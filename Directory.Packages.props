@@ -38,6 +38,7 @@
     <PackageVersion Include="Ryujinx.SDL2-CS" Version="2.30.0-build32" />
     <PackageVersion Include="securifybv.ShellLink" Version="0.1.0" />
     <PackageVersion Include="shaderc.net" Version="0.1.0" />
+    <PackageVersion Include="SharpMetal" Version="1.0.0-preview6" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="Silk.NET.Vulkan" Version="2.16.0" />
     <PackageVersion Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.16.0" />

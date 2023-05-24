@@ -1,0 +1,172 @@
+using Ryujinx.Graphics.GAL;
+using System;
+using SharpMetal;
+
+namespace Ryujinx.Graphics.Metal
+{
+    static class FormatTable
+    {
+        private static readonly MTLPixelFormat[] _table;
+
+        static FormatTable()
+        {
+            _table = new MTLPixelFormat[Enum.GetNames(typeof(Format)).Length];
+
+            Add(Format.R8Unorm,             MTLPixelFormat.R8Unorm);
+            Add(Format.R8Snorm,             MTLPixelFormat.R8Snorm);
+            Add(Format.R8Uint,              MTLPixelFormat.R8Uint);
+            Add(Format.R8Sint,              MTLPixelFormat.R8Sint);
+            Add(Format.R16Float,            MTLPixelFormat.R16Float);
+            Add(Format.R16Unorm,            MTLPixelFormat.R16Unorm);
+            Add(Format.R16Snorm,            MTLPixelFormat.R16Snorm);
+            Add(Format.R16Uint,             MTLPixelFormat.R16Uint);
+            Add(Format.R16Sint,             MTLPixelFormat.R16Sint);
+            Add(Format.R32Float,            MTLPixelFormat.R32Float);
+            Add(Format.R32Uint,             MTLPixelFormat.R32Uint);
+            Add(Format.R32Sint,             MTLPixelFormat.R32Sint);
+            Add(Format.R8G8Unorm,           MTLPixelFormat.RG8Unorm);
+            Add(Format.R8G8Snorm,           MTLPixelFormat.RG8Snorm);
+            Add(Format.R8G8Uint,            MTLPixelFormat.RG8Uint);
+            Add(Format.R8G8Sint,            MTLPixelFormat.RG8Sint);
+            Add(Format.R16G16Float,         MTLPixelFormat.RG16Float);
+            Add(Format.R16G16Unorm,         MTLPixelFormat.RG16Unorm);
+            Add(Format.R16G16Snorm,         MTLPixelFormat.RG16Snorm);
+            Add(Format.R16G16Uint,          MTLPixelFormat.RG16Uint);
+            Add(Format.R16G16Sint,          MTLPixelFormat.RG16Sint);
+            Add(Format.R32G32Float,         MTLPixelFormat.RG32Float);
+            Add(Format.R32G32Uint,          MTLPixelFormat.RG32Uint);
+            Add(Format.R32G32Sint,          MTLPixelFormat.RG32Sint);
+            // Add(Format.R8G8B8Unorm,         MTLPixelFormat.R8G8B8Unorm);
+            // Add(Format.R8G8B8Snorm,         MTLPixelFormat.R8G8B8Snorm);
+            // Add(Format.R8G8B8Uint,          MTLPixelFormat.R8G8B8Uint);
+            // Add(Format.R8G8B8Sint,          MTLPixelFormat.R8G8B8Sint);
+            // Add(Format.R16G16B16Float,      MTLPixelFormat.R16G16B16Float);
+            // Add(Format.R16G16B16Unorm,      MTLPixelFormat.R16G16B16Unorm);
+            // Add(Format.R16G16B16Snorm,      MTLPixelFormat.R16G16B16SNorm);
+            // Add(Format.R16G16B16Uint,       MTLPixelFormat.R16G16B16Uint);
+            // Add(Format.R16G16B16Sint,       MTLPixelFormat.R16G16B16Sint);
+            // Add(Format.R32G32B32Float,      MTLPixelFormat.R32G32B32Sfloat);
+            // Add(Format.R32G32B32Uint,       MTLPixelFormat.R32G32B32Uint);
+            // Add(Format.R32G32B32Sint,       MTLPixelFormat.R32G32B32Sint);
+            Add(Format.R8G8B8A8Unorm,       MTLPixelFormat.RGBA8Unorm);
+            Add(Format.R8G8B8A8Snorm,       MTLPixelFormat.RGBA8Snorm);
+            Add(Format.R8G8B8A8Uint,        MTLPixelFormat.RGBA8Uint);
+            Add(Format.R8G8B8A8Sint,        MTLPixelFormat.RGBA8Sint);
+            Add(Format.R16G16B16A16Float,   MTLPixelFormat.RGBA16Float);
+            Add(Format.R16G16B16A16Unorm,   MTLPixelFormat.RGBA16Unorm);
+            Add(Format.R16G16B16A16Snorm,   MTLPixelFormat.RGBA16Snorm);
+            Add(Format.R16G16B16A16Uint,    MTLPixelFormat.RGBA16Uint);
+            Add(Format.R16G16B16A16Sint,    MTLPixelFormat.RGBA16Sint);
+            Add(Format.R32G32B32A32Float,   MTLPixelFormat.RGBA32Float);
+            Add(Format.R32G32B32A32Uint,    MTLPixelFormat.RGBA32Uint);
+            Add(Format.R32G32B32A32Sint,    MTLPixelFormat.RGBA32Sint);
+            Add(Format.S8Uint,              MTLPixelFormat.Stencil8);
+            Add(Format.D16Unorm,            MTLPixelFormat.Depth16Unorm);
+            // Add(Format.S8UintD24Unorm,      MTLPixelFormat.S8UintD24Unorm);
+            Add(Format.D32Float,            MTLPixelFormat.Depth32Float);
+            Add(Format.D24UnormS8Uint,      MTLPixelFormat.Depth24Unorm_Stencil8);
+            Add(Format.D32FloatS8Uint,      MTLPixelFormat.Depth32Float_Stencil8);
+            Add(Format.R8G8B8A8Srgb,        MTLPixelFormat.RGBA8Unorm_sRGB);
+            // Add(Format.R4G4Unorm,           MTLPixelFormat.R4G4Unorm);
+            // Add(Format.R4G4B4A4Unorm,       MTLPixelFormat.R4G4B4A4Unorm);
+            // Add(Format.R5G5B5X1Unorm,       MTLPixelFormat.R5G5B5X1Unorm);
+            // Add(Format.R5G5B5A1Unorm,       MTLPixelFormat.R5G5B5A1Unorm);
+            Add(Format.R5G6B5Unorm,         MTLPixelFormat.B5G6R5Unorm);
+            Add(Format.R10G10B10A2Unorm,    MTLPixelFormat.RGB10A2Unorm);
+            Add(Format.R10G10B10A2Uint,     MTLPixelFormat.RGB10A2Uint);
+            Add(Format.R11G11B10Float,      MTLPixelFormat.RG11B10Float);
+            Add(Format.R9G9B9E5Float,       MTLPixelFormat.RGB9E5Float);
+            Add(Format.Bc1RgbaUnorm,        MTLPixelFormat.BC1_RGBA);
+            Add(Format.Bc2Unorm,            MTLPixelFormat.BC2_RGBA);
+            Add(Format.Bc3Unorm,            MTLPixelFormat.BC3_RGBA);
+            Add(Format.Bc1RgbaSrgb,         MTLPixelFormat.BC1_RGBA_sRGB);
+            Add(Format.Bc2Srgb,             MTLPixelFormat.BC2_RGBA_sRGB);
+            Add(Format.Bc3Srgb,             MTLPixelFormat.BC3_RGBA_sRGB);
+            Add(Format.Bc4Unorm,            MTLPixelFormat.BC4_RUnorm);
+            Add(Format.Bc4Snorm,            MTLPixelFormat.BC4_RSnorm);
+            Add(Format.Bc5Unorm,            MTLPixelFormat.BC5_RGUnorm);
+            Add(Format.Bc5Snorm,            MTLPixelFormat.BC5_RGSnorm);
+            Add(Format.Bc7Unorm,            MTLPixelFormat.BC7_RGBAUnorm);
+            Add(Format.Bc7Srgb,             MTLPixelFormat.BC7_RGBAUnorm_sRGB);
+            Add(Format.Bc6HSfloat,          MTLPixelFormat.BC6H_RGBFloat);
+            Add(Format.Bc6HUfloat,          MTLPixelFormat.BC6H_RGBUfloat);
+            Add(Format.Etc2RgbUnorm,        MTLPixelFormat.ETC2_RGB8);
+            Add(Format.Etc2RgbaUnorm,       MTLPixelFormat.ETC2_RGB8A1);
+            // Add(Format.Etc2RgbPtaUnorm,     MTLPixelFormat.Etc2RgbPtaUnorm);
+            Add(Format.Etc2RgbSrgb,         MTLPixelFormat.ETC2_RGB8_sRGB);
+            Add(Format.Etc2RgbaSrgb,        MTLPixelFormat.ETC2_RGB8A1_sRGB);
+            // Add(Format.Etc2RgbPtaSrgb,      MTLPixelFormat.Etc2RgbPtaSrgb);
+            // Add(Format.R8Uscaled,           MTLPixelFormat.R8Uscaled);
+            // Add(Format.R8Sscaled,           MTLPixelFormat.R8Sscaled);
+            // Add(Format.R16Uscaled,          MTLPixelFormat.R16Uscaled);
+            // Add(Format.R16Sscaled,          MTLPixelFormat.R16Sscaled);
+            // Add(Format.R32Uscaled,          MTLPixelFormat.R32Uscaled);
+            // Add(Format.R32Sscaled,          MTLPixelFormat.R32Sscaled);
+            // Add(Format.R8G8Uscaled,         MTLPixelFormat.R8G8Uscaled);
+            // Add(Format.R8G8Sscaled,         MTLPixelFormat.R8G8Sscaled);
+            // Add(Format.R16G16Uscaled,       MTLPixelFormat.R16G16Uscaled);
+            // Add(Format.R16G16Sscaled,       MTLPixelFormat.R16G16Sscaled);
+            // Add(Format.R32G32Uscaled,       MTLPixelFormat.R32G32Uscaled);
+            // Add(Format.R32G32Sscaled,       MTLPixelFormat.R32G32Sscaled);
+            // Add(Format.R8G8B8Uscaled,       MTLPixelFormat.R8G8B8Uscaled);
+            // Add(Format.R8G8B8Sscaled,       MTLPixelFormat.R8G8B8Sscaled);
+            // Add(Format.R16G16B16Uscaled,    MTLPixelFormat.R16G16B16Uscaled);
+            // Add(Format.R16G16B16Sscaled,    MTLPixelFormat.R16G16B16Sscaled);
+            // Add(Format.R32G32B32Uscaled,    MTLPixelFormat.R32G32B32Uscaled);
+            // Add(Format.R32G32B32Sscaled,    MTLPixelFormat.R32G32B32Sscaled);
+            // Add(Format.R8G8B8A8Uscaled,     MTLPixelFormat.R8G8B8A8Uscaled);
+            // Add(Format.R8G8B8A8Sscaled,     MTLPixelFormat.R8G8B8A8Sscaled);
+            // Add(Format.R16G16B16A16Uscaled, MTLPixelFormat.R16G16B16A16Uscaled);
+            // Add(Format.R16G16B16A16Sscaled, MTLPixelFormat.R16G16B16A16Sscaled);
+            // Add(Format.R32G32B32A32Uscaled, MTLPixelFormat.R32G32B32A32Uscaled);
+            // Add(Format.R32G32B32A32Sscaled, MTLPixelFormat.R32G32B32A32Sscaled);
+            // Add(Format.R10G10B10A2Snorm,    MTLPixelFormat.A2B10G10R10SNormPack32);
+            // Add(Format.R10G10B10A2Sint,     MTLPixelFormat.A2B10G10R10SintPack32);
+            // Add(Format.R10G10B10A2Uscaled,  MTLPixelFormat.A2B10G10R10UscaledPack32);
+            // Add(Format.R10G10B10A2Sscaled,  MTLPixelFormat.A2B10G10R10SscaledPack32);
+            Add(Format.Astc4x4Unorm,        MTLPixelFormat.ASTC_4x4_LDR);
+            Add(Format.Astc5x4Unorm,        MTLPixelFormat.ASTC_5x4_LDR);
+            Add(Format.Astc5x5Unorm,        MTLPixelFormat.ASTC_5x5_LDR);
+            Add(Format.Astc6x5Unorm,        MTLPixelFormat.ASTC_6x5_LDR);
+            Add(Format.Astc6x6Unorm,        MTLPixelFormat.ASTC_6x6_LDR);
+            Add(Format.Astc8x5Unorm,        MTLPixelFormat.ASTC_8x5_LDR);
+            Add(Format.Astc8x6Unorm,        MTLPixelFormat.ASTC_8x6_LDR);
+            Add(Format.Astc8x8Unorm,        MTLPixelFormat.ASTC_8x8_LDR);
+            Add(Format.Astc10x5Unorm,       MTLPixelFormat.ASTC_10x5_LDR);
+            Add(Format.Astc10x6Unorm,       MTLPixelFormat.ASTC_10x6_LDR);
+            Add(Format.Astc10x8Unorm,       MTLPixelFormat.ASTC_10x8_LDR);
+            Add(Format.Astc10x10Unorm,      MTLPixelFormat.ASTC_10x10_LDR);
+            Add(Format.Astc12x10Unorm,      MTLPixelFormat.ASTC_12x10_LDR);
+            Add(Format.Astc12x12Unorm,      MTLPixelFormat.ASTC_12x12_LDR);
+            Add(Format.Astc4x4Srgb,         MTLPixelFormat.ASTC_4x4_sRGB);
+            Add(Format.Astc5x4Srgb,         MTLPixelFormat.ASTC_5x4_sRGB);
+            Add(Format.Astc5x5Srgb,         MTLPixelFormat.ASTC_5x5_sRGB);
+            Add(Format.Astc6x5Srgb,         MTLPixelFormat.ASTC_6x5_sRGB);
+            Add(Format.Astc6x6Srgb,         MTLPixelFormat.ASTC_6x6_sRGB);
+            Add(Format.Astc8x5Srgb,         MTLPixelFormat.ASTC_8x5_sRGB);
+            Add(Format.Astc8x6Srgb,         MTLPixelFormat.ASTC_8x6_sRGB);
+            Add(Format.Astc8x8Srgb,         MTLPixelFormat.ASTC_8x8_sRGB);
+            Add(Format.Astc10x5Srgb,        MTLPixelFormat.ASTC_10x5_sRGB);
+            Add(Format.Astc10x6Srgb,        MTLPixelFormat.ASTC_10x6_sRGB);
+            Add(Format.Astc10x8Srgb,        MTLPixelFormat.ASTC_10x8_sRGB);
+            Add(Format.Astc10x10Srgb,       MTLPixelFormat.ASTC_10x10_sRGB);
+            Add(Format.Astc12x10Srgb,       MTLPixelFormat.ASTC_12x10_sRGB);
+            Add(Format.Astc12x12Srgb,       MTLPixelFormat.ASTC_12x12_sRGB);
+            Add(Format.B5G6R5Unorm,         MTLPixelFormat.B5G6R5Unorm);
+            Add(Format.B5G5R5A1Unorm,       MTLPixelFormat.BGR5A1Unorm);
+            Add(Format.A1B5G5R5Unorm,       MTLPixelFormat.A1BGR5Unorm);
+            Add(Format.B8G8R8A8Unorm,       MTLPixelFormat.BGRA8Unorm);
+            Add(Format.B8G8R8A8Srgb,        MTLPixelFormat.BGRA8Unorm_sRGB);
+        }
+
+        private static void Add(Format format, MTLPixelFormat mtlFormat)
+        {
+            _table[(int)format] = mtlFormat;
+        }
+
+        public static MTLPixelFormat GetFormat(Format format)
+        {
+            return _table[(int)format];
+        }
+    }
+}

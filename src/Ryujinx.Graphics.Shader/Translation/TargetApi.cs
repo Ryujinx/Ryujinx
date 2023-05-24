@@ -4,5 +4,6 @@ namespace Ryujinx.Graphics.Shader.Translation
     {
         OpenGL,
         Vulkan,
+        Metal
     }
 }

@@ -28,6 +28,7 @@ using Ryujinx.Graphics.GAL.Multithreading;
 using Ryujinx.Graphics.Gpu;
 using Ryujinx.Graphics.OpenGL;
 using Ryujinx.Graphics.Vulkan;
+using Ryujinx.Graphics.Metal;
 using Ryujinx.HLE;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
@@ -752,6 +753,10 @@ namespace Ryujinx.Ava
                     VulkanHelper.GetRequiredInstanceExtensions,
                     ConfigurationState.Instance.Graphics.PreferredGpu.Value);
             }
+            else if (ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Metal)
+            {
+                renderer = new MetalRenderer();
+            }
             else
             {
                 renderer = new OpenGLRenderer();
@@ -977,7 +982,7 @@ namespace Ryujinx.Ava
             StatusUpdatedEvent?.Invoke(this, new StatusUpdatedEventArgs(
                 Device.EnableDeviceVsync,
                 LocaleManager.Instance[LocaleKeys.VolumeShort] + $": {(int)(Device.GetVolume() * 100)}%",
-                ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Vulkan ? "Vulkan" : "OpenGL",
+                ConfigurationState.Instance.Graphics.GraphicsBackend.Value.ToText(),
                 dockedMode,
                 ConfigurationState.Instance.Graphics.AspectRatio.Value.ToText(),
                 LocaleManager.Instance[LocaleKeys.Game] + $": {Device.Statistics.GetGameFrameRate():00.00} FPS ({Device.Statistics.GetGameFrameTime():00.00} ms)",
