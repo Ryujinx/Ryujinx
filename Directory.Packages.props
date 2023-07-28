@@ -3,13 +3,13 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Avalonia" Version="11.0.10" />
-    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.0.10" />
-    <PackageVersion Include="Avalonia.Desktop" Version="11.0.10" />
-    <PackageVersion Include="Avalonia.Diagnostics" Version="11.0.10" />
-    <PackageVersion Include="Avalonia.Markup.Xaml.Loader" Version="11.0.10" />
-    <PackageVersion Include="Avalonia.Svg" Version="11.0.0.16" />
-    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.0.0.16" />
+    <PackageVersion Include="Avalonia" Version="11.0.7" />
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.0.7" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.0.7" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.0.7" />
+    <PackageVersion Include="Avalonia.Markup.Xaml.Loader" Version="11.0.7" />
+    <PackageVersion Include="Avalonia.Svg" Version="11.0.0.10" />
+    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.0.0.10" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="Concentus" Version="1.1.7" />
     <PackageVersion Include="DiscordRichPresence" Version="1.2.1.24" />
@@ -17,11 +17,12 @@
     <PackageVersion Include="FluentAvaloniaUI" Version="2.0.5" />
     <PackageVersion Include="GtkSharp.Dependencies" Version="1.1.1" />
     <PackageVersion Include="GtkSharp.Dependencies.osx" Version="0.0.5" />
+    <PackageVersion Include="jp2masa.Avalonia.Flexbox" Version="0.3.0-beta.4" />
     <PackageVersion Include="LibHac" Version="0.19.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.4.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.2.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
     <PackageVersion Include="MsgPack.Cli" Version="1.0.1" />
     <PackageVersion Include="NetCoreServer" Version="8.0.7" />
@@ -32,20 +33,21 @@
     <PackageVersion Include="OpenTK.Audio.OpenAL" Version="4.8.2" />
     <PackageVersion Include="OpenTK.Windowing.GraphicsLibraryFramework" Version="4.8.2" />
     <PackageVersion Include="Ryujinx.Audio.OpenAL.Dependencies" Version="1.21.0.1" />
-    <PackageVersion Include="Ryujinx.Graphics.Nvdec.Dependencies" Version="5.0.3-build14" />
+    <PackageVersion Include="Ryujinx.Graphics.Nvdec.Dependencies" Version="5.0.1-build13" />
     <PackageVersion Include="Ryujinx.Graphics.Vulkan.Dependencies.MoltenVK" Version="1.2.0" />
     <PackageVersion Include="Ryujinx.GtkSharp" Version="3.24.24.59-ryujinx" />
-    <PackageVersion Include="Ryujinx.SDL2-CS" Version="2.30.0-build32" />
+    <PackageVersion Include="Ryujinx.SDL2-CS" Version="2.28.1-build28" />
     <PackageVersion Include="securifybv.ShellLink" Version="0.1.0" />
     <PackageVersion Include="shaderc.net" Version="0.1.0" />
-    <PackageVersion Include="SharpMetal" Version="1.0.0-preview6" />
+    <PackageVersion Include="SharpMetal" Version="1.0.0-preview9" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="Silk.NET.Vulkan" Version="2.16.0" />
     <PackageVersion Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.16.0" />
     <PackageVersion Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.16.0" />
-    <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.7" />
-    <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="1.0.0" />
-    <PackageVersion Include="SPB" Version="0.0.4-build32" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="1.0.4" />
+    <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta11" />
+    <PackageVersion Include="SPB" Version="0.0.4-build28" />
+    <PackageVersion Include="System.Drawing.Common" Version="8.0.1" />
     <PackageVersion Include="System.IO.Hashing" Version="8.0.0" />
     <PackageVersion Include="System.Management" Version="8.0.0" />
     <PackageVersion Include="UnicornEngine.Unicorn" Version="2.0.2-rc1-fb78016" />
