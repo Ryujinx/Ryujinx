@@ -116,7 +116,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
         {
-            ulong bytesPerRow = (ulong)(Info.Width * Info.BytesPerPixel);
+            ulong bytesPerRow = (ulong)Info.GetMipStride(level);
             ulong bytesPerImage = 0;
 
             if (MTLTexture.TextureType == MTLTextureType.Type3D)
