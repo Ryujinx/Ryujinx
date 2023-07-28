@@ -213,7 +213,9 @@ namespace Ryujinx.Graphics.Metal
         public ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, bool hostReserved)
         {
             // https://developer.apple.com/documentation/metal/gpu_counters_and_counter_sample_buffers/creating_a_counter_sample_buffer_to_store_a_gpu_s_counter_data_during_a_pass?language=objc
-            throw new NotImplementedException();
+            var counterEvent = new CounterEvent();
+            resultHandler?.Invoke(counterEvent, type == CounterType.SamplesPassed ? (ulong)1 : 0);
+            return counterEvent;
         }
 
         public void ResetCounter(CounterType type)
