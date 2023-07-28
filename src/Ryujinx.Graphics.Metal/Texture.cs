@@ -11,6 +11,7 @@ namespace Ryujinx.Graphics.Metal
     {
         private readonly TextureCreateInfo _info;
         private readonly Pipeline _pipeline;
+        private readonly MTLDevice _device;
 
         public MTLTexture MTLTexture;
         public TextureCreateInfo Info => Info;
@@ -19,6 +20,8 @@ namespace Ryujinx.Graphics.Metal
 
         public Texture(MTLDevice device, Pipeline pipeline, TextureCreateInfo info, int firstLayer, int firstLevel)
         {
+            _device = device;
+            _pipeline = pipeline;
             _info = info;
 
             var descriptor = new MTLTextureDescriptor();
@@ -38,8 +41,7 @@ namespace Ryujinx.Graphics.Metal
                 alpha = Info.SwizzleA.Convert()
             };
 
-            MTLTexture = device.NewTexture(descriptor);
-            _pipeline = pipeline;
+            MTLTexture = _device.NewTexture(descriptor);
         }
 
         public void CopyTo(ITexture destination, int firstLayer, int firstLevel)
@@ -76,7 +78,10 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, Extents2D srcRegion, Extents2D dstRegion, bool linearFilter)
         {
-            throw new NotImplementedException();
+            var samplerDescriptor = new MTLSamplerDescriptor();
+            samplerDescriptor.MinFilter = linearFilter ? MTLSamplerMinMagFilter.Linear : MTLSamplerMinMagFilter.Nearest;
+            samplerDescriptor.MagFilter = linearFilter ? MTLSamplerMinMagFilter.Linear : MTLSamplerMinMagFilter.Nearest;
+            var samplerState = _device.NewSamplerState(samplerDescriptor);
         }
 
         public void CopyTo(BufferRange range, int layer, int level, int stride)
