@@ -14,7 +14,7 @@ namespace Ryujinx.Graphics.Metal
         private readonly MTLDevice _device;
 
         public MTLTexture MTLTexture;
-        public TextureCreateInfo Info => Info;
+        public TextureCreateInfo Info => _info;
         public int Width => Info.Width;
         public int Height => Info.Height;
 
@@ -114,22 +114,28 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public unsafe void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
+        public void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
         {
-            // TODO: Figure out bytesPerRow
-            // For an ordinary or packed pixel format, the stride, in bytes, between rows of source data.
-            // For a compressed pixel format, the stride is the number of bytes from the beginning of one row of blocks to the beginning of the next.
-            if (MTLTexture.IsSparse)
-            ulong bytesPerRow = 0;
+            ulong bytesPerRow = (ulong)(Info.Width * Info.BytesPerPixel);
+            ulong bytesPerImage = 0;
+
+            if (MTLTexture.TextureType == MTLTextureType.Type3D)
+            {
+                bytesPerImage = bytesPerRow * (ulong)Info.Height;
+            }
+
             var mtlRegion = new MTLRegion
             {
                 origin = new MTLOrigin { x = (ulong)region.X, y = (ulong)region.Y },
                 size = new MTLSize { width = (ulong)region.Width, height = (ulong)region.Height },
             };
 
-            fixed (byte* pData = data.Span)
+            unsafe
             {
-                MTLTexture.ReplaceRegion(mtlRegion, (ulong)level, (ulong)layer, new IntPtr(pData), bytesPerRow, 0);
+                fixed (byte* pData = data.Span)
+                {
+                    MTLTexture.ReplaceRegion(mtlRegion, (ulong)level, (ulong)layer, new IntPtr(pData), bytesPerRow, bytesPerImage);
+                }
             }
         }
 
