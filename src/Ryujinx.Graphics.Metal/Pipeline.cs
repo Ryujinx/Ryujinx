@@ -1,3 +1,4 @@
+using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader;
 using SharpMetal.Foundation;
@@ -35,8 +36,7 @@ namespace Ryujinx.Graphics.Metal
             _renderEncoderState = new(_device.NewRenderPipelineState(renderPipelineDescriptor, ref error));
             if (error != IntPtr.Zero)
             {
-                // throw new Exception($"Failed to create render pipeline state! {StringHelp}");
-                throw new Exception($"Failed to create render pipeline state!");
+                Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Render Pipeline State: {StringHelper.String(error.LocalizedDescription)}");
             }
 
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
