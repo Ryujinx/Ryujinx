@@ -1,23 +1,25 @@
 using Ryujinx.Graphics.GAL;
 using System;
-using SharpMetal;
+using System.Runtime.Versioning;
 
 namespace Ryujinx.Graphics.Metal
 {
+    [SupportedOSPlatform("macos")]
     public class Window : IWindow, IDisposable
     {
+        private readonly MetalRenderer _renderer;
 
-        public Window()
+        public Window(MetalRenderer renderer)
         {
-            /*var viewport = new MTLViewport
-            {
-
-            };*/
+            _renderer = renderer;
         }
 
         public void Present(ITexture texture, ImageCrop crop, Action swapBuffersCallback)
         {
-            throw new NotImplementedException();
+            if (_renderer.Pipeline is Pipeline pipeline)
+            {
+                pipeline.Present();
+            }
         }
 
         public void SetSize(int width, int height)

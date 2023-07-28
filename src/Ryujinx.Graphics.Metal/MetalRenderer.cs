@@ -31,9 +31,7 @@ namespace Ryujinx.Graphics.Metal
             _device = MTLDevice.CreateSystemDefaultDevice();
             Queue = _device.NewCommandQueue();
 
-            var commandBuffer = Queue.CommandBuffer();
-
-            _pipeline = new Pipeline(_device, commandBuffer);
+            _pipeline = new Pipeline(_device, Queue);
         }
 
         public void BackgroundContextAction(Action action, bool alwaysBackground = false)

@@ -11,9 +11,16 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     public class Pipeline : IPipeline, IDisposable
     {
-        private MTLDevice _device;
+        private readonly MTLDevice _device;
+        private readonly MTLCommandQueue _mtlCommandQueue;
+
         private MTLCommandBuffer _commandBuffer;
         private MTLRenderCommandEncoder _renderCommandEncoder;
+        private MTLRenderPipelineState _renderPipelineState;
+        private MTLBlitCommandEncoder _blitCommandEncoder;
+
+        public MTLRenderCommandEncoder RenderCommandEncoder => _renderCommandEncoder;
+        public MTLBlitCommandEncoder BlitCommandEncoder => _blitCommandEncoder;
 
         private PrimitiveTopology _topology;
 
@@ -21,21 +28,42 @@ namespace Ryujinx.Graphics.Metal
         private MTLIndexType _indexType;
         private ulong _indexBufferOffset;
 
-        public Pipeline(MTLDevice device, MTLCommandBuffer commandBuffer)
+        public Pipeline(MTLDevice device, MTLCommandQueue commandQueue)
         {
+            _device = device;
+            _mtlCommandQueue = commandQueue;
+
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
             var error = new NSError(IntPtr.Zero);
-            _device = device;
-            var renderPipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
+            _renderPipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
             if (error != IntPtr.Zero)
             {
                 // throw new Exception($"Failed to create render pipeline state! {StringHelp}");
                 throw new Exception($"Failed to create render pipeline state!");
             }
 
-            _commandBuffer = commandBuffer;
+            CreateCommandBuffer();
+        }
+
+        public void Present()
+        {
+            _renderCommandEncoder.EndEncoding();
+            _blitCommandEncoder.EndEncoding();
+            // TODO: Give command buffer a valid MTLDrawable
+            // _commandBuffer.PresentDrawable();
+            _commandBuffer.Commit();
+
+            CreateCommandBuffer();
+        }
+
+        public void CreateCommandBuffer()
+        {
+            _commandBuffer = _mtlCommandQueue.CommandBuffer();
+
             _renderCommandEncoder = _commandBuffer.RenderCommandEncoder(new MTLRenderPassDescriptor());
-            _renderCommandEncoder.SetRenderPipelineState(renderPipelineState);
+            _renderCommandEncoder.SetRenderPipelineState(_renderPipelineState);
+
+            _blitCommandEncoder = _commandBuffer.BlitCommandEncoder(new MTLBlitPassDescriptor());
         }
 
         public void Barrier()

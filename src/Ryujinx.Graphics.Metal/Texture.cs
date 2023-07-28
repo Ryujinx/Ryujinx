@@ -10,13 +10,14 @@ namespace Ryujinx.Graphics.Metal
     class Texture : ITexture, IDisposable
     {
         private readonly TextureCreateInfo _info;
+        private readonly Pipeline _pipeline;
 
         public MTLTexture MTLTexture;
         public TextureCreateInfo Info => Info;
         public int Width => Info.Width;
         public int Height => Info.Height;
 
-        public Texture(MTLDevice device, TextureCreateInfo info, int firstLayer, int firstLevel)
+        public Texture(MTLDevice device, Pipeline pipeline, TextureCreateInfo info, int firstLayer, int firstLevel)
         {
             _info = info;
 
@@ -27,6 +28,7 @@ namespace Ryujinx.Graphics.Metal
             descriptor.Height = (ulong)Height;
             descriptor.Depth = (ulong)Info.Depth;
             descriptor.SampleCount = (ulong)Info.Samples;
+            descriptor.MipmapLevelCount = (ulong)Info.Levels;
             descriptor.TextureType = Info.Target.Convert();
             descriptor.Swizzle = new MTLTextureSwizzleChannels
             {
@@ -37,16 +39,39 @@ namespace Ryujinx.Graphics.Metal
             };
 
             MTLTexture = device.NewTexture(descriptor);
+            _pipeline = pipeline;
         }
 
         public void CopyTo(ITexture destination, int firstLayer, int firstLevel)
         {
-            throw new NotImplementedException();
+            if (destination is Texture destinationTexture)
+            {
+                _pipeline.BlitCommandEncoder.CopyFromTexture(
+                    MTLTexture,
+                    (ulong)firstLayer,
+                    (ulong)firstLevel,
+                    destinationTexture.MTLTexture,
+                    (ulong)firstLayer,
+                    (ulong)firstLevel,
+                    MTLTexture.ArrayLength,
+                    MTLTexture.MipmapLevelCount);
+            }
         }
 
         public void CopyTo(ITexture destination, int srcLayer, int dstLayer, int srcLevel, int dstLevel)
         {
-            throw new NotImplementedException();
+            if (destination is Texture destinationTexture)
+            {
+                _pipeline.BlitCommandEncoder.CopyFromTexture(
+                    MTLTexture,
+                    (ulong)srcLayer,
+                    (ulong)srcLevel,
+                    destinationTexture.MTLTexture,
+                    (ulong)dstLayer,
+                    (ulong)dstLevel,
+                    MTLTexture.ArrayLength,
+                    MTLTexture.MipmapLevelCount);
+            }
         }
 
         public void CopyTo(ITexture destination, Extents2D srcRegion, Extents2D dstRegion, bool linearFilter)
