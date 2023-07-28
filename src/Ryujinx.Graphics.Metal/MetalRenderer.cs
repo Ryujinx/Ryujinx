@@ -89,22 +89,7 @@ namespace Ryujinx.Graphics.Metal
 
         public ITexture CreateTexture(TextureCreateInfo info)
         {
-            MTLTextureDescriptor descriptor = new()
-            {
-                PixelFormat = FormatCapabilities.ConvertToMTLFormat(info.Format),
-                TextureType = info.Target.Convert(),
-                Width = (ulong)info.Width,
-                Height = (ulong)info.Height,
-                MipmapLevelCount = (ulong)info.Levels,
-                SampleCount = (ulong)info.Samples,
-            };
-
-            return CreateTextureView(info);
-        }
-
-        internal Texture CreateTextureView(TextureCreateInfo info)
-        {
-            throw new NotImplementedException();
+            return new Texture(_device, _pipeline, info);
         }
 
         public bool PrepareHostMapping(IntPtr address, ulong size)
@@ -120,12 +105,14 @@ namespace Ryujinx.Graphics.Metal
 
         public void DeleteBuffer(BufferHandle buffer)
         {
-            throw new NotImplementedException();
+            MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref buffer));
+            mtlBuffer.SetPurgeableState(MTLPurgeableState.Empty);
         }
 
-        public PinnedSpan<byte> GetBufferData(BufferHandle buffer, int offset, int size)
+        public unsafe PinnedSpan<byte> GetBufferData(BufferHandle buffer, int offset, int size)
         {
-            throw new NotImplementedException();
+            MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref buffer));
+            return new PinnedSpan<byte>(IntPtr.Add(mtlBuffer.Contents, offset).ToPointer(), size);
         }
 
         public Capabilities GetCapabilities()
