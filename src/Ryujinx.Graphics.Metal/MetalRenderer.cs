@@ -54,6 +54,12 @@ namespace Ryujinx.Graphics.Metal
         public BufferHandle CreateBuffer(int size, BufferAccess access)
         {
             var buffer = _device.NewBuffer((ulong)size, MTLResourceOptions.ResourceStorageModeShared);
+
+            if (access == BufferAccess.FlushPersistent)
+            {
+                buffer.SetPurgeableState(MTLPurgeableState.NonVolatile);
+            }
+
             var bufferPtr = buffer.NativePtr;
             return Unsafe.As<IntPtr, BufferHandle>(ref bufferPtr);
         }
