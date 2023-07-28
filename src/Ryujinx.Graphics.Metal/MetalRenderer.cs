@@ -1,6 +1,7 @@
 using Ryujinx.Common.Configuration;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader.Translation;
+using SharpMetal.Foundation;
 using SharpMetal.Metal;
 using System;
 using System.Runtime.CompilerServices;
@@ -11,27 +12,26 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     public sealed class MetalRenderer : IRenderer
     {
-        private MTLDevice _device;
-
-        private Window _window;
-
-        private Pipeline _pipeline;
-
-        internal MTLCommandQueue Queue { get; private set; }
-
-        internal int BufferCount { get; private set; }
+        private readonly MTLDevice _device;
+        private readonly Window _window;
+        private readonly Pipeline _pipeline;
+        private readonly MTLCommandQueue _queue;
 
         public event EventHandler<ScreenCaptureImageInfo> ScreenCaptured;
         public bool PreferThreading => true;
         public IPipeline Pipeline => _pipeline;
         public IWindow Window => _window;
 
-        public void Initialize(GraphicsDebugLevel logLevel)
+        public MetalRenderer()
         {
             _device = MTLDevice.CreateSystemDefaultDevice();
-            Queue = _device.NewCommandQueue();
+            _queue = _device.NewCommandQueue();
+            _pipeline = new Pipeline(_device, _queue);
+            _window = new Window(this);
+        }
 
-            _pipeline = new Pipeline(_device, Queue);
+        public void Initialize(GraphicsDebugLevel logLevel)
+        {
         }
 
         public void BackgroundContextAction(Action action, bool alwaysBackground = false)
@@ -46,8 +46,6 @@ namespace Ryujinx.Graphics.Metal
 
         public BufferHandle CreateBuffer(IntPtr pointer, int size)
         {
-            BufferCount++;
-
             var buffer = _device.NewBuffer(pointer, (ulong)size, MTLResourceOptions.ResourceStorageModeShared);
             var bufferPtr = buffer.NativePtr;
             return Unsafe.As<IntPtr, BufferHandle>(ref bufferPtr);
@@ -55,8 +53,6 @@ namespace Ryujinx.Graphics.Metal
 
         public BufferHandle CreateBuffer(int size, BufferAccess access)
         {
-            BufferCount++;
-
             var buffer = _device.NewBuffer((ulong)size, MTLResourceOptions.ResourceStorageModeShared);
             var bufferPtr = buffer.NativePtr;
             return Unsafe.As<IntPtr, BufferHandle>(ref bufferPtr);
@@ -199,29 +195,36 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public void SetBufferData(BufferHandle buffer, int offset, ReadOnlySpan<byte> data)
+        public unsafe void SetBufferData(BufferHandle buffer, int offset, ReadOnlySpan<byte> data)
         {
-            throw new NotImplementedException();
+            MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref buffer));
+            var span = new Span<byte>(mtlBuffer.Contents.ToPointer(), (int)mtlBuffer.Length);
+            data.CopyTo(span.Slice(offset));
+            mtlBuffer.DidModifyRange(new NSRange
+            {
+                location = (ulong)offset,
+                length = (ulong)data.Length
+            });
         }
 
         public void UpdateCounters()
         {
-            throw new NotImplementedException();
+            // https://developer.apple.com/documentation/metal/gpu_counters_and_counter_sample_buffers/creating_a_counter_sample_buffer_to_store_a_gpu_s_counter_data_during_a_pass?language=objc
         }
 
         public void PreFrame()
         {
-            throw new NotImplementedException();
+
         }
 
         public ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, bool hostReserved)
         {
-            throw new NotImplementedException();
+            // https://developer.apple.com/documentation/metal/gpu_counters_and_counter_sample_buffers/creating_a_counter_sample_buffer_to_store_a_gpu_s_counter_data_during_a_pass?language=objc
         }
 
         public void ResetCounter(CounterType type)
         {
-            throw new NotImplementedException();
+            // https://developer.apple.com/documentation/metal/gpu_counters_and_counter_sample_buffers/creating_a_counter_sample_buffer_to_store_a_gpu_s_counter_data_during_a_pass?language=objc
         }
 
         public void WaitSync(ulong id)
