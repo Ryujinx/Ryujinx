@@ -15,14 +15,11 @@ namespace Ryujinx.Graphics.Metal
         private readonly MTLCommandQueue _mtlCommandQueue;
 
         private MTLCommandBuffer _commandBuffer;
-        private MTLRenderCommandEncoder _renderCommandEncoder;
-        private MTLRenderPipelineState _renderPipelineState;
-        private MTLBlitCommandEncoder _blitCommandEncoder;
+        private MTLCommandEncoder _currentEncoder;
 
-        public MTLRenderCommandEncoder RenderCommandEncoder => _renderCommandEncoder;
-        public MTLBlitCommandEncoder BlitCommandEncoder => _blitCommandEncoder;
+        public MTLCommandEncoder CurrentEncoder;
 
-        private PrimitiveTopology _topology;
+        private RenderEncoderState _renderEncoderState;
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -35,35 +32,57 @@ namespace Ryujinx.Graphics.Metal
 
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
             var error = new NSError(IntPtr.Zero);
-            _renderPipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
+            _renderEncoderState = new(_device.NewRenderPipelineState(renderPipelineDescriptor, ref error));
             if (error != IntPtr.Zero)
             {
                 // throw new Exception($"Failed to create render pipeline state! {StringHelp}");
                 throw new Exception($"Failed to create render pipeline state!");
             }
 
-            CreateCommandBuffer();
+            _commandBuffer = _mtlCommandQueue.CommandBuffer();
+        }
+
+        public void EndCurrentPass()
+        {
+            if (_currentEncoder != null)
+            {
+                _currentEncoder.EndEncoding();
+                _currentEncoder = null;
+            }
+        }
+
+        public MTLRenderCommandEncoder BeginRenderPass()
+        {
+            EndCurrentPass();
+
+            var descriptor = new MTLRenderPassDescriptor { };
+            var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
+            _renderEncoderState.SetEncoderState(renderCommandEncoder);
+
+            _currentEncoder = renderCommandEncoder;
+            return renderCommandEncoder;
+        }
+
+        public MTLBlitCommandEncoder BeginBlitPass()
+        {
+            EndCurrentPass();
+
+            var descriptor = new MTLBlitPassDescriptor { };
+            var blitCommandEncoder = _commandBuffer.BlitCommandEncoder(descriptor);
+
+            _currentEncoder = blitCommandEncoder;
+            return blitCommandEncoder;
         }
 
         public void Present()
         {
-            _renderCommandEncoder.EndEncoding();
-            _blitCommandEncoder.EndEncoding();
+            EndCurrentPass();
+
             // TODO: Give command buffer a valid MTLDrawable
             // _commandBuffer.PresentDrawable();
             _commandBuffer.Commit();
 
-            CreateCommandBuffer();
-        }
-
-        public void CreateCommandBuffer()
-        {
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
-
-            _renderCommandEncoder = _commandBuffer.RenderCommandEncoder(new MTLRenderPassDescriptor());
-            _renderCommandEncoder.SetRenderPipelineState(_renderPipelineState);
-
-            _blitCommandEncoder = _commandBuffer.BlitCommandEncoder(new MTLBlitPassDescriptor());
         }
 
         public void Barrier()
@@ -104,18 +123,40 @@ namespace Ryujinx.Graphics.Metal
 
         public void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
         {
-            // TODO: Support topology re-indexing to provide support for TriangleFans
-            var _primitiveType = _topology.Convert();
+            MTLRenderCommandEncoder renderCommandEncoder;
 
-            _renderCommandEncoder.DrawPrimitives(_primitiveType, (ulong)firstVertex, (ulong)vertexCount, (ulong)instanceCount, (ulong)firstInstance);
+            if (_currentEncoder is MTLRenderCommandEncoder encoder)
+            {
+                renderCommandEncoder = encoder;
+            }
+            else
+            {
+                renderCommandEncoder = BeginRenderPass();
+            }
+
+            // TODO: Support topology re-indexing to provide support for TriangleFans
+            var primitiveType = _renderEncoderState.Topology.Convert();
+
+            renderCommandEncoder.DrawPrimitives(primitiveType, (ulong)firstVertex, (ulong)vertexCount, (ulong)instanceCount, (ulong)firstInstance);
         }
 
         public void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int firstVertex, int firstInstance)
         {
-            // TODO: Support topology re-indexing to provide support for TriangleFans
-            var _primitiveType = _topology.Convert();
+            MTLRenderCommandEncoder renderCommandEncoder;
 
-            _renderCommandEncoder.DrawIndexedPrimitives(_primitiveType, (ulong)indexCount, _indexType, _indexBuffer, _indexBufferOffset, (ulong)instanceCount, firstVertex, (ulong)firstInstance);
+            if (_currentEncoder is MTLRenderCommandEncoder encoder)
+            {
+                renderCommandEncoder = encoder;
+            }
+            else
+            {
+                renderCommandEncoder = BeginRenderPass();
+            }
+
+            // TODO: Support topology re-indexing to provide support for TriangleFans
+            var primitiveType = _renderEncoderState.Topology.Convert();
+
+            renderCommandEncoder.DrawIndexedPrimitives(primitiveType, (ulong)indexCount, _indexType, _indexBuffer, _indexBufferOffset, (ulong)instanceCount, firstVertex, (ulong)firstInstance);
         }
 
         public void DrawIndexedIndirect(BufferRange indirectBuffer)
@@ -180,12 +221,26 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetFaceCulling(bool enable, Face face)
         {
-            _renderCommandEncoder.SetCullMode(enable ? face.Convert() : MTLCullMode.None);
+            var cullMode = enable ? face.Convert() : MTLCullMode.None;
+
+            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            {
+                renderCommandEncoder.SetCullMode(cullMode);
+            }
+
+            _renderEncoderState.CullMode = cullMode;
         }
 
         public void SetFrontFace(FrontFace frontFace)
         {
-            _renderCommandEncoder.SetFrontFacingWinding(frontFace.Convert());
+            var winding = frontFace.Convert();
+
+            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            {
+                renderCommandEncoder.SetFrontFacingWinding(winding);
+            }
+
+            _renderEncoderState.Winding = winding;
         }
 
         public void SetIndexBuffer(BufferRange buffer, IndexType type)
@@ -244,7 +299,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetPrimitiveTopology(PrimitiveTopology topology)
         {
-            _topology = topology;
+            _renderEncoderState.Topology = topology;
         }
 
         public void SetProgram(IProgram program)

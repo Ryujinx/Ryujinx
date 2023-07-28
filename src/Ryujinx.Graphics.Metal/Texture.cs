@@ -46,9 +46,20 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, int firstLayer, int firstLevel)
         {
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = _pipeline.BeginBlitPass();
+            }
+
             if (destination is Texture destinationTexture)
             {
-                _pipeline.BlitCommandEncoder.CopyFromTexture(
+                blitCommandEncoder.CopyFromTexture(
                     MTLTexture,
                     (ulong)firstLayer,
                     (ulong)firstLevel,
@@ -62,9 +73,20 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, int srcLayer, int dstLayer, int srcLevel, int dstLevel)
         {
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = _pipeline.BeginBlitPass();
+            }
+
             if (destination is Texture destinationTexture)
             {
-                _pipeline.BlitCommandEncoder.CopyFromTexture(
+                blitCommandEncoder.CopyFromTexture(
                     MTLTexture,
                     (ulong)srcLayer,
                     (ulong)srcLevel,
