@@ -92,7 +92,27 @@ namespace Ryujinx.Graphics.Metal
 
         public void ClearBuffer(BufferHandle destination, int offset, int size, uint value)
         {
-            throw new NotImplementedException();
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_currentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = BeginBlitPass();
+            }
+
+            // Might need a closer look, range's count, lower, and upper bound
+            // must be a multiple of 4
+            MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref destination));
+            blitCommandEncoder.FillBuffer(mtlBuffer,
+                new NSRange
+                {
+                    location = (ulong)offset,
+                    length = (ulong)size
+                },
+                (byte)value);
         }
 
         public void ClearRenderTargetColor(int index, int layer, int layerCount, uint componentMask, ColorF color)

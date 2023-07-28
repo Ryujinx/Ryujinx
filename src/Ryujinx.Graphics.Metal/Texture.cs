@@ -136,6 +136,7 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
+        // TODO: Rewrite using MTLBlitCommandEncoder
         public void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
         {
             ulong bytesPerRow = (ulong)Info.GetMipStride(level);
