@@ -1,8 +1,8 @@
 using Ryujinx.Common.Configuration;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader.Translation;
+using SharpMetal.Metal;
 using System;
-using SharpMetal;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
@@ -28,10 +28,10 @@ namespace Ryujinx.Graphics.Metal
 
         public void Initialize(GraphicsDebugLevel logLevel)
         {
-            _device = MTLDevice.MTLCreateSystemDefaultDevice();
-            Queue = _device.NewCommandQueueWithMaxCommandBufferCount(Constants.MaxCommandBuffersPerQueue);
+            _device = MTLDevice.CreateSystemDefaultDevice();
+            Queue = _device.NewCommandQueue();
 
-            var commandBuffer = Queue.CommandBufferWithDescriptor(new MTLCommandBufferDescriptor { RetainedReferences = true });
+            var commandBuffer = Queue.CommandBuffer();
 
             _pipeline = new Pipeline(_device, commandBuffer);
         }
@@ -50,7 +50,7 @@ namespace Ryujinx.Graphics.Metal
         {
             BufferCount++;
 
-            var buffer = _device.NewBufferWithBytesLengthOptions(pointer, (ulong)size, MTLResourceOptions.StorageModeShared);
+            var buffer = _device.NewBuffer(pointer, (ulong)size, MTLResourceOptions.ResourceStorageModeShared);
             var bufferPtr = buffer.NativePtr;
             return Unsafe.As<IntPtr, BufferHandle>(ref bufferPtr);
         }
@@ -59,7 +59,7 @@ namespace Ryujinx.Graphics.Metal
         {
             BufferCount++;
 
-            var buffer = _device.NewBufferWithLengthOptions((ulong)size, MTLResourceOptions.StorageModeShared);
+            var buffer = _device.NewBuffer((ulong)size, MTLResourceOptions.ResourceStorageModeShared);
             var bufferPtr = buffer.NativePtr;
             return Unsafe.As<IntPtr, BufferHandle>(ref bufferPtr);
         }
@@ -74,7 +74,7 @@ namespace Ryujinx.Graphics.Metal
         {
             (MTLSamplerMinMagFilter minFilter, MTLSamplerMipFilter mipFilter) = info.MinFilter.Convert();
 
-            var sampler = _device.CreateSamplerState(new MTLSamplerDescriptor
+            var sampler = _device.NewSamplerState(new MTLSamplerDescriptor
             {
                 BorderColor = MTLSamplerBorderColor.TransparentBlack,
                 MinFilter = minFilter,
@@ -90,10 +90,10 @@ namespace Ryujinx.Graphics.Metal
                 RAddressMode = info.AddressP.Convert()
             });
 
-            throw new NotImplementedException();
+            return new Sampler(sampler);
         }
 
-        public ITexture CreateTexture(TextureCreateInfo info, float scale)
+        public ITexture CreateTexture(TextureCreateInfo info)
         {
             MTLTextureDescriptor descriptor = new()
             {
@@ -105,10 +105,10 @@ namespace Ryujinx.Graphics.Metal
                 SampleCount = (ulong)info.Samples,
             };
 
-            return CreateTextureView(info, scale);
+            return CreateTextureView(info);
         }
 
-        internal TextureView CreateTextureView(TextureCreateInfo info, float scale)
+        internal Texture CreateTextureView(TextureCreateInfo info)
         {
             throw new NotImplementedException();
         }
@@ -160,17 +160,21 @@ namespace Ryujinx.Graphics.Metal
                 supportsFragmentShaderOrderingIntel: false,
                 supportsGeometryShader: false,
                 supportsGeometryShaderPassthrough: false,
+                supportsTransformFeedback: false,
                 supportsImageLoadFormatted: false,
                 supportsLayerVertexTessellation: false,
                 supportsMismatchingViewFormat: true,
                 supportsCubemapView: true,
                 supportsNonConstantTextureOffset: false,
                 supportsShaderBallot: false,
+                supportsShaderBarrierDivergence: false,
+                supportsShaderFloat64: false,
                 supportsTextureShadowLod: false,
                 supportsViewportIndexVertexTessellation: false,
                 supportsViewportMask: false,
                 supportsViewportSwizzle: false,
                 supportsIndirectParameters: true,
+                supportsDepthClipControl: false,
                 maximumUniformBuffersPerStage: Constants.MaxUniformBuffersPerStage,
                 maximumStorageBuffersPerStage: Constants.MaxStorageBuffersPerStage,
                 maximumTexturesPerStage: Constants.MaxTexturesPerStage,
@@ -212,7 +216,7 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, bool hostReserved)
+        public ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, bool hostReserved)
         {
             throw new NotImplementedException();
         }

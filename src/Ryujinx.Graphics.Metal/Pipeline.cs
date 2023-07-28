@@ -1,7 +1,9 @@
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader;
+using SharpMetal.Foundation;
+using SharpMetal.Metal;
 using System;
-using SharpMetal;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
 namespace Ryujinx.Graphics.Metal
@@ -9,16 +11,30 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     public class Pipeline : IPipeline, IDisposable
     {
+        private MTLDevice _device;
         private MTLCommandBuffer _commandBuffer;
         private MTLRenderCommandEncoder _renderCommandEncoder;
+
+        private PrimitiveTopology _topology;
+
+        private MTLBuffer _indexBuffer;
+        private MTLIndexType _indexType;
+        private ulong _indexBufferOffset;
 
         public Pipeline(MTLDevice device, MTLCommandBuffer commandBuffer)
         {
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
-            var renderPipelineState = device.CreateRenderPipelineState(renderPipelineDescriptor, out NSError _);
+            var error = new NSError(IntPtr.Zero);
+            _device = device;
+            var renderPipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
+            if (error != IntPtr.Zero)
+            {
+                // throw new Exception($"Failed to create render pipeline state! {StringHelp}");
+                throw new Exception($"Failed to create render pipeline state!");
+            }
 
             _commandBuffer = commandBuffer;
-            _renderCommandEncoder = _commandBuffer.CreateRenderCommandEncoder(new MTLRenderPassDescriptor());
+            _renderCommandEncoder = _commandBuffer.RenderCommandEncoder(new MTLRenderPassDescriptor());
             _renderCommandEncoder.SetRenderPipelineState(renderPipelineState);
         }
 
@@ -45,7 +61,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CommandBufferBarrier()
         {
-            throw new NotImplementedException();
+            // TODO: Only required for MTLHeap or untracked resources
         }
 
         public void CopyBuffer(BufferHandle source, BufferHandle destination, int srcOffset, int dstOffset, int size)
@@ -60,12 +76,18 @@ namespace Ryujinx.Graphics.Metal
 
         public void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
         {
-            throw new NotImplementedException();
+            // TODO: Support topology re-indexing to provide support for TriangleFans
+            var _primitiveType = _topology.Convert();
+
+            _renderCommandEncoder.DrawPrimitives(_primitiveType, (ulong)firstVertex, (ulong)vertexCount, (ulong)instanceCount, (ulong)firstInstance);
         }
 
         public void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int firstVertex, int firstInstance)
         {
-            throw new NotImplementedException();
+            // TODO: Support topology re-indexing to provide support for TriangleFans
+            var _primitiveType = _topology.Convert();
+
+            _renderCommandEncoder.DrawIndexedPrimitives(_primitiveType, (ulong)indexCount, _indexType, _indexBuffer, _indexBufferOffset, (ulong)instanceCount, firstVertex, (ulong)firstInstance);
         }
 
         public void DrawIndexedIndirect(BufferRange indirectBuffer)
@@ -95,7 +117,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetAlphaTest(bool enable, float reference, CompareOp op)
         {
-            throw new NotImplementedException();
+            // Metal does not support alpha test.
         }
 
         public void SetBlendState(AdvancedBlendDescriptor blend)
@@ -130,17 +152,23 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetFaceCulling(bool enable, Face face)
         {
-            throw new NotImplementedException();
+            _renderCommandEncoder.SetCullMode(enable ? face.Convert() : MTLCullMode.None);
         }
 
         public void SetFrontFace(FrontFace frontFace)
         {
-            throw new NotImplementedException();
+            _renderCommandEncoder.SetFrontFacingWinding(frontFace.Convert());
         }
 
         public void SetIndexBuffer(BufferRange buffer, IndexType type)
         {
-            throw new NotImplementedException();
+            if (buffer.Handle != BufferHandle.Null)
+            {
+                _indexType = type.Convert();
+                _indexBufferOffset = (ulong)buffer.Offset;
+                var handle = buffer.Handle;
+                _indexBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref handle));
+            }
         }
 
         public void SetImage(int binding, ITexture texture, Format imageFormat)
@@ -150,12 +178,12 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetLineParameters(float width, bool smooth)
         {
-            throw new NotImplementedException();
+            // Not supported in Metal
         }
 
         public void SetLogicOpState(bool enable, LogicalOp op)
         {
-            throw new NotImplementedException();
+            // Not supported in Metal
         }
 
         public void SetMultisampleState(MultisampleDescriptor multisample)
@@ -175,17 +203,20 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetPolygonMode(PolygonMode frontMode, PolygonMode backMode)
         {
-            throw new NotImplementedException();
+            // Not supported in Metal
         }
 
         public void SetPrimitiveRestart(bool enable, int index)
         {
-            throw new NotImplementedException();
+            // TODO: Supported for LineStrip and TriangleStrip
+            // https://github.com/gpuweb/gpuweb/issues/1220#issuecomment-732483263
+            // https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515520-drawindexedprimitives
+            // https://stackoverflow.com/questions/70813665/how-to-render-multiple-trianglestrips-using-metal
         }
 
         public void SetPrimitiveTopology(PrimitiveTopology topology)
         {
-            throw new NotImplementedException();
+            _topology = topology;
         }
 
         public void SetProgram(IProgram program)
@@ -194,11 +225,6 @@ namespace Ryujinx.Graphics.Metal
         }
 
         public void SetRasterizerDiscard(bool discard)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetRenderTargetScale(float scale)
         {
             throw new NotImplementedException();
         }
@@ -213,14 +239,33 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public void SetScissors(ReadOnlySpan<Rectangle<int>> regions)
+        public unsafe void SetScissors(ReadOnlySpan<Rectangle<int>> regions)
         {
-            throw new NotImplementedException();
+            // TODO: Test max allowed scissor rects on device
+            var mtlScissorRects = new MTLScissorRect[regions.Length];
+
+            for (int i = 0; i < regions.Length; i++)
+            {
+                var region = regions[i];
+                mtlScissorRects[i] = new MTLScissorRect
+                {
+                    height = (ulong)region.Height,
+                    width = (ulong)region.Width,
+                    x = (ulong)region.X,
+                    y = (ulong)region.Y
+                };
+            }
+
+            fixed (MTLScissorRect* pMtlScissorRects = mtlScissorRects)
+            {
+                // TODO: Fix this function which currently wont accept pointer as intended
+                // _renderCommandEncoder.SetScissorRects(pMtlScissorRects, regions.Length);
+            }
         }
 
         public void SetStencilTest(StencilTestDescriptor stencilTest)
         {
-            throw new NotImplementedException();
+            // TODO
         }
 
         public void SetStorageBuffers(ReadOnlySpan<BufferAssignment> buffers)
@@ -253,9 +298,30 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public void SetViewports(ReadOnlySpan<Viewport> viewports, bool disableTransform)
+        public unsafe void SetViewports(ReadOnlySpan<Viewport> viewports)
         {
-            throw new NotImplementedException();
+            // TODO: Test max allowed viewports on device
+            var mtlViewports = new MTLViewport[viewports.Length];
+
+            for (int i = 0; i < viewports.Length; i++)
+            {
+                var viewport = viewports[i];
+                mtlViewports[i] = new MTLViewport
+                {
+                    originX = viewport.Region.X,
+                    originY = viewport.Region.Y,
+                    width = viewport.Region.Width,
+                    height = viewport.Region.Height,
+                    znear = viewport.DepthNear,
+                    zfar = viewport.DepthFar
+                };
+            }
+
+            fixed (MTLViewport* pMtlViewports = mtlViewports)
+            {
+                // TODO: Fix this function which currently wont accept pointer as intended
+                // _renderCommandEncoder.SetViewports(pMtlViewports, viewports.Length);
+            }
         }
 
         public void TextureBarrier()
@@ -270,40 +336,34 @@ namespace Ryujinx.Graphics.Metal
 
         public bool TryHostConditionalRendering(ICounterEvent value, ulong compare, bool isEqual)
         {
-            throw new NotImplementedException();
+            // TODO: Implementable via indirect draw commands
+            return false;
         }
 
         public bool TryHostConditionalRendering(ICounterEvent value, ICounterEvent compare, bool isEqual)
         {
-            throw new NotImplementedException();
+            // TODO: Implementable via indirect draw commands
+            return false;
         }
 
         public void EndHostConditionalRendering()
         {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateRenderScale(ReadOnlySpan<float> scales, int totalCount, int fragmentCount)
-        {
-            throw new NotImplementedException();
+            // TODO: Implementable via indirect draw commands
         }
 
         public void BeginTransformFeedback(PrimitiveTopology topology)
         {
             // Metal does not support Transform Feedback
-            throw new NotSupportedException();
         }
 
         public void EndTransformFeedback()
         {
             // Metal does not support Transform Feedback
-            throw new NotSupportedException();
         }
 
         public void SetTransformFeedbackBuffers(ReadOnlySpan<BufferRange> buffers)
         {
             // Metal does not support Transform Feedback
-            throw new NotSupportedException();
         }
 
         public void Dispose()

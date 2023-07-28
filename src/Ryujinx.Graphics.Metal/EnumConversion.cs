@@ -182,6 +182,20 @@ namespace Ryujinx.Graphics.Metal
             };
         }
 
+        public static MTLTextureSwizzle Convert(this SwizzleComponent swizzleComponent)
+        {
+            return swizzleComponent switch
+            {
+                SwizzleComponent.Zero => MTLTextureSwizzle.Zero,
+                SwizzleComponent.One => MTLTextureSwizzle.One,
+                SwizzleComponent.Red => MTLTextureSwizzle.Red,
+                SwizzleComponent.Green => MTLTextureSwizzle.Green,
+                SwizzleComponent.Blue => MTLTextureSwizzle.Blue,
+                SwizzleComponent.Alpha => MTLTextureSwizzle.Alpha,
+                _ => LogInvalidAndReturn(swizzleComponent, nameof(SwizzleComponent), MTLTextureSwizzle.Zero),
+            };
+        }
+
         private static T2 LogInvalidAndReturn<T1, T2>(T1 value, string name, T2 defaultValue = default)
         {
             Logger.Debug?.Print(LogClass.Gpu, $"Invalid {name} enum value: {value}.");
