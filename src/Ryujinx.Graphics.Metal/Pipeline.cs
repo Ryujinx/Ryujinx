@@ -133,7 +133,26 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyBuffer(BufferHandle source, BufferHandle destination, int srcOffset, int dstOffset, int size)
         {
-            throw new NotImplementedException();
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = BeginBlitPass();
+            }
+
+            MTLBuffer sourceBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref source));
+            MTLBuffer destinationBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref destination));
+
+            blitCommandEncoder.CopyFromBuffer(
+                sourceBuffer,
+                (ulong)srcOffset,
+                destinationBuffer,
+                (ulong)dstOffset,
+                (ulong)size);
         }
 
         public void DispatchCompute(int groupsX, int groupsY, int groupsZ)
