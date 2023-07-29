@@ -2,6 +2,7 @@ using Ryujinx.Common.Memory;
 using Ryujinx.Graphics.GAL;
 using SharpMetal.Metal;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
 namespace Ryujinx.Graphics.Metal
@@ -100,15 +101,42 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, Extents2D srcRegion, Extents2D dstRegion, bool linearFilter)
         {
-            var samplerDescriptor = new MTLSamplerDescriptor();
-            samplerDescriptor.MinFilter = linearFilter ? MTLSamplerMinMagFilter.Linear : MTLSamplerMinMagFilter.Nearest;
-            samplerDescriptor.MagFilter = linearFilter ? MTLSamplerMinMagFilter.Linear : MTLSamplerMinMagFilter.Nearest;
-            var samplerState = _device.NewSamplerState(samplerDescriptor);
+            throw new NotImplementedException();
         }
 
         public void CopyTo(BufferRange range, int layer, int level, int stride)
         {
-            throw new NotImplementedException();
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = _pipeline.BeginBlitPass();
+            }
+
+            ulong bytesPerRow = (ulong)Info.GetMipStride(level);
+            ulong bytesPerImage = 0;
+            if (MTLTexture.TextureType == MTLTextureType.Type3D)
+            {
+                bytesPerImage = bytesPerRow * (ulong)Info.Height;
+            }
+
+            var handle = range.Handle;
+            MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref handle));
+
+            blitCommandEncoder.CopyFromTexture(
+                MTLTexture,
+                (ulong)layer,
+                (ulong)level,
+                new MTLOrigin(),
+                new MTLSize { width = MTLTexture.Width, height = MTLTexture.Height, depth = MTLTexture.Depth },
+                mtlBuffer,
+                (ulong)range.Offset,
+                bytesPerRow,
+                bytesPerImage);
         }
 
         public ITexture CreateView(TextureCreateInfo info, int firstLayer, int firstLevel)
@@ -163,7 +191,7 @@ namespace Ryujinx.Graphics.Metal
                     0,
                     bytesPerRow,
                     bytesPerImage,
-                    new MTLSize { width = MTLTexture.Width, height = MTLTexture.Height },
+                    new MTLSize { width = MTLTexture.Width, height = MTLTexture.Height, depth = MTLTexture.Depth},
                     MTLTexture,
                     (ulong)layer,
                     (ulong)level,
@@ -204,7 +232,7 @@ namespace Ryujinx.Graphics.Metal
                     0,
                     bytesPerRow,
                     bytesPerImage,
-                    new MTLSize { width = (ulong)region.Width, height = (ulong)region.Height },
+                    new MTLSize { width = (ulong)region.Width, height = (ulong)region.Height, depth = 1 },
                     MTLTexture,
                     (ulong)layer,
                     (ulong)level,
