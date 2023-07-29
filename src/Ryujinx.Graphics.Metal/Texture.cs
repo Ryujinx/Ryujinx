@@ -136,29 +136,44 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        // TODO: Rewrite using MTLBlitCommandEncoder
         public void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
         {
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = _pipeline.BeginBlitPass();
+            }
+
             ulong bytesPerRow = (ulong)Info.GetMipStride(level);
             ulong bytesPerImage = 0;
-
             if (MTLTexture.TextureType == MTLTextureType.Type3D)
             {
                 bytesPerImage = bytesPerRow * (ulong)Info.Height;
             }
 
-            var mtlRegion = new MTLRegion
-            {
-                origin = new MTLOrigin { x = (ulong)region.X, y = (ulong)region.Y },
-                size = new MTLSize { width = (ulong)region.Width, height = (ulong)region.Height },
-            };
-
             unsafe
             {
-                fixed (byte* pData = data.Span)
-                {
-                    MTLTexture.ReplaceRegion(mtlRegion, (ulong)level, (ulong)layer, new IntPtr(pData), bytesPerRow, bytesPerImage);
-                }
+                var dataSpan = data.Span;
+                var mtlBuffer = _device.NewBuffer((ulong)dataSpan.Length, MTLResourceOptions.ResourceStorageModeShared);
+                var bufferSpan = new Span<byte>(mtlBuffer.Contents.ToPointer(), dataSpan.Length);
+                dataSpan.CopyTo(bufferSpan);
+
+                blitCommandEncoder.CopyFromBuffer(
+                    mtlBuffer,
+                    0,
+                    bytesPerRow,
+                    bytesPerImage,
+                    new MTLSize { width = (ulong)region.Width, height = (ulong)region.Height },
+                    MTLTexture,
+                    (ulong)layer,
+                    (ulong)level,
+                    new MTLOrigin { x = (ulong)region.X, y = (ulong)region.Y }
+                );
             }
         }
 
