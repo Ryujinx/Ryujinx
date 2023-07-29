@@ -387,7 +387,34 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetStencilTest(StencilTestDescriptor stencilTest)
         {
-            // TODO
+            var depthStencilDescriptor = new MTLDepthStencilDescriptor
+            {
+                BackFaceStencil = new MTLStencilDescriptor
+                {
+                    StencilFailureOperation = stencilTest.BackSFail.Convert(),
+                    DepthFailureOperation = stencilTest.BackDpFail.Convert(),
+                    DepthStencilPassOperation = stencilTest.BackDpPass.Convert(),
+                    StencilCompareFunction = stencilTest.BackFunc.Convert(),
+                    ReadMask = (uint)stencilTest.BackFuncMask,
+                    WriteMask = (uint)stencilTest.BackMask
+                },
+                FrontFaceStencil = new MTLStencilDescriptor
+                {
+                    StencilFailureOperation = stencilTest.FrontSFail.Convert(),
+                    DepthFailureOperation = stencilTest.FrontDpFail.Convert(),
+                    DepthStencilPassOperation = stencilTest.FrontDpPass.Convert(),
+                    StencilCompareFunction = stencilTest.FrontFunc.Convert(),
+                    ReadMask = (uint)stencilTest.FrontFuncMask,
+                    WriteMask = (uint)stencilTest.FrontMask
+                }
+            };
+
+            var depthStencilState = _device.NewDepthStencilState(depthStencilDescriptor);
+
+            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            {
+                renderCommandEncoder.SetDepthStencilState(depthStencilState);
+            }
         }
 
         public void SetStorageBuffers(ReadOnlySpan<BufferAssignment> buffers)

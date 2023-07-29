@@ -11,6 +11,7 @@ namespace Ryujinx.Graphics.Metal
         public PrimitiveTopology Topology = PrimitiveTopology.Triangles;
         public MTLCullMode CullMode = MTLCullMode.None;
         public MTLWinding Winding = MTLWinding.Clockwise;
+        public MTLDepthStencilState DepthStencilState = null;
 
         public RenderEncoderState(MTLRenderPipelineState renderPipelineState)
         {
@@ -22,6 +23,7 @@ namespace Ryujinx.Graphics.Metal
             renderCommandEncoder.SetRenderPipelineState(RenderPipelineState);
             renderCommandEncoder.SetCullMode(CullMode);
             renderCommandEncoder.SetFrontFacingWinding(Winding);
+            renderCommandEncoder.SetDepthStencilState(DepthStencilState);
         }
     }
 }
