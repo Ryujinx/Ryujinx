@@ -31,6 +31,7 @@ namespace Ryujinx.Graphics.Metal
             _device = device;
             _mtlCommandQueue = commandQueue;
 
+            // TODO: Recreate descriptor and encoder state as needed
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
             var error = new NSError(IntPtr.Zero);
             _renderEncoderState = new(_device.NewRenderPipelineState(renderPipelineDescriptor, ref error), _device);
@@ -38,6 +39,7 @@ namespace Ryujinx.Graphics.Metal
             {
                 Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Render Pipeline State: {StringHelper.String(error.LocalizedDescription)}");
             }
+            //
 
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
         }
