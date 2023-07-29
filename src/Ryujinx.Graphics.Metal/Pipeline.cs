@@ -74,6 +74,17 @@ namespace Ryujinx.Graphics.Metal
             return blitCommandEncoder;
         }
 
+        public MTLComputeCommandEncoder BeginComputePass()
+        {
+            EndCurrentPass();
+
+            var descriptor = new MTLComputePassDescriptor { };
+            var computeCommandEncoder = _commandBuffer.ComputeCommandEncoder(descriptor);
+
+            _currentEncoder = computeCommandEncoder;
+            return computeCommandEncoder;
+        }
+
         public void Present()
         {
             EndCurrentPass();
