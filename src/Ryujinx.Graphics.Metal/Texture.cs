@@ -18,6 +18,7 @@ namespace Ryujinx.Graphics.Metal
         public TextureCreateInfo Info => _info;
         public int Width => Info.Width;
         public int Height => Info.Height;
+        public int Depth => Info.Depth;
 
         public Texture(MTLDevice device, Pipeline pipeline, TextureCreateInfo info)
         {
@@ -30,6 +31,7 @@ namespace Ryujinx.Graphics.Metal
             descriptor.Usage = MTLTextureUsage.ShaderRead | MTLTextureUsage.ShaderWrite | MTLTextureUsage.RenderTarget;
             descriptor.Width = (ulong)Width;
             descriptor.Height = (ulong)Height;
+            descriptor.Depth = (ulong)Depth;
             descriptor.Depth = (ulong)Info.Depth;
             descriptor.SampleCount = (ulong)Info.Samples;
             descriptor.MipmapLevelCount = (ulong)Info.Levels;
