@@ -133,7 +133,43 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetData(SpanOrArray<byte> data, int layer, int level)
         {
-            throw new NotImplementedException();
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = _pipeline.BeginBlitPass();
+            }
+
+            ulong bytesPerRow = (ulong)Info.GetMipStride(level);
+            ulong bytesPerImage = 0;
+            if (MTLTexture.TextureType == MTLTextureType.Type3D)
+            {
+                bytesPerImage = bytesPerRow * (ulong)Info.Height;
+            }
+
+            unsafe
+            {
+                var dataSpan = data.Span;
+                var mtlBuffer = _device.NewBuffer((ulong)dataSpan.Length, MTLResourceOptions.ResourceStorageModeShared);
+                var bufferSpan = new Span<byte>(mtlBuffer.Contents.ToPointer(), dataSpan.Length);
+                dataSpan.CopyTo(bufferSpan);
+
+                blitCommandEncoder.CopyFromBuffer(
+                    mtlBuffer,
+                    0,
+                    bytesPerRow,
+                    bytesPerImage,
+                    new MTLSize { width = MTLTexture.Width, height = MTLTexture.Height },
+                    MTLTexture,
+                    (ulong)layer,
+                    (ulong)level,
+                    new MTLOrigin()
+                );
+            }
         }
 
         public void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
