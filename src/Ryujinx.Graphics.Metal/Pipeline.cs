@@ -33,7 +33,7 @@ namespace Ryujinx.Graphics.Metal
 
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
             var error = new NSError(IntPtr.Zero);
-            _renderEncoderState = new(_device.NewRenderPipelineState(renderPipelineDescriptor, ref error));
+            _renderEncoderState = new(_device.NewRenderPipelineState(renderPipelineDescriptor, ref error), _device);
             if (error != IntPtr.Zero)
             {
                 Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Render Pipeline State: {StringHelper.String(error.LocalizedDescription)}");
@@ -255,7 +255,14 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetDepthTest(DepthTestDescriptor depthTest)
         {
-            throw new NotImplementedException();
+            var depthStencilState = _renderEncoderState.UpdateDepthState(
+                depthTest.TestEnable ? MTLCompareFunction.Always : depthTest.Func.Convert(),
+                depthTest.WriteEnable);
+
+            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            {
+                renderCommandEncoder.SetDepthStencilState(depthStencilState);
+            }
         }
 
         public void SetFaceCulling(bool enable, Face face)
@@ -387,29 +394,27 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetStencilTest(StencilTestDescriptor stencilTest)
         {
-            var depthStencilDescriptor = new MTLDepthStencilDescriptor
+            var backFace = new MTLStencilDescriptor
             {
-                BackFaceStencil = new MTLStencilDescriptor
-                {
-                    StencilFailureOperation = stencilTest.BackSFail.Convert(),
-                    DepthFailureOperation = stencilTest.BackDpFail.Convert(),
-                    DepthStencilPassOperation = stencilTest.BackDpPass.Convert(),
-                    StencilCompareFunction = stencilTest.BackFunc.Convert(),
-                    ReadMask = (uint)stencilTest.BackFuncMask,
-                    WriteMask = (uint)stencilTest.BackMask
-                },
-                FrontFaceStencil = new MTLStencilDescriptor
-                {
-                    StencilFailureOperation = stencilTest.FrontSFail.Convert(),
-                    DepthFailureOperation = stencilTest.FrontDpFail.Convert(),
-                    DepthStencilPassOperation = stencilTest.FrontDpPass.Convert(),
-                    StencilCompareFunction = stencilTest.FrontFunc.Convert(),
-                    ReadMask = (uint)stencilTest.FrontFuncMask,
-                    WriteMask = (uint)stencilTest.FrontMask
-                }
+                StencilFailureOperation = stencilTest.BackSFail.Convert(),
+                DepthFailureOperation = stencilTest.BackDpFail.Convert(),
+                DepthStencilPassOperation = stencilTest.BackDpPass.Convert(),
+                StencilCompareFunction = stencilTest.BackFunc.Convert(),
+                ReadMask = (uint)stencilTest.BackFuncMask,
+                WriteMask = (uint)stencilTest.BackMask
             };
 
-            var depthStencilState = _device.NewDepthStencilState(depthStencilDescriptor);
+            var frontFace = new MTLStencilDescriptor
+            {
+                StencilFailureOperation = stencilTest.FrontSFail.Convert(),
+                DepthFailureOperation = stencilTest.FrontDpFail.Convert(),
+                DepthStencilPassOperation = stencilTest.FrontDpPass.Convert(),
+                StencilCompareFunction = stencilTest.FrontFunc.Convert(),
+                ReadMask = (uint)stencilTest.FrontFuncMask,
+                WriteMask = (uint)stencilTest.FrontMask
+            };
+
+            var depthStencilState = _renderEncoderState.UpdateStencilState(backFace, frontFace);
 
             if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
             {
