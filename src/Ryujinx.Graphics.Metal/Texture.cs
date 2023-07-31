@@ -193,7 +193,7 @@ namespace Ryujinx.Graphics.Metal
                     0,
                     bytesPerRow,
                     bytesPerImage,
-                    new MTLSize { width = MTLTexture.Width, height = MTLTexture.Height, depth = MTLTexture.Depth},
+                    new MTLSize { width = MTLTexture.Width, height = MTLTexture.Height, depth = MTLTexture.Depth },
                     MTLTexture,
                     (ulong)layer,
                     (ulong)level,
