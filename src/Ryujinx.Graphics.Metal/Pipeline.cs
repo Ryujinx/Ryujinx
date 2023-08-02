@@ -1,3 +1,4 @@
+using Ryujinx.Common;
 using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader;
@@ -12,6 +13,8 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     public class Pipeline : IPipeline, IDisposable
     {
+        private const string ShaderSourcePath = "Ryujinx.Graphics.Metal/Shaders";
+
         private readonly MTLDevice _device;
         private readonly MTLCommandQueue _mtlCommandQueue;
 
@@ -31,9 +34,23 @@ namespace Ryujinx.Graphics.Metal
             _device = device;
             _mtlCommandQueue = commandQueue;
 
+            var error = new NSError(IntPtr.Zero);
+
+            var shaderSource = EmbeddedResources.ReadAllText(string.Join('/', ShaderSourcePath, "ColorBlitShaderSource.metal"));
+            var library = _device.NewLibrary(StringHelper.NSString(shaderSource), new(IntPtr.Zero), ref error);
+            if (error != IntPtr.Zero)
+            {
+                Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Library: {StringHelper.String(error.LocalizedDescription)}");
+            }
+
+            var vertexFunction = library.NewFunction(StringHelper.NSString("vertexMain"));
+            var fragmentFunction = library.NewFunction(StringHelper.NSString("fragmentMain"));
+
             // TODO: Recreate descriptor and encoder state as needed
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
-            var error = new NSError(IntPtr.Zero);
+            renderPipelineDescriptor.VertexFunction = vertexFunction;
+            renderPipelineDescriptor.FragmentFunction = fragmentFunction;
+
             _renderEncoderState = new(_device.NewRenderPipelineState(renderPipelineDescriptor, ref error), _device);
             if (error != IntPtr.Zero)
             {
@@ -57,7 +74,7 @@ namespace Ryujinx.Graphics.Metal
         {
             EndCurrentPass();
 
-            var descriptor = new MTLRenderPassDescriptor { };
+            var descriptor = new MTLRenderPassDescriptor();
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
             _renderEncoderState.SetEncoderState(renderCommandEncoder);
 
@@ -69,7 +86,7 @@ namespace Ryujinx.Graphics.Metal
         {
             EndCurrentPass();
 
-            var descriptor = new MTLBlitPassDescriptor { };
+            var descriptor = new MTLBlitPassDescriptor();
             var blitCommandEncoder = _commandBuffer.BlitCommandEncoder(descriptor);
 
             _currentEncoder = blitCommandEncoder;
@@ -80,7 +97,7 @@ namespace Ryujinx.Graphics.Metal
         {
             EndCurrentPass();
 
-            var descriptor = new MTLComputePassDescriptor { };
+            var descriptor = new MTLComputePassDescriptor();
             var computeCommandEncoder = _commandBuffer.ComputeCommandEncoder(descriptor);
 
             _currentEncoder = computeCommandEncoder;
@@ -93,14 +110,14 @@ namespace Ryujinx.Graphics.Metal
 
             // TODO: Give command buffer a valid MTLDrawable
             // _commandBuffer.PresentDrawable();
-            _commandBuffer.Commit();
+            // _commandBuffer.Commit();
 
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
         }
 
         public void Barrier()
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void ClearBuffer(BufferHandle destination, int offset, int size, uint value)
@@ -130,18 +147,18 @@ namespace Ryujinx.Graphics.Metal
 
         public void ClearRenderTargetColor(int index, int layer, int layerCount, uint componentMask, ColorF color)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void ClearRenderTargetDepthStencil(int layer, int layerCount, float depthValue, bool depthMask, int stencilValue,
             int stencilMask)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void CommandBufferBarrier()
         {
-            // TODO: Only required for MTLHeap or untracked resources
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void CopyBuffer(BufferHandle source, BufferHandle destination, int srcOffset, int dstOffset, int size)
@@ -170,7 +187,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void DispatchCompute(int groupsX, int groupsY, int groupsZ)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
@@ -213,57 +230,57 @@ namespace Ryujinx.Graphics.Metal
 
         public void DrawIndexedIndirect(BufferRange indirectBuffer)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndexedIndirectCount(BufferRange indirectBuffer, BufferRange parameterBuffer, int maxDrawCount, int stride)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndirect(BufferRange indirectBuffer)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndirectCount(BufferRange indirectBuffer, BufferRange parameterBuffer, int maxDrawCount, int stride)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawTexture(ITexture texture, ISampler sampler, Extents2DF srcRegion, Extents2DF dstRegion)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetAlphaTest(bool enable, float reference, CompareOp op)
         {
-            // Metal does not support alpha test.
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetBlendState(AdvancedBlendDescriptor blend)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetBlendState(int index, BlendDescriptor blend)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetDepthBias(PolygonModeMask enables, float factor, float units, float clamp)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetDepthClamp(bool clamp)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetDepthMode(DepthMode mode)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetDepthTest(DepthTestDescriptor depthTest)
@@ -315,37 +332,40 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetImage(int binding, ITexture texture, Format imageFormat)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetLineParameters(float width, bool smooth)
         {
             // Not supported in Metal
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetLogicOpState(bool enable, LogicalOp op)
         {
             // Not supported in Metal
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetMultisampleState(MultisampleDescriptor multisample)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetPatchParameters(int vertices, ReadOnlySpan<float> defaultOuterLevel, ReadOnlySpan<float> defaultInnerLevel)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetPointParameters(float size, bool isProgramPointSize, bool enablePointSprite, Origin origin)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetPolygonMode(PolygonMode frontMode, PolygonMode backMode)
         {
             // Not supported in Metal
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetPrimitiveRestart(bool enable, int index)
@@ -354,6 +374,7 @@ namespace Ryujinx.Graphics.Metal
             // https://github.com/gpuweb/gpuweb/issues/1220#issuecomment-732483263
             // https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515520-drawindexedprimitives
             // https://stackoverflow.com/questions/70813665/how-to-render-multiple-trianglestrips-using-metal
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetPrimitiveTopology(PrimitiveTopology topology)
@@ -363,22 +384,22 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetProgram(IProgram program)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetRasterizerDiscard(bool discard)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetRenderTargetColorMasks(ReadOnlySpan<uint> componentMask)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetRenderTargets(ITexture[] colors, ITexture depthStencil)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public unsafe void SetScissors(ReadOnlySpan<Rectangle<int>> regions)
@@ -437,32 +458,32 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetStorageBuffers(ReadOnlySpan<BufferAssignment> buffers)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetTextureAndSampler(ShaderStage stage, int binding, ITexture texture, ISampler sampler)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetUniformBuffers(ReadOnlySpan<BufferAssignment> buffers)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetUserClipDistance(int index, bool enableClip)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetVertexAttribs(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public unsafe void SetViewports(ReadOnlySpan<Viewport> viewports)
@@ -493,12 +514,12 @@ namespace Ryujinx.Graphics.Metal
 
         public void TextureBarrier()
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void TextureBarrierTiled()
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public bool TryHostConditionalRendering(ICounterEvent value, ulong compare, bool isEqual)
@@ -521,16 +542,19 @@ namespace Ryujinx.Graphics.Metal
         public void BeginTransformFeedback(PrimitiveTopology topology)
         {
             // Metal does not support Transform Feedback
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void EndTransformFeedback()
         {
             // Metal does not support Transform Feedback
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetTransformFeedbackBuffers(ReadOnlySpan<BufferRange> buffers)
         {
             // Metal does not support Transform Feedback
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void Dispose()

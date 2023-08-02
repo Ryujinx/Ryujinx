@@ -9,6 +9,10 @@
         <ProjectReference Include="..\Ryujinx.Common\Ryujinx.Common.csproj" />
         <ProjectReference Include="..\Ryujinx.Graphics.GAL\Ryujinx.Graphics.GAL.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="Shaders\ColorBlitShaderSource.metal" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="SharpMetal" />

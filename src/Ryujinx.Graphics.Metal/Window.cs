@@ -1,3 +1,4 @@
+using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
 using System;
 using System.Runtime.Versioning;
@@ -24,27 +25,27 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetSize(int width, int height)
         {
-            // Not needed as we can get the size from the surface.
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void ChangeVSyncMode(bool vsyncEnabled)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetAntiAliasing(AntiAliasing antialiasing)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetScalingFilter(ScalingFilter type)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetScalingFilterLevel(float level)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void Dispose()

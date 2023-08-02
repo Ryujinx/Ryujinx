@@ -1,3 +1,4 @@
+using Ryujinx.Common.Logging;
 using Ryujinx.Common.Memory;
 using Ryujinx.Graphics.GAL;
 using SharpMetal.Metal;
@@ -158,7 +159,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetData(SpanOrArray<byte> data)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetData(SpanOrArray<byte> data, int layer, int level)
@@ -245,17 +246,17 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetStorage(BufferRange buffer)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void Release()
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
     }
 }

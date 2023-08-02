@@ -1,4 +1,5 @@
 using Ryujinx.Common.Configuration;
+using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader.Translation;
 using SharpMetal.Foundation;
@@ -106,7 +107,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CreateSync(ulong id, bool strict)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DeleteBuffer(BufferHandle buffer)
@@ -175,7 +176,8 @@ namespace Ryujinx.Graphics.Metal
 
         public ulong GetCurrentSync()
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            return 0;
         }
 
         public HardwareInfo GetHardwareInfo()
