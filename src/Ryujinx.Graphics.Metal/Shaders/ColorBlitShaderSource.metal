@@ -2,29 +2,35 @@
 
 using namespace metal;
 
-struct TexCoordIn {
-    float4 tex_coord_in_data;
+constant float2 quadVertices[] = {
+    float2(-1, -1),
+    float2(-1,  1),
+    float2( 1,  1),
+    float2(-1, -1),
+    float2( 1,  1),
+    float2( 1, -1)
 };
 
-vertex float4 vertexMain(uint vertexID [[vertex_id]],
-                          constant TexCoordIn& tex_coord_in [[buffer(1)]]) {
-    int low = vertexID & 1;
-    int high = vertexID >> 1;
-    float2 tex_coord;
-    tex_coord.x = tex_coord_in.tex_coord_in_data[low];
-    tex_coord.y = tex_coord_in.tex_coord_in_data[2 + high];
+struct CopyVertexOut {
+    float4 position [[position]];
+    float2 uv;
+};
 
-    float4 position;
-    position.x = (float(low) - 0.5) * 2.0;
-    position.y = (float(high) - 0.5) * 2.0;
-    position.z = 0.0;
-    position.w = 1.0;
+vertex CopyVertexOut vertexMain(unsigned short vid [[vertex_id]]) {
+    float2 position = quadVertices[vid];
 
-    return position;
+    CopyVertexOut out;
+
+    out.position = float4(position, 0, 1);
+    out.uv = position * 0.5f + 0.5f;
+
+    return out;
 }
 
-fragment float4 fragmentMain(float2 tex_coord [[stage_in]],
-                              texture2d<float> tex [[texture(0)]]) {
-    float4 color = tex.sample(metal::address::clamp_to_edge, tex_coord);
-    return color;
+fragment float4 fragmentMain(CopyVertexOut in [[stage_in]],
+                              texture2d<float> tex) {
+    constexpr sampler sam(min_filter::nearest, mag_filter::nearest, mip_filter::none);
+
+    float3 color = tex.sample(sam, in.uv).xyz;
+    return float4(color, 1.0f);
 }

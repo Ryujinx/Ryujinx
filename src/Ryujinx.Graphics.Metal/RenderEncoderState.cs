@@ -17,23 +17,23 @@ namespace Ryujinx.Graphics.Metal
         private MTLStencilDescriptor _backFaceStencil = null;
         private MTLStencilDescriptor _frontFaceStencil = null;
 
-        public MTLRenderPipelineState RenderPipelineState;
+        public MTLRenderPipelineState CopyPipeline;
         public PrimitiveTopology Topology = PrimitiveTopology.Triangles;
         public MTLCullMode CullMode = MTLCullMode.None;
         public MTLWinding Winding = MTLWinding.Clockwise;
 
-        public RenderEncoderState(MTLRenderPipelineState renderPipelineState, MTLDevice device)
+        public RenderEncoderState(MTLRenderPipelineState copyPipeline, MTLDevice device)
         {
             _device = device;
-            RenderPipelineState = renderPipelineState;
+            CopyPipeline = copyPipeline;
         }
 
         public void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder)
         {
-            renderCommandEncoder.SetRenderPipelineState(RenderPipelineState);
+            renderCommandEncoder.SetRenderPipelineState(CopyPipeline);
             renderCommandEncoder.SetCullMode(CullMode);
             renderCommandEncoder.SetFrontFacingWinding(Winding);
-            renderCommandEncoder.SetDepthStencilState(_depthStencilState);
+            // renderCommandEncoder.SetDepthStencilState(_depthStencilState);
         }
 
         public MTLDepthStencilState UpdateStencilState(MTLStencilDescriptor backFace, MTLStencilDescriptor frontFace)

@@ -4,6 +4,7 @@ using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader.Translation;
 using SharpMetal.Foundation;
 using SharpMetal.Metal;
+using SharpMetal.QuartzCore;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
@@ -14,25 +15,43 @@ namespace Ryujinx.Graphics.Metal
     public sealed class MetalRenderer : IRenderer
     {
         private readonly MTLDevice _device;
-        private readonly Window _window;
-        private readonly Pipeline _pipeline;
         private readonly MTLCommandQueue _queue;
+        private readonly Func<CAMetalLayer> _getMetalLayer;
+
+        private Pipeline _pipeline;
+        private Window _window;
 
         public event EventHandler<ScreenCaptureImageInfo> ScreenCaptured;
         public bool PreferThreading => true;
         public IPipeline Pipeline => _pipeline;
         public IWindow Window => _window;
 
-        public MetalRenderer()
+        public MetalRenderer(Func<CAMetalLayer> metalLayer)
         {
             _device = MTLDevice.CreateSystemDefaultDevice();
             _queue = _device.NewCommandQueue();
-            _pipeline = new Pipeline(_device, _queue);
-            _window = new Window(this);
+            _getMetalLayer = metalLayer;
         }
 
         public void Initialize(GraphicsDebugLevel logLevel)
         {
+            var layer = _getMetalLayer();
+            layer.Device = _device;
+
+            var captureDescriptor = new MTLCaptureDescriptor();
+            captureDescriptor.CaptureObject = _queue;
+            captureDescriptor.Destination = MTLCaptureDestination.GPUTraceDocument;
+            captureDescriptor.OutputURL = NSURL.FileURLWithPath(StringHelper.NSString("/Users/isaacmarovitz/Desktop/Trace.gputrace"));
+            var captureError = new NSError(IntPtr.Zero);
+            MTLCaptureManager.SharedCaptureManager().StartCapture(captureDescriptor, ref captureError);
+            if (captureError != IntPtr.Zero)
+            {
+                Console.Write($"Failed to start capture! {StringHelper.String(captureError.LocalizedDescription)}");
+
+            }
+
+            _window = new Window(this, layer);
+            _pipeline = new Pipeline(_device, _queue, layer);
         }
 
         public void BackgroundContextAction(Action action, bool alwaysBackground = false)
@@ -96,7 +115,10 @@ namespace Ryujinx.Graphics.Metal
 
         public ITexture CreateTexture(TextureCreateInfo info)
         {
-            return new Texture(_device, _pipeline, info);
+            var texture = new Texture(_device, _pipeline, info);
+            Logger.Warning?.Print(LogClass.Gpu, "Texture created!");
+
+            return texture;
         }
 
         public bool PrepareHostMapping(IntPtr address, ulong size)
