@@ -157,9 +157,61 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public void SetData(SpanOrArray<byte> data)
+        // TODO: Handle array formats
+        public unsafe void SetData(SpanOrArray<byte> data)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            MTLBlitCommandEncoder blitCommandEncoder;
+
+            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                blitCommandEncoder = encoder;
+            }
+            else
+            {
+                blitCommandEncoder = _pipeline.BeginBlitPass();
+            }
+
+            var dataSpan = data.Span;
+            var mtlBuffer = _device.NewBuffer((ulong)dataSpan.Length, MTLResourceOptions.ResourceStorageModeShared);
+            var bufferSpan = new Span<byte>(mtlBuffer.Contents.ToPointer(), dataSpan.Length);
+            dataSpan.CopyTo(bufferSpan);
+
+            int width = Info.Width;
+            int height = Info.Height;
+            int depth = Info.Depth;
+            int levels = Info.GetLevelsClamped();
+
+            int offset = 0;
+
+            for (int level = 0; level < levels; level++)
+            {
+                int mipSize = Info.GetMipSize(level);
+
+                int endOffset = offset + mipSize;
+
+                if ((uint)endOffset > (uint)dataSpan.Length)
+                {
+                    return;
+                }
+
+                blitCommandEncoder.CopyFromBuffer(
+                    mtlBuffer,
+                    (ulong)offset,
+                    (ulong)Info.GetMipStride(level),
+                    (ulong)mipSize,
+                    new MTLSize { width = (ulong)width, height = (ulong)height, depth = (ulong)depth },
+                    MTLTexture,
+                    0,
+                    (ulong)level,
+                    new MTLOrigin()
+                );
+
+                offset += mipSize;
+
+                width = Math.Max(1, width >> 1);
+                height = Math.Max(1, height >> 1);
+                depth = Math.Max(1, depth >> 1);
+            }
         }
 
         public void SetData(SpanOrArray<byte> data, int layer, int level)
