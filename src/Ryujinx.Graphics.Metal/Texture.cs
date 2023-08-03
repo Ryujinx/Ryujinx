@@ -107,7 +107,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, Extents2D srcRegion, Extents2D dstRegion, bool linearFilter)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void CopyTo(BufferRange range, int layer, int level, int stride)

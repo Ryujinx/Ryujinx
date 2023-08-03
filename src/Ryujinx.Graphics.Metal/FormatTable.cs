@@ -1,9 +1,11 @@
 using Ryujinx.Graphics.GAL;
 using SharpMetal.Metal;
 using System;
+using System.Runtime.Versioning;
 
 namespace Ryujinx.Graphics.Metal
 {
+    [SupportedOSPlatform("macos")]
     static class FormatTable
     {
         private static readonly MTLPixelFormat[] _table;
@@ -167,7 +169,17 @@ namespace Ryujinx.Graphics.Metal
 
         public static MTLPixelFormat GetFormat(Format format)
         {
-            return _table[(int)format];
+            var mtlFormat = _table[(int)format];
+
+            if (mtlFormat == MTLPixelFormat.Depth24UnormStencil8 || mtlFormat == MTLPixelFormat.Depth32FloatStencil8)
+            {
+                if (!MTLDevice.CreateSystemDefaultDevice().Depth24Stencil8PixelFormatSupported)
+                {
+                    mtlFormat = MTLPixelFormat.Depth32Float;
+                }
+            }
+
+            return mtlFormat;
         }
     }
 }
