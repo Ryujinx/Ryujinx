@@ -23,7 +23,6 @@ namespace Ryujinx.Graphics.Metal
 
         public Texture(MTLDevice device, Pipeline pipeline, TextureCreateInfo info)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Texture init");
             _device = device;
             _pipeline = pipeline;
             _info = info;
@@ -53,17 +52,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, int firstLayer, int firstLevel)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Copy to");
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = _pipeline.BeginBlitPass();
-            }
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
 
             if (destination is Texture destinationTexture)
             {
@@ -81,17 +70,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, int srcLayer, int dstLayer, int srcLevel, int dstLevel)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Copy to");
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = _pipeline.BeginBlitPass();
-            }
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
 
             if (destination is Texture destinationTexture)
             {
@@ -114,17 +93,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(BufferRange range, int layer, int level, int stride)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Copy to");
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = _pipeline.BeginBlitPass();
-            }
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
 
             ulong bytesPerRow = (ulong)Info.GetMipStride(level);
             ulong bytesPerImage = 0;
@@ -166,17 +135,7 @@ namespace Ryujinx.Graphics.Metal
         // TODO: Handle array formats
         public unsafe void SetData(SpanOrArray<byte> data)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set data");
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = _pipeline.BeginBlitPass();
-            }
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
 
             var dataSpan = data.Span;
             var mtlBuffer = _device.NewBuffer((ulong)dataSpan.Length, MTLResourceOptions.ResourceStorageModeShared);
@@ -223,17 +182,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetData(SpanOrArray<byte> data, int layer, int level)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set data");
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = _pipeline.BeginBlitPass();
-            }
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
 
             ulong bytesPerRow = (ulong)Info.GetMipStride(level);
             ulong bytesPerImage = 0;
@@ -265,17 +214,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetData(SpanOrArray<byte> data, int layer, int level, Rectangle<int> region)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set data");
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_pipeline.CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = _pipeline.BeginBlitPass();
-            }
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
 
             ulong bytesPerRow = (ulong)Info.GetMipStride(level);
             ulong bytesPerImage = 0;

@@ -20,15 +20,14 @@ namespace Ryujinx.Graphics.Metal
         private MTLCommandBuffer _commandBuffer;
         private MTLCommandEncoder _currentEncoder;
 
-        public MTLCommandEncoder CurrentEncoder;
-
         private RenderEncoderState _renderEncoderState;
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
         private ulong _indexBufferOffset;
         private MTLClearColor _clearColor;
-        private int frameCount = 0;
+        private int _frameCount;
+        private bool _captureEnded = false;
 
         public Pipeline(MTLDevice device, MTLCommandQueue commandQueue)
         {
@@ -41,6 +40,36 @@ namespace Ryujinx.Graphics.Metal
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
         }
 
+        public MTLRenderCommandEncoder GetOrCreateRenderEncoder()
+        {
+            if (_currentEncoder is MTLRenderCommandEncoder encoder)
+            {
+                return encoder;
+            }
+
+            return BeginRenderPass();
+        }
+
+        public MTLBlitCommandEncoder GetOrCreateBlitEncoder()
+        {
+            if (_currentEncoder is MTLBlitCommandEncoder encoder)
+            {
+                return encoder;
+            }
+
+            return BeginBlitPass();
+        }
+
+        public MTLComputeCommandEncoder GetOrCreateComputeEncoder()
+        {
+            if (_currentEncoder is MTLComputeCommandEncoder encoder)
+            {
+                return encoder;
+            }
+
+            return BeginComputePass();
+        }
+
         public void EndCurrentPass()
         {
             if (_currentEncoder != null)
@@ -48,7 +77,6 @@ namespace Ryujinx.Graphics.Metal
                 _currentEncoder.EndEncoding();
                 _currentEncoder = null;
             }
-            Logger.Warning?.Print(LogClass.Gpu, "Current pass ended");
         }
 
         public MTLRenderCommandEncoder BeginRenderPass()
@@ -58,7 +86,6 @@ namespace Ryujinx.Graphics.Metal
             var descriptor = new MTLRenderPassDescriptor();
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
             _renderEncoderState.SetEncoderState(renderCommandEncoder);
-            Logger.Warning?.Print(LogClass.Gpu, "Began render pass");
 
             _currentEncoder = renderCommandEncoder;
             return renderCommandEncoder;
@@ -70,7 +97,6 @@ namespace Ryujinx.Graphics.Metal
 
             var descriptor = new MTLBlitPassDescriptor();
             var blitCommandEncoder = _commandBuffer.BlitCommandEncoder(descriptor);
-            Logger.Warning?.Print(LogClass.Gpu, "Began blit pass");
 
             _currentEncoder = blitCommandEncoder;
             return blitCommandEncoder;
@@ -82,7 +108,6 @@ namespace Ryujinx.Graphics.Metal
 
             var descriptor = new MTLComputePassDescriptor();
             var computeCommandEncoder = _commandBuffer.ComputeCommandEncoder(descriptor);
-            Logger.Warning?.Print(LogClass.Gpu, "Began compute pass");
 
             _currentEncoder = computeCommandEncoder;
             return computeCommandEncoder;
@@ -103,7 +128,6 @@ namespace Ryujinx.Graphics.Metal
             descriptor.ColorAttachments.Object(0).ClearColor = _clearColor;
 
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
-            Logger.Warning?.Print(LogClass.Gpu, "Began present");
             _renderEncoderState.SetEncoderState(renderCommandEncoder);
 
             var sampler = _device.NewSamplerState(new MTLSamplerDescriptor
@@ -122,14 +146,16 @@ namespace Ryujinx.Graphics.Metal
             _commandBuffer.PresentDrawable(drawable);
             _commandBuffer.Commit();
 
-            Logger.Warning?.Print(LogClass.Gpu, "Presented");
-
-            frameCount++;
-
-            if (frameCount >= 5)
+            if (!_captureEnded)
             {
-                MTLCaptureManager.SharedCaptureManager().StopCapture();
-                Logger.Warning?.Print(LogClass.Gpu, "Trace ended!");
+                _frameCount++;
+
+                if (_frameCount >= 5)
+                {
+                    _captureEnded = true;
+                    MTLCaptureManager.SharedCaptureManager().StopCapture();
+                    Logger.Warning?.Print(LogClass.Gpu, "Trace ended!");
+                }
             }
 
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
@@ -142,16 +168,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void ClearBuffer(BufferHandle destination, int offset, int size, uint value)
         {
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (_currentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = BeginBlitPass();
-            }
+            var blitCommandEncoder = GetOrCreateBlitEncoder();
 
             // Might need a closer look, range's count, lower, and upper bound
             // must be a multiple of 4
@@ -183,16 +200,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyBuffer(BufferHandle source, BufferHandle destination, int srcOffset, int dstOffset, int size)
         {
-            MTLBlitCommandEncoder blitCommandEncoder;
-
-            if (CurrentEncoder is MTLBlitCommandEncoder encoder)
-            {
-                blitCommandEncoder = encoder;
-            }
-            else
-            {
-                blitCommandEncoder = BeginBlitPass();
-            }
+            var blitCommandEncoder = GetOrCreateBlitEncoder();
 
             MTLBuffer sourceBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref source));
             MTLBuffer destinationBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref destination));
@@ -212,18 +220,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Draw");
-
-            MTLRenderCommandEncoder renderCommandEncoder;
-
-            if (_currentEncoder is MTLRenderCommandEncoder encoder)
-            {
-                renderCommandEncoder = encoder;
-            }
-            else
-            {
-                renderCommandEncoder = BeginRenderPass();
-            }
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             // TODO: Support topology re-indexing to provide support for TriangleFans
             var primitiveType = _renderEncoderState.Topology.Convert();
@@ -233,18 +230,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int firstVertex, int firstInstance)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Draw");
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
 
-            MTLRenderCommandEncoder renderCommandEncoder;
-
-            if (_currentEncoder is MTLRenderCommandEncoder encoder)
-            {
-                renderCommandEncoder = encoder;
-            }
-            else
-            {
-                renderCommandEncoder = BeginRenderPass();
-            }
 
             // TODO: Support topology re-indexing to provide support for TriangleFans
             var primitiveType = _renderEncoderState.Topology.Convert();
@@ -309,8 +296,6 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetDepthTest(DepthTestDescriptor depthTest)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set depth test");
-
             var depthStencilState = _renderEncoderState.UpdateDepthState(
                 depthTest.TestEnable ? MTLCompareFunction.Always : depthTest.Func.Convert(),
                 depthTest.WriteEnable);
@@ -323,8 +308,6 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetFaceCulling(bool enable, Face face)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set face culling");
-
             var cullMode = enable ? face.Convert() : MTLCullMode.None;
 
             if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
@@ -337,8 +320,6 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetFrontFace(FrontFace frontFace)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set front face");
-
             var winding = frontFace.Convert();
 
             if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
@@ -351,8 +332,6 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetIndexBuffer(BufferRange buffer, IndexType type)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Set index buffer");
-
             if (buffer.Handle != BufferHandle.Null)
             {
                 _indexType = type.Convert();

@@ -118,7 +118,6 @@ namespace Ryujinx.Graphics.Metal
         public ITexture CreateTexture(TextureCreateInfo info)
         {
             var texture = new Texture(_device, _pipeline, info);
-            Logger.Warning?.Print(LogClass.Gpu, "Texture created!");
 
             return texture;
         }
