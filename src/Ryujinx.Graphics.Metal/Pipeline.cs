@@ -1,4 +1,3 @@
-using Ryujinx.Common;
 using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader;
@@ -14,10 +13,9 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     public class Pipeline : IPipeline, IDisposable
     {
-        private const string ShaderSourcePath = "Ryujinx.Graphics.Metal/Shaders";
-
         private readonly MTLDevice _device;
         private readonly MTLCommandQueue _mtlCommandQueue;
+        private readonly HelperShaders _helperShaders;
 
         private MTLCommandBuffer _commandBuffer;
         private MTLCommandEncoder _currentEncoder;
@@ -32,43 +30,13 @@ namespace Ryujinx.Graphics.Metal
         private MTLClearColor _clearColor;
         private int frameCount = 0;
 
-        public Pipeline(MTLDevice device, MTLCommandQueue commandQueue, CAMetalLayer metalLayer)
+        public Pipeline(MTLDevice device, MTLCommandQueue commandQueue)
         {
             _device = device;
             _mtlCommandQueue = commandQueue;
+            _helperShaders = new HelperShaders(_device);
 
-            var error = new NSError(IntPtr.Zero);
-
-            var shaderSource = EmbeddedResources.ReadAllText(string.Join('/', ShaderSourcePath, "ColorBlitShaderSource.metal"));
-            var library = _device.NewLibrary(StringHelper.NSString(shaderSource), new(IntPtr.Zero), ref error);
-            if (error != IntPtr.Zero)
-            {
-                Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Library: {StringHelper.String(error.LocalizedDescription)}");
-            }
-
-            var vertexFunction = library.NewFunction(StringHelper.NSString("vertexMain"));
-            var fragmentFunction = library.NewFunction(StringHelper.NSString("fragmentMain"));
-
-            // TODO: Recreate descriptor and encoder state as needed
-            var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
-            renderPipelineDescriptor.VertexFunction = vertexFunction;
-            renderPipelineDescriptor.FragmentFunction = fragmentFunction;
-            // TODO: This should not be hardcoded, but a bug in SharpMetal prevents me from doing this correctly
-            renderPipelineDescriptor.ColorAttachments.Object(0).SetBlendingEnabled(true);
-            renderPipelineDescriptor.ColorAttachments.Object(0).PixelFormat = MTLPixelFormat.BGRA8Unorm;
-            renderPipelineDescriptor.ColorAttachments.Object(0).SourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationAlphaBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).SourceRGBBlendFactor = MTLBlendFactor.SourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationRGBBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
-
-            var renderPipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
-            if (error != IntPtr.Zero)
-            {
-                Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Render Pipeline State: {StringHelper.String(error.LocalizedDescription)}");
-            }
-
-            _renderEncoderState = new RenderEncoderState(renderPipelineState, _device);
-            //
+            _renderEncoderState = new RenderEncoderState(_helperShaders.BlitShader, _device);
 
             _commandBuffer = _mtlCommandQueue.CommandBuffer();
         }

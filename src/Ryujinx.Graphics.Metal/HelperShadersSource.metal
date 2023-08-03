@@ -16,7 +16,7 @@ struct CopyVertexOut {
     float2 uv;
 };
 
-vertex CopyVertexOut vertexMain(unsigned short vid [[vertex_id]]) {
+vertex CopyVertexOut vertexBlit(unsigned short vid [[vertex_id]]) {
     float2 position = quadVertices[vid];
 
     CopyVertexOut out;
@@ -28,8 +28,8 @@ vertex CopyVertexOut vertexMain(unsigned short vid [[vertex_id]]) {
     return out;
 }
 
-fragment float4 fragmentMain(CopyVertexOut in [[stage_in]],
-                              texture2d<float> tex) {
+fragment float4 fragmentBlit(CopyVertexOut in [[stage_in]],
+                             texture2d<float> tex) {
     constexpr sampler sam(min_filter::nearest, mag_filter::nearest, mip_filter::none);
 
     return tex.sample(sam, in.uv).xyzw;

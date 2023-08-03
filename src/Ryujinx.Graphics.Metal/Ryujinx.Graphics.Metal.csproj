@@ -11,11 +11,11 @@
     </ItemGroup>
     
     <ItemGroup>
-        <EmbeddedResource Include="Shaders\ColorBlitShaderSource.metal" />
+      <PackageReference Include="SharpMetal" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SharpMetal" />
+      <EmbeddedResource Include="HelperShadersSource.metal" />
     </ItemGroup>
 
 </Project>

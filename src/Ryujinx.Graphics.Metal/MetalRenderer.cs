@@ -46,12 +46,12 @@ namespace Ryujinx.Graphics.Metal
             MTLCaptureManager.SharedCaptureManager().StartCapture(captureDescriptor, ref captureError);
             if (captureError != IntPtr.Zero)
             {
-                Console.Write($"Failed to start capture! {StringHelper.String(captureError.LocalizedDescription)}");
+                Console.WriteLine($"Failed to start capture! {StringHelper.String(captureError.LocalizedDescription)}");
 
             }
 
             _window = new Window(this, layer);
-            _pipeline = new Pipeline(_device, _queue, layer);
+            _pipeline = new Pipeline(_device, _queue);
         }
 
         public void BackgroundContextAction(Action action, bool alwaysBackground = false)
