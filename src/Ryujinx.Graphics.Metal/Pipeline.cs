@@ -29,7 +29,7 @@ namespace Ryujinx.Graphics.Metal
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
         private ulong _indexBufferOffset;
-        private MTLClearColor _clearColor = new() { alpha = 1.0f };
+        private MTLClearColor _clearColor;
         private int frameCount = 0;
 
         public Pipeline(MTLDevice device, MTLCommandQueue commandQueue, CAMetalLayer metalLayer)
@@ -54,7 +54,12 @@ namespace Ryujinx.Graphics.Metal
             renderPipelineDescriptor.VertexFunction = vertexFunction;
             renderPipelineDescriptor.FragmentFunction = fragmentFunction;
             // TODO: This should not be hardcoded, but a bug in SharpMetal prevents me from doing this correctly
+            renderPipelineDescriptor.ColorAttachments.Object(0).SetBlendingEnabled(true);
             renderPipelineDescriptor.ColorAttachments.Object(0).PixelFormat = MTLPixelFormat.BGRA8Unorm;
+            renderPipelineDescriptor.ColorAttachments.Object(0).SourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;
+            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationAlphaBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
+            renderPipelineDescriptor.ColorAttachments.Object(0).SourceRGBBlendFactor = MTLBlendFactor.SourceAlpha;
+            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationRGBBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
 
             var renderPipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
             if (error != IntPtr.Zero)

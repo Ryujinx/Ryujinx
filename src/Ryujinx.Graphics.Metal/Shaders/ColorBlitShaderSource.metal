@@ -32,6 +32,5 @@ fragment float4 fragmentMain(CopyVertexOut in [[stage_in]],
                               texture2d<float> tex) {
     constexpr sampler sam(min_filter::nearest, mag_filter::nearest, mip_filter::none);
 
-    float3 color = tex.sample(sam, in.uv).xyz;
-    return float4(color, 1.0f);
+    return tex.sample(sam, in.uv).xyzw;
 }

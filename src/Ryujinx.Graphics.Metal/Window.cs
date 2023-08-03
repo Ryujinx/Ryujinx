@@ -1,6 +1,5 @@
 using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
-using SharpMetal.Metal;
 using SharpMetal.ObjectiveCCore;
 using SharpMetal.QuartzCore;
 using System;
@@ -20,6 +19,7 @@ namespace Ryujinx.Graphics.Metal
             _metalLayer = metalLayer;
         }
 
+        // TODO: Handle ImageCrop
         public void Present(ITexture texture, ImageCrop crop, Action swapBuffersCallback)
         {
             if (_renderer.Pipeline is Pipeline pipeline && texture is Texture tex)
