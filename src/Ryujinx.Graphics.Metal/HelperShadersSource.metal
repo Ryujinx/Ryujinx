@@ -2,6 +2,10 @@
 
 using namespace metal;
 
+// ------------------
+// Simple Blit Shader
+// ------------------
+
 constant float2 quadVertices[] = {
     float2(-1, -1),
     float2(-1,  1),
