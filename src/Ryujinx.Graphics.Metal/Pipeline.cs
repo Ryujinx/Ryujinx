@@ -13,6 +13,8 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     class Pipeline : IPipeline, IDisposable
     {
+        private const int MaxFramesPerCapture = 50;
+
         private readonly MTLDevice _device;
         private readonly MTLCommandQueue _mtlCommandQueue;
         private readonly HelperShaders _helperShaders;
@@ -150,7 +152,7 @@ namespace Ryujinx.Graphics.Metal
             {
                 _frameCount++;
 
-                if (_frameCount >= 5)
+                if (_frameCount >= MaxFramesPerCapture)
                 {
                     _captureEnded = true;
                     MTLCaptureManager.SharedCaptureManager().StopCapture();
