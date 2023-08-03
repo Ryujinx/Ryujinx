@@ -22,6 +22,7 @@ vertex CopyVertexOut vertexMain(unsigned short vid [[vertex_id]]) {
     CopyVertexOut out;
 
     out.position = float4(position, 0, 1);
+    out.position.y = -out.position.y;
     out.uv = position * 0.5f + 0.5f;
 
     return out;

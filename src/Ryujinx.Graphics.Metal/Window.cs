@@ -1,5 +1,8 @@
 using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
+using SharpMetal.Metal;
+using SharpMetal.ObjectiveCCore;
+using SharpMetal.QuartzCore;
 using System;
 using System.Runtime.Versioning;
 
@@ -9,17 +12,20 @@ namespace Ryujinx.Graphics.Metal
     public class Window : IWindow, IDisposable
     {
         private readonly MetalRenderer _renderer;
+        private readonly CAMetalLayer _metalLayer;
 
-        public Window(MetalRenderer renderer)
+        public Window(MetalRenderer renderer, CAMetalLayer metalLayer)
         {
             _renderer = renderer;
+            _metalLayer = metalLayer;
         }
 
         public void Present(ITexture texture, ImageCrop crop, Action swapBuffersCallback)
         {
-            if (_renderer.Pipeline is Pipeline pipeline)
+            if (_renderer.Pipeline is Pipeline pipeline && texture is Texture tex)
             {
-                pipeline.Present();
+                var drawable = new CAMetalDrawable(ObjectiveC.IntPtr_objc_msgSend(_metalLayer, "nextDrawable"));
+                pipeline.Present(drawable, tex);
             }
         }
 

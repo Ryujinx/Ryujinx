@@ -52,7 +52,7 @@ namespace Ryujinx.Graphics.Metal
             // TODO: Recreate descriptor and encoder state as needed
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
             renderPipelineDescriptor.VertexFunction = vertexFunction;
-            // renderPipelineDescriptor.FragmentFunction = fragmentFunction;
+            renderPipelineDescriptor.FragmentFunction = fragmentFunction;
             // TODO: This should not be hardcoded, but a bug in SharpMetal prevents me from doing this correctly
             renderPipelineDescriptor.ColorAttachments.Object(0).PixelFormat = MTLPixelFormat.BGRA8Unorm;
 
@@ -115,7 +115,7 @@ namespace Ryujinx.Graphics.Metal
             return computeCommandEncoder;
         }
 
-        public void Present(CAMetalDrawable drawable)
+        public void Present(CAMetalDrawable drawable, Texture texture)
         {
             EndCurrentPass();
 
@@ -128,8 +128,7 @@ namespace Ryujinx.Graphics.Metal
             Logger.Warning?.Print(LogClass.Gpu, "Began present");
             _renderEncoderState.SetEncoderState(renderCommandEncoder);
 
-            // Barry goes here
-            // renderCommandEncoder.SetFragmentTexture(_renderTarget, 0);
+            renderCommandEncoder.SetFragmentTexture(texture.MTLTexture, 0);
 
             renderCommandEncoder.DrawPrimitives(MTLPrimitiveType.Triangle, 0, 6);
             renderCommandEncoder.EndEncoding();
