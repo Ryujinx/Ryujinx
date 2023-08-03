@@ -20,7 +20,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
         public CodeGenContext(StructuredProgramInfo info, ShaderConfig config)
         {
             Info = info;
-            Config = Config;
+            Config = config;
 
             _sb = new StringBuilder();
         }

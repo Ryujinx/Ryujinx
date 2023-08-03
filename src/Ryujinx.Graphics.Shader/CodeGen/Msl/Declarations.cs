@@ -1,4 +1,3 @@
-using Ryujinx.Graphics.Shader.CodeGen.Glsl;
 using Ryujinx.Graphics.Shader.StructuredIr;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl
