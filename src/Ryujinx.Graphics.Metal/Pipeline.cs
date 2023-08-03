@@ -15,7 +15,7 @@ namespace Ryujinx.Graphics.Metal
     {
         // 0 Frames = No capture
         // Some games like Undertale trigger a stack overflow on capture end
-        private const int MaxFramesPerCapture = 5;
+        private const int MaxFramesPerCapture = 0;
         private const string CaptureLocation = "/Users/isaacmarovitz/Desktop/Captures/Trace-";
 
         private readonly MTLDevice _device;

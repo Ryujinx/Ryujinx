@@ -204,11 +204,14 @@ namespace Ryujinx.Graphics.Metal
             MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref buffer));
             var span = new Span<byte>(mtlBuffer.Contents.ToPointer(), (int)mtlBuffer.Length);
             data.CopyTo(span[offset..]);
-            mtlBuffer.DidModifyRange(new NSRange
+            if (mtlBuffer.StorageMode == MTLStorageMode.Managed)
             {
-                location = (ulong)offset,
-                length = (ulong)data.Length
-            });
+                mtlBuffer.DidModifyRange(new NSRange
+                {
+                    location = (ulong)offset,
+                    length = (ulong)data.Length
+                });
+            }
         }
 
         public void UpdateCounters()
