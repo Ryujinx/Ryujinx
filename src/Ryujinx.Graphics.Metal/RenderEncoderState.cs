@@ -1,5 +1,6 @@
 using Ryujinx.Graphics.GAL;
 using SharpMetal.Metal;
+using System;
 using System.Runtime.Versioning;
 
 namespace Ryujinx.Graphics.Metal
@@ -7,8 +8,9 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     struct RenderEncoderState
     {
-        private MTLDevice _device;
-
+        private readonly MTLDevice _device;
+        // TODO: Work with more than one pipeline state
+        private readonly MTLRenderPipelineState _copyPipeline;
         private MTLDepthStencilState _depthStencilState = null;
 
         private MTLCompareFunction _depthCompareFunction = MTLCompareFunction.Always;
@@ -17,7 +19,6 @@ namespace Ryujinx.Graphics.Metal
         private MTLStencilDescriptor _backFaceStencil = null;
         private MTLStencilDescriptor _frontFaceStencil = null;
 
-        public MTLRenderPipelineState CopyPipeline;
         public PrimitiveTopology Topology = PrimitiveTopology.Triangles;
         public MTLCullMode CullMode = MTLCullMode.None;
         public MTLWinding Winding = MTLWinding.Clockwise;
@@ -25,15 +26,19 @@ namespace Ryujinx.Graphics.Metal
         public RenderEncoderState(MTLRenderPipelineState copyPipeline, MTLDevice device)
         {
             _device = device;
-            CopyPipeline = copyPipeline;
+            _copyPipeline = copyPipeline;
         }
 
-        public void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder)
+        public readonly void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder)
         {
-            renderCommandEncoder.SetRenderPipelineState(CopyPipeline);
+            renderCommandEncoder.SetRenderPipelineState(_copyPipeline);
             renderCommandEncoder.SetCullMode(CullMode);
             renderCommandEncoder.SetFrontFacingWinding(Winding);
-            // renderCommandEncoder.SetDepthStencilState(_depthStencilState);
+
+            if (_depthStencilState != null)
+            {
+                renderCommandEncoder.SetDepthStencilState(_depthStencilState);
+            }
         }
 
         public MTLDepthStencilState UpdateStencilState(MTLStencilDescriptor backFace, MTLStencilDescriptor frontFace)

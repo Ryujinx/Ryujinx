@@ -38,10 +38,12 @@ namespace Ryujinx.Graphics.Metal
             var layer = _getMetalLayer();
             layer.Device = _device;
 
-            var captureDescriptor = new MTLCaptureDescriptor();
-            captureDescriptor.CaptureObject = _queue;
-            captureDescriptor.Destination = MTLCaptureDestination.GPUTraceDocument;
-            captureDescriptor.OutputURL = NSURL.FileURLWithPath(StringHelper.NSString("/Users/isaacmarovitz/Desktop/Trace.gputrace"));
+            var captureDescriptor = new MTLCaptureDescriptor
+            {
+                CaptureObject = _queue,
+                Destination = MTLCaptureDestination.GPUTraceDocument,
+                OutputURL = NSURL.FileURLWithPath(StringHelper.NSString("/Users/isaacmarovitz/Desktop/Trace.gputrace"))
+            };
             var captureError = new NSError(IntPtr.Zero);
             MTLCaptureManager.SharedCaptureManager().StartCapture(captureDescriptor, ref captureError);
             if (captureError != IntPtr.Zero)
@@ -216,7 +218,7 @@ namespace Ryujinx.Graphics.Metal
         {
             MTLBuffer mtlBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref buffer));
             var span = new Span<byte>(mtlBuffer.Contents.ToPointer(), (int)mtlBuffer.Length);
-            data.CopyTo(span.Slice(offset));
+            data.CopyTo(span[offset..]);
             mtlBuffer.DidModifyRange(new NSRange
             {
                 location = (ulong)offset,

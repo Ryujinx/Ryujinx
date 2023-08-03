@@ -11,7 +11,7 @@ using System.Runtime.Versioning;
 namespace Ryujinx.Graphics.Metal
 {
     [SupportedOSPlatform("macos")]
-    public class Pipeline : IPipeline, IDisposable
+    class Pipeline : IPipeline, IDisposable
     {
         private readonly MTLDevice _device;
         private readonly MTLCommandQueue _mtlCommandQueue;
@@ -88,8 +88,13 @@ namespace Ryujinx.Graphics.Metal
             return computeCommandEncoder;
         }
 
-        public void Present(CAMetalDrawable drawable, Texture texture)
+        public void Present(CAMetalDrawable drawable, ITexture texture)
         {
+            if (texture is not Texture tex)
+            {
+                return;
+            }
+
             EndCurrentPass();
 
             var descriptor = new MTLRenderPassDescriptor();
@@ -108,7 +113,7 @@ namespace Ryujinx.Graphics.Metal
                 MipFilter = MTLSamplerMipFilter.NotMipmapped
             });
 
-            renderCommandEncoder.SetFragmentTexture(texture.MTLTexture, 0);
+            renderCommandEncoder.SetFragmentTexture(tex.MTLTexture, 0);
             renderCommandEncoder.SetFragmentSamplerState(sampler, 0);
 
             renderCommandEncoder.DrawPrimitives(MTLPrimitiveType.Triangle, 0, 6);
@@ -162,7 +167,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void ClearRenderTargetColor(int index, int layer, int layerCount, uint componentMask, ColorF color)
         {
-            _clearColor = new MTLClearColor { red = color.Red, green = color.Green, blue = color.Blue, alpha = color.Alpha};
+            _clearColor = new MTLClearColor { red = color.Red, green = color.Green, blue = color.Blue, alpha = color.Alpha };
         }
 
         public void ClearRenderTargetDepthStencil(int layer, int layerCount, float depthValue, bool depthMask, int stencilValue,

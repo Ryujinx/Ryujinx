@@ -3,13 +3,13 @@ using SharpMetal.Metal;
 
 namespace Ryujinx.Graphics.Metal
 {
-    public class Sampler : ISampler
+    class Sampler : ISampler
     {
-        private MTLSamplerState _mtlSamplerState;
+        // private readonly MTLSamplerState _mtlSamplerState;
 
         public Sampler(MTLSamplerState mtlSamplerState)
         {
-            _mtlSamplerState = mtlSamplerState;
+            // _mtlSamplerState = mtlSamplerState;
         }
 
         public void Dispose()

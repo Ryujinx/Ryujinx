@@ -2,7 +2,7 @@ using Ryujinx.Graphics.GAL;
 
 namespace Ryujinx.Graphics.Metal
 {
-    public class CounterEvent : ICounterEvent
+    class CounterEvent : ICounterEvent
     {
 
         public CounterEvent()

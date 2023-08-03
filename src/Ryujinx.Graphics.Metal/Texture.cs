@@ -9,7 +9,7 @@ using System.Runtime.Versioning;
 namespace Ryujinx.Graphics.Metal
 {
     [SupportedOSPlatform("macos")]
-    public class Texture : ITexture, IDisposable
+    class Texture : ITexture, IDisposable
     {
         private readonly TextureCreateInfo _info;
         private readonly Pipeline _pipeline;
@@ -28,12 +28,14 @@ namespace Ryujinx.Graphics.Metal
             _pipeline = pipeline;
             _info = info;
 
-            var descriptor = new MTLTextureDescriptor();
-            descriptor.PixelFormat = FormatTable.GetFormat(Info.Format);
-            descriptor.Usage = MTLTextureUsage.ShaderRead | MTLTextureUsage.ShaderWrite | MTLTextureUsage.RenderTarget;
-            descriptor.Width = (ulong)Width;
-            descriptor.Height = (ulong)Height;
-            descriptor.Depth = (ulong)Depth;
+            var descriptor = new MTLTextureDescriptor
+            {
+                PixelFormat = FormatTable.GetFormat(Info.Format),
+                Usage = MTLTextureUsage.ShaderRead | MTLTextureUsage.ShaderWrite | MTLTextureUsage.RenderTarget,
+                Width = (ulong)Width,
+                Height = (ulong)Height,
+                Depth = (ulong)Depth
+            };
             descriptor.Depth = (ulong)Info.Depth;
             descriptor.SampleCount = (ulong)Info.Samples;
             descriptor.MipmapLevelCount = (ulong)Info.Levels;

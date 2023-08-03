@@ -106,26 +106,26 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             Add(Instruction.ShiftRightS32,            InstType.OpBinary,       ">>");
             Add(Instruction.ShiftRightU32,            InstType.OpBinary,       ">>");
             // TODO: Shuffle funcs
-            Add(Instruction.Shuffle, 0);
-            Add(Instruction.ShuffleDown, 0);
-            Add(Instruction.ShuffleUp, 0);
-            Add(Instruction.ShuffleXor, 0);
-            Add(Instruction.Sine, InstType.CallUnary, "sin");
-            Add(Instruction.SquareRoot, InstType.CallUnary, "sqrt");
-            Add(Instruction.Store, InstType.Special);
-            Add(Instruction.Subtract, InstType.OpBinary, "-");
+            Add(Instruction.Shuffle,                  0);
+            Add(Instruction.ShuffleDown,              0);
+            Add(Instruction.ShuffleUp,                0);
+            Add(Instruction.ShuffleXor,               0);
+            Add(Instruction.Sine,                     InstType.CallUnary,      "sin");
+            Add(Instruction.SquareRoot,               InstType.CallUnary,      "sqrt");
+            Add(Instruction.Store,                    InstType.Special);
+            Add(Instruction.Subtract,                 InstType.OpBinary,       "-");
             // TODO: Swizzle add
-            Add(Instruction.SwizzleAdd, InstType.Special);
-            Add(Instruction.TextureSample, InstType.Special);
-            Add(Instruction.TextureSize, InstType.Special);
-            Add(Instruction.Truncate, InstType.CallUnary, "trunc");
+            Add(Instruction.SwizzleAdd,               InstType.Special);
+            Add(Instruction.TextureSample,            InstType.Special);
+            Add(Instruction.TextureSize,              InstType.Special);
+            Add(Instruction.Truncate,                 InstType.CallUnary,      "trunc");
             Add(Instruction.UnpackDouble2x32,         0); // MSL does not have a 64-bit FP
-            Add(Instruction.UnpackHalf2x16,           InstType.CallUnary, "unpack_unorm2x16_to_half");
+            Add(Instruction.UnpackHalf2x16,           InstType.CallUnary,      "unpack_unorm2x16_to_half");
             Add(Instruction.VectorExtract,            InstType.Special);
-            Add(Instruction.VoteAll, InstType.CallUnary, "simd_all");
+            Add(Instruction.VoteAll,                  InstType.CallUnary,      "simd_all");
             // TODO: https://github.com/KhronosGroup/SPIRV-Cross/blob/bccaa94db814af33d8ef05c153e7c34d8bd4d685/reference/shaders-msl/comp/shader_group_vote.msl21.comp#L9
-            Add(Instruction.VoteAllEqual, InstType.Special);
-            Add(Instruction.VoteAny, InstType.CallUnary, "simd_any");
+            Add(Instruction.VoteAllEqual,             InstType.Special);
+            Add(Instruction.VoteAny,                  InstType.CallUnary,      "simd_any");
 #pragma warning restore IDE0055
         }
 

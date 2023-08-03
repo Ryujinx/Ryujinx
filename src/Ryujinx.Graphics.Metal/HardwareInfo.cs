@@ -6,8 +6,8 @@ namespace Ryujinx.Graphics.Metal
     static partial class HardwareInfoTools
     {
 
-        private readonly static IntPtr kCFAllocatorDefault = IntPtr.Zero;
-        private readonly static UInt32 kCFStringEncodingASCII = 0x0600;
+        private readonly static IntPtr _kCFAllocatorDefault = IntPtr.Zero;
+        private readonly static UInt32 _kCFStringEncodingASCII = 0x0600;
         private const string IOKit = "/System/Library/Frameworks/IOKit.framework/IOKit";
         private const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
 
@@ -47,8 +47,8 @@ namespace Ryujinx.Graphics.Metal
         {
             var serviceDict = IOServiceMatching("IOGPU");
             var service = IOServiceGetMatchingService(IntPtr.Zero, serviceDict);
-            var cfString = CFStringCreateWithCString(kCFAllocatorDefault, "vendor-id", kCFStringEncodingASCII);
-            var cfProperty = IORegistryEntryCreateCFProperty(service, cfString, kCFAllocatorDefault, 0);
+            var cfString = CFStringCreateWithCString(_kCFAllocatorDefault, "vendor-id", _kCFStringEncodingASCII);
+            var cfProperty = IORegistryEntryCreateCFProperty(service, cfString, _kCFAllocatorDefault, 0);
 
             byte[] buffer = new byte[4];
             var bufferPtr = CFDataGetBytePtr(cfProperty);
@@ -63,13 +63,13 @@ namespace Ryujinx.Graphics.Metal
         {
             var serviceDict = IOServiceMatching("IOGPU");
             var service = IOServiceGetMatchingService(IntPtr.Zero, serviceDict);
-            var cfString = CFStringCreateWithCString(kCFAllocatorDefault, "model", kCFStringEncodingASCII);
-            var cfProperty = IORegistryEntryCreateCFProperty(service, cfString, kCFAllocatorDefault, 0);
+            var cfString = CFStringCreateWithCString(_kCFAllocatorDefault, "model", _kCFStringEncodingASCII);
+            var cfProperty = IORegistryEntryCreateCFProperty(service, cfString, _kCFAllocatorDefault, 0);
 
             char[] buffer = new char[64];
             IntPtr bufferPtr = Marshal.AllocHGlobal(buffer.Length);
 
-            if (CFStringGetCString(cfProperty, bufferPtr, buffer.Length, kCFStringEncodingASCII))
+            if (CFStringGetCString(cfProperty, bufferPtr, buffer.Length, _kCFStringEncodingASCII))
             {
                 var model = Marshal.PtrToStringUTF8(bufferPtr);
                 Marshal.FreeHGlobal(bufferPtr);

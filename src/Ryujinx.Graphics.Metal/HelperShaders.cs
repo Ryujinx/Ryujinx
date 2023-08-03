@@ -30,17 +30,18 @@ namespace Ryujinx.Graphics.Metal
     }
 
     [SupportedOSPlatform("macos")]
-    public struct HelperShader
+    public readonly struct HelperShader
     {
-        private MTLRenderPipelineState _pipelineState;
+        private readonly MTLRenderPipelineState _pipelineState;
         public static implicit operator MTLRenderPipelineState(HelperShader shader) => shader._pipelineState;
 
         public HelperShader(MTLDevice device, MTLLibrary library, string vertex, string fragment)
         {
-            var renderPipelineDescriptor = new MTLRenderPipelineDescriptor();
-
-            renderPipelineDescriptor.VertexFunction = library.NewFunction(StringHelper.NSString(vertex));;
-            renderPipelineDescriptor.FragmentFunction = library.NewFunction(StringHelper.NSString(fragment));
+            var renderPipelineDescriptor = new MTLRenderPipelineDescriptor
+            {
+                VertexFunction = library.NewFunction(StringHelper.NSString(vertex)),
+                FragmentFunction = library.NewFunction(StringHelper.NSString(fragment))
+            };
             renderPipelineDescriptor.ColorAttachments.Object(0).SetBlendingEnabled(true);
             renderPipelineDescriptor.ColorAttachments.Object(0).PixelFormat = MTLPixelFormat.BGRA8Unorm;
             renderPipelineDescriptor.ColorAttachments.Object(0).SourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;

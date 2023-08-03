@@ -8,7 +8,7 @@ using System.Runtime.Versioning;
 namespace Ryujinx.Graphics.Metal
 {
     [SupportedOSPlatform("macos")]
-    public class Window : IWindow, IDisposable
+    class Window : IWindow, IDisposable
     {
         private readonly MetalRenderer _renderer;
         private readonly CAMetalLayer _metalLayer;
