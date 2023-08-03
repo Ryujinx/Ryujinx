@@ -38,20 +38,6 @@ namespace Ryujinx.Graphics.Metal
             var layer = _getMetalLayer();
             layer.Device = _device;
 
-            var captureDescriptor = new MTLCaptureDescriptor
-            {
-                CaptureObject = _queue,
-                Destination = MTLCaptureDestination.GPUTraceDocument,
-                OutputURL = NSURL.FileURLWithPath(StringHelper.NSString("/Users/isaacmarovitz/Desktop/Trace.gputrace"))
-            };
-            var captureError = new NSError(IntPtr.Zero);
-            MTLCaptureManager.SharedCaptureManager().StartCapture(captureDescriptor, ref captureError);
-            if (captureError != IntPtr.Zero)
-            {
-                Console.WriteLine($"Failed to start capture! {StringHelper.String(captureError.LocalizedDescription)}");
-
-            }
-
             _window = new Window(this, layer);
             _pipeline = new Pipeline(_device, _queue);
         }

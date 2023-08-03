@@ -13,10 +13,13 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     class Pipeline : IPipeline, IDisposable
     {
-        private const int MaxFramesPerCapture = 50;
+        // 0 Frames = No capture
+        // Some games like Undertale trigger a stack overflow on capture end
+        private const int MaxFramesPerCapture = 5;
+        private const string CaptureLocation = "/Users/isaacmarovitz/Desktop/Captures/Trace-";
 
         private readonly MTLDevice _device;
-        private readonly MTLCommandQueue _mtlCommandQueue;
+        private readonly MTLCommandQueue _commandQueue;
         private readonly HelperShaders _helperShaders;
 
         private MTLCommandBuffer _commandBuffer;
@@ -29,17 +32,41 @@ namespace Ryujinx.Graphics.Metal
         private ulong _indexBufferOffset;
         private MTLClearColor _clearColor;
         private int _frameCount;
-        private bool _captureEnded = false;
+        private bool _captureEnded = true;
 
         public Pipeline(MTLDevice device, MTLCommandQueue commandQueue)
         {
             _device = device;
-            _mtlCommandQueue = commandQueue;
+            _commandQueue = commandQueue;
             _helperShaders = new HelperShaders(_device);
 
             _renderEncoderState = new RenderEncoderState(_helperShaders.BlitShader, _device);
 
-            _commandBuffer = _mtlCommandQueue.CommandBuffer();
+            _commandBuffer = _commandQueue.CommandBuffer();
+
+            if (MaxFramesPerCapture > 0)
+            {
+                StartCapture();
+            }
+        }
+
+        private void StartCapture()
+        {
+            var captureDescriptor = new MTLCaptureDescriptor
+            {
+                CaptureObject = _commandQueue,
+                Destination = MTLCaptureDestination.GPUTraceDocument,
+                OutputURL = NSURL.FileURLWithPath(StringHelper.NSString(CaptureLocation + DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ".gputrace"))
+            };
+            var captureError = new NSError(IntPtr.Zero);
+            MTLCaptureManager.SharedCaptureManager().StartCapture(captureDescriptor, ref captureError);
+            if (captureError != IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to start capture! {StringHelper.String(captureError.LocalizedDescription)}");
+
+            }
+
+            _captureEnded = false;
         }
 
         public MTLRenderCommandEncoder GetOrCreateRenderEncoder()
@@ -160,7 +187,7 @@ namespace Ryujinx.Graphics.Metal
                 }
             }
 
-            _commandBuffer = _mtlCommandQueue.CommandBuffer();
+            _commandBuffer = _commandQueue.CommandBuffer();
         }
 
         public void Barrier()
