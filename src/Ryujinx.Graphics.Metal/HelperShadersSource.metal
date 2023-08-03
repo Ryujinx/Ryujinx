@@ -33,8 +33,7 @@ vertex CopyVertexOut vertexBlit(unsigned short vid [[vertex_id]]) {
 }
 
 fragment float4 fragmentBlit(CopyVertexOut in [[stage_in]],
-                             texture2d<float> tex) {
-    constexpr sampler sam(min_filter::nearest, mag_filter::nearest, mip_filter::none);
-
-    return tex.sample(sam, in.uv).xyzw;
+                             texture2d<float, access::sample> texture [[texture(0)]],
+                             sampler sampler [[sampler(0)]]) {
+    return texture.sample(sampler, in.uv);
 }

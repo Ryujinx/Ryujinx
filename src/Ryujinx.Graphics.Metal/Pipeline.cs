@@ -101,7 +101,15 @@ namespace Ryujinx.Graphics.Metal
             Logger.Warning?.Print(LogClass.Gpu, "Began present");
             _renderEncoderState.SetEncoderState(renderCommandEncoder);
 
+            var sampler = _device.NewSamplerState(new MTLSamplerDescriptor
+            {
+                MinFilter = MTLSamplerMinMagFilter.Nearest,
+                MagFilter = MTLSamplerMinMagFilter.Nearest,
+                MipFilter = MTLSamplerMipFilter.NotMipmapped
+            });
+
             renderCommandEncoder.SetFragmentTexture(texture.MTLTexture, 0);
+            renderCommandEncoder.SetFragmentSamplerState(sampler, 0);
 
             renderCommandEncoder.DrawPrimitives(MTLPrimitiveType.Triangle, 0, 6);
             renderCommandEncoder.EndEncoding();
@@ -199,6 +207,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
         {
+            Logger.Warning?.Print(LogClass.Gpu, "Draw");
+
             MTLRenderCommandEncoder renderCommandEncoder;
 
             if (_currentEncoder is MTLRenderCommandEncoder encoder)
@@ -218,6 +228,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int firstVertex, int firstInstance)
         {
+            Logger.Warning?.Print(LogClass.Gpu, "Draw");
+
             MTLRenderCommandEncoder renderCommandEncoder;
 
             if (_currentEncoder is MTLRenderCommandEncoder encoder)
@@ -292,6 +304,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetDepthTest(DepthTestDescriptor depthTest)
         {
+            Logger.Warning?.Print(LogClass.Gpu, "Set depth test");
+
             var depthStencilState = _renderEncoderState.UpdateDepthState(
                 depthTest.TestEnable ? MTLCompareFunction.Always : depthTest.Func.Convert(),
                 depthTest.WriteEnable);
@@ -304,6 +318,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetFaceCulling(bool enable, Face face)
         {
+            Logger.Warning?.Print(LogClass.Gpu, "Set face culling");
+
             var cullMode = enable ? face.Convert() : MTLCullMode.None;
 
             if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
@@ -316,6 +332,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetFrontFace(FrontFace frontFace)
         {
+            Logger.Warning?.Print(LogClass.Gpu, "Set front face");
+
             var winding = frontFace.Convert();
 
             if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
@@ -328,6 +346,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetIndexBuffer(BufferRange buffer, IndexType type)
         {
+            Logger.Warning?.Print(LogClass.Gpu, "Set index buffer");
+
             if (buffer.Handle != BufferHandle.Null)
             {
                 _indexType = type.Convert();
