@@ -8,6 +8,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
     {
         public const string Tab = "    ";
 
+        public StructuredFunction CurrentFunction { get; set; }
         public StructuredProgramInfo Info { get; }
         public ShaderConfig Config { get; }
 
