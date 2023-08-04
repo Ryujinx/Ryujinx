@@ -70,8 +70,6 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             {
                 switch (inst & Instruction.Mask)
                 {
-                    case Instruction.Ballot:
-                        return "";
                     case Instruction.Barrier:
                         return "";
                     case Instruction.Call:
@@ -99,8 +97,6 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                     case Instruction.Lod:
                         return "";
                     case Instruction.MemoryBarrier:
-                        return "";
-                    case Instruction.Negate:
                         return "";
                     case Instruction.Store:
                         return "";
