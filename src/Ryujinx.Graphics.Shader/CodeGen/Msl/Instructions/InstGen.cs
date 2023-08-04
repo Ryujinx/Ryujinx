@@ -1,5 +1,6 @@
 using Ryujinx.Graphics.Shader.IntermediateRepresentation;
 using Ryujinx.Graphics.Shader.StructuredIr;
+using Ryujinx.Graphics.Shader.Translation;
 using System;
 
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenHelper;
@@ -9,6 +10,20 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 {
     static class InstGen
     {
+        public static string GetExpression(CodeGenContext context, IAstNode node)
+        {
+            if (node is AstOperation operation)
+            {
+                return GetExpression(context, operation);
+            }
+            else if (node is AstOperand operand)
+            {
+                return context.OperandManager.GetExpression(context, operand);
+            }
+
+            throw new ArgumentException($"Invalid node type \"{node?.GetType().Name ?? "null"}\".");
+        }
+
         private static string GetExpression(CodeGenContext context, AstOperation operation)
         {
             Instruction inst = operation.Inst;
@@ -23,7 +38,24 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 
                 string args = string.Empty;
 
-                // Generate function
+                if (atomic)
+                {
+                    // Hell
+                }
+                else
+                {
+                    for (int argIndex = 0; argIndex < arity; argIndex++)
+                    {
+                        if (argIndex != 0)
+                        {
+                            args += ", ";
+                        }
+
+                        AggregateType dstType = GetSrcVarType(inst, argIndex);
+
+                        args += GetSourceExpr(context, operation.GetSource(argIndex), dstType);
+                    }
+                }
 
                 return info.OpName + '(' + args + ')';
             }
@@ -71,43 +103,43 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 switch (inst & Instruction.Mask)
                 {
                     case Instruction.Barrier:
-                        return "";
+                        return "|| BARRIER ||";
                     case Instruction.Call:
-                        return "";
+                        return "|| CALL ||";
                     case Instruction.FSIBegin:
-                        return "";
+                        return "|| FSI BEGIN ||";
                     case Instruction.FSIEnd:
-                        return "";
+                        return "|| FSI END ||";
                     case Instruction.FindLSB:
-                        return "";
+                        return "|| FIND LSB ||";
                     case Instruction.FindMSBS32:
-                        return "";
+                        return "|| FIND MSB S32 ||";
                     case Instruction.FindMSBU32:
-                        return "";
+                        return "|| FIND MSB U32 ||";
                     case Instruction.GroupMemoryBarrier:
-                        return "";
+                        return "|| FIND GROUP MEMORY BARRIER ||";
                     case Instruction.ImageLoad:
-                        return "";
+                        return "|| IMAGE LOAD ||";
                     case Instruction.ImageStore:
-                        return "";
+                        return "|| IMAGE STORE ||";
                     case Instruction.ImageAtomic:
-                        return "";
+                        return "|| IMAGE ATOMIC ||";
                     case Instruction.Load:
-                        return "";
+                        return "|| LOAD ||";
                     case Instruction.Lod:
-                        return "";
+                        return "|| LOD ||";
                     case Instruction.MemoryBarrier:
-                        return "";
+                        return "|| MEMORY BARRIER ||";
                     case Instruction.Store:
-                        return "";
+                        return "|| STORE ||";
                     case Instruction.TextureSample:
-                        return "";
+                        return "|| TEXTURE SAMPLE ||";
                     case Instruction.TextureSize:
-                        return "";
+                        return "|| TEXTURE SIZE ||";
                     case Instruction.VectorExtract:
-                        return "";
+                        return "|| VECTOR EXTRACT ||";
                     case Instruction.VoteAllEqual:
-                        return "";
+                        return "|| VOTE ALL EQUAL ||";
                 }
             }
 

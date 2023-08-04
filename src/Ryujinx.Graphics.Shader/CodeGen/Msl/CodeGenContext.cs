@@ -9,8 +9,12 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
         public const string Tab = "    ";
 
         public StructuredFunction CurrentFunction { get; set; }
+
         public StructuredProgramInfo Info { get; }
+
         public ShaderConfig Config { get; }
+
+        public OperandManager OperandManager { get;  }
 
         private readonly StringBuilder _sb;
 
@@ -22,6 +26,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
         {
             Info = info;
             Config = config;
+
+            OperandManager = new OperandManager();
 
             _sb = new StringBuilder();
         }
