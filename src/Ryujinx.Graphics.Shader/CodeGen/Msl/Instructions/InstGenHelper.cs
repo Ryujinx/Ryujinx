@@ -13,15 +13,15 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             _infoTable = new InstInfo[(int)Instruction.Count];
 
 #pragma warning disable IDE0055 // Disable formatting
-            Add(Instruction.AtomicAdd,                InstType.AtomicBinary,   "add");
-            Add(Instruction.AtomicAnd,                InstType.AtomicBinary,   "and");
+            Add(Instruction.AtomicAdd,                InstType.AtomicBinary,   "atomic_add_explicit");
+            Add(Instruction.AtomicAnd,                InstType.AtomicBinary,   "atomic_and_explicit");
             Add(Instruction.AtomicCompareAndSwap,     0);
-            Add(Instruction.AtomicMaxU32,             InstType.AtomicBinary,   "max");
-            Add(Instruction.AtomicMinU32,             InstType.AtomicBinary,   "min");
-            Add(Instruction.AtomicOr,                 InstType.AtomicBinary,   "or");
+            Add(Instruction.AtomicMaxU32,             InstType.AtomicBinary,   "atomic_max_explicit");
+            Add(Instruction.AtomicMinU32,             InstType.AtomicBinary,   "atomic_min_explicit");
+            Add(Instruction.AtomicOr,                 InstType.AtomicBinary,   "atomic_or_explicit");
             Add(Instruction.AtomicSwap,               0);
-            Add(Instruction.AtomicXor,                InstType.AtomicBinary,   "xor");
-            Add(Instruction.Absolute,                 InstType.AtomicBinary,   "abs");
+            Add(Instruction.AtomicXor,                InstType.AtomicBinary,   "atomic_xor_explicit");
+            Add(Instruction.Absolute,                 InstType.AtomicBinary,   "atomic_abs_explicit");
             Add(Instruction.Add,                      InstType.OpBinaryCom,    "+",  2);
             Add(Instruction.Ballot,                   InstType.Special);
             Add(Instruction.Barrier,                  InstType.Special);
