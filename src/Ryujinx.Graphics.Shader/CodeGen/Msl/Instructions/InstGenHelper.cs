@@ -98,8 +98,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             Add(Instruction.MinimumU32,               InstType.CallBinary,     "min");
             Add(Instruction.Modulo,                   InstType.CallBinary,     "%");
             Add(Instruction.Multiply,                 InstType.OpBinaryCom,    "*",  1);
-            Add(Instruction.MultiplyHighS32,          InstType.CallBinary,     HelperFunctionNames.MultiplyHighS32);
-            Add(Instruction.MultiplyHighU32,          InstType.CallBinary,     HelperFunctionNames.MultiplyHighU32);
+            Add(Instruction.MultiplyHighS32,          InstType.CallBinary,     "mulhi");
+            Add(Instruction.MultiplyHighU32,          InstType.CallBinary,     "mulhi");
             Add(Instruction.Negate,                   InstType.OpUnary,        "-");
             Add(Instruction.ReciprocalSquareRoot,     InstType.CallUnary,      "rsqrt");
             Add(Instruction.Return,                   InstType.OpNullary,      "return");
