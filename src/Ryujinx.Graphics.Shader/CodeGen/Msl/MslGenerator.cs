@@ -3,7 +3,7 @@ using Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions;
 using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
-
+using System.Linq;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.TypeConversion;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl
@@ -77,6 +77,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
             string funcKeyword = "inline";
             string funcName = null;
+
             if (isMainFunc)
             {
                 if (stage == ShaderStage.Vertex)
@@ -88,6 +89,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 {
                     funcKeyword = "fragment";
                     funcName = "fragmentMain";
+                }
+
+                if (context.Config.UsedInputAttributes != 0)
+                {
+                    args = args.Prepend("VertexIn in [[stage_in]]").ToArray();
                 }
             }
 

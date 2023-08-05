@@ -11,7 +11,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 {
     class OperandManager
     {
-         private readonly Dictionary<AstOperand, string> _locals;
+        private readonly Dictionary<AstOperand, string> _locals;
 
         public OperandManager()
         {
@@ -99,8 +99,6 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             IoVariable ioVariable = (IoVariable)varId.Value;
                             bool isOutput = operation.StorageKind == StorageKind.Output || operation.StorageKind == StorageKind.OutputPerPatch;
                             bool isPerPatch = operation.StorageKind == StorageKind.InputPerPatch || operation.StorageKind == StorageKind.OutputPerPatch;
-                            int location = 0;
-                            int component = 0;
 
                             if (context.Config.HasPerLocationInputOrOutput(ioVariable, isOutput))
                             {
@@ -109,14 +107,14 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                                     throw new InvalidOperationException($"Second input of {operation.Inst} with {operation.StorageKind} storage must be a constant operand.");
                                 }
 
-                                location = vecIndex.Value;
+                                int location = vecIndex.Value;
 
                                 if (operation.SourcesCount > 2 &&
                                     operation.GetSource(2) is AstOperand elemIndex &&
                                     elemIndex.Type == OperandType.Constant &&
                                     context.Config.HasPerLocationInputOrOutputComponent(ioVariable, location, elemIndex.Value, isOutput))
                                 {
-                                    component = elemIndex.Value;
+                                    int component = elemIndex.Value;
                                 }
                             }
 

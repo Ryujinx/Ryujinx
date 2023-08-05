@@ -8,11 +8,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 {
     static class TypeConversion
     {
-public static string ReinterpretCast(
-            CodeGenContext context,
-            IAstNode node,
-            AggregateType srcType,
-            AggregateType dstType)
+        public static string ReinterpretCast(
+                    CodeGenContext context,
+                    IAstNode node,
+                    AggregateType srcType,
+                    AggregateType dstType)
         {
             if (node is AstOperand operand && operand.Type == OperandType.Constant)
             {

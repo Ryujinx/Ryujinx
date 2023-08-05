@@ -34,10 +34,7 @@ namespace Ryujinx.Headless.SDL2.Metal
                 _caMetalLayer = new CAMetalLayer(SDL_Metal_GetLayer(SDL_Metal_CreateView(WindowHandle)));
             }
 
-            if (SDL2Driver.MainThreadDispatcher != null)
-            {
-                SDL2Driver.MainThreadDispatcher(CreateLayer);
-            }
+            SDL2Driver.MainThreadDispatcher?.Invoke(CreateLayer);
         }
 
         protected override void InitializeRenderer() { }

@@ -1,6 +1,9 @@
 using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 {
@@ -12,11 +15,14 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             context.AppendLine("#include <simd/simd.h>");
             context.AppendLine();
             context.AppendLine("using namespace metal;");
+            context.AppendLine();
 
             if ((info.HelperFunctionsMask & HelperFunctionsMask.SwizzleAdd) != 0)
             {
 
             }
+
+            DeclareInputAttributes(context, info);
         }
 
         public static void DeclareLocals(CodeGenContext context, StructuredFunction function)
@@ -52,6 +58,29 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 AggregateType.Vector4 | AggregateType.U32 => "uint4",
                 _ => throw new ArgumentException($"Invalid variable type \"{type}\"."),
             };
+        }
+
+        private static void DeclareInputAttributes(CodeGenContext context, StructuredProgramInfo info)
+        {
+            if (context.Config.UsedInputAttributes != 0)
+            {
+                context.AppendLine("struct VertexIn");
+                context.EnterScope();
+
+                int usedAttributes = context.Config.UsedInputAttributes | context.Config.PassthroughAttributes;
+                while (usedAttributes != 0)
+                {
+                    int index = BitOperations.TrailingZeroCount(usedAttributes);
+
+                    string name = $"{DefaultNames.IAttributePrefix}{index}";
+                    var type = context.Config.GpuAccessor.QueryAttributeType(index).ToVec4Type(TargetLanguage.Msl);
+                    context.AppendLine($"{type} {name} [[attribute({index})]];");
+
+                    usedAttributes &= ~(1 << index);
+                }
+
+                context.LeaveScope(";");
+            }
         }
     }
 }

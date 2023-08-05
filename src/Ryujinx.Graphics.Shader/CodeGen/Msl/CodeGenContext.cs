@@ -14,7 +14,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
         public ShaderConfig Config { get; }
 
-        public OperandManager OperandManager { get;  }
+        public OperandManager OperandManager { get; }
 
         private readonly StringBuilder _sb;
 
