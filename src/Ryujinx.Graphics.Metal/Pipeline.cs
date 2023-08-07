@@ -326,7 +326,7 @@ namespace Ryujinx.Graphics.Metal
         public void SetDepthTest(DepthTestDescriptor depthTest)
         {
             var depthStencilState = _renderEncoderState.UpdateDepthState(
-                depthTest.TestEnable ? MTLCompareFunction.Always : depthTest.Func.Convert(),
+                depthTest.TestEnable ? depthTest.Func.Convert() : MTLCompareFunction.Always,
                 depthTest.WriteEnable);
 
             if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
