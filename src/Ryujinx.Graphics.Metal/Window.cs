@@ -54,6 +54,8 @@ namespace Ryujinx.Graphics.Metal
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
+        public void SetColorSpacePassthrough(bool colorSpacePassThroughEnabled) { }
+
         public void Dispose()
         {
 

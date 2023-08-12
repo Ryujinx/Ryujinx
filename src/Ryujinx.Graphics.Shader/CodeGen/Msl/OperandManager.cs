@@ -68,8 +68,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             }
 
                             BufferDefinition buffer = operation.StorageKind == StorageKind.ConstantBuffer
-                                ? context.Config.Properties.ConstantBuffers[bindingIndex.Value]
-                                : context.Config.Properties.StorageBuffers[bindingIndex.Value];
+                                ? context.Properties.ConstantBuffers[bindingIndex.Value]
+                                : context.Properties.StorageBuffers[bindingIndex.Value];
                             StructureField field = buffer.Type.Fields[fieldIndex.Value];
 
                             return field.Type & AggregateType.ElementTypeMask;
@@ -82,8 +82,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             }
 
                             MemoryDefinition memory = operation.StorageKind == StorageKind.LocalMemory
-                                ? context.Config.Properties.LocalMemories[bindingId.Value]
-                                : context.Config.Properties.SharedMemories[bindingId.Value];
+                                ? context.Properties.LocalMemories[bindingId.Value]
+                                : context.Properties.SharedMemories[bindingId.Value];
 
                             return memory.Type & AggregateType.ElementTypeMask;
 
@@ -100,7 +100,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             bool isOutput = operation.StorageKind == StorageKind.Output || operation.StorageKind == StorageKind.OutputPerPatch;
                             bool isPerPatch = operation.StorageKind == StorageKind.InputPerPatch || operation.StorageKind == StorageKind.OutputPerPatch;
 
-                            if (context.Config.HasPerLocationInputOrOutput(ioVariable, isOutput))
+                            if (context.Definitions.HasPerLocationInputOrOutput(ioVariable, isOutput))
                             {
                                 if (operation.GetSource(1) is not AstOperand vecIndex || vecIndex.Type != OperandType.Constant)
                                 {
@@ -112,7 +112,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                                 if (operation.SourcesCount > 2 &&
                                     operation.GetSource(2) is AstOperand elemIndex &&
                                     elemIndex.Type == OperandType.Constant &&
-                                    context.Config.HasPerLocationInputOrOutputComponent(ioVariable, location, elemIndex.Value, isOutput))
+                                    context.Definitions.HasPerLocationInputOrOutputComponent(ioVariable, location, elemIndex.Value, isOutput))
                                 {
                                     int component = elemIndex.Value;
                                 }

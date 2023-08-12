@@ -10,15 +10,15 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 {
     static class MslGenerator
     {
-        public static string Generate(StructuredProgramInfo info, ShaderConfig config)
+        public static string Generate(StructuredProgramInfo info, CodeGenParameters parameters)
         {
-            if (config.Stage is not (ShaderStage.Vertex or ShaderStage.Fragment or ShaderStage.Compute))
+            if (parameters.Definitions.Stage is not (ShaderStage.Vertex or ShaderStage.Fragment or ShaderStage.Compute))
             {
-                Logger.Warning?.Print(LogClass.Gpu, $"Attempted to generate unsupported shader type {config.Stage}!");
+                Logger.Warning?.Print(LogClass.Gpu, $"Attempted to generate unsupported shader type {parameters.Definitions.Stage}!");
                 return "";
             }
 
-            CodeGenContext context = new(info, config);
+            CodeGenContext context = new(info, parameters);
 
             Declarations.Declare(context, info);
 
@@ -26,20 +26,20 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             {
                 for (int i = 1; i < info.Functions.Count; i++)
                 {
-                    context.AppendLine($"{GetFunctionSignature(context, info.Functions[i], config.Stage)};");
+                    context.AppendLine($"{GetFunctionSignature(context, info.Functions[i], parameters.Definitions.Stage)};");
                 }
 
                 context.AppendLine();
 
                 for (int i = 1; i < info.Functions.Count; i++)
                 {
-                    PrintFunction(context, info.Functions[i], config.Stage);
+                    PrintFunction(context, info.Functions[i], parameters.Definitions.Stage);
 
                     context.AppendLine();
                 }
             }
 
-            PrintFunction(context, info.Functions[0], config.Stage, true);
+            PrintFunction(context, info.Functions[0], parameters.Definitions.Stage, true);
 
             return context.GetCode();
         }
@@ -91,7 +91,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     funcName = "fragmentMain";
                 }
 
-                if (context.Config.UsedInputAttributes != 0)
+                if (context.AttributeUsage.UsedInputAttributes != 0)
                 {
                     args = args.Prepend("VertexIn in [[stage_in]]").ToArray();
                 }
@@ -141,7 +141,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 }
             };
 
-            bool supportsBarrierDivergence = context.Config.GpuAccessor.QueryHostSupportsShaderBarrierDivergence();
+            bool supportsBarrierDivergence = context.HostCapabilities.SupportsShaderBarrierDivergence;
             bool mayHaveReturned = false;
 
             foreach (IAstNode node in visitor.Visit())
@@ -156,7 +156,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             // so skip emitting the barrier for those cases.
                             if (visitor.Block.Type != AstBlockType.Main || mayHaveReturned || !isMainFunction)
                             {
-                                context.Config.GpuAccessor.Log($"Shader has barrier on potentially divergent block, the barrier will be removed.");
+                                context.Logger.Log($"Shader has barrier on potentially divergent block, the barrier will be removed.");
 
                                 continue;
                             }

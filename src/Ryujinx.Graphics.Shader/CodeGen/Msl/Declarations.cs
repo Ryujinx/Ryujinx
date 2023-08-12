@@ -1,8 +1,9 @@
+using Ryujinx.Graphics.Shader.IntermediateRepresentation;
 using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl
@@ -22,7 +23,12 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
             }
 
-            DeclareInputAttributes(context, info);
+            // DeclareInputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Input)));
+        }
+
+        static bool IsUserDefined(IoDefinition ioDefinition, StorageKind storageKind)
+        {
+            return ioDefinition.StorageKind == storageKind && ioDefinition.IoVariable == IoVariable.UserDefined;
         }
 
         public static void DeclareLocals(CodeGenContext context, StructuredFunction function)
@@ -60,27 +66,28 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             };
         }
 
-        private static void DeclareInputAttributes(CodeGenContext context, StructuredProgramInfo info)
-        {
-            if (context.Config.UsedInputAttributes != 0)
-            {
-                context.AppendLine("struct VertexIn");
-                context.EnterScope();
-
-                int usedAttributes = context.Config.UsedInputAttributes | context.Config.PassthroughAttributes;
-                while (usedAttributes != 0)
-                {
-                    int index = BitOperations.TrailingZeroCount(usedAttributes);
-
-                    string name = $"{DefaultNames.IAttributePrefix}{index}";
-                    var type = context.Config.GpuAccessor.QueryAttributeType(index).ToVec4Type(TargetLanguage.Msl);
-                    context.AppendLine($"{type} {name} [[attribute({index})]];");
-
-                    usedAttributes &= ~(1 << index);
-                }
-
-                context.LeaveScope(";");
-            }
-        }
+        // TODO: Redo for new Shader IR rep
+        // private static void DeclareInputAttributes(CodeGenContext context, IEnumerable<IoDefinition> inputs)
+        // {
+        //     if (context.AttributeUsage.UsedInputAttributes != 0)
+        //     {
+        //         context.AppendLine("struct VertexIn");
+        //         context.EnterScope();
+        //
+        //         int usedAttributes = context.AttributeUsage.UsedInputAttributes | context.AttributeUsage.PassthroughAttributes;
+        //         while (usedAttributes != 0)
+        //         {
+        //             int index = BitOperations.TrailingZeroCount(usedAttributes);
+        //
+        //             string name = $"{DefaultNames.IAttributePrefix}{index}";
+        //             var type = context.AttributeUsage.get .QueryAttributeType(index).ToVec4Type(TargetLanguage.Msl);
+        //             context.AppendLine($"{type} {name} [[attribute({index})]];");
+        //
+        //             usedAttributes &= ~(1 << index);
+        //         }
+        //
+        //         context.LeaveScope(";");
+        //     }
+        // }
     }
 }
