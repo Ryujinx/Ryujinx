@@ -30,7 +30,7 @@ namespace Ryujinx.Graphics.Metal
             var descriptor = new MTLTextureDescriptor
             {
                 PixelFormat = FormatTable.GetFormat(Info.Format),
-                Usage = MTLTextureUsage.ShaderRead | MTLTextureUsage.ShaderWrite | MTLTextureUsage.RenderTarget,
+                Usage = MTLTextureUsage.ShaderRead,
                 Width = (ulong)Width,
                 Height = (ulong)Height,
                 Depth = (ulong)Depth
