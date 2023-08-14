@@ -119,7 +119,8 @@ namespace Ryujinx.Graphics.Metal
 
         public ITexture CreateView(TextureCreateInfo info, int firstLayer, int firstLevel)
         {
-            throw new NotImplementedException();
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            return this;
         }
 
         public PinnedSpan<byte> GetData()
