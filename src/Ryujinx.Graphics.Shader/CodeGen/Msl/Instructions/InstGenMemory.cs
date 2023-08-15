@@ -27,10 +27,41 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             {
                 case StorageKind.ConstantBuffer:
                 case StorageKind.StorageBuffer:
-                    return "Constant or Storage buffer load or store";
+                    if (operation.GetSource(srcIndex++) is not AstOperand bindingIndex || bindingIndex.Type != OperandType.Constant)
+                    {
+                        throw new InvalidOperationException($"First input of {operation.Inst} with {storageKind} storage must be a constant operand.");
+                    }
+
+                    int binding = bindingIndex.Value;
+                    BufferDefinition buffer = storageKind == StorageKind.ConstantBuffer
+                        ? context.Properties.ConstantBuffers[binding]
+                        : context.Properties.StorageBuffers[binding];
+
+                    if (operation.GetSource(srcIndex++) is not AstOperand fieldIndex || fieldIndex.Type != OperandType.Constant)
+                    {
+                        throw new InvalidOperationException($"Second input of {operation.Inst} with {storageKind} storage must be a constant operand.");
+                    }
+
+                    StructureField field = buffer.Type.Fields[fieldIndex.Value];
+                    varName = $"{buffer.Name}.{field.Name}";
+                    varType = field.Type;
+                    break;
+
                 case StorageKind.LocalMemory:
                 case StorageKind.SharedMemory:
-                    return "Local or Shader memory load or store";
+                    if (operation.GetSource(srcIndex++) is not AstOperand { Type: OperandType.Constant } bindingId)
+                    {
+                        throw new InvalidOperationException($"First input of {operation.Inst} with {storageKind} storage must be a constant operand.");
+                    }
+
+                    MemoryDefinition memory = storageKind == StorageKind.LocalMemory
+                        ? context.Properties.LocalMemories[bindingId.Value]
+                        : context.Properties.SharedMemories[bindingId.Value];
+
+                    varName = memory.Name;
+                    varType = memory.Type;
+                    break;
+
                 case StorageKind.Input:
                 case StorageKind.InputPerPatch:
                 case StorageKind.Output:
@@ -61,6 +92,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 
                     (varName, varType) = IoMap.GetMslBuiltIn(ioVariable);
                     break;
+
                 default:
                     throw new InvalidOperationException($"Invalid storage kind {storageKind}.");
             }
