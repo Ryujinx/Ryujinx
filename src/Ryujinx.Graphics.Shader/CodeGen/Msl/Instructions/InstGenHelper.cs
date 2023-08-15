@@ -2,6 +2,8 @@ using Ryujinx.Graphics.Shader.IntermediateRepresentation;
 using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 
+using static Ryujinx.Graphics.Shader.CodeGen.Msl.TypeConversion;
+
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 {
     static class InstGenHelper
@@ -140,9 +142,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 
         public static string GetSourceExpr(CodeGenContext context, IAstNode node, AggregateType dstType)
         {
-            // TODO: Implement this
-            // return ReinterpretCast(context, node, OperandManager.GetNodeDestType(context, node), dstType);
-            return "";
+            return ReinterpretCast(context, node, OperandManager.GetNodeDestType(context, node), dstType);
         }
 
         public static string Enclose(string expr, IAstNode node, Instruction pInst, bool isLhs)

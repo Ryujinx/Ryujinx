@@ -3,6 +3,7 @@ using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
 
+using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenCall;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenHelper;
 using static Ryujinx.Graphics.Shader.StructuredIr.InstructionInfo;
 
@@ -105,7 +106,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                     case Instruction.Barrier:
                         return "|| BARRIER ||";
                     case Instruction.Call:
-                        return "|| CALL ||";
+                        return Call(context, operation);
                     case Instruction.FSIBegin:
                         return "|| FSI BEGIN ||";
                     case Instruction.FSIEnd:
