@@ -145,7 +145,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 }
             }
 
-            throw new InvalidOperationException($"Unexpected instruction type \"{info.Type}\".");
+            // TODO: Return this to being an error
+            return $"Unexpected instruction type \"{info.Type}\".";
         }
     }
 }

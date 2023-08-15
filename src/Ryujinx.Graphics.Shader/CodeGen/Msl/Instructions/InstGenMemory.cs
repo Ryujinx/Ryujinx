@@ -2,6 +2,7 @@ using Ryujinx.Graphics.Shader.IntermediateRepresentation;
 using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
+using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenHelper;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 {
@@ -56,14 +57,91 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 
             bool isGather = (texOp.Flags & TextureFlags.Gather) != 0;
             bool isShadow = (texOp.Type & SamplerType.Shadow) != 0;
+            bool intCoords = (texOp.Flags & TextureFlags.IntCoords) != 0;
+
+            bool isArray = (texOp.Type & SamplerType.Array) != 0;
 
             bool colorIsVector = isGather || !isShadow;
 
-            string texCall = "texture.sample(";
+            string texCall = "texture.";
 
-            string samplerName = GetSamplerName(context.Properties, texOp);
+            int srcIndex = 0;
 
-            texCall += samplerName;
+            string Src(AggregateType type)
+            {
+                return GetSourceExpr(context, texOp.GetSource(srcIndex++), type);
+            }
+
+            if (intCoords)
+            {
+                texCall += "read(";
+            }
+            else
+            {
+                texCall += "sample(";
+
+                string samplerName = GetSamplerName(context.Properties, texOp);
+
+                texCall += samplerName;
+            }
+
+            int coordsCount = texOp.Type.GetDimensions();
+
+            int pCount = coordsCount;
+
+            int arrayIndexElem = -1;
+
+            if (isArray)
+            {
+                arrayIndexElem = pCount++;
+            }
+
+            if (isShadow && !isGather)
+            {
+                pCount++;
+            }
+
+            void Append(string str)
+            {
+                texCall += ", " + str;
+            }
+
+            AggregateType coordType = intCoords ? AggregateType.S32 : AggregateType.FP32;
+
+            string AssemblePVector(int count)
+            {
+                if (count > 1)
+                {
+                    string[] elems = new string[count];
+
+                    for (int index = 0; index < count; index++)
+                    {
+                        if (arrayIndexElem == index)
+                        {
+                            elems[index] = Src(AggregateType.S32);
+
+                            if (!intCoords)
+                            {
+                                elems[index] = "float(" + elems[index] + ")";
+                            }
+                        }
+                        else
+                        {
+                            elems[index] = Src(coordType);
+                        }
+                    }
+
+                    string prefix = intCoords ? "int" : "float";
+
+                    return prefix + count + "(" + string.Join(", ", elems) + ")";
+                }
+                else
+                {
+                    return Src(coordType);
+                }
+            }
+
+            Append(AssemblePVector(pCount));
 
             texCall += ")" + (colorIsVector ? GetMaskMultiDest(texOp.Index) : "");
 
