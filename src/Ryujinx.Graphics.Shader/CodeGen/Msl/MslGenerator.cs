@@ -90,10 +90,25 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     funcKeyword = "fragment";
                     funcName = "fragmentMain";
                 }
+                else if (stage == ShaderStage.Compute)
+                {
+                    // TODO: Compute main
+                }
 
                 if (context.AttributeUsage.UsedInputAttributes != 0)
                 {
-                    args = args.Prepend("VertexIn in [[stage_in]]").ToArray();
+                    if (stage == ShaderStage.Vertex)
+                    {
+                        args = args.Prepend("VertexIn in [[stage_in]]").ToArray();
+                    }
+                    else if (stage == ShaderStage.Fragment)
+                    {
+                        args = args.Prepend("FragmentIn in [[stage_in]]").ToArray();
+                    }
+                    else if (stage == ShaderStage.Compute)
+                    {
+                        // TODO: Compute input
+                    }
                 }
             }
 

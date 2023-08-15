@@ -77,7 +77,22 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             {
                 if (inputs.Any())
                 {
-                    context.AppendLine("struct VertexIn");
+                    string prefix = "";
+
+                    switch (context.Definitions.Stage)
+                    {
+                        case ShaderStage.Vertex:
+                            prefix = "Vertex";
+                            break;
+                        case ShaderStage.Fragment:
+                            prefix = "Fragment";
+                            break;
+                        case ShaderStage.Compute:
+                            prefix = "Compute";
+                            break;
+                    }
+
+                    context.AppendLine($"struct {prefix}In");
                     context.EnterScope();
 
                     foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
