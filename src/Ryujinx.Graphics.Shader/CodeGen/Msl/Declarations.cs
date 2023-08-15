@@ -3,6 +3,7 @@ using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Numerics;
 
@@ -23,7 +24,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
             }
 
-            // DeclareInputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Input)));
+            DeclareInputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Input)));
         }
 
         static bool IsUserDefined(IoDefinition ioDefinition, StorageKind storageKind)
@@ -66,28 +67,30 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             };
         }
 
-        // TODO: Redo for new Shader IR rep
-        // private static void DeclareInputAttributes(CodeGenContext context, IEnumerable<IoDefinition> inputs)
-        // {
-        //     if (context.AttributeUsage.UsedInputAttributes != 0)
-        //     {
-        //         context.AppendLine("struct VertexIn");
-        //         context.EnterScope();
-        //
-        //         int usedAttributes = context.AttributeUsage.UsedInputAttributes | context.AttributeUsage.PassthroughAttributes;
-        //         while (usedAttributes != 0)
-        //         {
-        //             int index = BitOperations.TrailingZeroCount(usedAttributes);
-        //
-        //             string name = $"{DefaultNames.IAttributePrefix}{index}";
-        //             var type = context.AttributeUsage.get .QueryAttributeType(index).ToVec4Type(TargetLanguage.Msl);
-        //             context.AppendLine($"{type} {name} [[attribute({index})]];");
-        //
-        //             usedAttributes &= ~(1 << index);
-        //         }
-        //
-        //         context.LeaveScope(";");
-        //     }
-        // }
+        private static void DeclareInputAttributes(CodeGenContext context, IEnumerable<IoDefinition> inputs)
+        {
+            if (context.Definitions.IaIndexing)
+            {
+                // Not handled
+            }
+            else
+            {
+                if (inputs.Any())
+                {
+                    context.AppendLine("struct VertexIn");
+                    context.EnterScope();
+
+                    foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
+                    {
+                        string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: false));
+                        string name = $"{DefaultNames.IAttributePrefix}{ioDefinition.Location}";
+
+                        context.AppendLine($"{type} {name} [[attribute({ioDefinition.Location})]];");
+                    }
+
+                    context.LeaveScope(";");
+                }
+            }
+        }
     }
 }
