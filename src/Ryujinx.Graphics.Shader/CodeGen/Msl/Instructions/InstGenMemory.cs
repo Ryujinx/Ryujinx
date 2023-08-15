@@ -3,6 +3,7 @@ using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenHelper;
+using static Ryujinx.Graphics.Shader.StructuredIr.InstructionInfo;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 {
@@ -235,6 +236,12 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             return resourceDefinitions.Textures[textOp.Binding].Name;
         }
 
+        // TODO: Verify that this is valid in MSL
+        private static string GetMask(int index)
+        {
+            return $".{"rgba".AsSpan(index, 1)}";
+        }
+
         private static string GetMaskMultiDest(int mask)
         {
             string swizzle = ".";
@@ -248,6 +255,52 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             }
 
             return swizzle;
+        }
+
+        public static string TextureSize(CodeGenContext context, AstOperation operation)
+        {
+            AstTextureOperation texOp = (AstTextureOperation)operation;
+
+            string textureName = "texture";
+            string texCall = textureName + ".";
+
+            if (texOp.Index == 3)
+            {
+                texCall += $"get_num_mip_levels()";
+            }
+            else
+            {
+                context.Properties.Textures.TryGetValue(texOp.Binding, out TextureDefinition definition);
+                bool hasLod = !definition.Type.HasFlag(SamplerType.Multisample) && (definition.Type & SamplerType.Mask) != SamplerType.TextureBuffer;
+                texCall += "get_";
+
+                if (texOp.Index == 0)
+                {
+                    texCall += "width";
+                }
+                else if (texOp.Index == 1)
+                {
+                    texCall += "height";
+                }
+                else
+                {
+                    texCall += "depth";
+                }
+
+                texCall += "(";
+
+                if (hasLod)
+                {
+                    IAstNode lod = operation.GetSource(0);
+                    string lodExpr = GetSourceExpr(context, lod, GetSrcVarType(operation.Inst, 0));
+
+                    texCall += $"{lodExpr}";
+                }
+
+                texCall += $"){GetMask(texOp.Index)}";
+            }
+
+            return texCall;
         }
     }
 }

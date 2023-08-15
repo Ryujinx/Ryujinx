@@ -6,6 +6,7 @@ using System;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenCall;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenHelper;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenMemory;
+using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenVector;
 using static Ryujinx.Graphics.Shader.StructuredIr.InstructionInfo;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
@@ -137,9 +138,9 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                     case Instruction.TextureSample:
                         return TextureSample(context, operation);
                     case Instruction.TextureSize:
-                        return "|| TEXTURE SIZE ||";
+                        return TextureSize(context, operation);
                     case Instruction.VectorExtract:
-                        return "|| VECTOR EXTRACT ||";
+                        return VectorExtract(context, operation);
                     case Instruction.VoteAllEqual:
                         return "|| VOTE ALL EQUAL ||";
                 }
