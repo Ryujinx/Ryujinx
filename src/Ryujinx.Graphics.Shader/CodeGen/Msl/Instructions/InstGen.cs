@@ -5,6 +5,7 @@ using System;
 
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenCall;
 using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenHelper;
+using static Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions.InstGenMemory;
 using static Ryujinx.Graphics.Shader.StructuredIr.InstructionInfo;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
@@ -126,13 +127,13 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                     case Instruction.ImageAtomic:
                         return "|| IMAGE ATOMIC ||";
                     case Instruction.Load:
-                        return "|| LOAD ||";
+                        return Load(context, operation);
                     case Instruction.Lod:
                         return "|| LOD ||";
                     case Instruction.MemoryBarrier:
                         return "|| MEMORY BARRIER ||";
                     case Instruction.Store:
-                        return "|| STORE ||";
+                        return Store(context, operation);
                     case Instruction.TextureSample:
                         return "|| TEXTURE SAMPLE ||";
                     case Instruction.TextureSize:
