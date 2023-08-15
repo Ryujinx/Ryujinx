@@ -46,9 +46,6 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
         public static AggregateType GetNodeDestType(CodeGenContext context, IAstNode node)
         {
-            // TODO: Get rid of that function entirely and return the type from the operation generation
-            // functions directly, like SPIR-V does.
-
             if (node is AstOperation operation)
             {
                 if (operation.Inst == Instruction.Load || operation.Inst.IsAtomic())
@@ -99,6 +96,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             IoVariable ioVariable = (IoVariable)varId.Value;
                             bool isOutput = operation.StorageKind == StorageKind.Output || operation.StorageKind == StorageKind.OutputPerPatch;
                             bool isPerPatch = operation.StorageKind == StorageKind.InputPerPatch || operation.StorageKind == StorageKind.OutputPerPatch;
+                            int location = 0;
+                            int component = 0;
 
                             if (context.Definitions.HasPerLocationInputOrOutput(ioVariable, isOutput))
                             {
@@ -107,18 +106,24 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                                     throw new InvalidOperationException($"Second input of {operation.Inst} with {operation.StorageKind} storage must be a constant operand.");
                                 }
 
-                                int location = vecIndex.Value;
+                                location = vecIndex.Value;
 
                                 if (operation.SourcesCount > 2 &&
                                     operation.GetSource(2) is AstOperand elemIndex &&
                                     elemIndex.Type == OperandType.Constant &&
                                     context.Definitions.HasPerLocationInputOrOutputComponent(ioVariable, location, elemIndex.Value, isOutput))
                                 {
-                                    int component = elemIndex.Value;
+                                    component = elemIndex.Value;
                                 }
                             }
 
-                            (_, AggregateType varType) = IoMap.GetMslBuiltIn(ioVariable);
+                            (_, AggregateType varType) = IoMap.GetMslBuiltIn(
+                                context.Definitions,
+                                ioVariable,
+                                location,
+                                component,
+                                isOutput,
+                                isPerPatch);
 
                             return varType & AggregateType.ElementTypeMask;
                     }

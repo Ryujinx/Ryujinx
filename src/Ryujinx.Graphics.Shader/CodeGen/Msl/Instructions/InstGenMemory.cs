@@ -74,6 +74,9 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 
                     IoVariable ioVariable = (IoVariable)varId.Value;
                     bool isOutput = storageKind.IsOutput();
+                    bool isPerPatch = storageKind.IsPerPatch();
+                    int location = -1;
+                    int component = 0;
 
                     if (context.Definitions.HasPerLocationInputOrOutput(ioVariable, isOutput))
                     {
@@ -82,16 +85,25 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                             throw new InvalidOperationException($"Second input of {operation.Inst} with {storageKind} storage must be a constant operand.");
                         }
 
+                        location = vecIndex.Value;
+
                         if (operation.SourcesCount > srcIndex &&
                             operation.GetSource(srcIndex) is AstOperand elemIndex &&
                             elemIndex.Type == OperandType.Constant &&
                             context.Definitions.HasPerLocationInputOrOutputComponent(ioVariable, vecIndex.Value, elemIndex.Value, isOutput))
                         {
+                            component = elemIndex.Value;
                             srcIndex++;
                         }
                     }
 
-                    (varName, varType) = IoMap.GetMslBuiltIn(ioVariable);
+                    (varName, varType) = IoMap.GetMslBuiltIn(
+                        context.Definitions,
+                        ioVariable,
+                        location,
+                        component,
+                        isOutput,
+                        isPerPatch);
                     break;
 
                 default:
