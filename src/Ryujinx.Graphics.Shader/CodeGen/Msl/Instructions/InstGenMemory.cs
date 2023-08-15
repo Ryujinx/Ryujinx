@@ -49,5 +49,45 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
         {
             return GenerateLoadOrStore(context, operation, isStore: true);
         }
+
+        public static string TextureSample(CodeGenContext context, AstOperation operation)
+        {
+            AstTextureOperation texOp = (AstTextureOperation)operation;
+
+            bool isGather = (texOp.Flags & TextureFlags.Gather) != 0;
+            bool isShadow = (texOp.Type & SamplerType.Shadow) != 0;
+
+            bool colorIsVector = isGather || !isShadow;
+
+            string texCall = "texture.sample(";
+
+            string samplerName = GetSamplerName(context.Properties, texOp);
+
+            texCall += samplerName;
+
+            texCall += ")" + (colorIsVector ? GetMaskMultiDest(texOp.Index) : "");
+
+            return texCall;
+        }
+
+        private static string GetSamplerName(ShaderProperties resourceDefinitions, AstTextureOperation textOp)
+        {
+            return resourceDefinitions.Textures[textOp.Binding].Name;
+        }
+
+        private static string GetMaskMultiDest(int mask)
+        {
+            string swizzle = ".";
+
+            for (int i = 0; i < 4; i++)
+            {
+                if ((mask & (1 << i)) != 0)
+                {
+                    swizzle += "xyzw"[i];
+                }
+            }
+
+            return swizzle;
+        }
     }
 }
