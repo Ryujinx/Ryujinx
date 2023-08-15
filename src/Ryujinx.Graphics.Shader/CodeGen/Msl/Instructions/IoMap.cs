@@ -5,7 +5,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
 {
     static class IoMap
     {
-        public static (string, AggregateType) GetMSLBuiltIn(IoVariable ioVariable)
+        public static (string, AggregateType) GetMslBuiltIn(IoVariable ioVariable)
         {
             return ioVariable switch
             {

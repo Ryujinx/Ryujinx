@@ -118,7 +118,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                                 }
                             }
 
-                            (_, AggregateType varType) = IoMap.GetMSLBuiltIn(ioVariable);
+                            (_, AggregateType varType) = IoMap.GetMslBuiltIn(ioVariable);
 
                             return varType & AggregateType.ElementTypeMask;
                     }

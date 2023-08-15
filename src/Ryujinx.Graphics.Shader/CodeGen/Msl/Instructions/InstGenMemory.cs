@@ -35,10 +35,60 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 case StorageKind.InputPerPatch:
                 case StorageKind.Output:
                 case StorageKind.OutputPerPatch:
-                    return "I/O load or store";
+                    if (operation.GetSource(srcIndex++) is not AstOperand varId || varId.Type != OperandType.Constant)
+                    {
+                        throw new InvalidOperationException($"First input of {operation.Inst} with {storageKind} storage must be a constant operand.");
+                    }
+
+                    IoVariable ioVariable = (IoVariable)varId.Value;
+                    bool isOutput = storageKind.IsOutput();
+
+                    if (context.Definitions.HasPerLocationInputOrOutput(ioVariable, isOutput))
+                    {
+                        if (operation.GetSource(srcIndex++) is not AstOperand vecIndex || vecIndex.Type != OperandType.Constant)
+                        {
+                            throw new InvalidOperationException($"Second input of {operation.Inst} with {storageKind} storage must be a constant operand.");
+                        }
+
+                        if (operation.SourcesCount > srcIndex &&
+                            operation.GetSource(srcIndex) is AstOperand elemIndex &&
+                            elemIndex.Type == OperandType.Constant &&
+                            context.Definitions.HasPerLocationInputOrOutputComponent(ioVariable, vecIndex.Value, elemIndex.Value, isOutput))
+                        {
+                            srcIndex++;
+                        }
+                    }
+
+                    (varName, varType) = IoMap.GetMslBuiltIn(ioVariable);
+                    break;
                 default:
                     throw new InvalidOperationException($"Invalid storage kind {storageKind}.");
             }
+
+            for (; srcIndex < inputsCount; srcIndex++)
+            {
+                IAstNode src = operation.GetSource(srcIndex);
+
+                if ((varType & AggregateType.ElementCountMask) != 0 &&
+                    srcIndex == inputsCount - 1 &&
+                    src is AstOperand elementIndex &&
+                    elementIndex.Type == OperandType.Constant)
+                {
+                    varName += "." + "xyzw"[elementIndex.Value & 3];
+                }
+                else
+                {
+                    varName += $"[{GetSourceExpr(context, src, AggregateType.S32)}]";
+                }
+            }
+
+            if (isStore)
+            {
+                varType &= AggregateType.ElementTypeMask;
+                varName = $"{varName} = {GetSourceExpr(context, operation.GetSource(srcIndex), varType)}";
+            }
+
+            return varName;
         }
 
         public static string Load(CodeGenContext context, AstOperation operation)
