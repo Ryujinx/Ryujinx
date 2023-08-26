@@ -19,10 +19,10 @@ namespace Ryujinx.UI.App.Common
     {
         public bool Favorite { get; set; }
         public byte[] Icon { get; set; }
-        public string TitleName { get; set; }
-        public string TitleId { get; set; }
-        public string Developer { get; set; }
-        public string Version { get; set; }
+        public string TitleName { get; set; } = "Unknown";
+        public string TitleId { get; set; } = "0000000000000000";
+        public string Developer { get; set; } = "Unknown";
+        public string Version { get; set; } = "0";
         public TimeSpan TimePlayed { get; set; }
         public DateTime? LastPlayed { get; set; }
         public string FileExtension { get; set; }
