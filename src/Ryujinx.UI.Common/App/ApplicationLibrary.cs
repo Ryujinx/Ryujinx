@@ -916,7 +916,10 @@ namespace Ryujinx.UI.App.Common
                 }
             }
 
-            return programs.Where(programNcas => programNcas != null).ToArray();
+            return programs.Where(programNcas =>
+                programNcas != null
+                && (programNcas.Item1 != null || programNcas.Item2 != null || programNcas.Item3 != null)
+            ).ToArray();
         }
 
         public static (Nca patch, Nca control) GetGameUpdateDataFromPartition(VirtualFileSystem fileSystem, PartitionFileSystem pfs, string titleId, int programIndex)
