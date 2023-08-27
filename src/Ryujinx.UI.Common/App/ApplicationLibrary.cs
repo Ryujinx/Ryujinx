@@ -35,7 +35,6 @@ namespace Ryujinx.UI.App.Common
 
     public class ApplicationLibrary
     {
-        private const int MaxNcaPrograms = 16;
         public event EventHandler<ApplicationAddedEventArgs> ApplicationAdded;
         public event EventHandler<ApplicationCountUpdatedEventArgs> ApplicationCountUpdated;
 
@@ -167,16 +166,18 @@ namespace Ryujinx.UI.App.Common
             var applications = new List<ApplicationData>();
             string extension = Path.GetExtension(filePath).ToLower();
 
-            foreach ((Nca mainNca, Nca patchNca, Nca controlNca) in GetApplicationData(_virtualFileSystem, pfs))
+            foreach ((ulong titleId, (Nca mainNca, Nca patchNca, Nca controlNca)) in GetApplicationData(_virtualFileSystem, pfs, 0))
             {
-                ApplicationData applicationData = new();
+                ApplicationData applicationData = new()
+                {
+                    TitleId = titleId.ToString("x16"),
+                };
 
                 try
                 {
                     BlitStruct<ApplicationControlProperty> controlHolder = new(1);
 
                     IFileSystem controlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-                    applicationData.TitleId = controlNca?.Header.TitleId.ToString("x16");
 
                     // Check if there is an update available.
                     // TODO: Take gamecart updates into account as well
@@ -622,8 +623,7 @@ namespace Ryujinx.UI.App.Common
             return appMetadata;
         }
 
-        // TODO: Require programIndex instead of making it optional
-        public byte[] GetApplicationIcon(string applicationPath, Language desiredTitleLanguage, int programIndex = 0)
+        public byte[] GetApplicationIcon(string applicationPath, Language desiredTitleLanguage)
         {
             byte[] applicationIcon = null;
 
@@ -672,9 +672,18 @@ namespace Ryujinx.UI.App.Common
                             else
                             {
                                 // Store the ControlFS in variable called controlFs
-                                MPCNcas[] programs = GetApplicationData(_virtualFileSystem, pfs);
-                                (Nca _, Nca _, Nca controlNca) = programs[programIndex];
-                                IFileSystem controlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+                                Dictionary<ulong, MPCNcas> programs = GetApplicationData(_virtualFileSystem, pfs, 0);
+                                IFileSystem controlFs = null;
+
+                                // TODO: Get the icon for the requested titleID
+                                foreach ((ulong _, (Nca _, Nca _, Nca controlNca)) in programs)
+                                {
+                                    if (controlNca != null)
+                                    {
+                                        controlFs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+                                        break;
+                                    }
+                                }
 
                                 // Read the icon from the ControlFS and store it as a byte array
                                 try
@@ -707,10 +716,7 @@ namespace Ryujinx.UI.App.Common
                                             applicationIcon = stream.ToArray();
                                         }
 
-                                        if (applicationIcon != null)
-                                        {
-                                            break;
-                                        }
+                                        break;
                                     }
 
                                     applicationIcon ??= extension == ".xci" ? _xciIcon : _nspIcon;
@@ -879,11 +885,11 @@ namespace Ryujinx.UI.App.Common
             return false;
         }
 
-        private static MPCNcas[] GetApplicationData(VirtualFileSystem fileSystem, IFileSystem pfs)
+        private static Dictionary<ulong, MPCNcas> GetApplicationData(VirtualFileSystem fileSystem, IFileSystem pfs, int programIndex)
         {
             fileSystem.ImportTickets(pfs);
 
-            var programs = new MPCNcas[MaxNcaPrograms];
+            var programs = new Dictionary<ulong, MPCNcas>();
 
             foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*.nca"))
             {
@@ -895,31 +901,41 @@ namespace Ryujinx.UI.App.Common
 
                 int ncaProgramIndex = (int)(nca.Header.TitleId & 0xF);
 
-                programs[ncaProgramIndex] ??= new MPCNcas(null, null, null);
+                if (ncaProgramIndex != programIndex)
+                {
+                    continue;
+                }
 
                 if (nca.Header.ContentType == NcaContentType.Program)
                 {
                     int dataIndex = Nca.GetSectionIndexFromType(NcaSectionType.Data, NcaContentType.Program);
 
+                    if (!programs.ContainsKey(nca.Header.TitleId))
+                    {
+                        programs[nca.Header.TitleId] = new MPCNcas(null, null, null);
+                    }
+
                     if (nca.SectionExists(NcaSectionType.Data) && nca.Header.GetFsHeader(dataIndex).IsPatchSection())
                     {
-                        programs[ncaProgramIndex] = new MPCNcas(programs[ncaProgramIndex].Item1, nca, programs[ncaProgramIndex].Item3);
+                        programs[nca.Header.TitleId] = new MPCNcas(programs[nca.Header.TitleId].Item1, nca, programs[nca.Header.TitleId].Item3);
                     }
                     else
                     {
-                        programs[ncaProgramIndex] = new MPCNcas(nca, programs[ncaProgramIndex].Item2, programs[ncaProgramIndex].Item3);
+                        programs[nca.Header.TitleId] = new MPCNcas(nca, programs[nca.Header.TitleId].Item2, programs[nca.Header.TitleId].Item3);
                     }
                 }
                 else if (nca.Header.ContentType == NcaContentType.Control)
                 {
-                    programs[ncaProgramIndex] = new MPCNcas(programs[ncaProgramIndex].Item1, programs[ncaProgramIndex].Item2, nca);
+                    if (!programs.ContainsKey(nca.Header.TitleId))
+                    {
+                        programs[nca.Header.TitleId] = new MPCNcas(null, null, null);
+                    }
+
+                    programs[nca.Header.TitleId] = new MPCNcas(programs[nca.Header.TitleId].Item1, programs[nca.Header.TitleId].Item2, nca);
                 }
             }
 
-            return programs.Where(programNcas =>
-                programNcas != null
-                && (programNcas.Item1 != null || programNcas.Item2 != null || programNcas.Item3 != null)
-            ).ToArray();
+            return programs;
         }
 
         public static (Nca patch, Nca control) GetGameUpdateDataFromPartition(VirtualFileSystem fileSystem, PartitionFileSystem pfs, string titleId, int programIndex)
