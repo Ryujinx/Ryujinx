@@ -1,4 +1,5 @@
 using LibHac.Common;
+using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
@@ -8,19 +9,60 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
+using Ryujinx.HLE.FileSystem;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 
 namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
+    using MPCNcas = Tuple<Nca, Nca, Nca>;
+
     public static class PartitionFileSystemExtensions
     {
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
-        private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, string path, out string errorMessage)
+        public static Dictionary<ulong, MPCNcas> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        {
+            fileSystem.ImportTickets(partitionFileSystem);
+
+            var programs = new Dictionary<ulong, MPCNcas>();
+
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+            {
+                Nca nca = partitionFileSystem.GetNca(fileSystem.KeySet, fileEntry.FullPath);
+
+                if (nca.GetProgramIndex() != programIndex)
+                {
+                    continue;
+                }
+
+                if (nca.IsProgram() || nca.IsPatch() || nca.IsControl())
+                {
+                    if (!programs.ContainsKey(nca.Header.TitleId))
+                    {
+                        programs[nca.Header.TitleId] = new MPCNcas(null, null, null);
+                    }
+                }
+
+                if (nca.IsPatch())
+                {
+                    programs[nca.Header.TitleId] = new MPCNcas(programs[nca.Header.TitleId].Item1, nca, programs[nca.Header.TitleId].Item3);
+                }
+                else if (nca.IsProgram())
+                {
+                    programs[nca.Header.TitleId] = new MPCNcas(nca, programs[nca.Header.TitleId].Item2, programs[nca.Header.TitleId].Item3);
+                }
+                else if (nca.IsControl())
+                {
+                    programs[nca.Header.TitleId] = new MPCNcas(programs[nca.Header.TitleId].Item1, programs[nca.Header.TitleId].Item2, nca);
+                }
+            }
+
+            return programs;
+        }
+
+        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, string path, ulong titleId, out string errorMessage)
             where TMetaData : PartitionFileSystemMetaCore<TFormat, THeader, TEntry>, new()
             where TFormat : IPartitionFileSystemFormat
             where THeader : unmanaged, IPartitionFileSystemHeader
@@ -35,30 +77,21 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             try
             {
-                device.Configuration.VirtualFileSystem.ImportTickets(partitionFileSystem);
+                Dictionary<ulong, MPCNcas> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.Configuration.UserChannelPersistence.Index);
 
-                // TODO: To support multi-games container, this should use CNMT NCA instead.
-                foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+                if (titleId == 0)
                 {
-                    Nca nca = partitionFileSystem.GetNca(device, fileEntry.FullPath);
-
-                    if (nca.GetProgramIndex() != device.Configuration.UserChannelPersistence.Index)
+                    foreach ((ulong _, (Nca main, Nca patch, Nca control)) in applications)
                     {
-                        continue;
+                        mainNca = main;
+                        patchNca = patch;
+                        controlNca = control;
+                        break;
                     }
-
-                    if (nca.IsPatch())
-                    {
-                        patchNca = nca;
-                    }
-                    else if (nca.IsProgram())
-                    {
-                        mainNca = nca;
-                    }
-                    else if (nca.IsControl())
-                    {
-                        controlNca = nca;
-                    }
+                }
+                else if (applications.TryGetValue(titleId, out MPCNcas ncaTuple))
+                {
+                    (mainNca, patchNca, controlNca) = ncaTuple;
                 }
 
                 ProcessLoaderHelper.RegisterProgramMapInfo(device, partitionFileSystem).ThrowIfFailure();
@@ -79,54 +112,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     return (false, ProcessResult.Failed);
                 }
 
-                // Load Update NCAs.
-                Nca updatePatchNca = null;
-                Nca updateControlNca = null;
-
-                if (ulong.TryParse(mainNca.Header.TitleId.ToString("x16"), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out ulong titleIdBase))
-                {
-                    // Clear the program index part.
-                    titleIdBase &= ~0xFUL;
-
-                    // Load update information if exists.
-                    string titleUpdateMetadataPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, titleIdBase.ToString("x16"), "updates.json");
-                    if (File.Exists(titleUpdateMetadataPath))
-                    {
-                        string updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
-                        if (File.Exists(updatePath))
-                        {
-                            PartitionFileSystem updatePartitionFileSystem = new();
-                            updatePartitionFileSystem.Initialize(new FileStream(updatePath, FileMode.Open, FileAccess.Read).AsStorage()).ThrowIfFailure();
-
-                            device.Configuration.VirtualFileSystem.ImportTickets(updatePartitionFileSystem);
-
-                            // TODO: This should use CNMT NCA instead.
-                            foreach (DirectoryEntryEx fileEntry in updatePartitionFileSystem.EnumerateEntries("/", "*.nca"))
-                            {
-                                Nca nca = updatePartitionFileSystem.GetNca(device, fileEntry.FullPath);
-
-                                if (nca.GetProgramIndex() != device.Configuration.UserChannelPersistence.Index)
-                                {
-                                    continue;
-                                }
-
-                                if ($"{nca.Header.TitleId.ToString("x16")[..^3]}000" != titleIdBase.ToString("x16"))
-                                {
-                                    break;
-                                }
-
-                                if (nca.IsProgram())
-                                {
-                                    updatePatchNca = nca;
-                                }
-                                else if (nca.IsControl())
-                                {
-                                    updateControlNca = nca;
-                                }
-                            }
-                        }
-                    }
-                }
+                (Nca updatePatchNca, Nca updateControlNca) = mainNca.GetUpdateData(device.FileSystem, device.Configuration.UserChannelPersistence.Index, out string _);
 
                 if (updatePatchNca != null)
                 {
@@ -168,18 +154,18 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                 return (true, mainNca.Load(device, patchNca, controlNca));
             }
 
-            errorMessage = "Unable to load: Could not find Main NCA";
+            errorMessage = $"Unable to load: Could not find Main NCA for title '{titleId:x16}'";
 
             return (false, ProcessResult.Failed);
         }
 
-        public static Nca GetNca(this IFileSystem fileSystem, Switch device, string path)
+        public static Nca GetNca(this IFileSystem fileSystem, KeySet keySet, string path)
         {
             using var ncaFile = new UniqueRef<IFile>();
 
             fileSystem.OpenFile(ref ncaFile.Ref, path.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
-            return new Nca(device.Configuration.VirtualFileSystem.KeySet, ncaFile.Release().AsStorage());
+            return new Nca(keySet, ncaFile.Release().AsStorage());
         }
     }
 }

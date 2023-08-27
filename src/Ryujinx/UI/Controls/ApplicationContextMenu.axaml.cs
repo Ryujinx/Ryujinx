@@ -364,7 +364,7 @@ namespace Ryujinx.Ava.UI.Controls
 
             if (viewModel?.SelectedApplication != null)
             {
-                await viewModel.LoadApplication(viewModel.SelectedApplication.Path);
+                await viewModel.LoadApplication(viewModel.SelectedApplication);
             }
         }
     }

@@ -43,7 +43,7 @@ namespace Ryujinx.HLE.Loaders.Processes
 
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
             {
-                Nca nca = partitionFileSystem.GetNca(device, fileEntry.FullPath);
+                Nca nca = partitionFileSystem.GetNca(device.FileSystem.KeySet, fileEntry.FullPath);
 
                 if (!nca.IsProgram() && nca.IsPatch())
                 {

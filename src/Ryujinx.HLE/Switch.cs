@@ -73,9 +73,9 @@ namespace Ryujinx.HLE
             return Processes.LoadUnpackedNca(exeFsDir, romFsFile);
         }
 
-        public bool LoadXci(string xciFile)
+        public bool LoadXci(string xciFile, ulong titleId = 0)
         {
-            return Processes.LoadXci(xciFile);
+            return Processes.LoadXci(xciFile, titleId);
         }
 
         public bool LoadNca(string ncaFile)
@@ -83,9 +83,9 @@ namespace Ryujinx.HLE
             return Processes.LoadNca(ncaFile);
         }
 
-        public bool LoadNsp(string nspFile)
+        public bool LoadNsp(string nspFile, ulong titleId = 0)
         {
-            return Processes.LoadNsp(nspFile);
+            return Processes.LoadNsp(nspFile, titleId);
         }
 
         public bool LoadProgram(string fileName)

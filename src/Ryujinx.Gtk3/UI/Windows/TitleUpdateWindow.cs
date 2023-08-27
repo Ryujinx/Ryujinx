@@ -9,10 +9,11 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
-using Ryujinx.UI.App.Common;
+using Ryujinx.HLE.Loaders.Processes.Extensions;
 using Ryujinx.UI.Widgets;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using GUI = Gtk.Builder.ObjectAttribute;
@@ -95,7 +96,16 @@ namespace Ryujinx.UI.Windows
 
                 try
                 {
-                    (Nca patchNca, Nca controlNca) = ApplicationLibrary.GetGameUpdateDataFromPartition(_virtualFileSystem, nsp, _titleId, 0);
+                    ulong titleId = ulong.Parse(_titleId, NumberStyles.HexNumber);
+                    Dictionary<ulong, Tuple<Nca, Nca, Nca>> updates = nsp.GetApplicationData(_virtualFileSystem, 0);
+
+                    Nca patchNca = null;
+                    Nca controlNca = null;
+
+                    if (updates.TryGetValue(titleId, out Tuple<Nca, Nca, Nca> update))
+                    {
+                        (patchNca, Nca _, controlNca) = update;
+                    }
 
                     if (controlNca != null && patchNca != null)
                     {

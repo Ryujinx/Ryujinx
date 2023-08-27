@@ -9,6 +9,7 @@ using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Logging;
 using Ryujinx.HLE.FileSystem;
+using Ryujinx.HLE.Loaders.Processes.Extensions;
 using Ryujinx.UI.Common.Helper;
 using System;
 using System.IO;
@@ -105,7 +106,7 @@ namespace Ryujinx.UI.App.Common
                 return string.Empty;
             }
 
-            (Nca updatePatchNca, _) = ApplicationLibrary.GetGameUpdateData(virtualFileSystem, mainNca.Header.TitleId.ToString("x16"), 0, out _);
+            (Nca updatePatchNca, _) = mainNca.GetUpdateData(virtualFileSystem, 0, out string _);
 
             if (updatePatchNca != null)
             {

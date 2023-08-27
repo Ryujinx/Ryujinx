@@ -7,6 +7,7 @@ using Ryujinx.Common.SystemInterop;
 using Ryujinx.Modules;
 using Ryujinx.SDL2.Common;
 using Ryujinx.UI;
+using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
@@ -319,7 +320,12 @@ namespace Ryujinx
 
             if (CommandLineState.LaunchPathArg != null)
             {
-                mainWindow.RunApplication(CommandLineState.LaunchPathArg, CommandLineState.StartFullscreenArg);
+                ApplicationData applicationData = new()
+                {
+                    Path = CommandLineState.LaunchPathArg,
+                };
+
+                mainWindow.RunApplication(applicationData, CommandLineState.StartFullscreenArg);
             }
 
             if (ConfigurationState.Instance.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))

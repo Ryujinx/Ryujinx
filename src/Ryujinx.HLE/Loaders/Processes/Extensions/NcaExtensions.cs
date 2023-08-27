@@ -2,21 +2,28 @@ using LibHac;
 using LibHac.Common;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
+using LibHac.FsSystem;
 using LibHac.Loader;
 using LibHac.Ncm;
 using LibHac.Ns;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
+using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
+using Ryujinx.Common.Utilities;
+using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
+using System;
 using System.IO;
 using System.Linq;
 using ApplicationId = LibHac.Ncm.ApplicationId;
 
 namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
-    static class NcaExtensions
+    public static class NcaExtensions
     {
+        private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
+
         public static ProcessResult Load(this Nca nca, Switch device, Nca patchNca, Nca controlNca)
         {
             // Extract RomFs and ExeFs from NCA.
@@ -86,6 +93,12 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return processResult;
         }
 
+        public static ulong GetTitleIdBase(this Nca nca)
+        {
+            // Clear the program index part.
+            return nca.Header.TitleId & ~0xFUL;
+        }
+
         public static int GetProgramIndex(this Nca nca)
         {
             return (int)(nca.Header.TitleId & 0xF);
@@ -106,6 +119,44 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
         public static bool IsControl(this Nca nca)
         {
             return nca.Header.ContentType == NcaContentType.Control;
+        }
+
+        public static (Nca, Nca) GetUpdateData(this Nca mainNca, VirtualFileSystem fileSystem, int programIndex, out string updatePath)
+        {
+            updatePath = "(unknown)";
+
+            // Load Update NCAs.
+            Nca updatePatchNca = null;
+            Nca updateControlNca = null;
+
+            // Clear the program index part.
+            ulong titleIdBase = mainNca.GetTitleIdBase();
+
+            // Load update information if exists.
+            string titleUpdateMetadataPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, titleIdBase.ToString("x16"), "updates.json");
+            if (File.Exists(titleUpdateMetadataPath))
+            {
+                updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
+                if (File.Exists(updatePath))
+                {
+                    PartitionFileSystem updatePartitionFileSystem = new();
+                    updatePartitionFileSystem.Initialize(new FileStream(updatePath, FileMode.Open, FileAccess.Read).AsStorage()).ThrowIfFailure();
+
+                    foreach ((ulong updateTitleId, (Nca main, Nca patch, Nca control)) in updatePartitionFileSystem.GetApplicationData(fileSystem, programIndex))
+                    {
+                        if ((updateTitleId & ~0xFUL) != titleIdBase)
+                        {
+                            continue;
+                        }
+
+                        updatePatchNca = main;
+                        updateControlNca = control;
+                        break;
+                    }
+                }
+            }
+
+            return (updatePatchNca, updateControlNca);
         }
 
         public static IFileSystem GetExeFs(this Nca nca, Switch device, Nca patchNca = null)

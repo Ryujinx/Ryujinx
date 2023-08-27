@@ -17,7 +17,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
-using Ryujinx.UI.App.Common;
+using Ryujinx.HLE.Loaders.Processes.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -172,7 +172,15 @@ namespace Ryujinx.Ava.UI.ViewModels
                 {
                     var pfs = new PartitionFileSystem();
                     pfs.Initialize(file.AsStorage()).ThrowIfFailure();
-                    (Nca patchNca, Nca controlNca) = ApplicationLibrary.GetGameUpdateDataFromPartition(VirtualFileSystem, pfs, TitleId.ToString("x16"), 0);
+                    Dictionary<ulong, Tuple<Nca, Nca, Nca>> updates = pfs.GetApplicationData(VirtualFileSystem, 0);
+
+                    Nca patchNca = null;
+                    Nca controlNca = null;
+
+                    if (updates.TryGetValue(TitleId, out Tuple<Nca, Nca, Nca> update))
+                    {
+                        (patchNca, Nca _, controlNca) = update;
+                    }
 
                     if (controlNca != null && patchNca != null)
                     {
