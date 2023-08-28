@@ -109,6 +109,11 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return nca.Header.ContentType == NcaContentType.Program;
         }
 
+        public static bool IsMain(this Nca nca)
+        {
+            return nca.IsProgram() && !nca.IsPatch();
+        }
+
         public static bool IsPatch(this Nca nca)
         {
             int dataIndex = Nca.GetSectionIndexFromType(NcaSectionType.Data, NcaContentType.Program);
@@ -142,7 +147,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     PartitionFileSystem updatePartitionFileSystem = new();
                     updatePartitionFileSystem.Initialize(new FileStream(updatePath, FileMode.Open, FileAccess.Read).AsStorage()).ThrowIfFailure();
 
-                    foreach ((ulong updateTitleId, (Nca main, Nca patch, Nca control)) in updatePartitionFileSystem.GetApplicationData(fileSystem, programIndex))
+                    foreach ((ulong updateTitleId, (Nca patch, Nca control)) in updatePartitionFileSystem.GetUpdateData(fileSystem, programIndex))
                     {
                         if ((updateTitleId & ~0xFUL) != titleIdBase)
                         {

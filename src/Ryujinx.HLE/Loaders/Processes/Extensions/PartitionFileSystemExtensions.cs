@@ -16,17 +16,17 @@ using System.IO;
 
 namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
-    using MPCNcas = Tuple<Nca, Nca, Nca>;
+    using NcaTuple = Tuple<Nca, Nca>;
 
     public static class PartitionFileSystemExtensions
     {
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        public static Dictionary<ulong, MPCNcas> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        public static Dictionary<ulong, NcaTuple> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
-            var programs = new Dictionary<ulong, MPCNcas>();
+            var programs = new Dictionary<ulong, NcaTuple>();
 
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
             {
@@ -37,25 +37,57 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     continue;
                 }
 
-                if (nca.IsProgram() || nca.IsPatch() || nca.IsControl())
+                if (nca.IsMain() || nca.IsControl())
                 {
                     if (!programs.ContainsKey(nca.Header.TitleId))
                     {
-                        programs[nca.Header.TitleId] = new MPCNcas(null, null, null);
+                        programs[nca.Header.TitleId] = new NcaTuple(null, null);
                     }
                 }
 
-                if (nca.IsPatch())
+                if (nca.IsMain() && programs[nca.Header.TitleId].Item1 == null)
                 {
-                    programs[nca.Header.TitleId] = new MPCNcas(programs[nca.Header.TitleId].Item1, nca, programs[nca.Header.TitleId].Item3);
+                    programs[nca.Header.TitleId] = new NcaTuple(nca, programs[nca.Header.TitleId].Item2);
                 }
-                else if (nca.IsProgram())
+                else if (nca.IsControl() && programs[nca.Header.TitleId].Item2 == null)
                 {
-                    programs[nca.Header.TitleId] = new MPCNcas(nca, programs[nca.Header.TitleId].Item2, programs[nca.Header.TitleId].Item3);
+                    programs[nca.Header.TitleId] = new NcaTuple(programs[nca.Header.TitleId].Item1, nca);
+                }
+            }
+
+            return programs;
+        }
+
+        public static Dictionary<ulong, NcaTuple> GetUpdateData(this PartitionFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        {
+            fileSystem.ImportTickets(partitionFileSystem);
+
+            var programs = new Dictionary<ulong, NcaTuple>();
+
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+            {
+                Nca nca = partitionFileSystem.GetNca(fileSystem.KeySet, fileEntry.FullPath);
+
+                if (nca.GetProgramIndex() != programIndex)
+                {
+                    continue;
+                }
+
+                if (nca.IsPatch() || nca.IsControl())
+                {
+                    if (!programs.ContainsKey(nca.Header.TitleId))
+                    {
+                        programs[nca.Header.TitleId] = new NcaTuple(null, null);
+                    }
+                }
+
+                if (nca.IsPatch() && programs[nca.Header.TitleId].Item1 == null)
+                {
+                    programs[nca.Header.TitleId] = new NcaTuple(nca, programs[nca.Header.TitleId].Item2);
                 }
                 else if (nca.IsControl())
                 {
-                    programs[nca.Header.TitleId] = new MPCNcas(programs[nca.Header.TitleId].Item1, programs[nca.Header.TitleId].Item2, nca);
+                    programs[nca.Header.TitleId] = new NcaTuple(programs[nca.Header.TitleId].Item1, nca);
                 }
             }
 
@@ -77,21 +109,20 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             try
             {
-                Dictionary<ulong, MPCNcas> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.Configuration.UserChannelPersistence.Index);
+                Dictionary<ulong, NcaTuple> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.Configuration.UserChannelPersistence.Index);
 
                 if (titleId == 0)
                 {
-                    foreach ((ulong _, (Nca main, Nca patch, Nca control)) in applications)
+                    foreach ((ulong _, (Nca main, Nca control)) in applications)
                     {
                         mainNca = main;
-                        patchNca = patch;
                         controlNca = control;
                         break;
                     }
                 }
-                else if (applications.TryGetValue(titleId, out MPCNcas ncaTuple))
+                else if (applications.TryGetValue(titleId, out NcaTuple ncaTuple))
                 {
-                    (mainNca, patchNca, controlNca) = ncaTuple;
+                    (mainNca, controlNca) = ncaTuple;
                 }
 
                 ProcessLoaderHelper.RegisterProgramMapInfo(device, partitionFileSystem).ThrowIfFailure();

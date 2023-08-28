@@ -172,14 +172,14 @@ namespace Ryujinx.Ava.UI.ViewModels
                 {
                     var pfs = new PartitionFileSystem();
                     pfs.Initialize(file.AsStorage()).ThrowIfFailure();
-                    Dictionary<ulong, Tuple<Nca, Nca, Nca>> updates = pfs.GetApplicationData(VirtualFileSystem, 0);
+                    Dictionary<ulong, Tuple<Nca, Nca>> updates = pfs.GetUpdateData(VirtualFileSystem, 0);
 
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(TitleId, out Tuple<Nca, Nca, Nca> update))
+                    if (updates.TryGetValue(TitleId, out Tuple<Nca, Nca> update))
                     {
-                        (Nca _, patchNca, controlNca) = update;
+                        (patchNca, controlNca) = update;
                     }
 
                     if (controlNca != null && patchNca != null)

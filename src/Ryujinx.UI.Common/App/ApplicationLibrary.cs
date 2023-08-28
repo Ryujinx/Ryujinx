@@ -31,7 +31,7 @@ using TimeSpan = System.TimeSpan;
 
 namespace Ryujinx.UI.App.Common
 {
-    using MPCNcas = Tuple<Nca, Nca, Nca>;
+    using NcaTuple = Tuple<Nca, Nca>;
 
     public class ApplicationLibrary
     {
@@ -49,7 +49,6 @@ namespace Ryujinx.UI.App.Common
         private CancellationTokenSource _cancellationToken;
 
         private static readonly ApplicationJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
-        private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
         public ApplicationLibrary(VirtualFileSystem virtualFileSystem)
         {
@@ -166,7 +165,7 @@ namespace Ryujinx.UI.App.Common
             var applications = new List<ApplicationData>();
             string extension = Path.GetExtension(filePath).ToLower();
 
-            foreach ((ulong titleId, (Nca mainNca, Nca patchNca, Nca controlNca)) in pfs.GetApplicationData(_virtualFileSystem, 0))
+            foreach ((ulong titleId, (Nca mainNca, Nca controlNca)) in pfs.GetApplicationData(_virtualFileSystem, 0))
             {
                 ApplicationData applicationData = new()
                 {
@@ -367,9 +366,8 @@ namespace Ryujinx.UI.App.Common
                             ApplicationData application = new();
 
                             Nca nca = new(_virtualFileSystem.KeySet, new FileStream(applicationPath, FileMode.Open, FileAccess.Read).AsStorage());
-                            int dataIndex = Nca.GetSectionIndexFromType(NcaSectionType.Data, NcaContentType.Program);
 
-                            if (nca.Header.ContentType != NcaContentType.Program || (nca.SectionExists(NcaSectionType.Data) && nca.Header.GetFsHeader(dataIndex).IsPatchSection()))
+                            if (!nca.IsProgram() || nca.IsPatch())
                             {
                                 return false;
                             }
@@ -696,14 +694,14 @@ namespace Ryujinx.UI.App.Common
                             else
                             {
                                 // Store the ControlFS in variable called controlFs
-                                Dictionary<ulong, MPCNcas> programs = pfs.GetApplicationData(_virtualFileSystem, 0);
+                                Dictionary<ulong, NcaTuple> programs = pfs.GetApplicationData(_virtualFileSystem, 0);
                                 IFileSystem controlFs = null;
 
                                 if (programs.ContainsKey(titleId))
                                 {
-                                    if (programs[titleId].Item3 != null)
+                                    if (programs[titleId].Item2 != null)
                                     {
-                                        controlFs = programs[titleId].Item3.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+                                        controlFs = programs[titleId].Item2.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
                                     }
                                 }
 
@@ -890,7 +888,7 @@ namespace Ryujinx.UI.App.Common
 
                 if (patchNca != null && controlNca != null)
                 {
-                    updatedControlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+                    updatedControlFs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
                     return true;
                 }
