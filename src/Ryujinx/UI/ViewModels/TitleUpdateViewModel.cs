@@ -179,7 +179,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                     if (updates.TryGetValue(TitleId, out Tuple<Nca, Nca, Nca> update))
                     {
-                        (patchNca, Nca _, controlNca) = update;
+                        (Nca _, patchNca, controlNca) = update;
                     }
 
                     if (controlNca != null && patchNca != null)

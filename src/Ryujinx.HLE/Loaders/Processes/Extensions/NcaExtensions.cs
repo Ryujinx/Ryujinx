@@ -149,7 +149,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                             continue;
                         }
 
-                        updatePatchNca = main;
+                        updatePatchNca = patch;
                         updateControlNca = control;
                         break;
                     }

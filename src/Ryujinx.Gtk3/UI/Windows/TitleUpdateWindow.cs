@@ -104,7 +104,7 @@ namespace Ryujinx.UI.Windows
 
                     if (updates.TryGetValue(titleId, out Tuple<Nca, Nca, Nca> update))
                     {
-                        (patchNca, Nca _, controlNca) = update;
+                        (Nca _, patchNca, controlNca) = update;
                     }
 
                     if (controlNca != null && patchNca != null)
