@@ -549,6 +549,11 @@ namespace Ryujinx.UI.App.Common
                             });
                         }
 
+                        if (applications.Count > 1)
+                        {
+                            numApplicationsFound += applications.Count - 1;
+                        }
+
                         numApplicationsLoaded += applications.Count;
                     }
                     else
