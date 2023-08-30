@@ -102,7 +102,7 @@ namespace Ryujinx.UI.Windows
 
                 IFileSystem pfs;
 
-                if (System.IO.Path.GetExtension(path) == ".xci")
+                if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
                 {
                     pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
                 }
