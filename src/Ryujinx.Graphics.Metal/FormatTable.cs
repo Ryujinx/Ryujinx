@@ -127,7 +127,7 @@ namespace Ryujinx.Graphics.Metal
             // Add(Format.R10G10B10A2Sint,     MTLPixelFormat.A2B10G10R10SintPack32);
             // Add(Format.R10G10B10A2Uscaled,  MTLPixelFormat.A2B10G10R10UscaledPack32);
             // Add(Format.R10G10B10A2Sscaled,  MTLPixelFormat.A2B10G10R10SscaledPack32);
-            Add(Format.Astc4x4Unorm, MTLPixelFormat.ASTC4x4HDR);
+            Add(Format.Astc4x4Unorm, MTLPixelFormat.ASTC4x4LDR);
             Add(Format.Astc5x4Unorm, MTLPixelFormat.ASTC5x4LDR);
             Add(Format.Astc5x5Unorm, MTLPixelFormat.ASTC5x5LDR);
             Add(Format.Astc6x5Unorm, MTLPixelFormat.ASTC6x5LDR);
