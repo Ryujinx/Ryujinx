@@ -23,7 +23,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
     {
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        public static Dictionary<ulong, ContentCollection> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        public static Dictionary<ulong, ContentCollection> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel, int programIndex)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
@@ -31,7 +31,14 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.cnmt.nca"))
             {
-                ContentCollection content = new(partitionFileSystem, partitionFileSystem.GetCnmt(fileEntry.FullPath));
+                Cnmt cnmt = partitionFileSystem.GetNca(fileSystem.KeySet, fileEntry.FullPath).GetCnmt(checkLevel, ContentMetaType.Application);
+
+                if (cnmt == null)
+                {
+                    continue;
+                }
+
+                ContentCollection content = new(partitionFileSystem, cnmt);
 
                 if (content.Type != ContentMetaType.Application || content.ProgramIndex != programIndex)
                 {
@@ -44,7 +51,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return programs;
         }
 
-        public static Dictionary<ulong, ContentCollection> GetUpdateData(this PartitionFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        public static Dictionary<ulong, ContentCollection> GetUpdateData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel, int programIndex)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
@@ -52,7 +59,14 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.cnmt.nca"))
             {
-                ContentCollection content = new(partitionFileSystem, partitionFileSystem.GetCnmt(fileEntry.FullPath));
+                Cnmt cnmt = partitionFileSystem.GetNca(fileSystem.KeySet, fileEntry.FullPath).GetCnmt(checkLevel, ContentMetaType.Patch);
+
+                if (cnmt == null)
+                {
+                    continue;
+                }
+
+                ContentCollection content = new(partitionFileSystem, cnmt);
 
                 if (content.Type != ContentMetaType.Patch || content.ProgramIndex != programIndex)
                 {
@@ -80,7 +94,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             try
             {
-                Dictionary<ulong, ContentCollection> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.Configuration.UserChannelPersistence.Index);
+                Dictionary<ulong, ContentCollection> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.System.FsIntegrityCheckLevel, device.Configuration.UserChannelPersistence.Index);
 
                 if (titleId == 0)
                 {
@@ -115,7 +129,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     return (false, ProcessResult.Failed);
                 }
 
-                (Nca updatePatchNca, Nca updateControlNca) = mainNca.GetUpdateData(device.FileSystem, device.Configuration.UserChannelPersistence.Index, out string _);
+                (Nca updatePatchNca, Nca updateControlNca) = mainNca.GetUpdateData(device.FileSystem, device.System.FsIntegrityCheckLevel, device.Configuration.UserChannelPersistence.Index, out string _);
 
                 if (updatePatchNca != null)
                 {
@@ -169,15 +183,6 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             fileSystem.OpenFile(ref ncaFile.Ref, path.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
             return new Nca(keySet, ncaFile.Release().AsStorage());
-        }
-
-        public static Cnmt GetCnmt(this IFileSystem fileSystem, string path)
-        {
-            using var cnmtFile = new UniqueRef<IFile>();
-
-            fileSystem.OpenFile(ref cnmtFile.Ref, path.ToU8Span(), OpenMode.Read).ThrowIfFailure();
-
-            return new Cnmt(cnmtFile.Release().AsStream());
         }
     }
 }

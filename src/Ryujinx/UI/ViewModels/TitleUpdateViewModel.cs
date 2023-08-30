@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
@@ -8,6 +7,7 @@ using LibHac.Fs;
 using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
 using LibHac.Ns;
+using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Ava.Common.Locale;
@@ -19,11 +19,13 @@ using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
 using Ryujinx.UI.App.Common;
+using Ryujinx.UI.Common.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Application = Avalonia.Application;
 using ContentType = LibHac.Ncm.ContentType;
 using Path = System.IO.Path;
 using SpanHelpers = LibHac.Common.SpanHelpers;
@@ -111,7 +113,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private void LoadUpdates()
         {
             // Try to load updates from PFS first
-            AddUpdate(Title.Path);
+            AddUpdate(Title.Path, true);
 
             foreach (string path in TitleUpdateWindowData.Paths)
             {
@@ -167,17 +169,32 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        private void AddUpdate(string path)
+        private void AddUpdate(string path, bool ignoreNotFound = false)
         {
             if (File.Exists(path) && TitleUpdates.All(x => x.Path != path))
             {
+                IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                    ? IntegrityCheckLevel.ErrorOnInvalid
+                    : IntegrityCheckLevel.None;
+
                 using FileStream file = new(path, FileMode.Open, FileAccess.Read);
+
+                IFileSystem pfs;
+
+                if (Path.GetExtension(path) == ".xci")
+                {
+                    pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                }
+                else
+                {
+                    var pfsTemp = new PartitionFileSystem();
+                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
+                    pfs = pfsTemp;
+                }
 
                 try
                 {
-                    var pfs = new PartitionFileSystem();
-                    pfs.Initialize(file.AsStorage()).ThrowIfFailure();
-                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, 0);
+                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel, 0);
 
                     Nca patchNca = null;
                     Nca controlNca = null;
@@ -201,7 +218,10 @@ namespace Ryujinx.Ava.UI.ViewModels
                     }
                     else
                     {
-                        Dispatcher.UIThread.InvokeAsync(() => ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogUpdateAddUpdateErrorMessage]));
+                        if (!ignoreNotFound)
+                        {
+                            Dispatcher.UIThread.InvokeAsync(() => ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogUpdateAddUpdateErrorMessage]));
+                        }
                     }
                 }
                 catch (Exception ex)

@@ -19,7 +19,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
-using Ryujinx.UI.App.Common;
+using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
 using System;
 using System.Buffers;
@@ -227,7 +227,11 @@ namespace Ryujinx.Ava.Common
                     return;
                 }
 
-                (Nca updatePatchNca, _) = mainNca.GetUpdateData(_virtualFileSystem, programIndex, out string _);
+                IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                    ? IntegrityCheckLevel.ErrorOnInvalid
+                    : IntegrityCheckLevel.None;
+
+                (Nca updatePatchNca, _) = mainNca.GetUpdateData(_virtualFileSystem, checkLevel, programIndex, out string _);
                 if (updatePatchNca != null)
                 {
                     patchNca = updatePatchNca;

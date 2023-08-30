@@ -16,7 +16,7 @@ namespace Ryujinx.Ava.UI.Windows
 {
     public partial class TitleUpdateWindow : UserControl
     {
-        public TitleUpdateViewModel ViewModel;
+        public readonly TitleUpdateViewModel ViewModel;
 
         public TitleUpdateWindow()
         {

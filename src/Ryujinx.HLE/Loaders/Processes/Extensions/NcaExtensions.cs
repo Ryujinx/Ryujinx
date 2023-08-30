@@ -8,6 +8,7 @@ using LibHac.Ncm;
 using LibHac.Ns;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
+using LibHac.Tools.Ncm;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
@@ -126,7 +127,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return nca.Header.ContentType == NcaContentType.Control;
         }
 
-        public static (Nca, Nca) GetUpdateData(this Nca mainNca, VirtualFileSystem fileSystem, int programIndex, out string updatePath)
+        public static (Nca, Nca) GetUpdateData(this Nca mainNca, VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel, int programIndex, out string updatePath)
         {
             updatePath = "(unknown)";
 
@@ -147,7 +148,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     PartitionFileSystem updatePartitionFileSystem = new();
                     updatePartitionFileSystem.Initialize(new FileStream(updatePath, FileMode.Open, FileAccess.Read).AsStorage()).ThrowIfFailure();
 
-                    foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, programIndex))
+                    foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel, programIndex))
                     {
                         if ((updateTitleId & ~0xFUL) != titleIdBase)
                         {
@@ -227,6 +228,32 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             }
 
             return nacpData;
+        }
+
+        public static Cnmt GetCnmt(this Nca cnmtNca, IntegrityCheckLevel checkLevel, ContentMetaType metaType)
+        {
+            string path = $"/{metaType}_{cnmtNca.Header.TitleId:x16}.cnmt";
+            using var cnmtFile = new UniqueRef<IFile>();
+
+            try
+            {
+                Result result = cnmtNca.OpenFileSystem(0, checkLevel)
+                                       .OpenFile(ref cnmtFile.Ref, path.ToU8Span(), OpenMode.Read);
+
+                if (result.IsSuccess())
+                {
+                    return new Cnmt(cnmtFile.Release().AsStream());
+                }
+            }
+            catch (HorizonResultException e)
+            {
+                if (!ResultFs.PathNotFound.Includes(e.ResultValue))
+                {
+                    Logger.Warning?.Print(LogClass.Application, $"Failed get cnmt for '{cnmtNca.Header.TitleId:x16}' from nca: {e.Message}");
+                }
+            }
+
+            return null;
         }
     }
 }

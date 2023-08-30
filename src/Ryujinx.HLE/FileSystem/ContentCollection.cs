@@ -4,6 +4,7 @@ using LibHac.Ncm;
 using LibHac.Tools.FsSystem.NcaUtils;
 using LibHac.Tools.Ncm;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using System;
 
 namespace Ryujinx.HLE.FileSystem
 {
@@ -40,7 +41,8 @@ namespace Ryujinx.HLE.FileSystem
             {
                 if (entry.Type == type)
                 {
-                    return _pfs.GetNca(keySet, $"/{entry.NcaId}");
+                    string ncaId = BitConverter.ToString(entry.NcaId).Replace("-", null).ToLower();
+                    return _pfs.GetNca(keySet, $"/{ncaId}.nca");
                 }
             }
 

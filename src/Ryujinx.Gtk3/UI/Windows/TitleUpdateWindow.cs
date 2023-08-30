@@ -4,16 +4,18 @@ using LibHac.Fs;
 using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
 using LibHac.Ns;
+using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.UI.App.Common;
+using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Widgets;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using GUI = Gtk.Builder.ObjectAttribute;
@@ -25,7 +27,7 @@ namespace Ryujinx.UI.Windows
     {
         private readonly MainWindow _parent;
         private readonly VirtualFileSystem _virtualFileSystem;
-        private readonly string _titleId;
+        private readonly ApplicationData _title;
         private readonly string _updateJsonPath;
 
         private TitleUpdateMetadata _titleUpdateWindowData;
@@ -39,17 +41,17 @@ namespace Ryujinx.UI.Windows
         [GUI] RadioButton _noUpdateRadioButton;
 #pragma warning restore CS0649, IDE0044
 
-        public TitleUpdateWindow(MainWindow parent, VirtualFileSystem virtualFileSystem, string titleId, string titleName) : this(new Builder("Ryujinx.Gtk3.UI.Windows.TitleUpdateWindow.glade"), parent, virtualFileSystem, titleId, titleName) { }
+        public TitleUpdateWindow(MainWindow parent, VirtualFileSystem virtualFileSystem, ApplicationData applicationData) : this(new Builder("Ryujinx.Gtk3.UI.Windows.TitleUpdateWindow.glade"), parent, virtualFileSystem, applicationData) { }
 
-        private TitleUpdateWindow(Builder builder, MainWindow parent, VirtualFileSystem virtualFileSystem, string titleId, string titleName) : base(builder.GetRawOwnedObject("_titleUpdateWindow"))
+        private TitleUpdateWindow(Builder builder, MainWindow parent, VirtualFileSystem virtualFileSystem, ApplicationData applicationData) : base(builder.GetRawOwnedObject("_titleUpdateWindow"))
         {
             _parent = parent;
 
             builder.Autoconnect(this);
 
-            _titleId = titleId;
+            _title = applicationData;
             _virtualFileSystem = virtualFileSystem;
-            _updateJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _titleId, "updates.json");
+            _updateJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, applicationData.TitleIdString, "updates.json");
             _radioButtonToPathDictionary = new Dictionary<RadioButton, string>();
 
             try
@@ -65,7 +67,10 @@ namespace Ryujinx.UI.Windows
                 };
             }
 
-            _baseTitleInfoLabel.Text = $"Updates Available for {titleName} [{titleId.ToUpper()}]";
+            _baseTitleInfoLabel.Text = $"Updates Available for {applicationData.TitleName} [{applicationData.TitleIdString}]";
+
+            // Try to get updates from PFS first
+            AddUpdate(_title.Path, true);
 
             foreach (string path in _titleUpdateWindowData.Paths)
             {
@@ -85,24 +90,37 @@ namespace Ryujinx.UI.Windows
             }
         }
 
-        private void AddUpdate(string path)
+        private void AddUpdate(string path, bool ignoreNotFound = false)
         {
             if (File.Exists(path))
             {
+                IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                    ? IntegrityCheckLevel.ErrorOnInvalid
+                    : IntegrityCheckLevel.None;
+
                 using FileStream file = new(path, FileMode.Open, FileAccess.Read);
 
-                PartitionFileSystem nsp = new();
-                nsp.Initialize(file.AsStorage()).ThrowIfFailure();
+                IFileSystem pfs;
+
+                if (System.IO.Path.GetExtension(path) == ".xci")
+                {
+                    pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                }
+                else
+                {
+                    var pfsTemp = new PartitionFileSystem();
+                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
+                    pfs = pfsTemp;
+                }
 
                 try
                 {
-                    ulong titleId = ulong.Parse(_titleId, NumberStyles.HexNumber);
-                    Dictionary<ulong, ContentCollection> updates = nsp.GetUpdateData(_virtualFileSystem, 0);
+                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel, 0);
 
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(titleId, out ContentCollection update))
+                    if (updates.TryGetValue(_title.TitleId, out ContentCollection update))
                     {
                         patchNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Program);
                         controlNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Control);
@@ -128,7 +146,10 @@ namespace Ryujinx.UI.Windows
                     }
                     else
                     {
-                        GtkDialog.CreateErrorDialog("The specified file does not contain an update for the selected title!");
+                        if (!ignoreNotFound)
+                        {
+                            GtkDialog.CreateErrorDialog("The specified file does not contain an update for the selected title!");
+                        }
                     }
                 }
                 catch (Exception exception)
