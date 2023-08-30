@@ -163,10 +163,12 @@ namespace Ryujinx.Graphics.Metal
                 supportsMismatchingViewFormat: true,
                 supportsCubemapView: true,
                 supportsNonConstantTextureOffset: false,
+                supportsScaledVertexFormats: true,
                 supportsShaderBallot: false,
                 supportsShaderBarrierDivergence: false,
                 supportsShaderFloat64: false,
                 supportsTextureShadowLod: false,
+                supportsVertexStoreAndAtomics: false,
                 supportsViewportIndexVertexTessellation: false,
                 supportsViewportMask: false,
                 supportsViewportSwizzle: false,
@@ -178,7 +180,9 @@ namespace Ryujinx.Graphics.Metal
                 maximumImagesPerStage: Constants.MaxTextureBindings,
                 maximumComputeSharedMemorySize: (int)_device.MaxThreadgroupMemoryLength,
                 maximumSupportedAnisotropy: 0,
+                shaderSubgroupSize: 256,
                 storageBufferOffsetAlignment: 0,
+                textureBufferOffsetAlignment: 0,
                 gatherBiasPrecision: 0
             );
         }
