@@ -917,7 +917,7 @@ namespace Ryujinx.UI
                     isFirmwareTitle = true;
                 }
 
-                if (!LoadApplication(application.Path, ulong.Parse(application.TitleId, NumberStyles.HexNumber), isFirmwareTitle))
+                if (!LoadApplication(application.Path, application.TitleId, isFirmwareTitle))
                 {
                     _emulationContext.Dispose();
                     SwitchToGameTable();
@@ -1166,7 +1166,7 @@ namespace Ryujinx.UI
                 _tableStore.AppendValues(
                     args.AppData.Favorite,
                     new Gdk.Pixbuf(args.AppData.Icon, 75, 75),
-                    $"{args.AppData.TitleName}\n{args.AppData.TitleId.ToUpper()}",
+                    $"{args.AppData.TitleName}\n{args.AppData.TitleIdString.ToUpper()}",
                     args.AppData.Developer,
                     args.AppData.Version,
                     args.AppData.TimePlayedString,
@@ -1258,7 +1258,7 @@ namespace Ryujinx.UI
             {
                 Favorite = (bool)_tableStore.GetValue(treeIter, 0),
                 TitleName = ((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[0],
-                TitleId = ((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[1],
+                TitleId = ulong.Parse(((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[1], NumberStyles.HexNumber),
                 Developer = (string)_tableStore.GetValue(treeIter, 3),
                 Version = (string)_tableStore.GetValue(treeIter, 4),
                 TimePlayed = ValueFormatUtils.ParseTimeSpan((string)_tableStore.GetValue(treeIter, 5)),
@@ -1394,7 +1394,7 @@ namespace Ryujinx.UI
             ApplicationData applicationData = new()
             {
                 TitleName = "miiEdit",
-                TitleId = "0x0100000000001009",
+                TitleId = 0x0100000000001009ul,
                 Path = contentPath,
             };
 

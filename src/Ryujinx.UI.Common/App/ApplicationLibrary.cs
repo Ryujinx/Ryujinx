@@ -89,7 +89,7 @@ namespace Ryujinx.UI.App.Common
                     Npdm npdm = new(npdmFile.Get.AsStream());
 
                     data.TitleName = npdm.TitleName;
-                    data.TitleId = npdm.Aci0.TitleId.ToString("x16");
+                    data.TitleId = npdm.Aci0.TitleId;
                 }
 
                 return data;
@@ -169,7 +169,7 @@ namespace Ryujinx.UI.App.Common
             {
                 ApplicationData applicationData = new()
                 {
-                    TitleId = titleId.ToString("x16"),
+                    TitleId = titleId,
                 };
 
                 try
@@ -414,7 +414,7 @@ namespace Ryujinx.UI.App.Common
 
             foreach (var data in applications)
             {
-                ApplicationMetadata appMetadata = LoadAndSaveMetaData(data.TitleId, appMetadata =>
+                ApplicationMetadata appMetadata = LoadAndSaveMetaData(data.TitleIdString, appMetadata =>
                 {
                     appMetadata.Title = data.TitleName;
 
@@ -862,15 +862,15 @@ namespace Ryujinx.UI.App.Common
 
             if (controlData.PresenceGroupId != 0)
             {
-                data.TitleId = controlData.PresenceGroupId.ToString("x16");
+                data.TitleId = controlData.PresenceGroupId;
             }
             else if (controlData.SaveDataOwnerId != 0)
             {
-                data.TitleId = controlData.SaveDataOwnerId.ToString();
+                data.TitleId = controlData.SaveDataOwnerId;
             }
             else if (controlData.AddOnContentBaseId != 0)
             {
-                data.TitleId = (controlData.AddOnContentBaseId - 0x1000).ToString("x16");
+                data.TitleId = (controlData.AddOnContentBaseId - 0x1000);
             }
 
             data.Version = controlData.DisplayVersionString.ToString();

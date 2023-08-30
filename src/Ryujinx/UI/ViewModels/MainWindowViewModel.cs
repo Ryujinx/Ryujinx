@@ -36,7 +36,6 @@ using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1511,7 +1510,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             Logger.RestartTime();
 
-            SelectedIcon ??= ApplicationLibrary.GetApplicationIcon(application.Path, ConfigurationState.Instance.System.Language, ulong.Parse(application.TitleId, NumberStyles.HexNumber));
+            SelectedIcon ??= ApplicationLibrary.GetApplicationIcon(application.Path, ConfigurationState.Instance.System.Language, application.TitleId);
 
             PrepareLoadScreen();
 
@@ -1521,7 +1520,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                 RendererHostControl,
                 InputManager,
                 application.Path,
-                ulong.Parse(application.TitleId, NumberStyles.HexNumber),
+                application.TitleId,
                 VirtualFileSystem,
                 ContentManager,
                 AccountManager,

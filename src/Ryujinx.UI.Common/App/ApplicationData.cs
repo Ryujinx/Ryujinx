@@ -13,6 +13,7 @@ using Ryujinx.HLE.Loaders.Processes.Extensions;
 using Ryujinx.UI.Common.Helper;
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace Ryujinx.UI.App.Common
 {
@@ -21,7 +22,7 @@ namespace Ryujinx.UI.App.Common
         public bool Favorite { get; set; }
         public byte[] Icon { get; set; }
         public string TitleName { get; set; } = "Unknown";
-        public string TitleId { get; set; } = "0000000000000000";
+        public ulong TitleId { get; set; }
         public string Developer { get; set; } = "Unknown";
         public string Version { get; set; } = "0";
         public TimeSpan TimePlayed { get; set; }
@@ -36,6 +37,8 @@ namespace Ryujinx.UI.App.Common
         public string LastPlayedString => ValueFormatUtils.FormatDateTime(LastPlayed);
 
         public string FileSizeString => ValueFormatUtils.FormatFileSize(FileSize);
+
+        [JsonIgnore] public string TitleIdString => TitleId.ToString("x16");
 
         public static string GetApplicationBuildId(VirtualFileSystem virtualFileSystem, string titleFilePath)
         {
