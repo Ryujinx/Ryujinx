@@ -18,6 +18,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.UI.App.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +35,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public TitleUpdateMetadata TitleUpdateWindowData;
         public readonly string TitleUpdateJsonPath;
         private VirtualFileSystem VirtualFileSystem { get; }
-        private ulong TitleId { get; }
+        private ApplicationData Title { get; }
 
         private AvaloniaList<TitleUpdateModel> _titleUpdates = new();
         private AvaloniaList<object> _views = new();
@@ -74,18 +75,18 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public IStorageProvider StorageProvider;
 
-        public TitleUpdateViewModel(VirtualFileSystem virtualFileSystem, ulong titleId)
+        public TitleUpdateViewModel(VirtualFileSystem virtualFileSystem, ApplicationData applicationData)
         {
             VirtualFileSystem = virtualFileSystem;
 
-            TitleId = titleId;
+            Title = applicationData;
 
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 StorageProvider = desktop.MainWindow.StorageProvider;
             }
 
-            TitleUpdateJsonPath = Path.Combine(AppDataManager.GamesDirPath, titleId.ToString("x16"), "updates.json");
+            TitleUpdateJsonPath = Path.Combine(AppDataManager.GamesDirPath, Title.TitleIdString, "updates.json");
 
             try
             {
@@ -93,7 +94,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
             catch
             {
-                Logger.Warning?.Print(LogClass.Application, $"Failed to deserialize title update data for {TitleId} at {TitleUpdateJsonPath}");
+                Logger.Warning?.Print(LogClass.Application, $"Failed to deserialize title update data for {Title.TitleIdString} at {TitleUpdateJsonPath}");
 
                 TitleUpdateWindowData = new TitleUpdateMetadata
                 {
@@ -109,6 +110,9 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void LoadUpdates()
         {
+            // Try to load updates from PFS first
+            AddUpdate(Title.Path);
+
             foreach (string path in TitleUpdateWindowData.Paths)
             {
                 AddUpdate(path);
@@ -178,7 +182,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(TitleId, out ContentCollection content))
+                    if (updates.TryGetValue(Title.TitleId, out ContentCollection content))
                     {
                         patchNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Program);
                         controlNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Control);

@@ -17,11 +17,12 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
+using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.UI.App.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Application = Avalonia.Application;
 using Path = System.IO.Path;
 
@@ -38,7 +39,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private AvaloniaList<DownloadableContentModel> _selectedDownloadableContents = new();
 
         private string _search;
-        private readonly ulong _titleId;
+        private readonly ApplicationData _title;
         private readonly IStorageProvider _storageProvider;
 
         private static readonly DownloadableContentJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
@@ -91,18 +92,18 @@ namespace Ryujinx.Ava.UI.ViewModels
             get => string.Format(LocaleManager.Instance[LocaleKeys.DlcWindowHeading], DownloadableContents.Count);
         }
 
-        public DownloadableContentManagerViewModel(VirtualFileSystem virtualFileSystem, ulong titleId)
+        public DownloadableContentManagerViewModel(VirtualFileSystem virtualFileSystem, ApplicationData applicationData)
         {
             _virtualFileSystem = virtualFileSystem;
 
-            _titleId = titleId;
+            _title = applicationData;
 
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 _storageProvider = desktop.MainWindow.StorageProvider;
             }
 
-            _downloadableContentJsonPath = Path.Combine(AppDataManager.GamesDirPath, titleId.ToString("x16"), "dlc.json");
+            _downloadableContentJsonPath = Path.Combine(AppDataManager.GamesDirPath, applicationData.TitleIdString, "dlc.json");
 
             try
             {
@@ -119,6 +120,9 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void LoadDownloadableContents()
         {
+            // Try to load DLCs from PFS first
+            AddDownloadableContent(_title.Path);
+
             foreach (DownloadableContentContainer downloadableContentContainer in _downloadableContentContainerList)
             {
                 if (File.Exists(downloadableContentContainer.ContainerPath))
@@ -219,22 +223,24 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             foreach (var file in result)
             {
-                await AddDownloadableContent(file.Path.LocalPath);
+                if (!AddDownloadableContent(file.Path.LocalPath))
+                {
+                    await ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogDlcNoDlcErrorMessage]);
+                }
             }
         }
 
-        private async Task AddDownloadableContent(string path)
+        private bool AddDownloadableContent(string path)
         {
             if (!File.Exists(path) || DownloadableContents.FirstOrDefault(x => x.ContainerPath == path) != null)
             {
-                return;
+                return true;
             }
 
             using FileStream containerFile = File.OpenRead(path);
 
             PartitionFileSystem partitionFileSystem = new();
             partitionFileSystem.Initialize(containerFile.AsStorage()).ThrowIfFailure();
-            bool containsDownloadableContent = false;
 
             _virtualFileSystem.ImportTickets(partitionFileSystem);
 
@@ -252,7 +258,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 if (nca.Header.ContentType == NcaContentType.PublicData)
                 {
-                    if ((nca.Header.TitleId & 0xFFFFFFFFFFFFE000) != _titleId)
+                    if (nca.GetProgramIdBase() != _title.TitleId)
                     {
                         break;
                     }
@@ -264,14 +270,11 @@ namespace Ryujinx.Ava.UI.ViewModels
                     OnPropertyChanged(nameof(UpdateCount));
                     Sort();
 
-                    containsDownloadableContent = true;
+                    return true;
                 }
             }
 
-            if (!containsDownloadableContent)
-            {
-                await ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogDlcNoDlcErrorMessage]);
-            }
+            return false;
         }
 
         public void Remove(DownloadableContentModel model)
