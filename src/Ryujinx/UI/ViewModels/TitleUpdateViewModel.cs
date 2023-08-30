@@ -181,7 +181,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 IFileSystem pfs;
 
-                if (Path.GetExtension(path) == ".xci")
+                if (Path.GetExtension(path).ToLower() == ".xci")
                 {
                     pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
                 }

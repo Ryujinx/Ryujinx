@@ -199,7 +199,7 @@ namespace Ryujinx.UI.Widgets
                     {
                         IFileSystem pfs;
 
-                        if (System.IO.Path.GetExtension(_title.Path) == ".xci")
+                        if (System.IO.Path.GetExtension(_title.Path).ToLower() == ".xci")
                         {
                             Xci xci = new(_virtualFileSystem.KeySet, file.AsStorage());
 

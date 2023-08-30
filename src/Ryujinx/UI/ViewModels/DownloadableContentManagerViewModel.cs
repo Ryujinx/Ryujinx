@@ -239,8 +239,18 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             using FileStream containerFile = File.OpenRead(path);
 
-            PartitionFileSystem partitionFileSystem = new();
-            partitionFileSystem.Initialize(containerFile.AsStorage()).ThrowIfFailure();
+            IFileSystem partitionFileSystem;
+
+            if (Path.GetExtension(path).ToLower() == ".xci")
+            {
+                partitionFileSystem = new Xci(_virtualFileSystem.KeySet, containerFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
+            }
+            else
+            {
+                var pfsTemp = new PartitionFileSystem();
+                pfsTemp.Initialize(containerFile.AsStorage()).ThrowIfFailure();
+                partitionFileSystem = pfsTemp;
+            }
 
             _virtualFileSystem.ImportTickets(partitionFileSystem);
 

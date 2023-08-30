@@ -6,6 +6,7 @@ using LibHac.FsSystem;
 using LibHac.Loader;
 using LibHac.Ncm;
 using LibHac.Ns;
+using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using LibHac.Tools.Ncm;
@@ -18,6 +19,7 @@ using System.IO;
 using System.Linq;
 using ApplicationId = LibHac.Ncm.ApplicationId;
 using ContentType = LibHac.Ncm.ContentType;
+using Path = System.IO.Path;
 
 namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
@@ -139,14 +141,26 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             ulong titleIdBase = mainNca.GetProgramIdBase();
 
             // Load update information if exists.
-            string titleUpdateMetadataPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, titleIdBase.ToString("x16"), "updates.json");
+            string titleUpdateMetadataPath = Path.Combine(AppDataManager.GamesDirPath, titleIdBase.ToString("x16"), "updates.json");
             if (File.Exists(titleUpdateMetadataPath))
             {
                 updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
                 if (File.Exists(updatePath))
                 {
-                    PartitionFileSystem updatePartitionFileSystem = new();
-                    updatePartitionFileSystem.Initialize(new FileStream(updatePath, FileMode.Open, FileAccess.Read).AsStorage()).ThrowIfFailure();
+                    var updateFile = new FileStream(updatePath, FileMode.Open, FileAccess.Read);
+
+                    IFileSystem updatePartitionFileSystem;
+
+                    if (Path.GetExtension(updatePath).ToLower() == ".xci")
+                    {
+                        updatePartitionFileSystem = new Xci(fileSystem.KeySet, updateFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                    }
+                    else
+                    {
+                        PartitionFileSystem pfsTemp = new();
+                        pfsTemp.Initialize(updateFile.AsStorage()).ThrowIfFailure();
+                        updatePartitionFileSystem = pfsTemp;
+                    }
 
                     foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel, programIndex))
                     {
