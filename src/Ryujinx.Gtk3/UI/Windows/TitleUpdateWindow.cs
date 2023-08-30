@@ -97,14 +97,15 @@ namespace Ryujinx.UI.Windows
                 try
                 {
                     ulong titleId = ulong.Parse(_titleId, NumberStyles.HexNumber);
-                    Dictionary<ulong, Tuple<Nca, Nca>> updates = nsp.GetUpdateData(_virtualFileSystem, 0);
+                    Dictionary<ulong, ContentCollection> updates = nsp.GetUpdateData(_virtualFileSystem, 0);
 
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(titleId, out Tuple<Nca, Nca> update))
+                    if (updates.TryGetValue(titleId, out ContentCollection update))
                     {
-                        (patchNca, controlNca) = update;
+                        patchNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Program);
+                        controlNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Control);
                     }
 
                     if (controlNca != null && patchNca != null)

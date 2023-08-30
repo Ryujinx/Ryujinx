@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ContentType = LibHac.Ncm.ContentType;
 using Path = System.IO.Path;
 using SpanHelpers = LibHac.Common.SpanHelpers;
 
@@ -172,14 +173,15 @@ namespace Ryujinx.Ava.UI.ViewModels
                 {
                     var pfs = new PartitionFileSystem();
                     pfs.Initialize(file.AsStorage()).ThrowIfFailure();
-                    Dictionary<ulong, Tuple<Nca, Nca>> updates = pfs.GetUpdateData(VirtualFileSystem, 0);
+                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, 0);
 
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(TitleId, out Tuple<Nca, Nca> update))
+                    if (updates.TryGetValue(TitleId, out ContentCollection content))
                     {
-                        (patchNca, controlNca) = update;
+                        patchNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Program);
+                        controlNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Control);
                     }
 
                     if (controlNca != null && patchNca != null)

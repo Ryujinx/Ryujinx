@@ -3,9 +3,11 @@ using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
+using LibHac.Ncm;
 using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
+using LibHac.Tools.Ncm;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
@@ -13,82 +15,51 @@ using Ryujinx.HLE.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ContentType = LibHac.Ncm.ContentType;
 
 namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
-    using NcaTuple = Tuple<Nca, Nca>;
-
     public static class PartitionFileSystemExtensions
     {
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        public static Dictionary<ulong, NcaTuple> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        public static Dictionary<ulong, ContentCollection> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
-            var programs = new Dictionary<ulong, NcaTuple>();
+            var programs = new Dictionary<ulong, ContentCollection>();
 
-            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.cnmt.nca"))
             {
-                Nca nca = partitionFileSystem.GetNca(fileSystem.KeySet, fileEntry.FullPath);
+                ContentCollection content = new(partitionFileSystem, partitionFileSystem.GetCnmt(fileEntry.FullPath));
 
-                if (nca.GetProgramIndex() != programIndex)
+                if (content.Type != ContentMetaType.Application || content.ProgramIndex != programIndex)
                 {
                     continue;
                 }
 
-                if (nca.IsMain() || nca.IsControl())
-                {
-                    if (!programs.ContainsKey(nca.Header.TitleId))
-                    {
-                        programs[nca.Header.TitleId] = new NcaTuple(null, null);
-                    }
-                }
-
-                if (nca.IsMain() && programs[nca.Header.TitleId].Item1 == null)
-                {
-                    programs[nca.Header.TitleId] = new NcaTuple(nca, programs[nca.Header.TitleId].Item2);
-                }
-                else if (nca.IsControl() && programs[nca.Header.TitleId].Item2 == null)
-                {
-                    programs[nca.Header.TitleId] = new NcaTuple(programs[nca.Header.TitleId].Item1, nca);
-                }
+                programs.TryAdd(content.ApplicationTitleId, content);
             }
 
             return programs;
         }
 
-        public static Dictionary<ulong, NcaTuple> GetUpdateData(this PartitionFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
+        public static Dictionary<ulong, ContentCollection> GetUpdateData(this PartitionFileSystem partitionFileSystem, VirtualFileSystem fileSystem, int programIndex)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
-            var programs = new Dictionary<ulong, NcaTuple>();
+            var programs = new Dictionary<ulong, ContentCollection>();
 
-            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.cnmt.nca"))
             {
-                Nca nca = partitionFileSystem.GetNca(fileSystem.KeySet, fileEntry.FullPath);
+                ContentCollection content = new(partitionFileSystem, partitionFileSystem.GetCnmt(fileEntry.FullPath));
 
-                if (nca.GetProgramIndex() != programIndex)
+                if (content.Type != ContentMetaType.Patch || content.ProgramIndex != programIndex)
                 {
                     continue;
                 }
 
-                if (nca.IsPatch() || nca.IsControl())
-                {
-                    if (!programs.ContainsKey(nca.Header.TitleId))
-                    {
-                        programs[nca.Header.TitleId] = new NcaTuple(null, null);
-                    }
-                }
-
-                if (nca.IsPatch() && programs[nca.Header.TitleId].Item1 == null)
-                {
-                    programs[nca.Header.TitleId] = new NcaTuple(nca, programs[nca.Header.TitleId].Item2);
-                }
-                else if (nca.IsControl())
-                {
-                    programs[nca.Header.TitleId] = new NcaTuple(programs[nca.Header.TitleId].Item1, nca);
-                }
+                programs.TryAdd(content.ApplicationTitleId, content);
             }
 
             return programs;
@@ -109,20 +80,21 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             try
             {
-                Dictionary<ulong, NcaTuple> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.Configuration.UserChannelPersistence.Index);
+                Dictionary<ulong, ContentCollection> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.Configuration.UserChannelPersistence.Index);
 
                 if (titleId == 0)
                 {
-                    foreach ((ulong _, (Nca main, Nca control)) in applications)
+                    foreach ((ulong _, ContentCollection content) in applications)
                     {
-                        mainNca = main;
-                        controlNca = control;
+                        mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program);
+                        controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control);
                         break;
                     }
                 }
-                else if (applications.TryGetValue(titleId, out NcaTuple ncaTuple))
+                else if (applications.TryGetValue(titleId, out ContentCollection content))
                 {
-                    (mainNca, controlNca) = ncaTuple;
+                    mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program);
+                    controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control);
                 }
 
                 ProcessLoaderHelper.RegisterProgramMapInfo(device, partitionFileSystem).ThrowIfFailure();
@@ -197,6 +169,15 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             fileSystem.OpenFile(ref ncaFile.Ref, path.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
             return new Nca(keySet, ncaFile.Release().AsStorage());
+        }
+
+        public static Cnmt GetCnmt(this IFileSystem fileSystem, string path)
+        {
+            using var cnmtFile = new UniqueRef<IFile>();
+
+            fileSystem.OpenFile(ref cnmtFile.Ref, path.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+            return new Cnmt(cnmtFile.Release().AsStream());
         }
     }
 }

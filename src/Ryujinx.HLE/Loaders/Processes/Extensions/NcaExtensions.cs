@@ -13,10 +13,10 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
-using System;
 using System.IO;
 using System.Linq;
 using ApplicationId = LibHac.Ncm.ApplicationId;
+using ContentType = LibHac.Ncm.ContentType;
 
 namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
@@ -54,7 +54,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                 nacpData = controlNca.GetNacp(device);
             }
 
-            /* TODO: Rework this since it's wrong and doesn't work as it takes the DisplayVersion from a "potential" inexistant update.
+            /* TODO: Rework this since it's wrong and doesn't work as it takes the DisplayVersion from a "potential" non-existent update.
 
             // Load program 0 control NCA as we are going to need it for display version.
             (_, Nca updateProgram0ControlNca) = GetGameUpdateData(_device.Configuration.VirtualFileSystem, mainNca.Header.TitleId.ToString("x16"), 0, out _);
@@ -93,7 +93,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return processResult;
         }
 
-        public static ulong GetTitleIdBase(this Nca nca)
+        public static ulong GetProgramIdBase(this Nca nca)
         {
             // Clear the program index part.
             return nca.Header.TitleId & ~0xFUL;
@@ -135,7 +135,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             Nca updateControlNca = null;
 
             // Clear the program index part.
-            ulong titleIdBase = mainNca.GetTitleIdBase();
+            ulong titleIdBase = mainNca.GetProgramIdBase();
 
             // Load update information if exists.
             string titleUpdateMetadataPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, titleIdBase.ToString("x16"), "updates.json");
@@ -147,15 +147,15 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     PartitionFileSystem updatePartitionFileSystem = new();
                     updatePartitionFileSystem.Initialize(new FileStream(updatePath, FileMode.Open, FileAccess.Read).AsStorage()).ThrowIfFailure();
 
-                    foreach ((ulong updateTitleId, (Nca patch, Nca control)) in updatePartitionFileSystem.GetUpdateData(fileSystem, programIndex))
+                    foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, programIndex))
                     {
                         if ((updateTitleId & ~0xFUL) != titleIdBase)
                         {
                             continue;
                         }
 
-                        updatePatchNca = patch;
-                        updateControlNca = control;
+                        updatePatchNca = content.GetNcaByType(fileSystem.KeySet, ContentType.Program);
+                        updateControlNca = content.GetNcaByType(fileSystem.KeySet, ContentType.Control);
                         break;
                     }
                 }

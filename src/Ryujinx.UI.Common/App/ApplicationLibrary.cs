@@ -26,13 +26,12 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using ContentType = LibHac.Ncm.ContentType;
 using Path = System.IO.Path;
 using TimeSpan = System.TimeSpan;
 
 namespace Ryujinx.UI.App.Common
 {
-    using NcaTuple = Tuple<Nca, Nca>;
-
     public class ApplicationLibrary
     {
         public event EventHandler<ApplicationAddedEventArgs> ApplicationAdded;
@@ -165,7 +164,7 @@ namespace Ryujinx.UI.App.Common
             var applications = new List<ApplicationData>();
             string extension = Path.GetExtension(filePath).ToLower();
 
-            foreach ((ulong titleId, (Nca mainNca, Nca controlNca)) in pfs.GetApplicationData(_virtualFileSystem, 0))
+            foreach ((ulong titleId, ContentCollection content) in pfs.GetApplicationData(_virtualFileSystem, 0))
             {
                 ApplicationData applicationData = new()
                 {
@@ -174,6 +173,9 @@ namespace Ryujinx.UI.App.Common
 
                 try
                 {
+                    Nca mainNca = content.GetNcaByType(_virtualFileSystem.KeySet, ContentType.Program);
+                    Nca controlNca = content.GetNcaByType(_virtualFileSystem.KeySet, ContentType.Control);
+
                     BlitStruct<ApplicationControlProperty> controlHolder = new(1);
 
                     IFileSystem controlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
@@ -694,14 +696,14 @@ namespace Ryujinx.UI.App.Common
                             else
                             {
                                 // Store the ControlFS in variable called controlFs
-                                Dictionary<ulong, NcaTuple> programs = pfs.GetApplicationData(_virtualFileSystem, 0);
+                                Dictionary<ulong, ContentCollection> programs = pfs.GetApplicationData(_virtualFileSystem, 0);
                                 IFileSystem controlFs = null;
 
                                 if (programs.ContainsKey(titleId))
                                 {
-                                    if (programs[titleId].Item2 != null)
+                                    if (programs[titleId].GetNcaByType(_virtualFileSystem.KeySet, ContentType.Control) is { } controlNca)
                                     {
-                                        controlFs = programs[titleId].Item2.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+                                        controlFs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
                                     }
                                 }
 
