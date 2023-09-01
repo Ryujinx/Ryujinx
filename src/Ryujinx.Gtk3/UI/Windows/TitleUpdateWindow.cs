@@ -135,7 +135,14 @@ namespace Ryujinx.UI.Windows
                         controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None).OpenFile(ref nacpFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
                         nacpFile.Get.Read(out _, 0, SpanHelpers.AsByteSpan(ref controlData), ReadOption.None).ThrowIfFailure();
 
-                        RadioButton radioButton = new($"Version {controlData.DisplayVersionString.ToString()} - {path}");
+                        string radioLabel = $"Version {controlData.DisplayVersionString.ToString()} - {path}";
+
+                        if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
+                        {
+                            radioLabel = "Bundled: " + radioLabel;
+                        }
+
+                        RadioButton radioButton = new(radioLabel);
                         radioButton.JoinGroup(_noUpdateRadioButton);
 
                         _availableUpdatesBox.Add(radioButton);
