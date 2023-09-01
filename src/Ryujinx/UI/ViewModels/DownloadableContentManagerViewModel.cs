@@ -105,6 +105,12 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             _downloadableContentJsonPath = Path.Combine(AppDataManager.GamesDirPath, applicationData.TitleIdString, "dlc.json");
 
+            if (!File.Exists(_downloadableContentJsonPath))
+            {
+                _downloadableContentContainerList = new List<DownloadableContentContainer>();
+                Save();
+            }
+
             try
             {
                 _downloadableContentContainerList = JsonHelper.DeserializeFromFile(_downloadableContentJsonPath, _serializerContext.ListDownloadableContentContainer);
