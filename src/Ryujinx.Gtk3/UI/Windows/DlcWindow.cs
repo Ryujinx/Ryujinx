@@ -9,9 +9,11 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
+using Ryujinx.HLE.Loaders.Processes.Extensions;
 using Ryujinx.UI.Widgets;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using GUI = Gtk.Builder.ObjectAttribute;
 
@@ -177,7 +179,7 @@ namespace Ryujinx.UI.Windows
 
                         if (nca.Header.ContentType == NcaContentType.PublicData)
                         {
-                            if ((nca.Header.TitleId & 0xFFFFFFFFFFFFE000).ToString("x16") != _titleId)
+                            if (nca.GetProgramIdBase() != (ulong.Parse(_titleId, NumberStyles.HexNumber) & ~0xFUL))
                             {
                                 break;
                             }
