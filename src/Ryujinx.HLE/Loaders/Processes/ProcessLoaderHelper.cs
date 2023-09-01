@@ -51,7 +51,6 @@ namespace Ryujinx.HLE.Loaders.Processes
                 }
 
                 ulong currentMainProgramId = nca.GetProgramIdBase();
-                ;
 
                 if (applicationId == 0 && currentMainProgramId != 0)
                 {

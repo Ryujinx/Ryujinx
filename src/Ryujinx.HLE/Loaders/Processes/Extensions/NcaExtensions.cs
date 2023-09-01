@@ -98,8 +98,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
         public static ulong GetProgramIdBase(this Nca nca)
         {
-            // Clear the program index part.
-            return nca.Header.TitleId & ~0xFUL;
+            return nca.Header.TitleId & ~0x1FFFUL;
         }
 
         public static int GetProgramIndex(this Nca nca)
@@ -164,7 +163,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
                     foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel, programIndex))
                     {
-                        if ((updateTitleId & ~0xFUL) != titleIdBase)
+                        if ((updateTitleId & ~0x1FFFUL) != titleIdBase)
                         {
                             continue;
                         }

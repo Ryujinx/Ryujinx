@@ -179,7 +179,7 @@ namespace Ryujinx.UI.Windows
 
                         if (nca.Header.ContentType == NcaContentType.PublicData)
                         {
-                            if (nca.GetProgramIdBase() != (ulong.Parse(_titleId, NumberStyles.HexNumber) & ~0xFUL))
+                            if (nca.GetProgramIdBase() != (ulong.Parse(_titleId, NumberStyles.HexNumber) & ~0x1FFFUL))
                             {
                                 break;
                             }

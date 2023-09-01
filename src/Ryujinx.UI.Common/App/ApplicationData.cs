@@ -38,7 +38,9 @@ namespace Ryujinx.UI.App.Common
 
         public string FileSizeString => ValueFormatUtils.FormatFileSize(FileSize);
 
-        [JsonIgnore] public string TitleIdString => TitleId.ToString("x16");
+        [JsonIgnore] public string TitleIdString => TitleId.ToString("X16");
+
+        [JsonIgnore] public ulong TitleIdBase => TitleId & ~0x1FFFUL;
 
         public static string GetApplicationBuildId(VirtualFileSystem virtualFileSystem, IntegrityCheckLevel checkLevel, string titleFilePath)
         {

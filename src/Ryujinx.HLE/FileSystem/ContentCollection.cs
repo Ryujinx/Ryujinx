@@ -25,7 +25,7 @@ namespace Ryujinx.HLE.FileSystem
         public TitleVersion RequiredApplicationVersion => _cnmt.MinimumApplicationVersion;
         public byte[] Digest => _cnmt.Hash;
 
-        public ulong ProgramBaseId => Id & ~0xFUL;
+        public ulong ProgramBaseId => Id & ~0x1FFFUL;
         public int ProgramIndex => (int)(Id & 0xF);
         public bool IsSystemTitle => _cnmt.Type < ContentMetaType.Application;
 
