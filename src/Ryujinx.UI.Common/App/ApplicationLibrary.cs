@@ -275,18 +275,18 @@ namespace Ryujinx.UI.App.Common
                 switch (extension)
                 {
                     case ".xci":
-                    {
-                        Xci xci = new(_virtualFileSystem.KeySet, file.AsStorage());
-
-                        applications = GetApplicationsFromPfs(xci.OpenPartition(XciPartitionType.Secure), applicationPath);
-
-                        if (applications.Count == 0)
                         {
-                            return false;
-                        }
+                            Xci xci = new(_virtualFileSystem.KeySet, file.AsStorage());
 
-                        break;
-                    }
+                            applications = GetApplicationsFromPfs(xci.OpenPartition(XciPartitionType.Secure), applicationPath);
+
+                            if (applications.Count == 0)
+                            {
+                                return false;
+                            }
+
+                            break;
+                        }
                     case ".nsp":
                     case ".pfs0":
                         var pfs = new PartitionFileSystem();
@@ -303,110 +303,110 @@ namespace Ryujinx.UI.App.Common
 
                         break;
                     case ".nro":
-                    {
-                        BinaryReader reader = new(file);
-                        ApplicationData application = new();
-
-                        byte[] Read(long position, int size)
                         {
-                            file.Seek(position, SeekOrigin.Begin);
+                            BinaryReader reader = new(file);
+                            ApplicationData application = new();
 
-                            return reader.ReadBytes(size);
-                        }
-
-                        try
-                        {
-                            file.Seek(24, SeekOrigin.Begin);
-
-                            int assetOffset = reader.ReadInt32();
-
-                            if (Encoding.ASCII.GetString(Read(assetOffset, 4)) == "ASET")
+                            byte[] Read(long position, int size)
                             {
-                                byte[] iconSectionInfo = Read(assetOffset + 8, 0x10);
+                                file.Seek(position, SeekOrigin.Begin);
 
-                                long iconOffset = BitConverter.ToInt64(iconSectionInfo, 0);
-                                long iconSize = BitConverter.ToInt64(iconSectionInfo, 8);
+                                return reader.ReadBytes(size);
+                            }
 
-                                ulong nacpOffset = reader.ReadUInt64();
-                                ulong nacpSize = reader.ReadUInt64();
+                            try
+                            {
+                                file.Seek(24, SeekOrigin.Begin);
 
-                                // Reads and stores game icon as byte array
-                                if (iconSize > 0)
+                                int assetOffset = reader.ReadInt32();
+
+                                if (Encoding.ASCII.GetString(Read(assetOffset, 4)) == "ASET")
                                 {
-                                    application.Icon = Read(assetOffset + iconOffset, (int)iconSize);
+                                    byte[] iconSectionInfo = Read(assetOffset + 8, 0x10);
+
+                                    long iconOffset = BitConverter.ToInt64(iconSectionInfo, 0);
+                                    long iconSize = BitConverter.ToInt64(iconSectionInfo, 8);
+
+                                    ulong nacpOffset = reader.ReadUInt64();
+                                    ulong nacpSize = reader.ReadUInt64();
+
+                                    // Reads and stores game icon as byte array
+                                    if (iconSize > 0)
+                                    {
+                                        application.Icon = Read(assetOffset + iconOffset, (int)iconSize);
+                                    }
+                                    else
+                                    {
+                                        application.Icon = _nroIcon;
+                                    }
+
+                                    // Read the NACP data
+                                    Read(assetOffset + (int)nacpOffset, (int)nacpSize).AsSpan().CopyTo(controlHolder.ByteSpan);
+
+                                    GetApplicationInformation(ref controlHolder.Value, ref application);
                                 }
                                 else
                                 {
                                     application.Icon = _nroIcon;
+                                    application.TitleName = Path.GetFileNameWithoutExtension(applicationPath);
                                 }
 
-                                // Read the NACP data
-                                Read(assetOffset + (int)nacpOffset, (int)nacpSize).AsSpan().CopyTo(controlHolder.ByteSpan);
-
-                                GetApplicationInformation(ref controlHolder.Value, ref application);
+                                application.ControlHolder = controlHolder;
+                                applications.Add(application);
                             }
-                            else
+                            catch
                             {
-                                application.Icon = _nroIcon;
-                                application.TitleName = Path.GetFileNameWithoutExtension(applicationPath);
-                            }
+                                Logger.Warning?.Print(LogClass.Application, $"The file encountered was not of a valid type. Errored File: {applicationPath}");
 
-                            application.ControlHolder = controlHolder;
-                            applications.Add(application);
-                        }
-                        catch
-                        {
-                            Logger.Warning?.Print(LogClass.Application, $"The file encountered was not of a valid type. Errored File: {applicationPath}");
-
-                            return false;
-                        }
-
-                        break;
-                    }
-                    case ".nca":
-                    {
-                        try
-                        {
-                            ApplicationData application = new();
-
-                            Nca nca = new(_virtualFileSystem.KeySet, new FileStream(applicationPath, FileMode.Open, FileAccess.Read).AsStorage());
-
-                            if (!nca.IsProgram() || nca.IsPatch())
-                            {
                                 return false;
                             }
 
-                            application.Icon = _ncaIcon;
-                            application.TitleName = Path.GetFileNameWithoutExtension(applicationPath);
-                            application.ControlHolder = controlHolder;
-
-                            applications.Add(application);
+                            break;
                         }
-                        catch (InvalidDataException)
+                    case ".nca":
                         {
-                            Logger.Warning?.Print(LogClass.Application, $"The NCA header content type check has failed. This is usually because the header key is incorrect or missing. Errored File: {applicationPath}");
-                        }
-                        catch
-                        {
-                            Logger.Warning?.Print(LogClass.Application, $"The file encountered was not of a valid type. Errored File: {applicationPath}");
+                            try
+                            {
+                                ApplicationData application = new();
 
-                            return false;
-                        }
+                                Nca nca = new(_virtualFileSystem.KeySet, new FileStream(applicationPath, FileMode.Open, FileAccess.Read).AsStorage());
 
-                        break;
-                    }
+                                if (!nca.IsProgram() || nca.IsPatch())
+                                {
+                                    return false;
+                                }
+
+                                application.Icon = _ncaIcon;
+                                application.TitleName = Path.GetFileNameWithoutExtension(applicationPath);
+                                application.ControlHolder = controlHolder;
+
+                                applications.Add(application);
+                            }
+                            catch (InvalidDataException)
+                            {
+                                Logger.Warning?.Print(LogClass.Application, $"The NCA header content type check has failed. This is usually because the header key is incorrect or missing. Errored File: {applicationPath}");
+                            }
+                            catch
+                            {
+                                Logger.Warning?.Print(LogClass.Application, $"The file encountered was not of a valid type. Errored File: {applicationPath}");
+
+                                return false;
+                            }
+
+                            break;
+                        }
                     // If its an NSO we just set defaults
                     case ".nso":
-                    {
-                        ApplicationData application = new()
                         {
-                            Icon = _nsoIcon,
-                            TitleName = Path.GetFileNameWithoutExtension(applicationPath),
-                        };
+                            ApplicationData application = new()
+                            {
+                                Icon = _nsoIcon,
+                                TitleName = Path.GetFileNameWithoutExtension(applicationPath),
+                            };
 
-                        applications.Add(application);
-                        break;
-                    }
+                            applications.Add(application);
+                            break;
+                        }
                 }
             }
             catch (IOException exception)
@@ -734,11 +734,9 @@ namespace Ryujinx.UI.App.Common
 
                                         controlFs.OpenFile(ref icon.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
-                                        using (MemoryStream stream = new())
-                                        {
-                                            icon.Get.AsStream().CopyTo(stream);
-                                            applicationIcon = stream.ToArray();
-                                        }
+                                        using MemoryStream stream = new();
+                                        icon.Get.AsStream().CopyTo(stream);
+                                        applicationIcon = stream.ToArray();
 
                                         break;
                                     }

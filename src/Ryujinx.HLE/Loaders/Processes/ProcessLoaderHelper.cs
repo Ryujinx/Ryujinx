@@ -50,7 +50,8 @@ namespace Ryujinx.HLE.Loaders.Processes
                     continue;
                 }
 
-                ulong currentMainProgramId = nca.GetProgramIdBase();;
+                ulong currentMainProgramId = nca.GetProgramIdBase();
+                ;
 
                 if (applicationId == 0 && currentMainProgramId != 0)
                 {
