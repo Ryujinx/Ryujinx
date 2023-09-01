@@ -35,10 +35,12 @@ namespace Ryujinx.HLE.FileSystem
             _cnmt = cnmt;
         }
 
-        public Nca GetNcaByType(KeySet keySet, ContentType type)
+        public Nca GetNcaByType(KeySet keySet, ContentType type, int idOffset = 0)
         {
             foreach (var entry in _cnmt.ContentEntries)
             {
+                // TODO: Add check for IdOffset as soon as LibHac supports it:
+                // && entry.IdOffset == idOffset
                 if (entry.Type == type)
                 {
                     string ncaId = BitConverter.ToString(entry.NcaId).Replace("-", null).ToLower();
