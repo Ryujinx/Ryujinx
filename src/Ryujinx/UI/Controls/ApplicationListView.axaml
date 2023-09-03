@@ -109,7 +109,7 @@
                                     Spacing="5">
                                     <TextBlock
                                         HorizontalAlignment="Stretch"
-                                        Text="{Binding TitleIdString}"
+                                        Text="{Binding TitleId, StringFormat=X16}"
                                         TextAlignment="Start"
                                         TextWrapping="Wrap" />
                                     <TextBlock
