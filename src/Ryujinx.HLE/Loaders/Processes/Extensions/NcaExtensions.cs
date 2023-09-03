@@ -140,7 +140,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             ulong titleIdBase = mainNca.GetProgramIdBase();
 
             // Load update information if exists.
-            string titleUpdateMetadataPath = Path.Combine(AppDataManager.GamesDirPath, titleIdBase.ToString("x16"), "updates.json");
+            string titleUpdateMetadataPath = Path.Combine(AppDataManager.GamesDirPath, mainNca.Header.TitleId.ToString("x16"), "updates.json");
             if (File.Exists(titleUpdateMetadataPath))
             {
                 updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
