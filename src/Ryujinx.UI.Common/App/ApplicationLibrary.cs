@@ -183,7 +183,6 @@ namespace Ryujinx.UI.App.Common
                     IFileSystem controlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
                     // Check if there is an update available.
-                    // TODO: Take gamecart updates into account as well
                     if (IsUpdateApplied(mainNca, out IFileSystem updatedControlFs))
                     {
                         // Replace the original ControlFs by the updated one.

@@ -45,7 +45,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     continue;
                 }
 
-                programs.TryAdd(content.ApplicationTitleId, content);
+                programs.TryAdd(content.ApplicationId, content);
             }
 
             return programs;
@@ -73,7 +73,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     continue;
                 }
 
-                programs.TryAdd(content.ApplicationTitleId, content);
+                programs.TryAdd(content.ApplicationId, content);
             }
 
             return programs;

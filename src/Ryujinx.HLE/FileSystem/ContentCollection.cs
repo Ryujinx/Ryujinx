@@ -19,8 +19,8 @@ namespace Ryujinx.HLE.FileSystem
         public ulong Id => _cnmt.TitleId;
         public TitleVersion Version => _cnmt.TitleVersion;
         public ContentMetaType Type => _cnmt.Type;
-        public ulong ApplicationTitleId => _cnmt.ApplicationTitleId;
-        public ulong PatchTitleId => _cnmt.PatchTitleId;
+        public ulong ApplicationId => _cnmt.ApplicationTitleId;
+        public ulong PatchId => _cnmt.PatchTitleId;
         public TitleVersion RequiredSystemVersion => _cnmt.MinimumSystemVersion;
         public TitleVersion RequiredApplicationVersion => _cnmt.MinimumApplicationVersion;
         public byte[] Digest => _cnmt.Hash;
