@@ -8,10 +8,10 @@ namespace Ryujinx.Ava.UI.Models
         public ApplicationControlProperty Control { get; }
         public string Path { get; }
 
-        private bool IsXCI => System.IO.Path.GetExtension(Path)?.ToLower() == ".xci";
+        private bool IsXci => System.IO.Path.GetExtension(Path)?.ToLower() == ".xci";
 
         public string Label => LocaleManager.Instance.UpdateAndGetDynamicValue(
-            IsXCI ? LocaleKeys.TitleBundledUpdateVersionLabel : LocaleKeys.TitleUpdateVersionLabel,
+            IsXci ? LocaleKeys.TitleBundledUpdateVersionLabel : LocaleKeys.TitleUpdateVersionLabel,
             Control.DisplayVersionString.ToString()
         );
 

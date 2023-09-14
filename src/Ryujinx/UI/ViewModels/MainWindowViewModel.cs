@@ -96,7 +96,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private bool _canUpdate = true;
         private Cursor _cursor;
         private string _title;
-        private ApplicationData _currentEmulatedApplication;
+        private ApplicationData _currentApplicationData;
         private readonly AutoResetEvent _rendererWaitEvent;
         private WindowState _windowState;
         private double _windowWidth;
@@ -106,6 +106,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public ApplicationData ListSelectedApplication;
         public ApplicationData GridSelectedApplication;
+
         internal AppHost AppHost { get; set; }
 
         public MainWindowViewModel()
@@ -1107,7 +1108,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                                 IsLoadingIndeterminate = false;
                                 break;
                             case LoadState.Loaded:
-                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentEmulatedApplication.Name);
+                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentApplicationData.Name);
                                 IsLoadingIndeterminate = true;
                                 CacheLoadStatus = "";
                                 break;
@@ -1127,7 +1128,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                                 IsLoadingIndeterminate = false;
                                 break;
                             case ShaderCacheLoadingState.Loaded:
-                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentEmulatedApplication.Name);
+                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentApplicationData.Name);
                                 IsLoadingIndeterminate = true;
                                 CacheLoadStatus = "";
                                 break;
@@ -1178,13 +1179,13 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 UserChannelPersistence.ShouldRestart = false;
 
-                await LoadApplication(_currentEmulatedApplication);
+                await LoadApplication(_currentApplicationData);
             }
             else
             {
                 // Otherwise, clear state.
                 UserChannelPersistence = new UserChannelPersistence();
-                _currentEmulatedApplication = null;
+                _currentApplicationData = null;
             }
         }
 
@@ -1548,7 +1549,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             SwitchToRenderer(startFullscreen);
 
-            _currentEmulatedApplication = application;
+            _currentApplicationData = application;
 
             Thread gameThread = new(InitializeGame) { Name = "GUI.WindowThread" };
             gameThread.Start();

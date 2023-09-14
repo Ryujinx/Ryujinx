@@ -39,7 +39,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private AvaloniaList<DownloadableContentModel> _selectedDownloadableContents = new();
 
         private string _search;
-        private readonly ApplicationData _title;
+        private readonly ApplicationData _applicationData;
         private readonly IStorageProvider _storageProvider;
 
         private static readonly DownloadableContentJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
@@ -96,7 +96,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         {
             _virtualFileSystem = virtualFileSystem;
 
-            _title = applicationData;
+            _applicationData = applicationData;
 
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -108,6 +108,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             if (!File.Exists(_downloadableContentJsonPath))
             {
                 _downloadableContentContainerList = new List<DownloadableContentContainer>();
+
                 Save();
             }
 
@@ -126,8 +127,8 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void LoadDownloadableContents()
         {
-            // Try to load DLCs from PFS first
-            AddDownloadableContent(_title.Path);
+            // NOTE: Try to load downloadable contents from PFS0 first.
+            AddDownloadableContent(_applicationData.Path);
 
             foreach (DownloadableContentContainer downloadableContentContainer in _downloadableContentContainerList)
             {
@@ -274,7 +275,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 if (nca.Header.ContentType == NcaContentType.PublicData)
                 {
-                    if (nca.GetProgramIdBase() != (_title.IdBase))
+                    if (nca.GetProgramIdBase() != (_applicationData.IdBase))
                     {
                         break;
                     }

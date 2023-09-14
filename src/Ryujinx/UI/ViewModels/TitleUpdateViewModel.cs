@@ -37,7 +37,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public TitleUpdateMetadata TitleUpdateWindowData;
         public readonly string TitleUpdateJsonPath;
         private VirtualFileSystem VirtualFileSystem { get; }
-        private ApplicationData Title { get; }
+        private ApplicationData ApplicationData { get; }
 
         private AvaloniaList<TitleUpdateModel> _titleUpdates = new();
         private AvaloniaList<object> _views = new();
@@ -81,14 +81,14 @@ namespace Ryujinx.Ava.UI.ViewModels
         {
             VirtualFileSystem = virtualFileSystem;
 
-            Title = applicationData;
+            ApplicationData = applicationData;
 
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 StorageProvider = desktop.MainWindow.StorageProvider;
             }
 
-            TitleUpdateJsonPath = Path.Combine(AppDataManager.GamesDirPath, Title.IdString, "updates.json");
+            TitleUpdateJsonPath = Path.Combine(AppDataManager.GamesDirPath, ApplicationData.IdString, "updates.json");
 
             try
             {
@@ -96,7 +96,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
             catch
             {
-                Logger.Warning?.Print(LogClass.Application, $"Failed to deserialize title update data for {Title.IdString} at {TitleUpdateJsonPath}");
+                Logger.Warning?.Print(LogClass.Application, $"Failed to deserialize title update data for {ApplicationData.IdString} at {TitleUpdateJsonPath}");
 
                 TitleUpdateWindowData = new TitleUpdateMetadata
                 {
@@ -113,7 +113,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private void LoadUpdates()
         {
             // Try to load updates from PFS first
-            AddUpdate(Title.Path, true);
+            AddUpdate(ApplicationData.Path, true);
 
             foreach (string path in TitleUpdateWindowData.Paths)
             {
@@ -199,7 +199,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(Title.Id, out ContentCollection content))
+                    if (updates.TryGetValue(ApplicationData.Id, out ContentCollection content))
                     {
                         patchNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Program);
                         controlNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Control);

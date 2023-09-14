@@ -171,7 +171,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                 return (true, mainNca.Load(device, patchNca, controlNca));
             }
 
-            errorMessage = $"Unable to load: Could not find Main NCA for title '{titleId:x16}'";
+            errorMessage = $"Unable to load: Could not find Main NCA for title \"{titleId:X16}\"";
 
             return (false, ProcessResult.Failed);
         }

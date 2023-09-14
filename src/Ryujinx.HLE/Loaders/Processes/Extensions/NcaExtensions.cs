@@ -258,11 +258,11 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     return new Cnmt(cnmtFile.Release().AsStream());
                 }
             }
-            catch (HorizonResultException e)
+            catch (HorizonResultException ex)
             {
-                if (!ResultFs.PathNotFound.Includes(e.ResultValue))
+                if (!ResultFs.PathNotFound.Includes(ex.ResultValue))
                 {
-                    Logger.Warning?.Print(LogClass.Application, $"Failed get cnmt for '{cnmtNca.Header.TitleId:x16}' from nca: {e.Message}");
+                    Logger.Warning?.Print(LogClass.Application, $"Failed get cnmt for '{cnmtNca.Header.TitleId:x16}' from nca: {ex.Message}");
                 }
             }
 
