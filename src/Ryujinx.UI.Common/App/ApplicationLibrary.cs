@@ -89,8 +89,8 @@ namespace Ryujinx.UI.App.Common
                 {
                     Npdm npdm = new(npdmFile.Get.AsStream());
 
-                    data.TitleName = npdm.TitleName;
-                    data.TitleId = npdm.Aci0.TitleId;
+                    data.Name = npdm.TitleName;
+                    data.Id = npdm.Aci0.TitleId;
                 }
 
                 return data;
@@ -170,7 +170,7 @@ namespace Ryujinx.UI.App.Common
             {
                 ApplicationData applicationData = new()
                 {
-                    TitleId = titleId,
+                    Id = titleId,
                 };
 
                 try
@@ -347,7 +347,7 @@ namespace Ryujinx.UI.App.Common
                                 else
                                 {
                                     application.Icon = _nroIcon;
-                                    application.TitleName = Path.GetFileNameWithoutExtension(applicationPath);
+                                    application.Name = Path.GetFileNameWithoutExtension(applicationPath);
                                 }
 
                                 application.ControlHolder = controlHolder;
@@ -376,7 +376,7 @@ namespace Ryujinx.UI.App.Common
                                 }
 
                                 application.Icon = _ncaIcon;
-                                application.TitleName = Path.GetFileNameWithoutExtension(applicationPath);
+                                application.Name = Path.GetFileNameWithoutExtension(applicationPath);
                                 application.ControlHolder = controlHolder;
 
                                 applications.Add(application);
@@ -400,7 +400,7 @@ namespace Ryujinx.UI.App.Common
                             ApplicationData application = new()
                             {
                                 Icon = _nsoIcon,
-                                TitleName = Path.GetFileNameWithoutExtension(applicationPath),
+                                Name = Path.GetFileNameWithoutExtension(applicationPath),
                             };
 
                             applications.Add(application);
@@ -417,9 +417,9 @@ namespace Ryujinx.UI.App.Common
 
             foreach (var data in applications)
             {
-                ApplicationMetadata appMetadata = LoadAndSaveMetaData(data.TitleIdString, appMetadata =>
+                ApplicationMetadata appMetadata = LoadAndSaveMetaData(data.IdString, appMetadata =>
                 {
-                    appMetadata.Title = data.TitleName;
+                    appMetadata.Title = data.Name;
 
                     // Only do the migration if time_played has a value and timespan_played hasn't been updated yet.
                     if (appMetadata.TimePlayedOld != default && appMetadata.TimePlayed == TimeSpan.Zero)
@@ -826,22 +826,22 @@ namespace Ryujinx.UI.App.Common
 
             if (controlData.Title.ItemsRo.Length > (int)desiredTitleLanguage)
             {
-                data.TitleName = controlData.Title[(int)desiredTitleLanguage].NameString.ToString();
+                data.Name = controlData.Title[(int)desiredTitleLanguage].NameString.ToString();
                 data.Developer = controlData.Title[(int)desiredTitleLanguage].PublisherString.ToString();
             }
             else
             {
-                data.TitleName = null;
+                data.Name = null;
                 data.Developer = null;
             }
 
-            if (string.IsNullOrWhiteSpace(data.TitleName))
+            if (string.IsNullOrWhiteSpace(data.Name))
             {
                 foreach (ref readonly var controlTitle in controlData.Title.ItemsRo)
                 {
                     if (!controlTitle.NameString.IsEmpty())
                     {
-                        data.TitleName = controlTitle.NameString.ToString();
+                        data.Name = controlTitle.NameString.ToString();
 
                         break;
                     }
@@ -863,15 +863,15 @@ namespace Ryujinx.UI.App.Common
 
             if (controlData.PresenceGroupId != 0)
             {
-                data.TitleId = controlData.PresenceGroupId;
+                data.Id = controlData.PresenceGroupId;
             }
             else if (controlData.SaveDataOwnerId != 0)
             {
-                data.TitleId = controlData.SaveDataOwnerId;
+                data.Id = controlData.SaveDataOwnerId;
             }
             else if (controlData.AddOnContentBaseId != 0)
             {
-                data.TitleId = (controlData.AddOnContentBaseId - 0x1000);
+                data.Id = (controlData.AddOnContentBaseId - 0x1000);
             }
 
             data.Version = controlData.DisplayVersionString.ToString();

@@ -51,7 +51,7 @@ namespace Ryujinx.UI.Windows
 
             _title = applicationData;
             _virtualFileSystem = virtualFileSystem;
-            _updateJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, applicationData.TitleIdString, "updates.json");
+            _updateJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, applicationData.IdString, "updates.json");
             _radioButtonToPathDictionary = new Dictionary<RadioButton, string>();
 
             try
@@ -67,7 +67,7 @@ namespace Ryujinx.UI.Windows
                 };
             }
 
-            _baseTitleInfoLabel.Text = $"Updates Available for {applicationData.TitleName} [{applicationData.TitleIdString}]";
+            _baseTitleInfoLabel.Text = $"Updates Available for {applicationData.Name} [{applicationData.IdString}]";
 
             // Try to get updates from PFS first
             AddUpdate(_title.Path, true);
@@ -120,7 +120,7 @@ namespace Ryujinx.UI.Windows
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(_title.TitleId, out ContentCollection update))
+                    if (updates.TryGetValue(_title.Id, out ContentCollection update))
                     {
                         patchNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Program);
                         controlNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Control);

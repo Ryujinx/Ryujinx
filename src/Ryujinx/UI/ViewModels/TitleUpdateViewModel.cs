@@ -88,7 +88,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                 StorageProvider = desktop.MainWindow.StorageProvider;
             }
 
-            TitleUpdateJsonPath = Path.Combine(AppDataManager.GamesDirPath, Title.TitleIdString, "updates.json");
+            TitleUpdateJsonPath = Path.Combine(AppDataManager.GamesDirPath, Title.IdString, "updates.json");
 
             try
             {
@@ -96,7 +96,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
             catch
             {
-                Logger.Warning?.Print(LogClass.Application, $"Failed to deserialize title update data for {Title.TitleIdString} at {TitleUpdateJsonPath}");
+                Logger.Warning?.Print(LogClass.Application, $"Failed to deserialize title update data for {Title.IdString} at {TitleUpdateJsonPath}");
 
                 TitleUpdateWindowData = new TitleUpdateMetadata
                 {
@@ -199,7 +199,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                     Nca patchNca = null;
                     Nca controlNca = null;
 
-                    if (updates.TryGetValue(Title.TitleId, out ContentCollection content))
+                    if (updates.TryGetValue(Title.Id, out ContentCollection content))
                     {
                         patchNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Program);
                         controlNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Control);

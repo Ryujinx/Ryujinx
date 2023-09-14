@@ -80,7 +80,7 @@
                                     <TextBlock
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Text="{Binding TitleName}"
+                                        Text="{Binding Name}"
                                         TextAlignment="Center"
                                         TextWrapping="Wrap" />
                                 </Panel>

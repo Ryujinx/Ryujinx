@@ -35,7 +35,7 @@ namespace Ryujinx.UI.Windows
                 : IntegrityCheckLevel.None;
 
             _baseTitleInfoLabel.Text = $"Cheats Available for {titleName} [{titleId:X16}]";
-            _buildIdTextView.Buffer.Text = $"BuildId: {ApplicationData.GetApplicationBuildId(virtualFileSystem, checkLevel, titlePath)}";
+            _buildIdTextView.Buffer.Text = $"BuildId: {ApplicationData.GetBuildId(virtualFileSystem, checkLevel, titlePath)}";
 
             string modsBasePath = ModLoader.GetModsBasePath();
             string titleModsPath = ModLoader.GetApplicationDir(modsBasePath, titleId.ToString("X16"));

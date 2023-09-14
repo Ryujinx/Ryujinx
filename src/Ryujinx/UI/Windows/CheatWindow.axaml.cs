@@ -41,7 +41,7 @@ namespace Ryujinx.Ava.UI.Windows
                 : IntegrityCheckLevel.None;
 
             Heading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.CheatWindowHeading, titleName, titleId.ToUpper());
-            BuildId = ApplicationData.GetApplicationBuildId(virtualFileSystem, checkLevel, titlePath);
+            BuildId = ApplicationData.GetBuildId(virtualFileSystem, checkLevel, titlePath);
 
             InitializeComponent();
 

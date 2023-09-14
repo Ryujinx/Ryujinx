@@ -940,8 +940,8 @@ namespace Ryujinx.Ava.UI.ViewModels
             return SortMode switch
             {
 #pragma warning disable IDE0055 // Disable formatting
-                ApplicationSort.Title           => IsAscending ? SortExpressionComparer<ApplicationData>.Ascending(app => app.TitleName)
-                                                               : SortExpressionComparer<ApplicationData>.Descending(app => app.TitleName),
+                ApplicationSort.Title           => IsAscending ? SortExpressionComparer<ApplicationData>.Ascending(app => app.Name)
+                                                               : SortExpressionComparer<ApplicationData>.Descending(app => app.Name),
                 ApplicationSort.Developer       => IsAscending ? SortExpressionComparer<ApplicationData>.Ascending(app => app.Developer)
                                                                : SortExpressionComparer<ApplicationData>.Descending(app => app.Developer),
                 ApplicationSort.LastPlayed      => new LastPlayedSortComparer(IsAscending),
@@ -978,7 +978,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         {
             if (arg is ApplicationData app)
             {
-                return string.IsNullOrWhiteSpace(_searchText) || app.TitleName.ToLower().Contains(_searchText.ToLower());
+                return string.IsNullOrWhiteSpace(_searchText) || app.Name.ToLower().Contains(_searchText.ToLower());
             }
 
             return false;
@@ -1107,7 +1107,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                                 IsLoadingIndeterminate = false;
                                 break;
                             case LoadState.Loaded:
-                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentEmulatedApplication.TitleName);
+                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentEmulatedApplication.Name);
                                 IsLoadingIndeterminate = true;
                                 CacheLoadStatus = "";
                                 break;
@@ -1127,7 +1127,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                                 IsLoadingIndeterminate = false;
                                 break;
                             case ShaderCacheLoadingState.Loaded:
-                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentEmulatedApplication.TitleName);
+                                LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, _currentEmulatedApplication.Name);
                                 IsLoadingIndeterminate = true;
                                 CacheLoadStatus = "";
                                 break;
@@ -1482,7 +1482,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 ApplicationData applicationData = new()
                 {
-                    TitleName = Path.GetFileNameWithoutExtension(result[0].Path.LocalPath),
+                    Name = Path.GetFileNameWithoutExtension(result[0].Path.LocalPath),
                     Path = result[0].Path.LocalPath,
                 };
 
@@ -1510,7 +1510,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             Logger.RestartTime();
 
-            SelectedIcon ??= ApplicationLibrary.GetApplicationIcon(application.Path, ConfigurationState.Instance.System.Language, application.TitleId);
+            SelectedIcon ??= ApplicationLibrary.GetApplicationIcon(application.Path, ConfigurationState.Instance.System.Language, application.Id);
 
             PrepareLoadScreen();
 
@@ -1520,7 +1520,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                 RendererHostControl,
                 InputManager,
                 application.Path,
-                application.TitleId,
+                application.Id,
                 VirtualFileSystem,
                 ContentManager,
                 AccountManager,
@@ -1538,12 +1538,12 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             CanUpdate = false;
 
-            LoadHeading = application.TitleName;
+            LoadHeading = application.Name;
 
-            if (string.IsNullOrWhiteSpace(application.TitleName))
+            if (string.IsNullOrWhiteSpace(application.Name))
             {
                 LoadHeading = LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.LoadingHeading, AppHost.Device.Processes.ActiveApplication.Name);
-                application.TitleName = AppHost.Device.Processes.ActiveApplication.Name;
+                application.Name = AppHost.Device.Processes.ActiveApplication.Name;
             }
 
             SwitchToRenderer(startFullscreen);

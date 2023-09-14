@@ -123,7 +123,7 @@ namespace Ryujinx.UI.Widgets
 
         private void OpenSaveDir(in SaveDataFilter saveDataFilter)
         {
-            if (!TryFindSaveData(_title.TitleName, _title.TitleId, _title.ControlHolder, in saveDataFilter, out ulong saveDataId))
+            if (!TryFindSaveData(_title.Name, _title.Id, _title.ControlHolder, in saveDataFilter, out ulong saveDataId))
             {
                 return;
             }
@@ -450,21 +450,21 @@ namespace Ryujinx.UI.Widgets
         private void OpenSaveUserDir_Clicked(object sender, EventArgs args)
         {
             var userId = new LibHac.Fs.UserId((ulong)_accountManager.LastOpenedUser.UserId.High, (ulong)_accountManager.LastOpenedUser.UserId.Low);
-            var saveDataFilter = SaveDataFilter.Make(_title.TitleId, saveType: default, userId, saveDataId: default, index: default);
+            var saveDataFilter = SaveDataFilter.Make(_title.Id, saveType: default, userId, saveDataId: default, index: default);
 
             OpenSaveDir(in saveDataFilter);
         }
 
         private void OpenSaveDeviceDir_Clicked(object sender, EventArgs args)
         {
-            var saveDataFilter = SaveDataFilter.Make(_title.TitleId, SaveDataType.Device, userId: default, saveDataId: default, index: default);
+            var saveDataFilter = SaveDataFilter.Make(_title.Id, SaveDataType.Device, userId: default, saveDataId: default, index: default);
 
             OpenSaveDir(in saveDataFilter);
         }
 
         private void OpenSaveBcatDir_Clicked(object sender, EventArgs args)
         {
-            var saveDataFilter = SaveDataFilter.Make(_title.TitleId, SaveDataType.Bcat, userId: default, saveDataId: default, index: default);
+            var saveDataFilter = SaveDataFilter.Make(_title.Id, SaveDataType.Bcat, userId: default, saveDataId: default, index: default);
 
             OpenSaveDir(in saveDataFilter);
         }
@@ -476,18 +476,18 @@ namespace Ryujinx.UI.Widgets
 
         private void ManageDlc_Clicked(object sender, EventArgs args)
         {
-            new DlcWindow(_virtualFileSystem, _title.TitleIdString, _title.TitleName).Show();
+            new DlcWindow(_virtualFileSystem, _title.IdString, _title.Name).Show();
         }
 
         private void ManageCheats_Clicked(object sender, EventArgs args)
         {
-            new CheatWindow(_virtualFileSystem, _title.TitleId, _title.TitleName, _title.Path).Show();
+            new CheatWindow(_virtualFileSystem, _title.Id, _title.Name, _title.Path).Show();
         }
 
         private void OpenTitleModDir_Clicked(object sender, EventArgs args)
         {
             string modsBasePath = ModLoader.GetModsBasePath();
-            string titleModsPath = ModLoader.GetApplicationDir(modsBasePath, _title.TitleIdString);
+            string titleModsPath = ModLoader.GetApplicationDir(modsBasePath, _title.IdString);
 
             OpenHelper.OpenFolder(titleModsPath);
         }
@@ -495,7 +495,7 @@ namespace Ryujinx.UI.Widgets
         private void OpenTitleSdModDir_Clicked(object sender, EventArgs args)
         {
             string sdModsBasePath = ModLoader.GetSdModsBasePath();
-            string titleModsPath = ModLoader.GetApplicationDir(sdModsBasePath, _title.TitleIdString);
+            string titleModsPath = ModLoader.GetApplicationDir(sdModsBasePath, _title.IdString);
 
             OpenHelper.OpenFolder(titleModsPath);
         }
@@ -517,7 +517,7 @@ namespace Ryujinx.UI.Widgets
 
         private void OpenPtcDir_Clicked(object sender, EventArgs args)
         {
-            string ptcDir = System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.TitleIdString, "cache", "cpu");
+            string ptcDir = System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.IdString, "cache", "cpu");
 
             string mainPath = System.IO.Path.Combine(ptcDir, "0");
             string backupPath = System.IO.Path.Combine(ptcDir, "1");
@@ -534,7 +534,7 @@ namespace Ryujinx.UI.Widgets
 
         private void OpenShaderCacheDir_Clicked(object sender, EventArgs args)
         {
-            string shaderCacheDir = System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.TitleIdString, "cache", "shader");
+            string shaderCacheDir = System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.IdString, "cache", "shader");
 
             if (!Directory.Exists(shaderCacheDir))
             {
@@ -546,10 +546,10 @@ namespace Ryujinx.UI.Widgets
 
         private void PurgePtcCache_Clicked(object sender, EventArgs args)
         {
-            DirectoryInfo mainDir = new(System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.TitleIdString, "cache", "cpu", "0"));
-            DirectoryInfo backupDir = new(System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.TitleIdString, "cache", "cpu", "1"));
+            DirectoryInfo mainDir = new(System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.IdString, "cache", "cpu", "0"));
+            DirectoryInfo backupDir = new(System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.IdString, "cache", "cpu", "1"));
 
-            MessageDialog warningDialog = GtkDialog.CreateConfirmationDialog("Warning", $"You are about to queue a PPTC rebuild on the next boot of:\n\n<b>{_title.TitleName}</b>\n\nAre you sure you want to proceed?");
+            MessageDialog warningDialog = GtkDialog.CreateConfirmationDialog("Warning", $"You are about to queue a PPTC rebuild on the next boot of:\n\n<b>{_title.Name}</b>\n\nAre you sure you want to proceed?");
 
             List<FileInfo> cacheFiles = new();
 
@@ -583,9 +583,9 @@ namespace Ryujinx.UI.Widgets
 
         private void PurgeShaderCache_Clicked(object sender, EventArgs args)
         {
-            DirectoryInfo shaderCacheDir = new(System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.TitleIdString, "cache", "shader"));
+            DirectoryInfo shaderCacheDir = new(System.IO.Path.Combine(AppDataManager.GamesDirPath, _title.IdString, "cache", "shader"));
 
-            using MessageDialog warningDialog = GtkDialog.CreateConfirmationDialog("Warning", $"You are about to delete the shader cache for :\n\n<b>{_title.TitleName}</b>\n\nAre you sure you want to proceed?");
+            using MessageDialog warningDialog = GtkDialog.CreateConfirmationDialog("Warning", $"You are about to delete the shader cache for :\n\n<b>{_title.Name}</b>\n\nAre you sure you want to proceed?");
 
             List<DirectoryInfo> oldCacheDirectories = new();
             List<FileInfo> newCacheFiles = new();
@@ -630,8 +630,8 @@ namespace Ryujinx.UI.Widgets
             IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
                 ? IntegrityCheckLevel.ErrorOnInvalid
                 : IntegrityCheckLevel.None;
-            byte[] appIcon = new ApplicationLibrary(_virtualFileSystem, checkLevel).GetApplicationIcon(_title.Path, ConfigurationState.Instance.System.Language, _title.TitleId);
-            ShortcutHelper.CreateAppShortcut(_title.Path, _title.TitleName, _title.TitleIdString, appIcon);
+            byte[] appIcon = new ApplicationLibrary(_virtualFileSystem, checkLevel).GetApplicationIcon(_title.Path, ConfigurationState.Instance.System.Language, _title.Id);
+            ShortcutHelper.CreateAppShortcut(_title.Path, _title.Name, _title.IdString, appIcon);
         }
     }
 }

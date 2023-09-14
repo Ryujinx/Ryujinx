@@ -21,8 +21,8 @@ namespace Ryujinx.UI.App.Common
     {
         public bool Favorite { get; set; }
         public byte[] Icon { get; set; }
-        public string TitleName { get; set; } = "Unknown";
-        public ulong TitleId { get; set; }
+        public string Name { get; set; } = "Unknown";
+        public ulong Id { get; set; }
         public string Developer { get; set; } = "Unknown";
         public string Version { get; set; } = "0";
         public TimeSpan TimePlayed { get; set; }
@@ -38,11 +38,11 @@ namespace Ryujinx.UI.App.Common
 
         public string FileSizeString => ValueFormatUtils.FormatFileSize(FileSize);
 
-        [JsonIgnore] public string TitleIdString => TitleId.ToString("x16");
+        [JsonIgnore] public string IdString => Id.ToString("x16");
 
-        [JsonIgnore] public ulong TitleIdBase => TitleId & ~0x1FFFUL;
+        [JsonIgnore] public ulong IdBase => Id & ~0x1FFFUL;
 
-        public static string GetApplicationBuildId(VirtualFileSystem virtualFileSystem, IntegrityCheckLevel checkLevel, string titleFilePath)
+        public static string GetBuildId(VirtualFileSystem virtualFileSystem, IntegrityCheckLevel checkLevel, string titleFilePath)
         {
             using FileStream file = new(titleFilePath, FileMode.Open, FileAccess.Read);
 

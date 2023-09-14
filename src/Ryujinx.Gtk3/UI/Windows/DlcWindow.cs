@@ -22,7 +22,7 @@ namespace Ryujinx.UI.Windows
     public class DlcWindow : Window
     {
         private readonly VirtualFileSystem _virtualFileSystem;
-        private readonly string _titleId;
+        private readonly string _applicationId;
         private readonly string _dlcJsonPath;
         private readonly List<DownloadableContentContainer> _dlcContainerList;
 
@@ -36,14 +36,14 @@ namespace Ryujinx.UI.Windows
 
         public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, string titleName) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, titleName) { }
 
-        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string titleId, string titleName) : base(builder.GetRawOwnedObject("_dlcWindow"))
+        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string applicationId, string titleName) : base(builder.GetRawOwnedObject("_dlcWindow"))
         {
             builder.Autoconnect(this);
 
-            _titleId = titleId;
+            _applicationId = applicationId;
             _virtualFileSystem = virtualFileSystem;
-            _dlcJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _titleId, "dlc.json");
-            _baseTitleInfoLabel.Text = $"DLC Available for {titleName} [{titleId.ToUpper()}]";
+            _dlcJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _applicationId, "dlc.json");
+            _baseTitleInfoLabel.Text = $"DLC Available for {titleName} [{applicationId.ToUpper()}]";
 
             try
             {
@@ -74,7 +74,7 @@ namespace Ryujinx.UI.Windows
             };
 
             _dlcTreeView.AppendColumn("Enabled", enableToggle, "active", 0);
-            _dlcTreeView.AppendColumn("TitleId", new CellRendererText(), "text", 1);
+            _dlcTreeView.AppendColumn("ApplicationId", new CellRendererText(), "text", 1);
             _dlcTreeView.AppendColumn("Path", new CellRendererText(), "text", 2);
 
             foreach (DownloadableContentContainer dlcContainer in _dlcContainerList)
@@ -179,7 +179,7 @@ namespace Ryujinx.UI.Windows
 
                         if (nca.Header.ContentType == NcaContentType.PublicData)
                         {
-                            if (nca.GetProgramIdBase() != (ulong.Parse(_titleId, NumberStyles.HexNumber) & ~0x1FFFUL))
+                            if (nca.GetProgramIdBase() != (ulong.Parse(_applicationId, NumberStyles.HexNumber) & ~0x1FFFUL))
                             {
                                 break;
                             }

@@ -136,8 +136,8 @@ namespace Ryujinx.Ava.UI.Views.Main
             {
                 ApplicationData applicationData = new()
                 {
-                    TitleName = "miiEdit",
-                    TitleId = 0x0100000000001009ul,
+                    Name = "miiEdit",
+                    Id = 0x0100000000001009ul,
                     Path = contentPath,
                 };
 
