@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Image = SixLabors.ImageSharp.Image;
 using Key = Ryujinx.Input.Key;
+using PresentIntervalState = Ryujinx.Graphics.GAL.PresentIntervalState;
 using ScalingFilter = Ryujinx.Graphics.GAL.ScalingFilter;
 using Switch = Ryujinx.HLE.Switch;
 
@@ -455,7 +456,7 @@ namespace Ryujinx.UI
                 Device.Gpu.SetGpuThread();
                 Device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
 
-                Renderer.Window.ChangeVSyncMode(Device.EnableDeviceVsync);
+                Renderer.Window.ChangePresentIntervalState(Device.EnableDeviceVsync ? PresentIntervalState.Switch : PresentIntervalState.Unbounded);
 
                 (Toplevel as MainWindow)?.ActivatePauseMenu();
 
@@ -492,7 +493,7 @@ namespace Ryujinx.UI
                         }
 
                         StatusUpdatedEvent?.Invoke(this, new StatusUpdatedEventArgs(
-                            Device.EnableDeviceVsync,
+                            Device.EnableDeviceVsync ? PresentIntervalState.Switch.ToString() : PresentIntervalState.Unbounded.ToString(),
                             Device.GetVolume(),
                             _gpuBackendName,
                             dockedMode,
@@ -757,7 +758,7 @@ namespace Ryujinx.UI
         {
             KeyboardHotkeyState state = KeyboardHotkeyState.None;
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ToggleVsync))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.PresentIntervalState))
             {
                 state |= KeyboardHotkeyState.ToggleVSync;
             }

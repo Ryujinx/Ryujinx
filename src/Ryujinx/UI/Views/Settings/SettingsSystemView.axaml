@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
@@ -181,10 +182,67 @@
                             Width="350"
                             ToolTip.Tip="{locale:Locale TimeTooltip}" />
                     </StackPanel>
-                    <CheckBox IsChecked="{Binding EnableVsync}">
+                    <StackPanel Margin="0,0,0,10"
+                                Orientation="Horizontal">
                         <TextBlock
-                            Text="{locale:Locale SettingsTabSystemEnableVsync}"
-                            ToolTip.Tip="{locale:Locale VSyncToggleTooltip}" />
+                            VerticalAlignment="Center"
+                            Text="{locale:Locale SettingsTabSystemPresentIntervalState}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemPresentIntervalStateTooltip}"
+                            Width="250" />
+                        <ComboBox
+                            SelectedIndex="{Binding PresentIntervalState}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemPresentIntervalStateTooltip}"
+                            HorizontalContentAlignment="Left"
+                            Width="350">
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemPresentIntervalStateSwitch}" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemPresentIntervalStateUnbounded}" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemPresentIntervalStateCustom}" />
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding EnableCustomPresentInterval}"
+                                Margin="0,0,0,10"
+                                Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{locale:Locale SettingsTabSystemCustomPresentIntervalValue}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemCustomPresentIntervalValueTooltip}"
+                            Width="250" />
+                        <ui:NumberBox IsVisible="{Binding EnableCustomPresentInterval}"
+                                      ToolTip.Tip="{locale:Locale SettingsTabSystemCustomPresentIntervalValueTooltip}"
+                                      Value="{Binding CustomPresentInterval}"
+                                      Width="165"
+                                      SmallChange="1.0"
+                                      LargeChange="10"
+                                      SimpleNumberFormat="F0"
+                                      SpinButtonPlacementMode="Hidden"
+                                      Minimum="10"
+                                      Maximum="1000" />
+                        <Slider Value="{Binding CustomPresentIntervalPercentageProxy}"
+                                ToolTip.Tip="{locale:Locale SettingsTabSystemCustomPresentIntervalSliderTooltip}"
+                                MinWidth="175"
+                                Margin="10,-3,0,0"
+                                Height="32"
+                                Padding="0,-5"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                LargeChange="10"
+                                SmallChange="1"
+                                VerticalAlignment="Center"
+                                Minimum="10"
+                                Maximum="400" />
+                        <TextBlock Margin="5,0"
+                                   Width="40"
+                                   Text="{Binding CustomPresentIntervalPercentageText}"/>
+                    </StackPanel>
+                    <CheckBox IsChecked="{Binding EnableCustomPresentInterval}"
+                              ToolTip.Tip="{locale:Locale SettingsTabSystemEnableCustomPresentIntervalTooltip}">
+                        <TextBlock Text="{locale:Locale SettingsTabSystemEnableCustomPresentInterval}" />
                     </CheckBox>
                     <CheckBox IsChecked="{Binding EnableFsIntegrityChecks}">
                         <TextBlock

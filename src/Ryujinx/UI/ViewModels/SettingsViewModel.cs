@@ -7,6 +7,7 @@ using Ryujinx.Audio.Backends.SDL2;
 using Ryujinx.Audio.Backends.SoundIo;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Helpers;
+using Ryujinx.Ava.UI.Views.Main;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Hid;
@@ -50,6 +51,10 @@ namespace Ryujinx.Ava.UI.ViewModels
         private int _graphicsBackendIndex;
         private int _scalingFilter;
         private int _scalingFilterLevel;
+        private int _customPresentInterval;
+        private bool _enableCustomPresentInterval;
+        private int _customPresentIntervalPercentageProxy;
+        private PresentIntervalState _presentIntervalState;
 
         public event Action CloseWindow;
         public event Action SaveSettingsEvent;
@@ -136,7 +141,75 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool EnableDockedMode { get; set; }
         public bool EnableKeyboard { get; set; }
         public bool EnableMouse { get; set; }
-        public bool EnableVsync { get; set; }
+        public PresentIntervalState PresentIntervalState
+        {
+            get => _presentIntervalState;
+            set
+            {
+                if (value == PresentIntervalState.Custom)
+                {
+                    EnableCustomPresentInterval = true;
+                }
+                _presentIntervalState = value;
+                OnPropertyChanged();
+                OnPropertyChanged((nameof(EnableCustomPresentInterval)));
+            }
+        }
+
+        public int CustomPresentIntervalPercentageProxy
+        {
+            get => _customPresentIntervalPercentageProxy;
+            set
+            {
+                int newInterval = (int)(((decimal)value / 100) * 60);
+                _customPresentInterval = newInterval;
+                _customPresentIntervalPercentageProxy = value;
+                OnPropertyChanged((nameof(CustomPresentInterval)));
+                OnPropertyChanged((nameof(CustomPresentIntervalPercentageText)));
+            }
+        }
+
+        public string CustomPresentIntervalPercentageText
+        {
+            get
+            {
+                string text = CustomPresentIntervalPercentageProxy.ToString() + "%";
+                return text;
+            }
+            set
+            {
+
+            }
+        }
+
+        public bool EnableCustomPresentInterval
+        {
+            get => _enableCustomPresentInterval;
+            set
+            {
+                _enableCustomPresentInterval = value;
+                if (_presentIntervalState == PresentIntervalState.Custom && value == false)
+                {
+                    PresentIntervalState = PresentIntervalState.Switch;
+                    OnPropertyChanged(nameof(PresentIntervalState));
+                }
+                OnPropertyChanged();
+            }
+        }
+
+        public int CustomPresentInterval
+        {
+            get => _customPresentInterval;
+            set
+            {
+                _customPresentInterval = value;
+                int newPercent = (int)(((decimal)value / 60) * 100);
+                _customPresentIntervalPercentageProxy = newPercent;
+                OnPropertyChanged(nameof(CustomPresentIntervalPercentageProxy));
+                OnPropertyChanged(nameof(CustomPresentIntervalPercentageText));
+                OnPropertyChanged();
+            }
+        }
         public bool EnablePptc { get; set; }
         public bool EnableInternetAccess { get; set; }
         public bool EnableFsIntegrityChecks { get; set; }
@@ -430,7 +503,9 @@ namespace Ryujinx.Ava.UI.ViewModels
             CurrentDate = currentDateTime.Date;
             CurrentTime = currentDateTime.TimeOfDay.Add(TimeSpan.FromSeconds(config.System.SystemTimeOffset));
 
-            EnableVsync = config.Graphics.EnableVsync;
+            EnableCustomPresentInterval = config.Graphics.EnableCustomPresentInterval.Value;
+            CustomPresentInterval = config.Graphics.CustomPresentInterval;
+            PresentIntervalState = config.Graphics.PresentIntervalState;
             EnableFsIntegrityChecks = config.System.EnableFsIntegrityChecks;
             ExpandDramSize = config.System.ExpandRam;
             IgnoreMissingServices = config.System.IgnoreMissingServices;
@@ -442,7 +517,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             // Graphics
             GraphicsBackendIndex = (int)config.Graphics.GraphicsBackend.Value;
-            // Physical devices are queried asynchronously hence the prefered index config value is loaded in LoadAvailableGpus().
+            // Physical devices are queried asynchronously hence the preferred index config value is loaded in LoadAvailableGpus().
             EnableShaderCache = config.Graphics.EnableShaderCache;
             EnableTextureRecompression = config.Graphics.EnableTextureRecompression;
             EnableMacroHLE = config.Graphics.EnableMacroHLE;
@@ -517,7 +592,9 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
 
             config.System.SystemTimeOffset.Value = Convert.ToInt64((CurrentDate.ToUnixTimeSeconds() + CurrentTime.TotalSeconds) - DateTimeOffset.Now.ToUnixTimeSeconds());
-            config.Graphics.EnableVsync.Value = EnableVsync;
+            config.Graphics.PresentIntervalState.Value = PresentIntervalState;
+            config.Graphics.EnableCustomPresentInterval.Value = EnableCustomPresentInterval;
+            config.Graphics.CustomPresentInterval.Value = CustomPresentInterval;
             config.System.EnableFsIntegrityChecks.Value = EnableFsIntegrityChecks;
             config.System.ExpandRam.Value = ExpandDramSize;
             config.System.IgnoreMissingServices.Value = IgnoreMissingServices;
@@ -583,6 +660,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
             MainWindow.UpdateGraphicsConfig();
+            MainWindow.MainWindowViewModel.PresentIntervalStateSettingChanged();
 
             SaveSettingsEvent?.Invoke();
 

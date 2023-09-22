@@ -9,6 +9,7 @@ using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.HLE.UI;
 using System;
+using PresentIntervalState = Ryujinx.Common.Configuration.PresentIntervalState;
 
 namespace Ryujinx.HLE
 {
@@ -84,9 +85,14 @@ namespace Ryujinx.HLE
         internal readonly RegionCode Region;
 
         /// <summary>
-        /// Control the initial state of the vertical sync in the SurfaceFlinger service.
+        /// Control the initial state of the present interval in the SurfaceFlinger service (previously Vsync).
         /// </summary>
-        internal readonly bool EnableVsync;
+        internal readonly PresentIntervalState PresentIntervalState;
+
+        /// <summary>
+        /// Control the custom present interval, if enabled and active.
+        /// </summary>
+        internal readonly int CustomPresentInterval;
 
         /// <summary>
         /// Control the initial state of the docked mode.
@@ -180,7 +186,7 @@ namespace Ryujinx.HLE
                                 IHostUIHandler hostUIHandler,
                                 SystemLanguage systemLanguage,
                                 RegionCode region,
-                                bool enableVsync,
+                                PresentIntervalState presentIntervalState,
                                 bool enableDockedMode,
                                 bool enablePtc,
                                 bool enableInternetAccess,
@@ -194,7 +200,9 @@ namespace Ryujinx.HLE
                                 float audioVolume,
                                 bool useHypervisor,
                                 string multiplayerLanInterfaceId,
-                                MultiplayerMode multiplayerMode)
+                                MultiplayerMode multiplayerMode,
+                                //bool enableCustomPresentInterval,
+                                int customPresentInterval)
         {
             VirtualFileSystem = virtualFileSystem;
             LibHacHorizonManager = libHacHorizonManager;
@@ -207,7 +215,9 @@ namespace Ryujinx.HLE
             HostUIHandler = hostUIHandler;
             SystemLanguage = systemLanguage;
             Region = region;
-            EnableVsync = enableVsync;
+            PresentIntervalState = presentIntervalState;
+            //EnableCustomPresentInterval = enableCustomPresentInterval;
+            CustomPresentInterval = customPresentInterval;
             EnableDockedMode = enableDockedMode;
             EnablePtc = enablePtc;
             EnableInternetAccess = enableInternetAccess;

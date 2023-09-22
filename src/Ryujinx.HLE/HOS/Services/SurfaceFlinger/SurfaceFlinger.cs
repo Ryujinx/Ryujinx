@@ -10,13 +10,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using PresentIntervalState = Ryujinx.Common.Configuration.PresentIntervalState;
 
 namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 {
     class SurfaceFlinger : IConsumerListener, IDisposable
     {
-        private const int TargetFps = 60;
-
         private readonly Switch _device;
 
         private readonly Dictionary<long, Layer> _layers;
@@ -34,6 +33,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 
         private int _swapInterval;
         private int _swapIntervalDelay;
+        private bool _targetPresentIntervalChanged = true;
 
         private readonly object _lock = new();
 
@@ -58,6 +58,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
         public SurfaceFlinger(Switch device)
         {
             _device = device;
+            _device.TargetPresentIntervalChanged += () => _targetPresentIntervalChanged = true;
             _layers = new Dictionary<long, Layer>();
             RenderLayerId = 0;
 
@@ -81,14 +82,18 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
             _swapInterval = swapInterval;
 
             // If the swap interval is 0, Game VSync is disabled.
-            if (_swapInterval == 0)
+            if (_targetPresentIntervalChanged)
             {
-                _nextFrameEvent.Set();
-                _ticksPerFrame = 1;
-            }
-            else
-            {
-                _ticksPerFrame = Stopwatch.Frequency / TargetFps;
+                _targetPresentIntervalChanged = false;
+                if (_swapInterval == 0)
+                {
+                    _nextFrameEvent.Set();
+                    _ticksPerFrame = 1;
+                }
+                else
+                {
+                    _ticksPerFrame = Stopwatch.Frequency / (long)_device.TargetPresentInterval;
+                }
             }
         }
 
@@ -371,14 +376,11 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
                 if (acquireStatus == Status.Success)
                 {
                     // If device vsync is disabled, reflect the change.
-                    if (!_device.EnableDeviceVsync)
+                    if (_device.PresentIntervalState == PresentIntervalState.Unbounded)
                     {
-                        if (_swapInterval != 0)
-                        {
-                            UpdateSwapInterval(0);
-                        }
+                        UpdateSwapInterval(0);
                     }
-                    else if (item.SwapInterval != _swapInterval)
+                    else
                     {
                         UpdateSwapInterval(item.SwapInterval);
                     }

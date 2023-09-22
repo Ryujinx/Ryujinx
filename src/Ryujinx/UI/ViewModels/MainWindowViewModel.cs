@@ -58,6 +58,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private string _searchText;
         private Timer _searchTimer;
         private string _dockedStatusText;
+        private string _presentIntervalStateText;
         private string _fifoStatusText;
         private string _gameStatusText;
         private string _volumeStatusText;
@@ -73,7 +74,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private bool _showStatusSeparator;
         private Brush _progressBarForegroundColor;
         private Brush _progressBarBackgroundColor;
-        private Brush _vsyncColor;
+        private Brush _presentIntervalStateColor;
         private byte[] _selectedIcon;
         private bool _isAppletMenuActive;
         private int _statusBarProgressMaximum;
@@ -101,6 +102,10 @@ namespace Ryujinx.Ava.UI.ViewModels
         private WindowState _windowState;
         private double _windowWidth;
         private double _windowHeight;
+        private int _customPresentInterval;
+        private int _customPresentIntervalPercentageProxy;
+
+
 
         private bool _isActive;
 
@@ -127,6 +132,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 Volume = ConfigurationState.Instance.System.AudioVolume;
             }
+            CustomPresentInterval = ConfigurationState.Instance.Graphics.CustomPresentInterval.Value;
         }
 
         public void Initialize(
@@ -403,13 +409,85 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public Brush VsyncColor
+        public Brush PresentIntervalStateColor
         {
-            get => _vsyncColor;
+            get => _presentIntervalStateColor;
             set
             {
-                _vsyncColor = value;
+                _presentIntervalStateColor = value;
 
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ShowCustomPresentIntervalPicker
+        {
+            get
+            {
+                if (_isGameRunning)
+                {
+                    return AppHost.Device.PresentIntervalState ==
+                           PresentIntervalState.Custom;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                OnPropertyChanged();
+            }
+        }
+
+        public int CustomPresentIntervalPercentageProxy
+        {
+            get => _customPresentIntervalPercentageProxy;
+            set
+            {
+                int newInterval = (int)(((decimal)value / 100) * 60);
+                _customPresentInterval = newInterval;
+                _customPresentIntervalPercentageProxy = value;
+                ConfigurationState.Instance.Graphics.CustomPresentInterval.Value = newInterval;
+                if (_isGameRunning)
+                {
+                    AppHost.Device.CustomPresentInterval = newInterval;
+                    AppHost.Device.UpdatePresentInterval();
+                }
+                OnPropertyChanged((nameof(CustomPresentInterval)));
+                OnPropertyChanged((nameof(CustomPresentIntervalPercentageText)));
+            }
+        }
+
+        public string CustomPresentIntervalPercentageText
+        {
+            get
+            {
+                string text = CustomPresentIntervalPercentageProxy.ToString() + "%";
+                return text;
+            }
+            set
+            {
+
+            }
+        }
+
+        public int CustomPresentInterval
+        {
+            get => _customPresentInterval;
+            set
+            {
+                _customPresentInterval = value;
+                int newPercent = (int)(((decimal)value / 60) * 100);
+                _customPresentIntervalPercentageProxy = newPercent;
+                ConfigurationState.Instance.Graphics.CustomPresentInterval.Value = value;
+                if (_isGameRunning)
+                {
+                    AppHost.Device.CustomPresentInterval = value;
+                    AppHost.Device.UpdatePresentInterval();
+                }
+                OnPropertyChanged(nameof(CustomPresentIntervalPercentageProxy));
+                OnPropertyChanged(nameof(CustomPresentIntervalPercentageText));
                 OnPropertyChanged();
             }
         }
@@ -497,6 +575,17 @@ namespace Ryujinx.Ava.UI.ViewModels
             set
             {
                 _backendText = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        public string PresentIntervalStateText
+        {
+            get => _presentIntervalStateText;
+            set
+            {
+                _presentIntervalStateText = value;
 
                 OnPropertyChanged();
             }
@@ -1196,17 +1285,18 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    Application.Current.Styles.TryGetResource(args.VSyncEnabled
-                        ? "VsyncEnabled"
-                        : "VsyncDisabled",
-                        Application.Current.ActualThemeVariant,
+                    Application.Current.Styles.TryGetResource(args.PresentIntervalState,
+                        Avalonia.Application.Current.ActualThemeVariant,
                         out object color);
 
                     if (color is not null)
                     {
-                        VsyncColor = new SolidColorBrush((Color)color);
+                        PresentIntervalStateColor = new SolidColorBrush((Color)color);
                     }
 
+                    PresentIntervalStateText = args.PresentIntervalState;
+                    ShowCustomPresentIntervalPicker =
+                        args.PresentIntervalState == PresentIntervalState.Custom.ToString();
                     DockedStatusText = args.DockedMode;
                     AspectRatioStatusText = args.AspectRatio;
                     GameStatusText = args.GameStatus;
@@ -1363,6 +1453,57 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 ConfigurationState.Instance.System.EnableDockedMode.Value = !ConfigurationState.Instance.System.EnableDockedMode.Value;
             }
+        }
+
+        public void UpdatePresentIntervalState()
+        {
+            PresentIntervalState oldPresentInterval = AppHost.Device.PresentIntervalState;
+            PresentIntervalState newPresentInterval = PresentIntervalState.Switch;
+            bool customPresentIntervalEnabled = ConfigurationState.Instance.Graphics.EnableCustomPresentInterval.Value;
+
+            switch (oldPresentInterval)
+            {
+                case PresentIntervalState.Switch:
+                    newPresentInterval = PresentIntervalState.Unbounded;
+                    break;
+                case PresentIntervalState.Unbounded:
+                    if (customPresentIntervalEnabled)
+                    {
+                        newPresentInterval = PresentIntervalState.Custom;
+                    }
+                    else
+                    {
+                        newPresentInterval = PresentIntervalState.Switch;
+                    }
+                    break;
+                case PresentIntervalState.Custom:
+                    newPresentInterval = PresentIntervalState.Switch;
+                    break;
+            }
+
+            ConfigurationState.Instance.Graphics.PresentIntervalState.Value = newPresentInterval;
+
+            if (_isGameRunning)
+            {
+                AppHost.UpdatePresentInterval(newPresentInterval);
+            }
+
+            OnPropertyChanged(nameof(ShowCustomPresentIntervalPicker));
+        }
+
+        public void PresentIntervalStateSettingChanged()
+        {
+            if (_isGameRunning)
+            {
+                AppHost.Device.CustomPresentInterval = ConfigurationState.Instance.Graphics.CustomPresentInterval.Value;
+                AppHost.Device.UpdatePresentInterval();
+            }
+
+            CustomPresentInterval = ConfigurationState.Instance.Graphics.CustomPresentInterval.Value;
+            OnPropertyChanged(nameof(ShowCustomPresentIntervalPicker));
+            OnPropertyChanged(nameof(CustomPresentIntervalPercentageProxy));
+            OnPropertyChanged(nameof(CustomPresentIntervalPercentageText));
+            OnPropertyChanged(nameof(CustomPresentInterval));
         }
 
         public async Task ExitCurrentState()

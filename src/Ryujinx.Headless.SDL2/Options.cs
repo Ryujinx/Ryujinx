@@ -114,8 +114,14 @@ namespace Ryujinx.Headless.SDL2
         [Option("fs-global-access-log-mode", Required = false, Default = 0, HelpText = "Enables FS access log output to the console.")]
         public int FsGlobalAccessLogMode { get; set; }
 
-        [Option("disable-vsync", Required = false, HelpText = "Disables Vertical Sync.")]
+        [Option("disable-vsync", Required = false, HelpText = "Disables Vertical Sync. Deprecated. Use present-interval-mode instead.")]
         public bool DisableVSync { get; set; }
+
+        [Option("present-interval-mode", Required = false, Default = PresentIntervalState.Switch, HelpText = "Sets the present interval mode (Switch, Unbounded, or Custom).")]
+        public PresentIntervalState PresentIntervalState { get; set; }
+
+        [Option("custom-present-interval", Required = false, Default = 90, HelpText = "Sets the custom present interval target value (integer).")]
+        public int CustomPresentInterval { get; set; }
 
         [Option("disable-shader-cache", Required = false, HelpText = "Disables Shader cache.")]
         public bool DisableShaderCache { get; set; }

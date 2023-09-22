@@ -1,3 +1,4 @@
+using Ryujinx.Common;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Hid;
 using Ryujinx.Common.Configuration.Multiplayer;
@@ -170,7 +171,24 @@ namespace Ryujinx.UI.Common.Configuration
         /// <summary>
         /// Enables or disables Vertical Sync
         /// </summary>
+        /// <remarks>Kept for file format compatibility (to avoid possible failure when parsing configuration on old versions)</remarks>
+        /// TODO: Remove this when those older versions aren't in use anymore.
         public bool EnableVsync { get; set; }
+
+        /// <summary>
+        /// Current present interval state; 60 (Switch), unbounded ("Vsync off"), or custom
+        /// </summary>
+        public PresentIntervalState PresentIntervalState { get; set; }
+
+        /// <summary>
+        /// Enables or disables the custom present interval
+        /// </summary>
+        public bool EnableCustomPresentInterval { get; set; }
+
+        /// <summary>
+        /// The custom present interval value
+        /// </summary>
+        public int CustomPresentInterval { get; set; }
 
         /// <summary>
         /// Enables or disables Shader cache

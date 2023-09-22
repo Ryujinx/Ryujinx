@@ -27,7 +27,24 @@ namespace Ryujinx.HLE
         public TamperMachine TamperMachine { get; }
         public IHostUIHandler UIHandler { get; }
 
-        public bool EnableDeviceVsync { get; set; } = true;
+        public PresentIntervalState PresentIntervalState { get; set; } = PresentIntervalState.Switch;
+        public bool CustomPresentIntervalEnabled { get; set; } = false;
+        public int CustomPresentInterval { get; set; }
+
+        public long TargetPresentInterval { get; set; } = 60;
+        public Action TargetPresentIntervalChanged { get; set; }
+
+        public bool EnableDeviceVsync
+        {
+            get
+            {
+                return PresentIntervalState == PresentIntervalState.Switch;
+            }
+            set
+            {
+                PresentIntervalState = value ? PresentIntervalState.Switch : PresentIntervalState.Unbounded;
+            }
+        }
 
         public bool IsFrameAvailable => Gpu.Window.IsFrameAvailable;
 
@@ -59,12 +76,20 @@ namespace Ryujinx.HLE
             System.State.SetLanguage(Configuration.SystemLanguage);
             System.State.SetRegion(Configuration.Region);
 
-            EnableDeviceVsync                       = Configuration.EnableVsync;
+            EnableDeviceVsync                       = Configuration.PresentIntervalState == PresentIntervalState.Switch;
+            PresentIntervalState                    = Configuration.PresentIntervalState;
+            CustomPresentInterval                   = Configuration.CustomPresentInterval;
             System.State.DockedMode                 = Configuration.EnableDockedMode;
             System.PerformanceState.PerformanceMode = System.State.DockedMode ? PerformanceMode.Boost : PerformanceMode.Default;
             System.EnablePtc                        = Configuration.EnablePtc;
             System.FsIntegrityCheckLevel            = Configuration.FsIntegrityCheckLevel;
             System.GlobalAccessLogMode              = Configuration.FsGlobalAccessLogMode;
+            UpdatePresentInterval(); //todo remove these comments before committing.
+                                     // this call seems awkward. maybe this should be part of HOS.Horizon,
+                                     // where surfaceflinger is initialized? not sure though since it isn't a genuine
+                                     // Switch system setting. either way, if not, we need this call here because 
+                                     // SurfaceFlinger was initialized with the default target interval
+                                     // of 60.
 #pragma warning restore IDE0055
         }
 
@@ -113,6 +138,35 @@ namespace Ryujinx.HLE
         public void PresentFrame(Action swapBuffersCallback)
         {
             Gpu.Window.Present(swapBuffersCallback);
+        }
+
+        public void IncrementCustomPresentInterval()
+        {
+            CustomPresentInterval += 1;
+            UpdatePresentInterval();
+        }
+
+        public void DecrementCustomPresentInterval()
+        {
+            CustomPresentInterval -= 1;
+            UpdatePresentInterval();
+        }
+
+        public void UpdatePresentInterval()
+        {
+            switch (PresentIntervalState)
+            {
+                case PresentIntervalState.Custom:
+                    TargetPresentInterval = CustomPresentInterval;
+                    break;
+                case PresentIntervalState.Switch:
+                    TargetPresentInterval = 60;
+                    break;
+                case PresentIntervalState.Unbounded:
+                    TargetPresentInterval = 1;
+                    break;
+            }
+            TargetPresentIntervalChanged.Invoke();
         }
 
         public void SetVolume(float volume)

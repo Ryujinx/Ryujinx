@@ -54,7 +54,7 @@ namespace Ryujinx.Graphics.OpenGL
             GL.PixelStore(PixelStoreParameter.UnpackAlignment, 4);
         }
 
-        public void ChangeVSyncMode(bool vsyncEnabled) { }
+        public void ChangePresentIntervalState(PresentIntervalState presentIntervalState) { }
 
         public void SetSize(int width, int height)
         {
