@@ -288,11 +288,11 @@ namespace Ryujinx.Ava.UI.Windows
                     _deferLoad = false;
 
                     ApplicationData applicationData = new()
-                {
-                    Path = _launchPath,
-                };
+                    {
+                        Path = _launchPath,
+                    };
 
-                ViewModel.LoadApplication(applicationData, _startFullscreen).Wait();
+                    ViewModel.LoadApplication(applicationData, _startFullscreen).Wait();
                 }
             }
             else
