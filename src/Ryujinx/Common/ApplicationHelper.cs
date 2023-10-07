@@ -231,7 +231,7 @@ namespace Ryujinx.Ava.Common
                     ? IntegrityCheckLevel.ErrorOnInvalid
                     : IntegrityCheckLevel.None;
 
-                (Nca updatePatchNca, _) = mainNca.GetUpdateData(_virtualFileSystem, checkLevel, programIndex, out string _);
+                (Nca updatePatchNca, _) = mainNca.GetUpdateData(_virtualFileSystem, checkLevel, programIndex, out _);
                 if (updatePatchNca != null)
                 {
                     patchNca = updatePatchNca;

@@ -275,7 +275,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 if (nca.Header.ContentType == NcaContentType.PublicData)
                 {
-                    if (nca.GetProgramIdBase() != (_applicationData.IdBase))
+                    if (nca.GetProgramIdBase() != _applicationData.IdBase)
                     {
                         break;
                     }
