@@ -146,13 +146,13 @@ namespace Ryujinx.Ava.UI.ViewModels
             get => _presentIntervalState;
             set
             {
-                if (value == PresentIntervalState.Custom)
+                if (value == PresentIntervalState.Custom ||
+                    value == PresentIntervalState.Switch ||
+                    value == PresentIntervalState.Unbounded)
                 {
-                    EnableCustomPresentInterval = true;
+                    _presentIntervalState = value;
+                    OnPropertyChanged();
                 }
-                _presentIntervalState = value;
-                OnPropertyChanged();
-                OnPropertyChanged((nameof(EnableCustomPresentInterval)));
             }
         }
 
@@ -191,7 +191,10 @@ namespace Ryujinx.Ava.UI.ViewModels
                 if (_presentIntervalState == PresentIntervalState.Custom && value == false)
                 {
                     PresentIntervalState = PresentIntervalState.Switch;
-                    OnPropertyChanged(nameof(PresentIntervalState));
+                }
+                else if (value)
+                {
+                    PresentIntervalState = PresentIntervalState.Custom;
                 }
                 OnPropertyChanged();
             }

@@ -190,8 +190,9 @@
                             ToolTip.Tip="{locale:Locale SettingsTabSystemPresentIntervalStateTooltip}"
                             Width="250" />
                         <ComboBox
+                            IsVisible="{Binding EnableCustomPresentInterval}"
                             SelectedIndex="{Binding PresentIntervalState}"
-                            ToolTip.Tip="{locale:Locale SettingsTabSystemPresentIntervalStateTooltip}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemPresentIntervalStateTooltipCustom}"
                             HorizontalContentAlignment="Left"
                             Width="350">
                             <ComboBoxItem>
@@ -202,6 +203,19 @@
                             </ComboBoxItem>
                             <ComboBoxItem>
                                 <TextBlock Text="{locale:Locale SettingsTabSystemPresentIntervalStateCustom}" />
+                            </ComboBoxItem>
+                        </ComboBox>
+                        <ComboBox
+                            IsVisible="{Binding !EnableCustomPresentInterval}"
+                            SelectedIndex="{Binding PresentIntervalState}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemPresentIntervalStateTooltip}"
+                            HorizontalContentAlignment="Left"
+                            Width="350">
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemPresentIntervalStateSwitch}" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemPresentIntervalStateUnbounded}" />
                             </ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
@@ -221,7 +235,7 @@
                                       LargeChange="10"
                                       SimpleNumberFormat="F0"
                                       SpinButtonPlacementMode="Hidden"
-                                      Minimum="10"
+                                      Minimum="6"
                                       Maximum="1000" />
                         <Slider Value="{Binding CustomPresentIntervalPercentageProxy}"
                                 ToolTip.Tip="{locale:Locale SettingsTabSystemCustomPresentIntervalSliderTooltip}"
@@ -240,10 +254,6 @@
                                    Width="40"
                                    Text="{Binding CustomPresentIntervalPercentageText}"/>
                     </StackPanel>
-                    <CheckBox IsChecked="{Binding EnableCustomPresentInterval}"
-                              ToolTip.Tip="{locale:Locale SettingsTabSystemEnableCustomPresentIntervalTooltip}">
-                        <TextBlock Text="{locale:Locale SettingsTabSystemEnableCustomPresentInterval}" />
-                    </CheckBox>
                     <CheckBox IsChecked="{Binding EnableFsIntegrityChecks}">
                         <TextBlock
                             Text="{locale:Locale SettingsTabSystemEnableFsIntegrityChecks}"
@@ -274,6 +284,11 @@
                         IsChecked="{Binding IgnoreMissingServices}"
                         ToolTip.Tip="{locale:Locale IgnoreMissingServicesTooltip}">
                         <TextBlock Text="{locale:Locale SettingsTabSystemIgnoreMissingServices}" />
+                    </CheckBox>
+                    <CheckBox
+                        IsChecked="{Binding EnableCustomPresentInterval}"
+                        ToolTip.Tip="{locale:Locale SettingsTabSystemEnableCustomPresentIntervalTooltip}">
+                        <TextBlock Text="{locale:Locale SettingsTabSystemEnableCustomPresentInterval}" />
                     </CheckBox>
                 </StackPanel>
             </StackPanel>
