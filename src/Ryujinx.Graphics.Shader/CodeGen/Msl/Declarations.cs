@@ -3,9 +3,7 @@ using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
-using System.Numerics;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 {
@@ -25,6 +23,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             }
 
             DeclareInputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Input)));
+            context.AppendLine();
+            DeclareOutputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Output)));
         }
 
         static bool IsUserDefined(IoDefinition ioDefinition, StorageKind storageKind)
@@ -101,6 +101,48 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                         string name = $"{DefaultNames.IAttributePrefix}{ioDefinition.Location}";
 
                         context.AppendLine($"{type} {name} [[attribute({ioDefinition.Location})]];");
+                    }
+
+                    context.LeaveScope(";");
+                }
+            }
+        }
+
+        private static void DeclareOutputAttributes(CodeGenContext context, IEnumerable<IoDefinition> inputs)
+        {
+            if (context.Definitions.IaIndexing)
+            {
+                // Not handled
+            }
+            else
+            {
+                if (inputs.Any())
+                {
+                    string prefix = "";
+
+                    switch (context.Definitions.Stage)
+                    {
+                        case ShaderStage.Vertex:
+                            prefix = "Vertex";
+                            break;
+                        case ShaderStage.Fragment:
+                            prefix = "Fragment";
+                            break;
+                        case ShaderStage.Compute:
+                            prefix = "Compute";
+                            break;
+                    }
+
+                    context.AppendLine($"struct {prefix}Output");
+                    context.EnterScope();
+
+                    foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
+                    {
+                        string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: false));
+                        string name = $"{DefaultNames.IAttributePrefix}{ioDefinition.Location}";
+                        string suffix = ioDefinition.IoVariable == IoVariable.Position ? " [[position]]" : "";
+
+                        context.AppendLine($"{type} {name}{suffix};");
                     }
 
                     context.LeaveScope(";");
