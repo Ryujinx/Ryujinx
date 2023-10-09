@@ -52,21 +52,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 name += "_" + "xyzw"[component & 3];
             }
 
-            string prefix = "";
-            switch (definitions.Stage)
-            {
-                case ShaderStage.Vertex:
-                    prefix = "Vertex";
-                    break;
-                case ShaderStage.Fragment:
-                    prefix = "Fragment";
-                    break;
-                case ShaderStage.Compute:
-                    prefix = "Compute";
-                    break;
-            }
-
-            prefix += isOutput ? "Out" : "In";
+            string prefix = isOutput ? "out" : "in";
 
             return (prefix + "." + name, definitions.GetUserDefinedType(location, isOutput));
         }
