@@ -94,11 +94,11 @@ namespace Ryujinx.Graphics.Metal
             Add(Format.Bc6HSfloat, MTLPixelFormat.BC6HRGBFloat);
             Add(Format.Bc6HUfloat, MTLPixelFormat.BC6HRGBUfloat);
             Add(Format.Etc2RgbUnorm, MTLPixelFormat.ETC2RGB8);
-            Add(Format.Etc2RgbaUnorm, MTLPixelFormat.ETC2RGB8A1);
-            // Add(Format.Etc2RgbPtaUnorm,     MTLPixelFormat.Etc2RgbPtaUnorm);
+            // Add(Format.Etc2RgbaUnorm, MTLPixelFormat.ETC2RGBA8);
+            Add(Format.Etc2RgbPtaUnorm, MTLPixelFormat.ETC2RGB8A1);
             Add(Format.Etc2RgbSrgb, MTLPixelFormat.ETC2RGB8sRGB);
-            Add(Format.Etc2RgbaSrgb, MTLPixelFormat.ETC2RGB8A1sRGB);
-            // Add(Format.Etc2RgbPtaSrgb,      MTLPixelFormat.Etc2RgbPtaSrgb);
+            // Add(Format.Etc2RgbaSrgb, MTLPixelFormat.ETC2RGBA8sRGB);
+            Add(Format.Etc2RgbPtaSrgb, MTLPixelFormat.ETC2RGB8A1sRGB);
             // Add(Format.R8Uscaled,           MTLPixelFormat.R8Uscaled);
             // Add(Format.R8Sscaled,           MTLPixelFormat.R8Sscaled);
             // Add(Format.R16Uscaled,          MTLPixelFormat.R16Uscaled);
