@@ -51,7 +51,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             context.AppendLine(GetFunctionSignature(context, function, stage, isMainFunc));
             context.EnterScope();
 
-            Declarations.DeclareLocals(context, function);
+            Declarations.DeclareLocals(context, function, stage);
 
             PrintBlock(context, function.MainBlock, isMainFunc);
 
@@ -77,6 +77,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
             string funcKeyword = "inline";
             string funcName = null;
+            string returnType = Declarations.GetVarTypeName(context, function.ReturnType);
 
             if (isMainFunc)
             {
@@ -84,6 +85,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 {
                     funcKeyword = "vertex";
                     funcName = "vertexMain";
+                    returnType = "VertexOutput";
                 }
                 else if (stage == ShaderStage.Fragment)
                 {
@@ -112,7 +114,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 }
             }
 
-            return $"{funcKeyword} {Declarations.GetVarTypeName(context, function.ReturnType)} {funcName ?? function.Name}({string.Join(", ", args)})";
+            return $"{funcKeyword} {returnType} {funcName ?? function.Name}({string.Join(", ", args)})";
         }
 
         private static void PrintBlock(CodeGenContext context, AstBlock block, bool isMainFunction)

@@ -69,6 +69,9 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 if (inst == Instruction.Return && operation.SourcesCount != 0)
                 {
                     return $"{op} {GetSourceExpr(context, operation.GetSource(0), context.CurrentFunction.ReturnType)}";
+                } else if (inst == Instruction.Return && context.Definitions.Stage == ShaderStage.Vertex)
+                {
+                    return $"{op} out";
                 }
 
                 int arity = (int)(info.Type & InstType.ArityMask);

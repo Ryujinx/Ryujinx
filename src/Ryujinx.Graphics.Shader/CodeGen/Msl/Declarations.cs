@@ -32,8 +32,13 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             return ioDefinition.StorageKind == storageKind && ioDefinition.IoVariable == IoVariable.UserDefined;
         }
 
-        public static void DeclareLocals(CodeGenContext context, StructuredFunction function)
+        public static void DeclareLocals(CodeGenContext context, StructuredFunction function, ShaderStage stage)
         {
+            if (stage == ShaderStage.Vertex)
+            {
+                context.AppendLine("VertexOutput out;");
+            }
+
             foreach (AstOperand decl in function.Locals)
             {
                 string name = context.OperandManager.DeclareLocal(decl);
