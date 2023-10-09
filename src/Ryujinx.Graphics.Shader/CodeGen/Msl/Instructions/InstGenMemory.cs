@@ -269,6 +269,25 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             return swizzle;
         }
 
+        public static string TextureQuerySamples(CodeGenContext context, AstOperation operation)
+        {
+            AstTextureOperation texOp = (AstTextureOperation)operation;
+
+            bool isBindless = (texOp.Flags & TextureFlags.Bindless) != 0;
+
+            // TODO: Bindless texture support. For now we just return 0.
+            if (isBindless)
+            {
+                return NumberFormatter.FormatInt(0);
+            }
+
+            string textureName = "texture";
+            string texCall = textureName + ".";
+            texCall += $"get_num_samples()";
+
+            return texCall;
+        }
+
         public static string TextureQuerySize(CodeGenContext context, AstOperation operation)
         {
             AstTextureOperation texOp = (AstTextureOperation)operation;
