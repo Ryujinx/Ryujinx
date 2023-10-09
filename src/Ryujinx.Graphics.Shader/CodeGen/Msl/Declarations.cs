@@ -143,8 +143,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
                     foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
                     {
-                        string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: false));
-                        string name = $"{DefaultNames.IAttributePrefix}{ioDefinition.Location}";
+                        string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: true));
+                        string name = $"{DefaultNames.OAttributePrefix}{ioDefinition.Location}";
                         string suffix = ioDefinition.IoVariable == IoVariable.Position ? " [[position]]" : "";
 
                         context.AppendLine($"{type} {name}{suffix};");
