@@ -28,8 +28,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
          *
          * Metal does not have a combined image sampler like sampler2D in GLSL, as a result we need to bind
          * an individual texture and a sampler object for each instance of a combined image sampler.
-         * As a result, the binding indices of straight up textures (i.e. without a sampler) start
-         * after the last sampler/texture pair.
+         * Therefore, he binding indices of straight up textures (i.e. without a sampler) must start
+         * after the last sampler/texture pair (n + Number of Pairs).
          *
          * Uniforms
          *
