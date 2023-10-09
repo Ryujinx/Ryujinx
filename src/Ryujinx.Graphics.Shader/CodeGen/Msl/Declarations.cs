@@ -24,7 +24,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
             DeclareInputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Input)));
             context.AppendLine();
-            DeclareOutputAttributes(context, info.IoDefinitions.Where(x => IsUserDefined(x, StorageKind.Output)));
+            DeclareOutputAttributes(context, info.IoDefinitions.Where(x => x.StorageKind == StorageKind.Output));
         }
 
         static bool IsUserDefined(IoDefinition ioDefinition, StorageKind storageKind)
@@ -145,6 +145,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     {
                         string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: true));
                         string name = $"{DefaultNames.OAttributePrefix}{ioDefinition.Location}";
+                        name = ioDefinition.IoVariable == IoVariable.Position ? "position" : name;
                         string suffix = ioDefinition.IoVariable == IoVariable.Position ? " [[position]]" : "";
 
                         context.AppendLine($"{type} {name}{suffix};");
