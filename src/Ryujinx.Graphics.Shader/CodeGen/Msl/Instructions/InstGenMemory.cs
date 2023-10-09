@@ -269,7 +269,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
             return swizzle;
         }
 
-        public static string TextureSize(CodeGenContext context, AstOperation operation)
+        public static string TextureQuerySize(CodeGenContext context, AstOperation operation)
         {
             AstTextureOperation texOp = (AstTextureOperation)operation;
 

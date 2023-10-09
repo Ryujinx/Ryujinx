@@ -137,8 +137,10 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                         return Store(context, operation);
                     case Instruction.TextureSample:
                         return TextureSample(context, operation);
-                    case Instruction.TextureSize:
-                        return TextureSize(context, operation);
+                    case Instruction.TextureQuerySamples:
+                        return "|| TEXTURE QUERY SIZE ||";
+                    case Instruction.TextureQuerySize:
+                        return TextureQuerySize(context, operation);
                     case Instruction.VectorExtract:
                         return VectorExtract(context, operation);
                     case Instruction.VoteAllEqual:
