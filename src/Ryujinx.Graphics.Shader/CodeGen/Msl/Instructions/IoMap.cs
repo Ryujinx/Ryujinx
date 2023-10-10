@@ -19,7 +19,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 IoVariable.BaseInstance => ("base_instance", AggregateType.S32),
                 IoVariable.BaseVertex => ("base_vertex", AggregateType.S32),
                 IoVariable.ClipDistance => ("clip_distance", AggregateType.Array | AggregateType.FP32),
-                IoVariable.FragmentOutputColor => ("color", AggregateType.Vector2 | AggregateType.Vector3 | AggregateType.Vector4),
+                IoVariable.FragmentOutputColor => ("out.color", AggregateType.Vector4 | AggregateType.FP32),
                 IoVariable.FragmentOutputDepth => ("depth", AggregateType.FP32),
                 IoVariable.FrontFacing => ("front_facing", AggregateType.Bool),
                 IoVariable.InstanceId => ("instance_id", AggregateType.S32),

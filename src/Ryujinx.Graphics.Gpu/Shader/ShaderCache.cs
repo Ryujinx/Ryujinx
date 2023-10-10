@@ -818,7 +818,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
 
         /// <summary>
         /// Creates shader translation options with the requested graphics API and flags.
-        /// The shader language is choosen based on the current configuration and graphics API.
+        /// The shader language is chosen based on the current configuration and graphics API.
         /// </summary>
         /// <param name="api">Target graphics API</param>
         /// <param name="flags">Translation flags</param>
