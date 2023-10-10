@@ -526,12 +526,12 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetVertexAttribs(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            _renderEncoderState.UpdateVertexAttributes(vertexAttribs);
         }
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
-            _renderEncoderState.UpdateVertexDescriptor(vertexBuffers);
+            _renderEncoderState.UpdateVertexBuffers(vertexBuffers);
         }
 
         public unsafe void SetViewports(ReadOnlySpan<Viewport> viewports)

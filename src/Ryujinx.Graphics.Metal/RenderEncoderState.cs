@@ -103,17 +103,26 @@ namespace Ryujinx.Graphics.Metal
             });
         }
 
-        public void UpdateVertexDescriptor(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
+        public void UpdateVertexAttributes(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
         {
+            // Reset Vertex Descriptor
             _vertexDescriptor = new();
 
+            for (int i = 0; i < vertexAttribs.Length; i++)
+            {
+                // TODO: Format should not be hardcoded
+                _vertexDescriptor.Attributes.Object((ulong)i).Format = MTLVertexFormat.Float4;
+                _vertexDescriptor.Attributes.Object((ulong)i).BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
+                _vertexDescriptor.Attributes.Object((ulong)i).Offset = (ulong)vertexAttribs[i].Offset;
+            }
+        }
+
+        public void UpdateVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
+        {
             for (int i = 0; i < vertexBuffers.Length; i++)
             {
                 if (vertexBuffers[i].Stride != 0)
                 {
-                    // TODO: Format should not be hardcoded
-                    _vertexDescriptor.Attributes.Object((ulong)i).Format = MTLVertexFormat.Float4;
-                    _vertexDescriptor.Attributes.Object((ulong)i).BufferIndex = (ulong)i;
                     _vertexDescriptor.Layouts.Object((ulong)i).Stride = (ulong)vertexBuffers[i].Stride;
                 }
             }
