@@ -26,6 +26,7 @@ namespace Ryujinx.Graphics.Metal
         private MTLCommandEncoder _currentEncoder;
 
         private RenderEncoderState _renderEncoderState;
+        private MTLVertexDescriptor _vertexDescriptor = new();
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -117,7 +118,7 @@ namespace Ryujinx.Graphics.Metal
 
             var descriptor = new MTLRenderPassDescriptor();
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
-            _renderEncoderState.SetEncoderState(renderCommandEncoder);
+            _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
 
             _currentEncoder = renderCommandEncoder;
             return renderCommandEncoder;
@@ -160,7 +161,7 @@ namespace Ryujinx.Graphics.Metal
             descriptor.ColorAttachments.Object(0).ClearColor = _clearColor;
 
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
-            _renderEncoderState.SetEncoderState(renderCommandEncoder);
+            _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
 
             var sampler = _device.NewSamplerState(new MTLSamplerDescriptor
             {
@@ -526,12 +527,28 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetVertexAttribs(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
         {
-            _renderEncoderState.UpdateVertexAttributes(vertexAttribs);
+            for (int i = 0; i < vertexAttribs.Length; i++)
+            {
+                if (!vertexAttribs[i].IsZero)
+                {
+                    // TODO: Format should not be hardcoded
+                    var attrib = _vertexDescriptor.Attributes.Object((ulong)i);
+                    attrib.Format = MTLVertexFormat.Float4;
+                    attrib.BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
+                    attrib.Offset = (ulong)vertexAttribs[i].Offset;
+                }
+            }
         }
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
-            _renderEncoderState.UpdateVertexBuffers(vertexBuffers);
+            for (int i = 0; i < vertexBuffers.Length; i++)
+            {
+                if (vertexBuffers[i].Stride != 0)
+                {
+                    _vertexDescriptor.Layouts.Object((ulong)i).Stride = (ulong)vertexBuffers[i].Stride;
+                }
+            }
         }
 
         public unsafe void SetViewports(ReadOnlySpan<Viewport> viewports)

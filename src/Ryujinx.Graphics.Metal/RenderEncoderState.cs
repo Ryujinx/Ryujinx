@@ -21,8 +21,6 @@ namespace Ryujinx.Graphics.Metal
         private MTLStencilDescriptor _backFaceStencil = null;
         private MTLStencilDescriptor _frontFaceStencil = null;
 
-        private MTLVertexDescriptor _vertexDescriptor = new();
-
         public PrimitiveTopology Topology = PrimitiveTopology.Triangles;
         public MTLCullMode CullMode = MTLCullMode.None;
         public MTLWinding Winding = MTLWinding.Clockwise;
@@ -34,11 +32,11 @@ namespace Ryujinx.Graphics.Metal
             _device = device;
         }
 
-        public readonly void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder)
+        public readonly void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder, MTLVertexDescriptor vertexDescriptor)
         {
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor
             {
-                VertexDescriptor = _vertexDescriptor
+                VertexDescriptor = vertexDescriptor
             };
 
             if (_vertexFunction != null)
@@ -51,12 +49,13 @@ namespace Ryujinx.Graphics.Metal
                 renderPipelineDescriptor.VertexFunction = _fragmentFunction;
             }
 
-            renderPipelineDescriptor.ColorAttachments.Object(0).SetBlendingEnabled(true);
-            renderPipelineDescriptor.ColorAttachments.Object(0).PixelFormat = MTLPixelFormat.BGRA8Unorm;
-            renderPipelineDescriptor.ColorAttachments.Object(0).SourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationAlphaBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).SourceRGBBlendFactor = MTLBlendFactor.SourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationRGBBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
+            var attachment = renderPipelineDescriptor.ColorAttachments.Object(0);
+            attachment.SetBlendingEnabled(true);
+            attachment.PixelFormat = MTLPixelFormat.BGRA8Unorm;
+            attachment.SourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;
+            attachment.DestinationAlphaBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
+            attachment.SourceRGBBlendFactor = MTLBlendFactor.SourceAlpha;
+            attachment.DestinationRGBBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
 
             var error = new NSError(IntPtr.Zero);
             var pipelineState = _device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
@@ -101,31 +100,6 @@ namespace Ryujinx.Graphics.Metal
                 BackFaceStencil = _backFaceStencil,
                 FrontFaceStencil = _frontFaceStencil
             });
-        }
-
-        public void UpdateVertexAttributes(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
-        {
-            for (int i = 0; i < vertexAttribs.Length; i++)
-            {
-                if (!vertexAttribs[i].IsZero)
-                {
-                    // TODO: Format should not be hardcoded
-                    _vertexDescriptor.Attributes.Object((ulong)i).Format = MTLVertexFormat.Float4;
-                    _vertexDescriptor.Attributes.Object((ulong)i).BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
-                    _vertexDescriptor.Attributes.Object((ulong)i).Offset = (ulong)vertexAttribs[i].Offset;
-                }
-            }
-        }
-
-        public void UpdateVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
-        {
-            for (int i = 0; i < vertexBuffers.Length; i++)
-            {
-                if (vertexBuffers[i].Stride != 0)
-                {
-                    _vertexDescriptor.Layouts.Object((ulong)i).Stride = (ulong)vertexBuffers[i].Stride;
-                }
-            }
         }
     }
 }
