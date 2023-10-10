@@ -6,7 +6,7 @@ namespace Ryujinx.Graphics.Metal
     {
         public ProgramLinkStatus CheckProgramLink(bool blocking)
         {
-            return ProgramLinkStatus.Failure;
+            return ProgramLinkStatus.Success;
         }
 
         public byte[] GetBinary()
