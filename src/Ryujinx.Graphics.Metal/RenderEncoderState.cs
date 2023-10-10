@@ -106,7 +106,7 @@ namespace Ryujinx.Graphics.Metal
         public void UpdateVertexAttributes(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
         {
             // Reset Vertex Descriptor
-            _vertexDescriptor = new();
+            _vertexDescriptor.Reset();
 
             for (int i = 0; i < vertexAttribs.Length; i++)
             {
