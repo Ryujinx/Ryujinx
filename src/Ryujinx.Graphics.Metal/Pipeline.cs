@@ -27,6 +27,7 @@ namespace Ryujinx.Graphics.Metal
 
         private RenderEncoderState _renderEncoderState;
         private MTLVertexDescriptor _vertexDescriptor = new();
+        private MTLBuffer[] _vertexBuffers;
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -119,6 +120,14 @@ namespace Ryujinx.Graphics.Metal
             var descriptor = new MTLRenderPassDescriptor();
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
             _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
+
+            for (int i = 0; i < _vertexBuffers.Length; i++)
+            {
+                if (_vertexBuffers[i] != null)
+                {
+                    renderCommandEncoder.SetVertexBuffer(_vertexBuffers[i], 0, (ulong)i);
+                }
+            }
 
             _currentEncoder = renderCommandEncoder;
             return renderCommandEncoder;
@@ -542,11 +551,17 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
+            _vertexBuffers = new MTLBuffer[vertexBuffers.Length];
+
             for (int i = 0; i < vertexBuffers.Length; i++)
             {
                 if (vertexBuffers[i].Stride != 0)
                 {
                     _vertexDescriptor.Layouts.Object((ulong)i).Stride = (ulong)vertexBuffers[i].Stride;
+                    _vertexBuffers[i] = _device.NewBuffer(
+                        vertexBuffers[i].Buffer.Handle.ToIntPtr(),
+                        (ulong)vertexBuffers[i].Buffer.Size,
+                        MTLResourceOptions.ResourceStorageModeManaged);
                 }
             }
         }
