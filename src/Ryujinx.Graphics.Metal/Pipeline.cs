@@ -40,7 +40,10 @@ namespace Ryujinx.Graphics.Metal
             _commandQueue = commandQueue;
             _helperShaders = new HelperShaders(_device);
 
-            _renderEncoderState = new RenderEncoderState(_helperShaders.BlitShader, _device);
+            _renderEncoderState = new RenderEncoderState(
+                _helperShaders.BlitShader.VertexFunction,
+                _helperShaders.BlitShader.FragmentFunction,
+                _device);
 
             _commandBuffer = _commandQueue.CommandBuffer();
 
@@ -424,7 +427,12 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetProgram(IProgram program)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            Program prg = (Program)program;
+
+            _renderEncoderState = new RenderEncoderState(
+                prg.VertexFunction,
+                prg.FragmentFunction,
+                _device);
         }
 
         public void SetRasterizerDiscard(bool discard)
@@ -523,7 +531,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            _renderEncoderState.UpdateVertexDescriptor(vertexBuffers);
         }
 
         public unsafe void SetViewports(ReadOnlySpan<Viewport> viewports)

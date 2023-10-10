@@ -12,12 +12,12 @@ namespace Ryujinx.Graphics.Metal
     class Program : IProgram
     {
         private ProgramLinkStatus _status = ProgramLinkStatus.Incomplete;
-        private MTLFunction[] _shaderHandles;
+        public MTLFunction VertexFunction;
+        public MTLFunction FragmentFunction;
+        public MTLFunction ComputeFunction;
 
         public Program(ShaderSource[] shaders, MTLDevice device)
         {
-            _shaderHandles = new MTLFunction[shaders.Length];
-
             for (int index = 0; index < shaders.Length; index++)
             {
                 var libraryError = new NSError(IntPtr.Zero);
@@ -33,13 +33,13 @@ namespace Ryujinx.Graphics.Metal
                     switch (shaders[index].Stage)
                     {
                         case ShaderStage.Compute:
-                            _shaderHandles[index] = shaderLibrary.NewFunction(StringHelper.NSString("computeMain"));
+                            ComputeFunction = shaderLibrary.NewFunction(StringHelper.NSString("computeMain"));
                             break;
                         case ShaderStage.Vertex:
-                            _shaderHandles[index] = shaderLibrary.NewFunction(StringHelper.NSString("vertexMain"));
+                            VertexFunction = shaderLibrary.NewFunction(StringHelper.NSString("vertexMain"));
                             break;
                         case ShaderStage.Fragment:
-                            _shaderHandles[index] = shaderLibrary.NewFunction(StringHelper.NSString("fragmentMain"));
+                            FragmentFunction = shaderLibrary.NewFunction(StringHelper.NSString("fragmentMain"));
                             break;
                         default:
                             Logger.Warning?.Print(LogClass.Gpu, $"Cannot handle stage {shaders[index].Stage}!");

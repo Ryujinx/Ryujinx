@@ -32,29 +32,13 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     public readonly struct HelperShader
     {
-        private readonly MTLRenderPipelineState _pipelineState;
-        public static implicit operator MTLRenderPipelineState(HelperShader shader) => shader._pipelineState;
+        public readonly MTLFunction VertexFunction;
+        public readonly MTLFunction FragmentFunction;
 
         public HelperShader(MTLDevice device, MTLLibrary library, string vertex, string fragment)
         {
-            var renderPipelineDescriptor = new MTLRenderPipelineDescriptor
-            {
-                VertexFunction = library.NewFunction(StringHelper.NSString(vertex)),
-                FragmentFunction = library.NewFunction(StringHelper.NSString(fragment))
-            };
-            renderPipelineDescriptor.ColorAttachments.Object(0).SetBlendingEnabled(true);
-            renderPipelineDescriptor.ColorAttachments.Object(0).PixelFormat = MTLPixelFormat.BGRA8Unorm;
-            renderPipelineDescriptor.ColorAttachments.Object(0).SourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationAlphaBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).SourceRGBBlendFactor = MTLBlendFactor.SourceAlpha;
-            renderPipelineDescriptor.ColorAttachments.Object(0).DestinationRGBBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
-
-            var error = new NSError(IntPtr.Zero);
-            _pipelineState = device.NewRenderPipelineState(renderPipelineDescriptor, ref error);
-            if (error != IntPtr.Zero)
-            {
-                Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Render Pipeline State: {StringHelper.String(error.LocalizedDescription)}");
-            }
+            VertexFunction = library.NewFunction(StringHelper.NSString(vertex));
+            FragmentFunction = library.NewFunction(StringHelper.NSString(fragment));
         }
     }
 }
