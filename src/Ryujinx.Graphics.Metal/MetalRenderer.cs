@@ -74,8 +74,7 @@ namespace Ryujinx.Graphics.Metal
 
         public IProgram CreateProgram(ShaderSource[] shaders, ShaderInfo info)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
-            return new Program();
+            return new Program(shaders, _device);
         }
 
         public ISampler CreateSampler(SamplerCreateInfo info)
