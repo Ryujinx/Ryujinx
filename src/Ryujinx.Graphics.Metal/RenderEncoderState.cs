@@ -105,15 +105,15 @@ namespace Ryujinx.Graphics.Metal
 
         public void UpdateVertexAttributes(ReadOnlySpan<VertexAttribDescriptor> vertexAttribs)
         {
-            // Reset Vertex Descriptor
-            _vertexDescriptor.Reset();
-
             for (int i = 0; i < vertexAttribs.Length; i++)
             {
-                // TODO: Format should not be hardcoded
-                _vertexDescriptor.Attributes.Object((ulong)i).Format = MTLVertexFormat.Float4;
-                _vertexDescriptor.Attributes.Object((ulong)i).BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
-                _vertexDescriptor.Attributes.Object((ulong)i).Offset = (ulong)vertexAttribs[i].Offset;
+                if (!vertexAttribs[i].IsZero)
+                {
+                    // TODO: Format should not be hardcoded
+                    _vertexDescriptor.Attributes.Object((ulong)i).Format = MTLVertexFormat.Float4;
+                    _vertexDescriptor.Attributes.Object((ulong)i).BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
+                    _vertexDescriptor.Attributes.Object((ulong)i).Offset = (ulong)vertexAttribs[i].Offset;
+                }
             }
         }
 
