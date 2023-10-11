@@ -46,7 +46,7 @@ namespace Ryujinx.Graphics.Metal
 
             if (_fragmentFunction != null)
             {
-                renderPipelineDescriptor.VertexFunction = _fragmentFunction;
+                renderPipelineDescriptor.FragmentFunction = _fragmentFunction;
             }
 
             var attachment = renderPipelineDescriptor.ColorAttachments.Object(0);
