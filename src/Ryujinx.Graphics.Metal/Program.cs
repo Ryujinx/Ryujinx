@@ -28,28 +28,27 @@ namespace Ryujinx.Graphics.Metal
                 {
                     Logger.Warning?.Print(LogClass.Gpu, $"Shader linking failed: \n{StringHelper.String(libraryError.LocalizedDescription)}");
                     _status = ProgramLinkStatus.Failure;
+                    return;
                 }
-                else
-                {
-                    switch (shaders[index].Stage)
-                    {
-                        case ShaderStage.Compute:
-                            ComputeFunction = shaderLibrary.NewFunction(StringHelper.NSString("computeMain"));
-                            break;
-                        case ShaderStage.Vertex:
-                            VertexFunction = shaderLibrary.NewFunction(StringHelper.NSString("vertexMain"));
-                            break;
-                        case ShaderStage.Fragment:
-                            FragmentFunction = shaderLibrary.NewFunction(StringHelper.NSString("fragmentMain"));
-                            break;
-                        default:
-                            Logger.Warning?.Print(LogClass.Gpu, $"Cannot handle stage {shaders[index].Stage}!");
-                            break;
-                    }
 
-                    _status = ProgramLinkStatus.Success;
+                switch (shaders[index].Stage)
+                {
+                    case ShaderStage.Compute:
+                        ComputeFunction = shaderLibrary.NewFunction(StringHelper.NSString("computeMain"));
+                        break;
+                    case ShaderStage.Vertex:
+                        VertexFunction = shaderLibrary.NewFunction(StringHelper.NSString("vertexMain"));
+                        break;
+                    case ShaderStage.Fragment:
+                        FragmentFunction = shaderLibrary.NewFunction(StringHelper.NSString("fragmentMain"));
+                        break;
+                    default:
+                        Logger.Warning?.Print(LogClass.Gpu, $"Cannot handle stage {shaders[index].Stage}!");
+                        break;
                 }
             }
+
+            _status = ProgramLinkStatus.Success;
         }
 
         public ProgramLinkStatus CheckProgramLink(bool blocking)
