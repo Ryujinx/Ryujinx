@@ -26,7 +26,7 @@ namespace Ryujinx.Graphics.Metal
         private MTLCommandEncoder _currentEncoder;
 
         private RenderEncoderState _renderEncoderState;
-        private MTLVertexDescriptor _vertexDescriptor = new();
+        private readonly MTLVertexDescriptor _vertexDescriptor = new();
         private MTLBuffer[] _vertexBuffers;
 
         private MTLBuffer _indexBuffer;

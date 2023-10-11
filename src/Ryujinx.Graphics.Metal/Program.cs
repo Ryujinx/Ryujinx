@@ -11,7 +11,7 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     class Program : IProgram
     {
-        private ProgramLinkStatus _status = ProgramLinkStatus.Incomplete;
+        private ProgramLinkStatus _status;
         public MTLFunction VertexFunction;
         public MTLFunction FragmentFunction;
         public MTLFunction ComputeFunction;
