@@ -91,6 +91,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 {
                     funcKeyword = "fragment";
                     funcName = "fragmentMain";
+                    returnType = "FragmentOutput";
                 }
                 else if (stage == ShaderStage.Compute)
                 {

@@ -67,6 +67,10 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             {
                 context.AppendLine("VertexOutput out;");
             }
+            else if (stage == ShaderStage.Fragment)
+            {
+                context.AppendLine("FragmentOutput out;");
+            }
 
             foreach (AstOperand decl in function.Locals)
             {
@@ -133,8 +137,9 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     {
                         string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: false));
                         string name = $"{DefaultNames.IAttributePrefix}{ioDefinition.Location}";
+                        string suffix = context.Definitions.Stage == ShaderStage.Vertex ? $" [[attribute({ioDefinition.Location})]]" : "";
 
-                        context.AppendLine($"{type} {name} [[attribute({ioDefinition.Location})]];");
+                        context.AppendLine($"{type} {name}{suffix};");
                     }
 
                     context.LeaveScope(";");
@@ -173,9 +178,17 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
                     {
                         string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: true));
-                        string name = $"{DefaultNames.OAttributePrefix}{ioDefinition.Location}";
-                        name = ioDefinition.IoVariable == IoVariable.Position ? "position" : name;
-                        string suffix = ioDefinition.IoVariable == IoVariable.Position ? " [[position]]" : "";
+                        string name = ioDefinition.IoVariable switch
+                        {
+                            IoVariable.Position => "position",
+                            IoVariable.FragmentOutputColor => "color",
+                            _ => $"{DefaultNames.OAttributePrefix}{ioDefinition.Location}"
+                        };
+                        string suffix = ioDefinition.IoVariable switch
+                        {
+                            IoVariable.Position => " [[position]]",
+                            _ => ""
+                        };
 
                         context.AppendLine($"{type} {name}{suffix};");
                     }
