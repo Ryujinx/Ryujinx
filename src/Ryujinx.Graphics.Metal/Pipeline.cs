@@ -24,10 +24,11 @@ namespace Ryujinx.Graphics.Metal
 
         private MTLCommandBuffer _commandBuffer;
         private MTLCommandEncoder _currentEncoder;
+        private MTLTexture[] _renderTargets = Array.Empty<MTLTexture>();
 
         private RenderEncoderState _renderEncoderState;
         private readonly MTLVertexDescriptor _vertexDescriptor = new();
-        private MTLBuffer[] _vertexBuffers;
+        private MTLBuffer[] _vertexBuffers = Array.Empty<MTLBuffer>();
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -118,6 +119,15 @@ namespace Ryujinx.Graphics.Metal
             EndCurrentPass();
 
             var descriptor = new MTLRenderPassDescriptor();
+            for (int i = 0; i < _renderTargets.Length; i++)
+            {
+                if (_renderTargets[i] != null)
+                {
+                    var attachment = descriptor.ColorAttachments.Object((ulong)i);
+                    attachment.Texture = _renderTargets[i];
+                }
+            }
+
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
             _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
 
@@ -457,7 +467,23 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetRenderTargets(ITexture[] colors, ITexture depthStencil)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            _renderTargets = new MTLTexture[colors.Length];
+
+            for (int i = 0; i < colors.Length; i++)
+            {
+                if (colors[i] is not Texture tex)
+                {
+                    continue;
+                }
+
+                if (tex.MTLTexture != null)
+                {
+                    _renderTargets[i] = tex.MTLTexture;
+                }
+            }
+
+            // Recreate Render Command Encoder
+            BeginRenderPass();
         }
 
         public unsafe void SetScissors(ReadOnlySpan<Rectangle<int>> regions)
