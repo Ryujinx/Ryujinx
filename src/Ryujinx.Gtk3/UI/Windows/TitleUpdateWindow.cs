@@ -102,19 +102,19 @@ namespace Ryujinx.UI.Windows
 
                 IFileSystem pfs;
 
-                if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
-                {
-                    pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                }
-                else
-                {
-                    var pfsTemp = new PartitionFileSystem();
-                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                    pfs = pfsTemp;
-                }
-
                 try
                 {
+                    if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
+                    {
+                        pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                    }
+                    else
+                    {
+                        var pfsTemp = new PartitionFileSystem();
+                        pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
+                        pfs = pfsTemp;
+                    }
+
                     Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel, 0);
 
                     Nca patchNca = null;

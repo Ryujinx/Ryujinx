@@ -157,7 +157,12 @@ namespace Ryujinx.UI.Windows
                     using FileStream containerFile = File.OpenRead(containerPath);
 
                     PartitionFileSystem pfs = new();
-                    pfs.Initialize(containerFile.AsStorage()).ThrowIfFailure();
+
+                    if (pfs.Initialize(containerFile.AsStorage()).IsFailure())
+                    {
+                        continue;
+                    }
+
                     bool containsDlc = false;
 
                     _virtualFileSystem.ImportTickets(pfs);

@@ -181,19 +181,19 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 IFileSystem pfs;
 
-                if (Path.GetExtension(path).ToLower() == ".xci")
-                {
-                    pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                }
-                else
-                {
-                    var pfsTemp = new PartitionFileSystem();
-                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                    pfs = pfsTemp;
-                }
-
                 try
                 {
+                    if (Path.GetExtension(path).ToLower() == ".xci")
+                    {
+                        pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                    }
+                    else
+                    {
+                        var pfsTemp = new PartitionFileSystem();
+                        pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
+                        pfs = pfsTemp;
+                    }
+
                     Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel, 0);
 
                     Nca patchNca = null;
