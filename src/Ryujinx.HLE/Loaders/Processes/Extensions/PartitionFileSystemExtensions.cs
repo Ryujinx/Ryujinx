@@ -23,7 +23,8 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
     {
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        public static Dictionary<ulong, ContentCollection> GetApplicationData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel, int programIndex)
+        public static Dictionary<ulong, ContentCollection> GetApplicationData(this IFileSystem partitionFileSystem,
+            VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
@@ -40,7 +41,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
                 ContentCollection content = new(partitionFileSystem, cnmt);
 
-                if (content.Type != ContentMetaType.Application || content.ProgramIndex != programIndex)
+                if (content.Type != ContentMetaType.Application)
                 {
                     continue;
                 }
@@ -51,7 +52,8 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return programs;
         }
 
-        public static Dictionary<ulong, ContentCollection> GetUpdateData(this IFileSystem partitionFileSystem, VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel, int programIndex)
+        public static Dictionary<ulong, ContentCollection> GetUpdateData(this IFileSystem partitionFileSystem,
+            VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
@@ -68,7 +70,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
                 ContentCollection content = new(partitionFileSystem, cnmt);
 
-                if (content.Type != ContentMetaType.Patch || content.ProgramIndex != programIndex)
+                if (content.Type != ContentMetaType.Patch)
                 {
                     continue;
                 }
@@ -94,21 +96,21 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             try
             {
-                Dictionary<ulong, ContentCollection> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.System.FsIntegrityCheckLevel, device.Configuration.UserChannelPersistence.Index);
+                Dictionary<ulong, ContentCollection> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.System.FsIntegrityCheckLevel);
 
                 if (titleId == 0)
                 {
                     foreach ((ulong _, ContentCollection content) in applications)
                     {
-                        mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program);
-                        controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control);
+                        mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program, device.Configuration.UserChannelPersistence.Index);
+                        controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control, device.Configuration.UserChannelPersistence.Index);
                         break;
                     }
                 }
                 else if (applications.TryGetValue(titleId, out ContentCollection content))
                 {
-                    mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program);
-                    controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control);
+                    mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program, device.Configuration.UserChannelPersistence.Index);
+                    controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control, device.Configuration.UserChannelPersistence.Index);
                 }
 
                 ProcessLoaderHelper.RegisterProgramMapInfo(device, partitionFileSystem).ThrowIfFailure();

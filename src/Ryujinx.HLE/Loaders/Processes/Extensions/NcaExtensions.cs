@@ -161,15 +161,15 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                         updatePartitionFileSystem = pfsTemp;
                     }
 
-                    foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel, programIndex))
+                    foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel))
                     {
                         if ((updateTitleId & ~0x1FFFUL) != titleIdBase)
                         {
                             continue;
                         }
 
-                        updatePatchNca = content.GetNcaByType(fileSystem.KeySet, ContentType.Program);
-                        updateControlNca = content.GetNcaByType(fileSystem.KeySet, ContentType.Control);
+                        updatePatchNca = content.GetNcaByType(fileSystem.KeySet, ContentType.Program, programIndex);
+                        updateControlNca = content.GetNcaByType(fileSystem.KeySet, ContentType.Control, programIndex);
                         break;
                     }
                 }

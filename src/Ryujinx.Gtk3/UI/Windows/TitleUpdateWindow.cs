@@ -115,7 +115,7 @@ namespace Ryujinx.UI.Windows
                         pfs = pfsTemp;
                     }
 
-                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel, 0);
+                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel);
 
                     Nca patchNca = null;
                     Nca controlNca = null;

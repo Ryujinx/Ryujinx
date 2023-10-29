@@ -194,7 +194,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                         pfs = pfsTemp;
                     }
 
-                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel, 0);
+                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel);
 
                     Nca patchNca = null;
                     Nca controlNca = null;

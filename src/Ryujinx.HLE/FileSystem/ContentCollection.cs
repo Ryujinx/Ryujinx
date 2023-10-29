@@ -26,7 +26,6 @@ namespace Ryujinx.HLE.FileSystem
         public byte[] Digest => _cnmt.Hash;
 
         public ulong ProgramBaseId => Id & ~0x1FFFUL;
-        public int ProgramIndex => (int)(Id & 0xF);
         public bool IsSystemTitle => _cnmt.Type < ContentMetaType.Application;
 
         public ContentCollection(IFileSystem pfs, Cnmt cnmt)
@@ -35,17 +34,24 @@ namespace Ryujinx.HLE.FileSystem
             _cnmt = cnmt;
         }
 
-        public Nca GetNcaByType(KeySet keySet, ContentType type, int idOffset = 0)
+        public Nca GetNcaByType(KeySet keySet, ContentType type, int programIndex = 0)
         {
+            // TODO: Replace this with a check for IdOffset as soon as LibHac supports it:
+            // && entry.IdOffset == programIndex
+
             foreach (var entry in _cnmt.ContentEntries)
             {
-                // TODO: Add check for IdOffset as soon as LibHac supports it:
-                // && entry.IdOffset == idOffset
-                if (entry.Type == type)
+                if (entry.Type != type)
                 {
-                    string ncaId = BitConverter.ToString(entry.NcaId).Replace("-", null).ToLower();
+                    continue;
+                }
 
-                    return _pfs.GetNca(keySet, $"/{ncaId}.nca");
+                string ncaId = BitConverter.ToString(entry.NcaId).Replace("-", null).ToLower();
+                Nca nca = _pfs.GetNca(keySet, $"/{ncaId}.nca");
+
+                if (nca.GetProgramIndex() == programIndex)
+                {
+                    return nca;
                 }
             }
 
