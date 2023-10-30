@@ -543,6 +543,7 @@
   "NoUpdate": "No Update",
   "TitleUpdateVersionLabel": "Version {0}",
   "TitleBundledUpdateVersionLabel": "Bundled: Version {0}",
+  "TitleBundledDlcLabel": "Bundled:",
   "RyujinxInfo": "Ryujinx - Info",
   "RyujinxConfirm": "Ryujinx - Confirmation",
   "FileDialogAllTypes": "All types",

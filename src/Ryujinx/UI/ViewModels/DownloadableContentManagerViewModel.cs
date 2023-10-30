@@ -127,7 +127,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void LoadDownloadableContents()
         {
-            // NOTE: Try to load downloadable contents from PFS0 first.
+            // NOTE: Try to load downloadable contents from PFS first.
             AddDownloadableContent(_applicationData.Path);
 
             foreach (DownloadableContentContainer downloadableContentContainer in _downloadableContentContainerList)

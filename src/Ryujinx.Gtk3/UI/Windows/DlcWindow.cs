@@ -10,6 +10,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Widgets;
 using System;
 using System.Collections.Generic;
@@ -34,16 +35,16 @@ namespace Ryujinx.UI.Windows
         [GUI] TreeSelection _dlcTreeSelection;
 #pragma warning restore CS0649, IDE0044
 
-        public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, string titleName) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, titleName) { }
+        public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, ApplicationData title) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, title) { }
 
-        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string applicationId, string titleName) : base(builder.GetRawOwnedObject("_dlcWindow"))
+        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string applicationId, ApplicationData title) : base(builder.GetRawOwnedObject("_dlcWindow"))
         {
             builder.Autoconnect(this);
 
             _applicationId = applicationId;
             _virtualFileSystem = virtualFileSystem;
             _dlcJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _applicationId, "dlc.json");
-            _baseTitleInfoLabel.Text = $"DLC Available for {titleName} [{applicationId.ToUpper()}]";
+            _baseTitleInfoLabel.Text = $"DLC Available for {title.Name} [{applicationId.ToUpper()}]";
 
             try
             {
@@ -76,6 +77,9 @@ namespace Ryujinx.UI.Windows
             _dlcTreeView.AppendColumn("Enabled", enableToggle, "active", 0);
             _dlcTreeView.AppendColumn("ApplicationId", new CellRendererText(), "text", 1);
             _dlcTreeView.AppendColumn("Path", new CellRendererText(), "text", 2);
+
+            // NOTE: Try to load downloadable contents from PFS first.
+            AddDlc(title.Path, true);
 
             foreach (DownloadableContentContainer dlcContainer in _dlcContainerList)
             {
@@ -133,6 +137,57 @@ namespace Ryujinx.UI.Windows
             return null;
         }
 
+        private void AddDlc(string path, bool ignoreNotFound = false)
+        {
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            using FileStream containerFile = File.OpenRead(path);
+
+            PartitionFileSystem pfs = new();
+            pfs.Initialize(containerFile.AsStorage()).ThrowIfFailure();
+
+            bool containsDlc = false;
+
+            _virtualFileSystem.ImportTickets(pfs);
+
+            TreeIter? parentIter = null;
+
+            foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*.nca"))
+            {
+                using var ncaFile = new UniqueRef<IFile>();
+
+                pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+                Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), path);
+
+                if (nca == null)
+                {
+                    continue;
+                }
+
+                if (nca.Header.ContentType == NcaContentType.PublicData)
+                {
+                    if (nca.GetProgramIdBase() != (ulong.Parse(_applicationId, NumberStyles.HexNumber) & ~0x1FFFUL))
+                    {
+                        break;
+                    }
+
+                    parentIter ??= ((TreeStore)_dlcTreeView.Model).AppendValues(true, "", path);
+
+                    ((TreeStore)_dlcTreeView.Model).AppendValues(parentIter.Value, true, nca.Header.TitleId.ToString("X16"), fileEntry.FullPath);
+                    containsDlc = true;
+                }
+            }
+
+            if (!containsDlc && !ignoreNotFound)
+            {
+                GtkDialog.CreateErrorDialog("The specified file does not contain DLC for the selected title!");
+            }
+        }
+
         private void AddButton_Clicked(object sender, EventArgs args)
         {
             FileChooserNative fileChooser = new("Select DLC files", this, FileChooserAction.Open, "Add", "Cancel")
@@ -152,57 +207,7 @@ namespace Ryujinx.UI.Windows
             {
                 foreach (string containerPath in fileChooser.Filenames)
                 {
-                    if (!File.Exists(containerPath))
-                    {
-                        return;
-                    }
-
-                    using FileStream containerFile = File.OpenRead(containerPath);
-
-                    PartitionFileSystem pfs = new();
-
-                    if (pfs.Initialize(containerFile.AsStorage()).IsFailure())
-                    {
-                        continue;
-                    }
-
-                    bool containsDlc = false;
-
-                    _virtualFileSystem.ImportTickets(pfs);
-
-                    TreeIter? parentIter = null;
-
-                    foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*.nca"))
-                    {
-                        using var ncaFile = new UniqueRef<IFile>();
-
-                        pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
-
-                        Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), containerPath);
-
-                        if (nca == null)
-                        {
-                            continue;
-                        }
-
-                        if (nca.Header.ContentType == NcaContentType.PublicData)
-                        {
-                            if (nca.GetProgramIdBase() != (ulong.Parse(_applicationId, NumberStyles.HexNumber) & ~0x1FFFUL))
-                            {
-                                break;
-                            }
-
-                            parentIter ??= ((TreeStore)_dlcTreeView.Model).AppendValues(true, "", containerPath);
-
-                            ((TreeStore)_dlcTreeView.Model).AppendValues(parentIter.Value, true, nca.Header.TitleId.ToString("X16"), fileEntry.FullPath);
-                            containsDlc = true;
-                        }
-                    }
-
-                    if (!containsDlc)
-                    {
-                        GtkDialog.CreateErrorDialog("The specified file does not contain DLC for the selected title!");
-                    }
+                    AddDlc(containerPath);
                 }
             }
 

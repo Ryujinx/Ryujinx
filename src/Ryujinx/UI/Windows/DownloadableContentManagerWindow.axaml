@@ -97,7 +97,7 @@
                                         MaxLines="2"
                                         TextWrapping="Wrap"
                                         TextTrimming="CharacterEllipsis"
-                                        Text="{Binding FileName}" />
+                                        Text="{Binding Label}" />
                                     <TextBlock
                                         Grid.Column="1"
                                         Margin="10 0"
