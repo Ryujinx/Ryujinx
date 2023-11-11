@@ -24,10 +24,9 @@ namespace Ryujinx.Ava.UI.Models
         public string FullPath { get; }
 
         public string FileName => Path.GetFileName(ContainerPath);
-        private bool IsXci => Path.GetExtension(FileName)?.ToLower() == ".xci";
 
         public string Label =>
-            IsXci ? $"{LocaleManager.Instance[LocaleKeys.TitleBundledDlcLabel]} {FileName}" : FileName;
+            Path.GetExtension(FileName)?.ToLower() == ".xci" ? $"{LocaleManager.Instance[LocaleKeys.TitleBundledDlcLabel]} {FileName}" : FileName;
 
         public DownloadableContentModel(string titleId, string containerPath, string fullPath, bool enabled)
         {
