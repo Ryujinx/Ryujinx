@@ -11,7 +11,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
 {
     class ManagedSocket : ISocket
     {
-        public int Refcount { get; set; }
+        public int RefCount { get; set; }
 
         public AddressFamily AddressFamily => Socket.AddressFamily;
 
@@ -32,13 +32,13 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
         public ManagedSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
             Socket = new Socket(addressFamily, socketType, protocolType);
-            Refcount = 1;
+            RefCount = 1;
         }
 
         private ManagedSocket(Socket socket)
         {
             Socket = socket;
-            Refcount = 1;
+            RefCount = 1;
         }
 
         private static SocketFlags ConvertBsdSocketFlags(BsdSocketFlags bsdSocketFlags)
