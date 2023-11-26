@@ -105,7 +105,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             byte[] requestData = new byte[Marshal.SizeOf<TReq>()];
             byte[] responseData = new byte[Marshal.SizeOf<TResp>() + (_proxyAuth?.WrapperLength ?? 0)];
 
-            MemoryMarshal.Write(requestData, ref request);
+            MemoryMarshal.Write(requestData, request);
 
             int expectedSentBytes;
             int sentBytes;
@@ -353,7 +353,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                 DestinationPort = (ushort)remoteEndPoint.Port,
             };
 
-            MemoryMarshal.Write(data, ref header);
+            MemoryMarshal.Write(data, header);
             buffer[..size].CopyTo(data.AsSpan()[Marshal.SizeOf<SocksUdpIpv4Header>()..]);
 
             try
