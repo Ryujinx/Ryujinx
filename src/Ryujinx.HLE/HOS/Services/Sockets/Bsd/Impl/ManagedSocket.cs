@@ -41,7 +41,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             RefCount = 1;
         }
 
-        private static SocketFlags ConvertBsdSocketFlags(BsdSocketFlags bsdSocketFlags)
+        internal static SocketFlags ConvertBsdSocketFlags(BsdSocketFlags bsdSocketFlags)
         {
             SocketFlags socketFlags = SocketFlags.None;
 
