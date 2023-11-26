@@ -103,7 +103,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd
             {
                 lock (_lock)
                 {
-                    oldFile.Refcount++;
+                    oldFile.RefCount++;
 
                     return RegisterFileDescriptor(oldFile);
                 }
@@ -118,9 +118,9 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd
 
             if (file != null)
             {
-                file.Refcount--;
+                file.RefCount--;
 
-                if (file.Refcount <= 0)
+                if (file.RefCount <= 0)
                 {
                     file.Dispose();
                 }
