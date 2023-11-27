@@ -17,13 +17,13 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Proxy.Packets
 
         public IPAddress DestinationAddress
         {
-            get => new(BitConverter.GetBytes(_destinationAddress));
+            readonly get => new(BitConverter.GetBytes(_destinationAddress));
             set => _destinationAddress = BitConverter.ToUInt32(value.GetAddressBytes());
         }
 
         public ushort DestinationPort
         {
-            get
+            readonly get
             {
                 byte[] portBytes = BitConverter.GetBytes(_destinationPort);
                 Array.Reverse(portBytes);

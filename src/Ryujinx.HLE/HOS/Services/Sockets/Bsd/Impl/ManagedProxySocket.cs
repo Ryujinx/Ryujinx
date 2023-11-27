@@ -33,7 +33,8 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
         public SocketType SocketType { get; }
         public ProtocolType ProtocolType { get; }
 
-        public bool Blocking {
+        public bool Blocking
+        {
             get
             {
                 return _udpEndpoint != null ? _udpSocket.Blocking : Socket.Blocking;
@@ -99,8 +100,8 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
         }
 
         private TResp SendAndReceive<TReq, TResp>(TReq request)
-            where TReq: unmanaged
-            where TResp: unmanaged
+            where TReq : unmanaged
+            where TResp : unmanaged
         {
             byte[] requestData = new byte[Marshal.SizeOf<TReq>()];
             byte[] responseData = new byte[Marshal.SizeOf<TResp>() + (_proxyAuth?.WrapperLength ?? 0)];
@@ -301,8 +302,10 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             EnsureSuccessReply(response.ReplyField);
 
             _udpEndpoint = new IPEndPoint(response.BoundAddress, response.BoundPort);
-            _udpSocket = new Socket(AddressFamily, SocketType, ProtocolType);
-            _udpSocket.Blocking = Socket.Blocking;
+            _udpSocket = new Socket(AddressFamily, SocketType, ProtocolType)
+            {
+                Blocking = Socket.Blocking
+            };
             _udpSocket.Bind(endpoint);
 
             _ready = true;
@@ -411,10 +414,10 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             LinuxError result;
             remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
             bool shouldBlockAfterOperation = false;
-            
+
             byte[] data = new byte[size + _proxyAuth.WrapperLength + Marshal.SizeOf<SocksUdpIpv4Header>()];
             EndPoint udpEndpoint = _udpEndpoint;
-            
+
             if (_udpSocket is not { IsBound: true })
             {
                 receiveSize = -1;
@@ -434,7 +437,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                 data = _proxyAuth.Unwrap(data).ToArray();
 
                 var header = MemoryMarshal.Read<SocksUdpIpv4Header>(data);
-            
+
                 // An implementation that doesn't support fragmentation must drop any fragmented datagram
                 // TODO: Implement support for fragmentation
                 if (header.Fragment != 0)
@@ -445,7 +448,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                     }
 
                     receiveSize = -1;
-                    
+
                     return LinuxError.EOPNOTSUPP;
                 }
 
@@ -668,7 +671,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                 return WinSockHelper.ConvertError((WsaError)exception.ErrorCode);
             }
         }
-        
+
         public LinuxError Read(out int readSize, Span<byte> buffer)
         {
             return Receive(out readSize, buffer, BsdSocketFlags.None);
