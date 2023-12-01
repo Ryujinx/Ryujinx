@@ -346,8 +346,8 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                 throw new InvalidOperationException("No connection has been established. Issue a proxy command before sending data.");
             }
 
-            byte[] data = new byte[Marshal.SizeOf<SocksUdpIpv4Header>() + buffer.Length];
-            var header = new SocksUdpIpv4Header
+            byte[] data = new byte[Marshal.SizeOf<SocksIpv4UdpHeader>() + buffer.Length];
+            var header = new SocksIpv4UdpHeader
             {
                 Reserved = 0,
                 Fragment = 0,
@@ -357,12 +357,12 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             };
 
             MemoryMarshal.Write(data, header);
-            buffer[..size].CopyTo(data.AsSpan()[Marshal.SizeOf<SocksUdpIpv4Header>()..]);
+            buffer[..size].CopyTo(data.AsSpan()[Marshal.SizeOf<SocksIpv4UdpHeader>()..]);
 
             try
             {
                 sendSize = _udpSocket.SendTo(_proxyAuth.Wrap(data), _udpEndpoint) -
-                           Marshal.SizeOf<SocksUdpIpv4Header>() - _proxyAuth.WrapperLength;
+                           Marshal.SizeOf<SocksIpv4UdpHeader>() - _proxyAuth.WrapperLength;
 
                 return LinuxError.SUCCESS;
             }
@@ -415,7 +415,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
             bool shouldBlockAfterOperation = false;
 
-            byte[] data = new byte[size + _proxyAuth.WrapperLength + Marshal.SizeOf<SocksUdpIpv4Header>()];
+            byte[] data = new byte[size + _proxyAuth.WrapperLength + Marshal.SizeOf<SocksIpv4UdpHeader>()];
             EndPoint udpEndpoint = _udpEndpoint;
 
             if (_udpSocket is not { IsBound: true })
@@ -433,10 +433,10 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
 
             try
             {
-                receiveSize = _udpSocket.ReceiveFrom(data, ref udpEndpoint) - _proxyAuth.WrapperLength - Marshal.SizeOf<SocksUdpIpv4Header>();
+                receiveSize = _udpSocket.ReceiveFrom(data, ref udpEndpoint) - _proxyAuth.WrapperLength - Marshal.SizeOf<SocksIpv4UdpHeader>();
                 data = _proxyAuth.Unwrap(data).ToArray();
 
-                var header = MemoryMarshal.Read<SocksUdpIpv4Header>(data);
+                var header = MemoryMarshal.Read<SocksIpv4UdpHeader>(data);
 
                 // An implementation that doesn't support fragmentation must drop any fragmented datagram
                 // TODO: Implement support for fragmentation
@@ -453,7 +453,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                 }
 
                 remoteEndPoint = new IPEndPoint(header.DestinationAddress, header.DestinationPort);
-                data.AsSpan()[Marshal.SizeOf<SocksUdpIpv4Header>()..].CopyTo(buffer[..size]);
+                data.AsSpan()[Marshal.SizeOf<SocksIpv4UdpHeader>()..].CopyTo(buffer[..size]);
 
                 result = LinuxError.SUCCESS;
             }

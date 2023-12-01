@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Proxy.Packets
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct SocksUdpIpv4Header
+    public struct SocksIpv4UdpHeader
     {
         public ushort Reserved;
         public byte Fragment;
