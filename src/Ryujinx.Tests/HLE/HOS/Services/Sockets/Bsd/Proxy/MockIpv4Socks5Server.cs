@@ -39,7 +39,7 @@ namespace Ryujinx.Tests.HLE.HOS.Services.Sockets.Bsd.Proxy
         public IPAddress DestinationAddress;
         public ushort DestinationPort;
 
-        public MockIpv4Socks5NoAuthSession(TcpServer server) : base(server) {}
+        public MockIpv4Socks5NoAuthSession(TcpServer server) : base(server) { }
 
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
