@@ -304,7 +304,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             _udpEndpoint = new IPEndPoint(response.BoundAddress, response.BoundPort);
             _udpSocket = new Socket(AddressFamily, SocketType, ProtocolType)
             {
-                Blocking = Socket.Blocking
+                Blocking = Socket.Blocking,
             };
             _udpSocket.Bind(endpoint);
 
