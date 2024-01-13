@@ -176,19 +176,19 @@ namespace Ryujinx.UI.Common.Configuration
         public bool EnableVsync { get; set; }
 
         /// <summary>
-        /// Current present interval state; 60 (Switch), unbounded ("Vsync off"), or custom
+        /// Current VSync mode; 60 (Switch), unbounded ("Vsync off"), or custom
         /// </summary>
-        public PresentIntervalState PresentIntervalState { get; set; }
+        public VSyncMode VSyncMode { get; set; }
 
         /// <summary>
         /// Enables or disables the custom present interval
         /// </summary>
-        public bool EnableCustomPresentInterval { get; set; }
+        public bool EnableCustomVSyncInterval { get; set; }
 
         /// <summary>
         /// The custom present interval value
         /// </summary>
-        public int CustomPresentInterval { get; set; }
+        public int CustomVSyncInterval { get; set; }
 
         /// <summary>
         /// Enables or disables Shader cache

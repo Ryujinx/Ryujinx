@@ -80,18 +80,18 @@
             MaxHeight="18"
             Orientation="Horizontal">
             <TextBlock
-                Name="PresentIntervalState"
+                Name="VSyncMode"
                 Margin="5,0,5,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Foreground="{Binding PresentIntervalStateColor}"
+                Foreground="{Binding VSyncModeColor}"
                 IsVisible="{Binding !ShowLoadProgress}"
-                PointerReleased="PresentIntervalState_PointerReleased"
-                Text="{Binding PresentIntervalStateText}"
-                TextAlignment="Left"/>
+                PointerReleased="VSyncMode_PointerReleased"
+                Text="{Binding VSyncModeText}"
+                TextAlignment="Start"/>
                 <Button MinWidth="0"
                         Width="20"
-                        IsVisible="{Binding ShowCustomPresentIntervalPicker}"
+                        IsVisible="{Binding ShowCustomVSyncIntervalPicker}"
                         Margin="-5,0,5,0"
                         Background="Transparent"
                         BorderThickness="0">
@@ -114,8 +114,8 @@
                         <Flyout Placement="Top" ShowMode="TransientWithDismissOnPointerMoveAway">
                             <StackPanel Margin="0,0,0,10"
                                         Orientation="Horizontal">
-                                <ui:NumberBox ToolTip.Tip="{locale:Locale SettingsTabSystemCustomPresentIntervalValueTooltip}"
-                                              Value="{Binding CustomPresentInterval}"
+                                <ui:NumberBox ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalValueTooltip}"
+                                              Value="{Binding CustomVSyncInterval}"
                                               Width="175"
                                               SmallChange="1.0"
                                               LargeChange="10"
@@ -123,8 +123,8 @@
                                               SpinButtonPlacementMode="Hidden"
                                               Minimum="10"
                                               Maximum="1000" />
-                                <Slider Value="{Binding CustomPresentIntervalPercentageProxy}"
-                                        ToolTip.Tip="{locale:Locale SettingsTabSystemCustomPresentIntervalSliderTooltip}"
+                                <Slider Value="{Binding CustomVSyncIntervalPercentageProxy}"
+                                        ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalSliderTooltip}"
                                         MinWidth="175"
                                         Margin="10,-3,0,0"
                                         Height="32"
@@ -138,7 +138,7 @@
                                         Maximum="400" />
                                 <TextBlock Margin="5,0"
                                            Width="40"
-                                           Text="{Binding CustomPresentIntervalPercentageText}"/>
+                                           Text="{Binding CustomVSyncIntervalPercentageText}"/>
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>

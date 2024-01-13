@@ -27,22 +27,22 @@ namespace Ryujinx.HLE
         public TamperMachine TamperMachine { get; }
         public IHostUIHandler UIHandler { get; }
 
-        public PresentIntervalState PresentIntervalState { get; set; } = PresentIntervalState.Switch;
-        public bool CustomPresentIntervalEnabled { get; set; } = false;
-        public int CustomPresentInterval { get; set; }
+        public VSyncMode VSyncMode { get; set; } = VSyncMode.Switch;
+        public bool CustomVSyncIntervalEnabled { get; set; } = false;
+        public int CustomVSyncInterval { get; set; }
 
-        public long TargetPresentInterval { get; set; } = 60;
-        public Action TargetPresentIntervalChanged { get; set; }
+        public long TargetVSyncInterval { get; set; } = 60;
+        public Action TargetVSyncIntervalChanged { get; set; }
 
         public bool EnableDeviceVsync
         {
             get
             {
-                return PresentIntervalState == PresentIntervalState.Switch;
+                return VSyncMode == VSyncMode.Switch;
             }
             set
             {
-                PresentIntervalState = value ? PresentIntervalState.Switch : PresentIntervalState.Unbounded;
+                VSyncMode = value ? VSyncMode.Switch : VSyncMode.Unbounded;
             }
         }
 
@@ -76,15 +76,15 @@ namespace Ryujinx.HLE
             System.State.SetLanguage(Configuration.SystemLanguage);
             System.State.SetRegion(Configuration.Region);
 
-            EnableDeviceVsync                       = Configuration.PresentIntervalState == PresentIntervalState.Switch;
-            PresentIntervalState                    = Configuration.PresentIntervalState;
-            CustomPresentInterval                   = Configuration.CustomPresentInterval;
+            EnableDeviceVsync                       = Configuration.VSyncMode == VSyncMode.Switch;
+            VSyncMode                               = Configuration.VSyncMode;
+            CustomVSyncInterval                     = Configuration.CustomVSyncInterval;
             System.State.DockedMode                 = Configuration.EnableDockedMode;
             System.PerformanceState.PerformanceMode = System.State.DockedMode ? PerformanceMode.Boost : PerformanceMode.Default;
             System.EnablePtc                        = Configuration.EnablePtc;
             System.FsIntegrityCheckLevel            = Configuration.FsIntegrityCheckLevel;
             System.GlobalAccessLogMode              = Configuration.FsGlobalAccessLogMode;
-            UpdatePresentInterval(); //todo remove these comments before committing.
+            UpdateVSyncInterval(); //todo remove these comments before committing.
                                      // this call seems awkward. maybe this should be part of HOS.Horizon,
                                      // where surfaceflinger is initialized? not sure though since it isn't a genuine
                                      // Switch system setting. either way, if not, we need this call here because 
@@ -140,33 +140,33 @@ namespace Ryujinx.HLE
             Gpu.Window.Present(swapBuffersCallback);
         }
 
-        public void IncrementCustomPresentInterval()
+        public void IncrementCustomVSyncInterval()
         {
-            CustomPresentInterval += 1;
-            UpdatePresentInterval();
+            CustomVSyncInterval += 1;
+            UpdateVSyncInterval();
         }
 
-        public void DecrementCustomPresentInterval()
+        public void DecrementCustomVSyncInterval()
         {
-            CustomPresentInterval -= 1;
-            UpdatePresentInterval();
+            CustomVSyncInterval -= 1;
+            UpdateVSyncInterval();
         }
 
-        public void UpdatePresentInterval()
+        public void UpdateVSyncInterval()
         {
-            switch (PresentIntervalState)
+            switch (VSyncMode)
             {
-                case PresentIntervalState.Custom:
-                    TargetPresentInterval = CustomPresentInterval;
+                case VSyncMode.Custom:
+                    TargetVSyncInterval = CustomVSyncInterval;
                     break;
-                case PresentIntervalState.Switch:
-                    TargetPresentInterval = 60;
+                case VSyncMode.Switch:
+                    TargetVSyncInterval = 60;
                     break;
-                case PresentIntervalState.Unbounded:
-                    TargetPresentInterval = 1;
+                case VSyncMode.Unbounded:
+                    TargetVSyncInterval = 1;
                     break;
             }
-            TargetPresentIntervalChanged.Invoke();
+            TargetVSyncIntervalChanged.Invoke();
         }
 
         public void SetVolume(float volume)

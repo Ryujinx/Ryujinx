@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using PresentIntervalState = Ryujinx.Common.Configuration.PresentIntervalState;
+using VSyncMode = Ryujinx.Common.Configuration.VSyncMode;
 
 namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 {
@@ -33,7 +33,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 
         private int _swapInterval;
         private int _swapIntervalDelay;
-        private bool _targetPresentIntervalChanged = true;
+        private bool _targetVSyncIntervalChanged = true;
 
         private readonly object _lock = new();
 
@@ -58,7 +58,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
         public SurfaceFlinger(Switch device)
         {
             _device = device;
-            _device.TargetPresentIntervalChanged += () => _targetPresentIntervalChanged = true;
+            _device.TargetVSyncIntervalChanged += () => _targetVSyncIntervalChanged = true;
             _layers = new Dictionary<long, Layer>();
             RenderLayerId = 0;
 
@@ -82,9 +82,9 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
             _swapInterval = swapInterval;
 
             // If the swap interval is 0, Game VSync is disabled.
-            if (_targetPresentIntervalChanged)
+            if (_targetVSyncIntervalChanged)
             {
-                _targetPresentIntervalChanged = false;
+                _targetVSyncIntervalChanged = false;
                 if (_swapInterval == 0)
                 {
                     _nextFrameEvent.Set();
@@ -92,7 +92,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
                 }
                 else
                 {
-                    _ticksPerFrame = Stopwatch.Frequency / (long)_device.TargetPresentInterval;
+                    _ticksPerFrame = Stopwatch.Frequency / (long)_device.TargetVSyncInterval;
                 }
             }
         }
@@ -376,7 +376,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
                 if (acquireStatus == Status.Success)
                 {
                     // If device vsync is disabled, reflect the change.
-                    if (_device.PresentIntervalState == PresentIntervalState.Unbounded)
+                    if (_device.VSyncMode == VSyncMode.Unbounded)
                     {
                         UpdateSwapInterval(0);
                     }

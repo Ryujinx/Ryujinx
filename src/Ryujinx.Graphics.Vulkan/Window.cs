@@ -29,7 +29,7 @@ namespace Ryujinx.Graphics.Vulkan
 
         private int _width;
         private int _height;
-        private PresentIntervalState _presentIntervalState;
+        private VSyncMode _vSyncMode;
         private bool _swapchainIsDirty;
         private VkFormat _format;
         private AntiAliasing _currentAntiAliasing;
@@ -139,7 +139,7 @@ namespace Ryujinx.Graphics.Vulkan
                 ImageArrayLayers = 1,
                 PreTransform = capabilities.CurrentTransform,
                 CompositeAlpha = ChooseCompositeAlpha(capabilities.SupportedCompositeAlpha),
-                PresentMode = ChooseSwapPresentMode(presentModes, _presentIntervalState),
+                PresentMode = ChooseSwapPresentMode(presentModes, _vSyncMode),
                 Clipped = true,
             };
 
@@ -279,9 +279,9 @@ namespace Ryujinx.Graphics.Vulkan
             }
         }
 
-        private static PresentModeKHR ChooseSwapPresentMode(PresentModeKHR[] availablePresentModes, PresentIntervalState presentIntervalState)
+        private static PresentModeKHR ChooseSwapPresentMode(PresentModeKHR[] availablePresentModes, VSyncMode vSyncMode)
         {
-            if (presentIntervalState == PresentIntervalState.Unbounded && availablePresentModes.Contains(PresentModeKHR.ImmediateKhr))
+            if (vSyncMode == VSyncMode.Unbounded && availablePresentModes.Contains(PresentModeKHR.ImmediateKhr))
             {
                 return PresentModeKHR.ImmediateKhr;
             }
@@ -625,9 +625,9 @@ namespace Ryujinx.Graphics.Vulkan
             // Not needed as we can get the size from the surface.
         }
 
-        public override void ChangePresentIntervalState(PresentIntervalState presentIntervalState)
+        public override void ChangeVSyncMode(VSyncMode vSyncMode)
         {
-            _presentIntervalState = presentIntervalState;
+            _vSyncMode = vSyncMode;
             _swapchainIsDirty = true;
         }
 

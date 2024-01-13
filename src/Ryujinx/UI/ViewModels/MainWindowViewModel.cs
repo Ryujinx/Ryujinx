@@ -58,7 +58,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private string _searchText;
         private Timer _searchTimer;
         private string _dockedStatusText;
-        private string _presentIntervalStateText;
+        private string _vSyncModeText;
         private string _fifoStatusText;
         private string _gameStatusText;
         private string _volumeStatusText;
@@ -74,7 +74,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private bool _showStatusSeparator;
         private Brush _progressBarForegroundColor;
         private Brush _progressBarBackgroundColor;
-        private Brush _presentIntervalStateColor;
+        private Brush _vSyncModeColor;
         private byte[] _selectedIcon;
         private bool _isAppletMenuActive;
         private int _statusBarProgressMaximum;
@@ -102,8 +102,8 @@ namespace Ryujinx.Ava.UI.ViewModels
         private WindowState _windowState;
         private double _windowWidth;
         private double _windowHeight;
-        private int _customPresentInterval;
-        private int _customPresentIntervalPercentageProxy;
+        private int _customVSyncInterval;
+        private int _customVSyncIntervalPercentageProxy;
 
 
 
@@ -132,7 +132,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 Volume = ConfigurationState.Instance.System.AudioVolume;
             }
-            CustomPresentInterval = ConfigurationState.Instance.Graphics.CustomPresentInterval.Value;
+            CustomVSyncInterval = ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value;
         }
 
         public void Initialize(
@@ -409,25 +409,25 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public Brush PresentIntervalStateColor
+        public Brush VSyncModeColor
         {
-            get => _presentIntervalStateColor;
+            get => _vSyncModeColor;
             set
             {
-                _presentIntervalStateColor = value;
+                _vSyncModeColor = value;
 
                 OnPropertyChanged();
             }
         }
 
-        public bool ShowCustomPresentIntervalPicker
+        public bool ShowCustomVSyncIntervalPicker
         {
             get
             {
                 if (_isGameRunning)
                 {
-                    return AppHost.Device.PresentIntervalState ==
-                           PresentIntervalState.Custom;
+                    return AppHost.Device.VSyncMode ==
+                           VSyncMode.Custom;
                 }
                 else
                 {
@@ -440,30 +440,30 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public int CustomPresentIntervalPercentageProxy
+        public int CustomVSyncIntervalPercentageProxy
         {
-            get => _customPresentIntervalPercentageProxy;
+            get => _customVSyncIntervalPercentageProxy;
             set
             {
                 int newInterval = (int)(((decimal)value / 100) * 60);
-                _customPresentInterval = newInterval;
-                _customPresentIntervalPercentageProxy = value;
-                ConfigurationState.Instance.Graphics.CustomPresentInterval.Value = newInterval;
+                _customVSyncInterval = newInterval;
+                _customVSyncIntervalPercentageProxy = value;
+                ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value = newInterval;
                 if (_isGameRunning)
                 {
-                    AppHost.Device.CustomPresentInterval = newInterval;
-                    AppHost.Device.UpdatePresentInterval();
+                    AppHost.Device.CustomVSyncInterval = newInterval;
+                    AppHost.Device.UpdateVSyncInterval();
                 }
-                OnPropertyChanged((nameof(CustomPresentInterval)));
-                OnPropertyChanged((nameof(CustomPresentIntervalPercentageText)));
+                OnPropertyChanged((nameof(CustomVSyncInterval)));
+                OnPropertyChanged((nameof(CustomVSyncIntervalPercentageText)));
             }
         }
 
-        public string CustomPresentIntervalPercentageText
+        public string CustomVSyncIntervalPercentageText
         {
             get
             {
-                string text = CustomPresentIntervalPercentageProxy.ToString() + "%";
+                string text = CustomVSyncIntervalPercentageProxy.ToString() + "%";
                 return text;
             }
             set
@@ -472,22 +472,22 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public int CustomPresentInterval
+        public int CustomVSyncInterval
         {
-            get => _customPresentInterval;
+            get => _customVSyncInterval;
             set
             {
-                _customPresentInterval = value;
+                _customVSyncInterval = value;
                 int newPercent = (int)(((decimal)value / 60) * 100);
-                _customPresentIntervalPercentageProxy = newPercent;
-                ConfigurationState.Instance.Graphics.CustomPresentInterval.Value = value;
+                _customVSyncIntervalPercentageProxy = newPercent;
+                ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value = value;
                 if (_isGameRunning)
                 {
-                    AppHost.Device.CustomPresentInterval = value;
-                    AppHost.Device.UpdatePresentInterval();
+                    AppHost.Device.CustomVSyncInterval = value;
+                    AppHost.Device.UpdateVSyncInterval();
                 }
-                OnPropertyChanged(nameof(CustomPresentIntervalPercentageProxy));
-                OnPropertyChanged(nameof(CustomPresentIntervalPercentageText));
+                OnPropertyChanged(nameof(CustomVSyncIntervalPercentageProxy));
+                OnPropertyChanged(nameof(CustomVSyncIntervalPercentageText));
                 OnPropertyChanged();
             }
         }
@@ -580,12 +580,12 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public string PresentIntervalStateText
+        public string VSyncModeText
         {
-            get => _presentIntervalStateText;
+            get => _vSyncModeText;
             set
             {
-                _presentIntervalStateText = value;
+                _vSyncModeText = value;
 
                 OnPropertyChanged();
             }
@@ -1285,18 +1285,18 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    Application.Current.Styles.TryGetResource(args.PresentIntervalState,
+                    Application.Current.Styles.TryGetResource(args.VSyncMode,
                         Avalonia.Application.Current.ActualThemeVariant,
                         out object color);
 
                     if (color is not null)
                     {
-                        PresentIntervalStateColor = new SolidColorBrush((Color)color);
+                        VSyncModeColor = new SolidColorBrush((Color)color);
                     }
 
-                    PresentIntervalStateText = args.PresentIntervalState == "Custom" ? "Custom" : "VSync";
-                    ShowCustomPresentIntervalPicker =
-                        args.PresentIntervalState == PresentIntervalState.Custom.ToString();
+                    VSyncModeText = args.VSyncMode == "Custom" ? "Custom" : "VSync";
+                    ShowCustomVSyncIntervalPicker =
+                        args.VSyncMode == VSyncMode.Custom.ToString();
                     DockedStatusText = args.DockedMode;
                     AspectRatioStatusText = args.AspectRatio;
                     GameStatusText = args.GameStatus;
@@ -1455,55 +1455,25 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public void UpdatePresentIntervalState()
+        public void UpdateVSyncMode()
         {
-            PresentIntervalState oldPresentInterval = AppHost.Device.PresentIntervalState;
-            PresentIntervalState newPresentInterval = PresentIntervalState.Switch;
-            bool customPresentIntervalEnabled = ConfigurationState.Instance.Graphics.EnableCustomPresentInterval.Value;
-
-            switch (oldPresentInterval)
-            {
-                case PresentIntervalState.Switch:
-                    newPresentInterval = PresentIntervalState.Unbounded;
-                    break;
-                case PresentIntervalState.Unbounded:
-                    if (customPresentIntervalEnabled)
-                    {
-                        newPresentInterval = PresentIntervalState.Custom;
-                    }
-                    else
-                    {
-                        newPresentInterval = PresentIntervalState.Switch;
-                    }
-                    break;
-                case PresentIntervalState.Custom:
-                    newPresentInterval = PresentIntervalState.Switch;
-                    break;
-            }
-
-            ConfigurationState.Instance.Graphics.PresentIntervalState.Value = newPresentInterval;
-
-            if (_isGameRunning)
-            {
-                AppHost.UpdatePresentInterval(newPresentInterval);
-            }
-
-            OnPropertyChanged(nameof(ShowCustomPresentIntervalPicker));
+            AppHost.VSyncModeToggle();
+            OnPropertyChanged(nameof(ShowCustomVSyncIntervalPicker));
         }
 
-        public void PresentIntervalStateSettingChanged()
+        public void VSyncModeSettingChanged()
         {
             if (_isGameRunning)
             {
-                AppHost.Device.CustomPresentInterval = ConfigurationState.Instance.Graphics.CustomPresentInterval.Value;
-                AppHost.Device.UpdatePresentInterval();
+                AppHost.Device.CustomVSyncInterval = ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value;
+                AppHost.Device.UpdateVSyncInterval();
             }
 
-            CustomPresentInterval = ConfigurationState.Instance.Graphics.CustomPresentInterval.Value;
-            OnPropertyChanged(nameof(ShowCustomPresentIntervalPicker));
-            OnPropertyChanged(nameof(CustomPresentIntervalPercentageProxy));
-            OnPropertyChanged(nameof(CustomPresentIntervalPercentageText));
-            OnPropertyChanged(nameof(CustomPresentInterval));
+            CustomVSyncInterval = ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value;
+            OnPropertyChanged(nameof(ShowCustomVSyncIntervalPicker));
+            OnPropertyChanged(nameof(CustomVSyncIntervalPercentageProxy));
+            OnPropertyChanged(nameof(CustomVSyncIntervalPercentageText));
+            OnPropertyChanged(nameof(CustomVSyncInterval));
         }
 
         public async Task ExitCurrentState()

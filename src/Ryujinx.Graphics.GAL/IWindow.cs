@@ -9,7 +9,7 @@ namespace Ryujinx.Graphics.GAL
 
         void SetSize(int width, int height);
 
-        void ChangePresentIntervalState(PresentIntervalState presentIntervalState);
+        void ChangeVSyncMode(VSyncMode vSyncMode);
 
         void SetAntiAliasing(AntiAliasing antialiasing);
         void SetScalingFilter(ScalingFilter type);

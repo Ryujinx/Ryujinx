@@ -4,7 +4,7 @@ namespace Ryujinx.Ava.UI.Models
 {
     internal class StatusUpdatedEventArgs : EventArgs
     {
-        public string PresentIntervalState { get; }
+        public string VSyncMode { get; }
         public string VolumeStatus { get; }
         public string GpuBackend { get; }
         public string AspectRatio { get; }
@@ -13,9 +13,9 @@ namespace Ryujinx.Ava.UI.Models
         public string GameStatus { get; }
         public string GpuName { get; }
 
-        public StatusUpdatedEventArgs(string presentIntervalState, string volumeStatus, string gpuBackend, string dockedMode, string aspectRatio, string gameStatus, string fifoStatus, string gpuName)
+        public StatusUpdatedEventArgs(string vSyncMode, string volumeStatus, string gpuBackend, string dockedMode, string aspectRatio, string gameStatus, string fifoStatus, string gpuName)
         {
-            PresentIntervalState = presentIntervalState;
+            VSyncMode = vSyncMode;
             VolumeStatus = volumeStatus;
             GpuBackend = gpuBackend;
             DockedMode = dockedMode;

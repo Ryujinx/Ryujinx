@@ -32,7 +32,7 @@ namespace Ryujinx.Graphics.GAL.Multithreading
             _impl.Window.SetSize(width, height);
         }
 
-        public void ChangePresentIntervalState(PresentIntervalState presentIntervalState) { }
+        public void ChangeVSyncMode(VSyncMode vSyncMode) { }
 
         public void SetAntiAliasing(AntiAliasing effect) { }
 

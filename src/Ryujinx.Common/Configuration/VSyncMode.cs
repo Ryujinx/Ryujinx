@@ -4,9 +4,9 @@ using System.Text.Json.Serialization;
 
 namespace Ryujinx.Common.Configuration
 {
-    [JsonConverter(typeof(TypedStringEnumConverter<PresentIntervalState>))]
+    [JsonConverter(typeof(TypedStringEnumConverter<VSyncMode>))]
     [Flags]
-    public enum PresentIntervalState
+    public enum VSyncMode
     {
         Switch = 0,
         Unbounded = 1 << 0,

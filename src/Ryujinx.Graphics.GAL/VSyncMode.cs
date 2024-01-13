@@ -1,6 +1,6 @@
 namespace Ryujinx.Graphics.GAL
 {
-    public enum PresentIntervalState
+    public enum VSyncMode
     {
         Switch = 0,
         Unbounded = 1 << 0,
