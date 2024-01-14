@@ -47,14 +47,9 @@ namespace Ryujinx.Graphics.Metal
             throw new NotImplementedException();
         }
 
-        public BufferHandle CreateBuffer(int size, BufferHandle storageHint)
-        {
-            return CreateBuffer(size, BufferAccess.Default);
-        }
-
         public BufferHandle CreateBuffer(int size, BufferAccess access, BufferHandle storageHint)
         {
-            throw new NotImplementedException();
+            return CreateBuffer(size, access);
         }
 
         public BufferHandle CreateBuffer(IntPtr pointer, int size)
