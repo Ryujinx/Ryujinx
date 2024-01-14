@@ -52,11 +52,21 @@ namespace Ryujinx.Graphics.Metal
             return CreateBuffer(size, BufferAccess.Default);
         }
 
+        public BufferHandle CreateBuffer(int size, BufferAccess access, BufferHandle storageHint)
+        {
+            throw new NotImplementedException();
+        }
+
         public BufferHandle CreateBuffer(IntPtr pointer, int size)
         {
             var buffer = _device.NewBuffer(pointer, (ulong)size, MTLResourceOptions.ResourceStorageModeShared);
             var bufferPtr = buffer.NativePtr;
             return Unsafe.As<IntPtr, BufferHandle>(ref bufferPtr);
+        }
+
+        public BufferHandle CreateBufferSparse(ReadOnlySpan<BufferRange> storageBuffers)
+        {
+            throw new NotImplementedException();
         }
 
         public BufferHandle CreateBuffer(int size, BufferAccess access)
@@ -150,6 +160,7 @@ namespace Ryujinx.Graphics.Metal
                 supportsR4G4Format: false,
                 supportsR4G4B4A4Format: true,
                 supportsSnormBufferTextureFormat: true,
+                supportsSparseBuffer: false,
                 supports5BitComponentFormat: true,
                 supportsBlendEquationAdvanced: false,
                 supportsFragmentShaderInterlock: true,
@@ -166,6 +177,7 @@ namespace Ryujinx.Graphics.Metal
                 supportsShaderBallot: false,
                 supportsShaderBarrierDivergence: false,
                 supportsShaderFloat64: false,
+                supportsTextureGatherOffsets: false,
                 supportsTextureShadowLod: false,
                 supportsVertexStoreAndAtomics: false,
                 supportsViewportIndexVertexTessellation: false,

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
@@ -9,7 +9,7 @@
         <ProjectReference Include="..\Ryujinx.Common\Ryujinx.Common.csproj" />
         <ProjectReference Include="..\Ryujinx.Graphics.GAL\Ryujinx.Graphics.GAL.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <PackageReference Include="SharpMetal" />
     </ItemGroup>
