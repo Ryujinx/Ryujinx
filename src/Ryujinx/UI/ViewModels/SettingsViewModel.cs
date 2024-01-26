@@ -160,7 +160,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             get => _customVSyncIntervalPercentageProxy;
             set
             {
-                int newInterval = (int)(((decimal)value / 100) * 60);
+                int newInterval = (int)((value / 100f) * 60);
                 _customVSyncInterval = newInterval;
                 _customVSyncIntervalPercentageProxy = value;
                 OnPropertyChanged((nameof(CustomVSyncInterval)));
@@ -174,10 +174,6 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 string text = CustomVSyncIntervalPercentageProxy.ToString() + "%";
                 return text;
-            }
-            set
-            {
-
             }
         }
 
@@ -205,7 +201,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             set
             {
                 _customVSyncInterval = value;
-                int newPercent = (int)(((decimal)value / 60) * 100);
+                int newPercent = (int)((value / 60f) * 100);
                 _customVSyncIntervalPercentageProxy = newPercent;
                 OnPropertyChanged(nameof(CustomVSyncIntervalPercentageProxy));
                 OnPropertyChanged(nameof(CustomVSyncIntervalPercentageText));
