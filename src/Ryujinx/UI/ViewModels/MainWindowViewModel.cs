@@ -105,8 +105,6 @@ namespace Ryujinx.Ava.UI.ViewModels
         private int _customVSyncInterval;
         private int _customVSyncIntervalPercentageProxy;
 
-
-
         private bool _isActive;
 
         public ApplicationData ListSelectedApplication;

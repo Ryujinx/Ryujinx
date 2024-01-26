@@ -7,7 +7,6 @@ using Ryujinx.Audio.Backends.SDL2;
 using Ryujinx.Audio.Backends.SoundIo;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Helpers;
-using Ryujinx.Ava.UI.Views.Main;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Hid;
@@ -188,7 +187,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             set
             {
                 _enableCustomVSyncInterval = value;
-                if (_vSyncMode == VSyncMode.Custom && value == false)
+                if (_vSyncMode == VSyncMode.Custom && !value)
                 {
                     VSyncMode = VSyncMode.Switch;
                 }

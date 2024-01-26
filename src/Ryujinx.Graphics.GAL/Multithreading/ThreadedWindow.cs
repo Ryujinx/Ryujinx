@@ -1,4 +1,3 @@
-using Ryujinx.Common.Configuration;
 using Ryujinx.Graphics.GAL.Multithreading.Commands.Window;
 using Ryujinx.Graphics.GAL.Multithreading.Model;
 using Ryujinx.Graphics.GAL.Multithreading.Resources;
