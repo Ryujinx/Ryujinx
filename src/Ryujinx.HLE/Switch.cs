@@ -32,7 +32,6 @@ namespace Ryujinx.HLE
         public int CustomVSyncInterval { get; set; }
 
         public long TargetVSyncInterval { get; set; } = 60;
-        public Action TargetVSyncIntervalChanged { get; set; }
 
         public bool EnableDeviceVsync
         {
@@ -166,7 +165,6 @@ namespace Ryujinx.HLE
                     TargetVSyncInterval = 1;
                     break;
             }
-            TargetVSyncIntervalChanged.Invoke();
         }
 
         public void SetVolume(float volume)

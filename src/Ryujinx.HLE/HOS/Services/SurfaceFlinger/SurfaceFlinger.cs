@@ -31,9 +31,11 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
         private readonly long _spinTicks;
         private readonly long _1msTicks;
 
+        private VSyncMode _vSyncMode;
+        private long _targetVSyncInterval;
+
         private int _swapInterval;
         private int _swapIntervalDelay;
-        private bool _targetVSyncIntervalChanged = true;
 
         private readonly object _lock = new();
 
@@ -58,7 +60,6 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
         public SurfaceFlinger(Switch device)
         {
             _device = device;
-            _device.TargetVSyncIntervalChanged += () => _targetVSyncIntervalChanged = true;
             _layers = new Dictionary<long, Layer>();
             RenderLayerId = 0;
 
@@ -82,18 +83,15 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
             _swapInterval = swapInterval;
 
             // If the swap interval is 0, Game VSync is disabled.
-            if (_targetVSyncIntervalChanged)
+            if (_swapInterval == 0)
             {
-                _targetVSyncIntervalChanged = false;
-                if (_swapInterval == 0)
-                {
-                    _nextFrameEvent.Set();
-                    _ticksPerFrame = 1;
-                }
-                else
-                {
-                    _ticksPerFrame = Stopwatch.Frequency / (long)_device.TargetVSyncInterval;
-                }
+                _nextFrameEvent.Set();
+                _ticksPerFrame = 1;
+            }
+            else
+            {
+                _ticksPerFrame = Stopwatch.Frequency / _device.TargetVSyncInterval;
+                _targetVSyncInterval = _device.TargetVSyncInterval;
             }
         }
 
@@ -375,12 +373,20 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 
                 if (acquireStatus == Status.Success)
                 {
-                    // If device vsync is disabled, reflect the change.
                     if (_device.VSyncMode == VSyncMode.Unbounded)
                     {
-                        UpdateSwapInterval(0);
+                        if (_swapInterval != 0)
+                        {
+                            UpdateSwapInterval(0);
+                            _vSyncMode = _device.VSyncMode;
+                        }
                     }
-                    else
+                    else if (_device.VSyncMode != _vSyncMode)
+                    {
+                        UpdateSwapInterval(_device.VSyncMode == VSyncMode.Unbounded ? 0 : item.SwapInterval);
+                        _vSyncMode = _device.VSyncMode;
+                    }
+                    else if (item.SwapInterval != _swapInterval || _device.TargetVSyncInterval != _targetVSyncInterval)
                     {
                         UpdateSwapInterval(item.SwapInterval);
                     }
