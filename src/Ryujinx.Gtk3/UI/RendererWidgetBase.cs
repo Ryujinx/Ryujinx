@@ -456,7 +456,7 @@ namespace Ryujinx.UI
                 Device.Gpu.SetGpuThread();
                 Device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
 
-                Renderer.Window.ChangeVSyncMode(Device.EnableDeviceVsync ? VSyncMode.Switch : VSyncMode.Unbounded);
+                Renderer.Window.ChangeVSyncMode(Device.VSyncMode == (Ryujinx.Common.Configuration.VSyncMode)VSyncMode.Switch ? VSyncMode.Switch : VSyncMode.Unbounded);
 
                 (Toplevel as MainWindow)?.ActivatePauseMenu();
 
@@ -493,7 +493,7 @@ namespace Ryujinx.UI
                         }
 
                         StatusUpdatedEvent?.Invoke(this, new StatusUpdatedEventArgs(
-                            Device.EnableDeviceVsync ? VSyncMode.Switch.ToString() : VSyncMode.Unbounded.ToString(),
+                            Device.VSyncMode == Ryujinx.Common.Configuration.VSyncMode.Switch ? VSyncMode.Switch.ToString() : VSyncMode.Unbounded.ToString(),
                             Device.GetVolume(),
                             _gpuBackendName,
                             dockedMode,
@@ -654,7 +654,7 @@ namespace Ryujinx.UI
                 if (currentHotkeyState.HasFlag(KeyboardHotkeyState.ToggleVSync) &&
                     !_prevHotkeyState.HasFlag(KeyboardHotkeyState.ToggleVSync))
                 {
-                    Device.EnableDeviceVsync = !Device.EnableDeviceVsync;
+                    Device.VSyncMode = Device.VSyncMode == Ryujinx.Common.Configuration.VSyncMode.Switch ? Ryujinx.Common.Configuration.VSyncMode.Unbounded : Ryujinx.Common.Configuration.VSyncMode.Switch;
                 }
 
                 if ((currentHotkeyState.HasFlag(KeyboardHotkeyState.Screenshot) &&

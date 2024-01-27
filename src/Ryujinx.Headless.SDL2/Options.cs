@@ -114,9 +114,6 @@ namespace Ryujinx.Headless.SDL2
         [Option("fs-global-access-log-mode", Required = false, Default = 0, HelpText = "Enables FS access log output to the console.")]
         public int FsGlobalAccessLogMode { get; set; }
 
-        [Option("disable-vsync", Required = false, HelpText = "Disables Vertical Sync. Deprecated. Use vsync-mode instead.")]
-        public bool DisableVSync { get; set; }
-
         [Option("vsync-mode", Required = false, Default = VSyncMode.Switch, HelpText = "Sets the emulated VSync mode (Switch, Unbounded, or Custom).")]
         public VSyncMode VSyncMode { get; set; }
 

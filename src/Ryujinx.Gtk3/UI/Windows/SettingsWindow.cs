@@ -243,7 +243,7 @@ namespace Ryujinx.UI.Windows
                     break;
             }
 
-            if (ConfigurationState.Instance.Graphics.EnableVsync)
+            if (ConfigurationState.Instance.Graphics.VSyncMode.Value == VSyncMode.Switch)
             {
                 _vSyncToggle.Click();
             }
@@ -628,7 +628,8 @@ namespace Ryujinx.UI.Windows
             ConfigurationState.Instance.CheckUpdatesOnStart.Value = _checkUpdatesToggle.Active;
             ConfigurationState.Instance.ShowConfirmExit.Value = _showConfirmExitToggle.Active;
             ConfigurationState.Instance.HideCursor.Value = hideCursor;
-            ConfigurationState.Instance.Graphics.EnableVsync.Value = _vSyncToggle.Active;
+            ConfigurationState.Instance.Graphics.VSyncMode.Value =
+                _vSyncToggle.Active ? VSyncMode.Switch : VSyncMode.Unbounded;
             ConfigurationState.Instance.Graphics.EnableShaderCache.Value = _shaderCacheToggle.Active;
             ConfigurationState.Instance.Graphics.EnableTextureRecompression.Value = _textureRecompressionToggle.Active;
             ConfigurationState.Instance.Graphics.EnableMacroHLE.Value = _macroHLEToggle.Active;

@@ -468,11 +468,6 @@ namespace Ryujinx.UI.Common.Configuration
             public ReactiveObject<string> ShadersDumpPath { get; private set; }
 
             /// <summary>
-            /// Toggles VSync on or off. Deprecated, included for GTK compatibility.
-            /// </summary>
-            public ReactiveObject<bool> EnableVsync { get; private set; }
-
-            /// <summary>
             /// Toggles the present interval mode. Options are Switch (60Hz), Unbounded (previously Vsync off), and Custom, if enabled.
             /// </summary>
             public ReactiveObject<VSyncMode> VSyncMode { get; private set; }
@@ -549,8 +544,6 @@ namespace Ryujinx.UI.Common.Configuration
                 VSyncMode.Event += static (sender, e) => LogValueChange(e, nameof(VSyncMode));
                 EnableCustomVSyncInterval = new ReactiveObject<bool>();
                 EnableCustomVSyncInterval.Event += static (sender, e) => LogValueChange(e, nameof(EnableCustomVSyncInterval));
-                EnableVsync = new ReactiveObject<bool>();
-                EnableVsync.Event += static (sender, e) => LogValueChange(e, nameof(EnableVsync));
                 CustomVSyncInterval = new ReactiveObject<int>();
                 CustomVSyncInterval.Event += static (sender, e) => LogValueChange(e, nameof(CustomVSyncInterval));
                 EnableShaderCache = new ReactiveObject<bool>();
@@ -700,7 +693,6 @@ namespace Ryujinx.UI.Common.Configuration
                 CheckUpdatesOnStart = CheckUpdatesOnStart,
                 ShowConfirmExit = ShowConfirmExit,
                 HideCursor = HideCursor,
-                EnableVsync = Graphics.EnableVsync,
                 VSyncMode = Graphics.VSyncMode,
                 EnableCustomVSyncInterval = Graphics.EnableCustomVSyncInterval,
                 CustomVSyncInterval = Graphics.CustomVSyncInterval,
@@ -810,7 +802,6 @@ namespace Ryujinx.UI.Common.Configuration
             CheckUpdatesOnStart.Value = true;
             ShowConfirmExit.Value = true;
             HideCursor.Value = HideCursorMode.OnIdle;
-            Graphics.EnableVsync.Value = true;
             Graphics.VSyncMode.Value = VSyncMode.Switch;
             Graphics.CustomVSyncInterval.Value = 120;
             Graphics.EnableCustomVSyncInterval.Value = false;
@@ -1500,7 +1491,6 @@ namespace Ryujinx.UI.Common.Configuration
             CheckUpdatesOnStart.Value = configurationFileFormat.CheckUpdatesOnStart;
             ShowConfirmExit.Value = configurationFileFormat.ShowConfirmExit;
             HideCursor.Value = configurationFileFormat.HideCursor;
-            Graphics.EnableVsync.Value = configurationFileFormat.VSyncMode == VSyncMode.Switch;
             Graphics.VSyncMode.Value = configurationFileFormat.VSyncMode;
             Graphics.EnableCustomVSyncInterval.Value = configurationFileFormat.EnableCustomVSyncInterval;
             Graphics.CustomVSyncInterval.Value = configurationFileFormat.CustomVSyncInterval;

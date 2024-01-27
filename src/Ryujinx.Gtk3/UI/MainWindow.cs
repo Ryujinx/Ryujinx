@@ -656,7 +656,7 @@ namespace Ryujinx.UI
                 _uiHandler,
                 (SystemLanguage)ConfigurationState.Instance.System.Language.Value,
                 (RegionCode)ConfigurationState.Instance.System.Region.Value,
-                ConfigurationState.Instance.Graphics.EnableVsync ? VSyncMode.Switch : VSyncMode.Unbounded,
+                ConfigurationState.Instance.Graphics.VSyncMode,
                 ConfigurationState.Instance.System.EnableDockedMode,
                 ConfigurationState.Instance.System.EnablePtc,
                 ConfigurationState.Instance.System.EnableInternetAccess,
@@ -1262,9 +1262,9 @@ namespace Ryujinx.UI
 
         private void VSyncStatus_Clicked(object sender, ButtonReleaseEventArgs args)
         {
-            _emulationContext.EnableDeviceVsync = !_emulationContext.EnableDeviceVsync;
+            _emulationContext.VSyncMode = _emulationContext.VSyncMode == VSyncMode.Switch ? VSyncMode.Unbounded : VSyncMode.Switch;
 
-            Logger.Info?.Print(LogClass.Application, $"VSync toggled to: {_emulationContext.EnableDeviceVsync}");
+            Logger.Info?.Print(LogClass.Application, $"VSync toggled to: {_emulationContext.VSyncMode}");
         }
 
         private void DockedMode_Clicked(object sender, ButtonReleaseEventArgs args)

@@ -33,18 +33,6 @@ namespace Ryujinx.HLE
 
         public long TargetVSyncInterval { get; set; } = 60;
 
-        public bool EnableDeviceVsync
-        {
-            get
-            {
-                return VSyncMode == VSyncMode.Switch;
-            }
-            set
-            {
-                VSyncMode = value ? VSyncMode.Switch : VSyncMode.Unbounded;
-            }
-        }
-
         public bool IsFrameAvailable => Gpu.Window.IsFrameAvailable;
 
         public Switch(HLEConfiguration configuration)
@@ -75,7 +63,6 @@ namespace Ryujinx.HLE
             System.State.SetLanguage(Configuration.SystemLanguage);
             System.State.SetRegion(Configuration.Region);
 
-            EnableDeviceVsync                       = Configuration.VSyncMode == VSyncMode.Switch;
             VSyncMode                               = Configuration.VSyncMode;
             CustomVSyncInterval                     = Configuration.CustomVSyncInterval;
             System.State.DockedMode                 = Configuration.EnableDockedMode;
