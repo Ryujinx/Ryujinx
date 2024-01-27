@@ -449,6 +449,12 @@ namespace Ryujinx.Graphics.Metal
         {
             Program prg = (Program)program;
 
+            if (prg.VertexFunction == null)
+            {
+                Logger.Error?.PrintMsg(LogClass.Gpu, "Invalid Vertex Function!");
+                return;
+            }
+
             _renderEncoderState = new RenderEncoderState(
                 prg.VertexFunction,
                 prg.FragmentFunction,
