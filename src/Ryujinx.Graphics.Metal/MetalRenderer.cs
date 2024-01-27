@@ -201,7 +201,7 @@ namespace Ryujinx.Graphics.Metal
 
         public HardwareInfo GetHardwareInfo()
         {
-            return new HardwareInfo(HardwareInfoTools.GetVendor(), HardwareInfoTools.GetModel());
+            return new HardwareInfo(HardwareInfoTools.GetVendor(), HardwareInfoTools.GetModel(), "Apple");
         }
 
         public IProgram LoadProgramBinary(byte[] programBinary, bool hasFragmentShader, ShaderInfo info)
