@@ -671,7 +671,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void Dispose()
         {
-
+            EndCurrentPass();
         }
     }
 }
