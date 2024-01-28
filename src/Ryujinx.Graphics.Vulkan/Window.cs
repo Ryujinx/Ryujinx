@@ -628,6 +628,7 @@ namespace Ryujinx.Graphics.Vulkan
         public override void ChangeVSyncMode(VSyncMode vSyncMode)
         {
             _vSyncMode = vSyncMode;
+            //present mode may change, so mark the swapchain for recreation
             _swapchainIsDirty = true;
         }
 

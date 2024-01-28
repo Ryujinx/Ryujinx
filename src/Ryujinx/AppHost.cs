@@ -247,7 +247,6 @@ namespace Ryujinx.Ava
                 Device.VSyncMode = e.NewValue;
                 Device.UpdateVSyncInterval();
             }
-            //vulkan present mode may change in response, so recreate the swapchain
             _renderer.Window?.ChangeVSyncMode((Ryujinx.Graphics.GAL.VSyncMode)e.NewValue);
 
             _viewModel.ShowCustomVSyncIntervalPicker = (e.NewValue == VSyncMode.Custom);
