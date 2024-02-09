@@ -446,7 +446,6 @@ namespace Ryujinx.Ava.UI.ViewModels
                 int newInterval = (int)((value / 100f) * 60);
                 _customVSyncInterval = newInterval;
                 _customVSyncIntervalPercentageProxy = value;
-                ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value = newInterval;
                 if (_isGameRunning)
                 {
                     AppHost.Device.CustomVSyncInterval = newInterval;
@@ -478,7 +477,6 @@ namespace Ryujinx.Ava.UI.ViewModels
                 _customVSyncInterval = value;
                 int newPercent = (int)((value / 60f) * 100);
                 _customVSyncIntervalPercentageProxy = newPercent;
-                ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value = value;
                 if (_isGameRunning)
                 {
                     AppHost.Device.CustomVSyncInterval = value;

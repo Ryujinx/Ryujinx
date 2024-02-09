@@ -250,8 +250,6 @@ namespace Ryujinx.Ava
             _renderer.Window?.ChangeVSyncMode((Ryujinx.Graphics.GAL.VSyncMode)e.NewValue);
 
             _viewModel.ShowCustomVSyncIntervalPicker = (e.NewValue == VSyncMode.Custom);
-
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
         }
 
         public void VSyncModeToggle()
@@ -281,7 +279,7 @@ namespace Ryujinx.Ava
                     break;
             }
 
-            ConfigurationState.Instance.Graphics.VSyncMode.Value = newVSyncMode;
+            UpdateVSyncMode(this, new ReactiveEventArgs<VSyncMode>(oldVSyncMode, newVSyncMode));
         }
 
         private void UpdateCustomVSyncIntervalValue(object sender, ReactiveEventArgs<int> e)
