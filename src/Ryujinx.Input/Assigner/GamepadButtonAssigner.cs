@@ -59,16 +59,16 @@ namespace Ryujinx.Input.Assigner
             return _gamepad == null || !_gamepad.IsConnected;
         }
 
-        public string GetPressedButton()
+        public ButtonValue? GetPressedButton()
         {
             IEnumerable<GamepadButtonInputId> pressedButtons = _detector.GetPressedButtons();
 
             if (pressedButtons.Any())
             {
-                return !_forStick ? pressedButtons.First().ToString() : ((StickInputId)pressedButtons.First()).ToString();
+                return !_forStick ? new(pressedButtons.First()) : new(((StickInputId)pressedButtons.First()));
             }
 
-            return "";
+            return null;
         }
 
         private void CollectButtonStats()

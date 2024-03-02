@@ -10,6 +10,7 @@ using Ryujinx.Input;
 using Ryujinx.Input.Assigner;
 using Ryujinx.Input.GTK3;
 using Ryujinx.UI.Common.Configuration;
+using Ryujinx.UI.Helper;
 using Ryujinx.UI.Widgets;
 using System;
 using System.Collections.Generic;
@@ -893,7 +894,7 @@ namespace Ryujinx.UI.Windows
                     }
                 }
 
-                string pressedButton = assigner.GetPressedButton();
+                string pressedButton = ButtonValueHelper.ToString(assigner.GetPressedButton() ?? new ButtonValue(Input.Key.Unknown));
 
                 Application.Invoke(delegate
                 {

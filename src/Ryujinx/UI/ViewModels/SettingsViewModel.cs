@@ -7,9 +7,9 @@ using Ryujinx.Audio.Backends.SDL2;
 using Ryujinx.Audio.Backends.SoundIo;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Helpers;
+using Ryujinx.Ava.UI.Models.Input;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
-using Ryujinx.Common.Configuration.Hid;
 using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.Common.GraphicsDriver;
 using Ryujinx.Common.Logging;
@@ -46,7 +46,6 @@ namespace Ryujinx.Ava.UI.ViewModels
         private bool _isVulkanAvailable = true;
         private bool _directoryChanged;
         private readonly List<string> _gpuIds = new();
-        private KeyboardHotkeys _keyboardHotkeys;
         private int _graphicsBackendIndex;
         private int _scalingFilter;
         private int _scalingFilterLevel;
@@ -242,16 +241,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             get => new(Enum.GetNames<MultiplayerMode>());
         }
 
-        public KeyboardHotkeys KeyboardHotkeys
-        {
-            get => _keyboardHotkeys;
-            set
-            {
-                _keyboardHotkeys = value;
-
-                OnPropertyChanged();
-            }
-        }
+        public HotkeysConfig KeyboardHotkeys { get; set; }
 
         public int NetworkInterfaceIndex
         {
@@ -418,7 +408,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             EnableMouse = config.Hid.EnableMouse;
 
             // Keyboard Hotkeys
-            KeyboardHotkeys = config.Hid.Hotkeys.Value;
+            KeyboardHotkeys = new HotkeysConfig(config.Hid.Hotkeys.Value);
 
             // System
             Region = (int)config.System.Region.Value;
@@ -505,7 +495,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.Hid.EnableMouse.Value = EnableMouse;
 
             // Keyboard Hotkeys
-            config.Hid.Hotkeys.Value = KeyboardHotkeys;
+            config.Hid.Hotkeys.Value = KeyboardHotkeys.GetConfig();
 
             // System
             config.System.Region.Value = (Region)Region;

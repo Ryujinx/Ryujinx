@@ -11,7 +11,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
 
         public void Dispose()
         {
-            ControllerSettings.Dispose();
+            InputView.Dispose();
         }
     }
 }

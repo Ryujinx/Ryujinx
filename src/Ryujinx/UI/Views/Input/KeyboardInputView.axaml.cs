@@ -6,18 +6,17 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.ViewModels.Input;
-using Ryujinx.Common.Configuration.Hid.Controller;
 using Ryujinx.Input;
 using Ryujinx.Input.Assigner;
-using StickInputId = Ryujinx.Common.Configuration.Hid.Controller.StickInputId;
+using Key = Ryujinx.Common.Configuration.Hid.Key;
 
 namespace Ryujinx.Ava.UI.Views.Input
 {
-    public partial class ControllerInputView : UserControl
+    public partial class KeyboardInputView : UserControl
     {
         private ButtonKeyAssigner _currentAssigner;
 
-        public ControllerInputView()
+        public KeyboardInputView()
         {
             InitializeComponent();
 
@@ -51,8 +50,6 @@ namespace Ryujinx.Ava.UI.Views.Input
                         return;
                     }
 
-                    bool isStick = button.Tag != null && button.Tag.ToString() == "stick";
-
                     if (_currentAssigner == null)
                     {
                         _currentAssigner = new ButtonKeyAssigner(button);
@@ -61,10 +58,10 @@ namespace Ryujinx.Ava.UI.Views.Input
 
                         PointerPressed += MouseClick;
 
-                        var viewModel = (DataContext as ControllerInputViewModel);
+                        var viewModel = (DataContext as KeyboardInputViewModel);
 
                         IKeyboard keyboard = (IKeyboard)viewModel.parentModel.AvaloniaKeyboardDriver.GetGamepad("0"); // Open Avalonia keyboard for cancel operations.
-                        IButtonAssigner assigner = CreateButtonAssigner(isStick);
+                        IButtonAssigner assigner = CreateButtonAssigner();
 
                         _currentAssigner.ButtonAssigned += (sender, e) =>
                         {
@@ -76,70 +73,88 @@ namespace Ryujinx.Ava.UI.Views.Input
                                 switch (button.Name)
                                 {
                                     case "ButtonZl":
-                                        viewModel.Config.ButtonZl = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonZl = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonL":
-                                        viewModel.Config.ButtonL = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonL = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonMinus":
-                                        viewModel.Config.ButtonMinus = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonMinus = buttonValue.AsHidType<Key>();
                                         break;
                                     case "LeftStickButton":
-                                        viewModel.Config.LeftStickButton = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.LeftStickButton = buttonValue.AsHidType<Key>();
                                         break;
-                                    case "LeftJoystick":
-                                        viewModel.Config.LeftJoystick = buttonValue.AsHidType<StickInputId>();
+                                    case "LeftStickUp":
+                                        viewModel.Config.LeftStickUp = buttonValue.AsHidType<Key>();
+                                        break;
+                                    case "LeftStickDown":
+                                        viewModel.Config.LeftStickDown = buttonValue.AsHidType<Key>();
+                                        break;
+                                    case "LeftStickRight":
+                                        viewModel.Config.LeftStickRight = buttonValue.AsHidType<Key>();
+                                        break;
+                                    case "LeftStickLeft":
+                                        viewModel.Config.LeftStickLeft = buttonValue.AsHidType<Key>();
                                         break;
                                     case "DpadUp":
-                                        viewModel.Config.DpadUp = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.DpadUp = buttonValue.AsHidType<Key>();
                                         break;
                                     case "DpadDown":
-                                        viewModel.Config.DpadDown = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.DpadDown = buttonValue.AsHidType<Key>();
                                         break;
                                     case "DpadLeft":
-                                        viewModel.Config.DpadLeft = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.DpadLeft = buttonValue.AsHidType<Key>();
                                         break;
                                     case "DpadRight":
-                                        viewModel.Config.DpadRight = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.DpadRight = buttonValue.AsHidType<Key>();
                                         break;
                                     case "LeftButtonSr":
-                                        viewModel.Config.LeftButtonSr = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.LeftButtonSr = buttonValue.AsHidType<Key>();
                                         break;
                                     case "LeftButtonSl":
-                                        viewModel.Config.LeftButtonSl = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.LeftButtonSl = buttonValue.AsHidType<Key>();
                                         break;
                                     case "RightButtonSr":
-                                        viewModel.Config.RightButtonSr = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.RightButtonSr = buttonValue.AsHidType<Key>();
                                         break;
                                     case "RightButtonSl":
-                                        viewModel.Config.RightButtonSl = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.RightButtonSl = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonZr":
-                                        viewModel.Config.ButtonZr = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonZr = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonR":
-                                        viewModel.Config.ButtonR = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonR = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonPlus":
-                                        viewModel.Config.ButtonPlus = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonPlus = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonA":
-                                        viewModel.Config.ButtonA = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonA = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonB":
-                                        viewModel.Config.ButtonB = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonB = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonX":
-                                        viewModel.Config.ButtonX = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonX = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ButtonY":
-                                        viewModel.Config.ButtonY = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.ButtonY = buttonValue.AsHidType<Key>();
                                         break;
                                     case "RightStickButton":
-                                        viewModel.Config.RightStickButton = buttonValue.AsHidType<GamepadInputId>();
+                                        viewModel.Config.RightStickButton = buttonValue.AsHidType<Key>();
                                         break;
-                                    case "RightJoystick":
-                                        viewModel.Config.RightJoystick = buttonValue.AsHidType<StickInputId>();
+                                    case "RightStickUp":
+                                        viewModel.Config.RightStickUp = buttonValue.AsHidType<Key>();
+                                        break;
+                                    case "RightStickDown":
+                                        viewModel.Config.RightStickDown = buttonValue.AsHidType<Key>();
+                                        break;
+                                    case "RightStickRight":
+                                        viewModel.Config.RightStickRight = buttonValue.AsHidType<Key>();
+                                        break;
+                                    case "RightStickLeft":
+                                        viewModel.Config.RightStickLeft = buttonValue.AsHidType<Key>();
                                         break;
                                 }
                             }
@@ -174,11 +189,11 @@ namespace Ryujinx.Ava.UI.Views.Input
             PointerPressed -= MouseClick;
         }
 
-        private IButtonAssigner CreateButtonAssigner(bool forStick)
+        private IButtonAssigner CreateButtonAssigner()
         {
             IButtonAssigner assigner;
 
-            assigner = new GamepadButtonAssigner((DataContext as ControllerInputViewModel).parentModel.SelectedGamepad, ((DataContext as ControllerInputViewModel).parentModel.Config as StandardControllerInputConfig).TriggerThreshold, forStick);
+            assigner = new KeyboardKeyAssigner((IKeyboard)(DataContext as KeyboardInputViewModel).parentModel.SelectedGamepad);
 
             return assigner;
         }

@@ -15,8 +15,7 @@
                             <MenuItem Header="Test 2" />
                             <MenuItem Header="Test 3">
                                 <MenuItem.Icon>
-                                    <CheckBox Margin="0"
-                                              IsChecked="{ReflectionBinding Checkbox, Mode=TwoWay}" />
+                                    <CheckBox Margin="0" />
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
