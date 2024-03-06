@@ -67,15 +67,15 @@ jobs:
         run: dotnet publish -c "${{ matrix.configuration }}" -r "${{ matrix.platform.name }}" -o ./publish_sdl2_headless -p:Version="${{ env.RYUJINX_BASE_VERSION }}" -p:DebugType=embedded -p:SourceRevisionId="${{ steps.git_short_hash.outputs.result }}" -p:ExtraDefineConstants=DISABLE_UPDATER src/Ryujinx.Headless.SDL2 --self-contained true
         if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
 
-      - name: Publish Ryujinx.Ava
-        run: dotnet publish -c "${{ matrix.configuration }}" -r "${{ matrix.platform.name }}" -o ./publish_ava -p:Version="${{ env.RYUJINX_BASE_VERSION }}" -p:DebugType=embedded -p:SourceRevisionId="${{ steps.git_short_hash.outputs.result }}" -p:ExtraDefineConstants=DISABLE_UPDATER src/Ryujinx.Ava --self-contained true
+      - name: Publish Ryujinx.Gtk3
+        run: dotnet publish -c "${{ matrix.configuration }}" -r "${{ matrix.platform.name }}" -o ./publish_gtk -p:Version="${{ env.RYUJINX_BASE_VERSION }}" -p:DebugType=embedded -p:SourceRevisionId="${{ steps.git_short_hash.outputs.result }}" -p:ExtraDefineConstants=DISABLE_UPDATER src/Ryujinx.Gtk3 --self-contained true
         if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
 
       - name: Set executable bit
         run: |
           chmod +x ./publish/Ryujinx ./publish/Ryujinx.sh
           chmod +x ./publish_sdl2_headless/Ryujinx.Headless.SDL2 ./publish_sdl2_headless/Ryujinx.sh
-          chmod +x ./publish_ava/Ryujinx.Ava ./publish_ava/Ryujinx.sh
+          chmod +x ./publish_gtk/Ryujinx.Gtk3 ./publish_gtk/Ryujinx.sh
         if: github.event_name == 'pull_request' && matrix.platform.os == 'ubuntu-latest'
 
       - name: Upload Ryujinx artifact
@@ -92,11 +92,11 @@ jobs:
           path: publish_sdl2_headless
         if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
 
-      - name: Upload Ryujinx.Ava artifact
+      - name: Upload Ryujinx.Gtk3 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ava-ryujinx-${{ matrix.configuration }}-${{ env.RYUJINX_BASE_VERSION }}+${{ steps.git_short_hash.outputs.result }}-${{ matrix.platform.zip_os_name }}
-          path: publish_ava
+          name: gtk-ryujinx-${{ matrix.configuration }}-${{ env.RYUJINX_BASE_VERSION }}+${{ steps.git_short_hash.outputs.result }}-${{ matrix.platform.zip_os_name }}
+          path: publish_gtk
         if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
 
   build_macos:
@@ -140,19 +140,19 @@ jobs:
         shell: bash
         if: github.event_name == 'pull_request'
 
-      - name: Publish macOS Ryujinx.Ava
+      - name: Publish macOS Ryujinx
         run: |
-          ./distribution/macos/create_macos_build_ava.sh . publish_tmp_ava publish_ava ./distribution/macos/entitlements.xml "${{ env.RYUJINX_BASE_VERSION }}" "${{ steps.git_short_hash.outputs.result }}" "${{ matrix.configuration }}" "-p:ExtraDefineConstants=DISABLE_UPDATER"
+          ./distribution/macos/create_macos_build_ava.sh . publish_tmp publish ./distribution/macos/entitlements.xml "${{ env.RYUJINX_BASE_VERSION }}" "${{ steps.git_short_hash.outputs.result }}" "${{ matrix.configuration }}" "-p:ExtraDefineConstants=DISABLE_UPDATER"
 
       - name: Publish macOS Ryujinx.Headless.SDL2
         run: |
           ./distribution/macos/create_macos_build_headless.sh . publish_tmp_headless publish_headless ./distribution/macos/entitlements.xml "${{ env.RYUJINX_BASE_VERSION }}" "${{ steps.git_short_hash.outputs.result }}" "${{ matrix.configuration }}" "-p:ExtraDefineConstants=DISABLE_UPDATER"
 
-      - name: Upload Ryujinx.Ava artifact
+      - name: Upload Ryujinx artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ava-ryujinx-${{ matrix.configuration }}-${{ env.RYUJINX_BASE_VERSION }}+${{ steps.git_short_hash.outputs.result }}-macos_universal
-          path: "publish_ava/*.tar.gz"
+          name: ryujinx-${{ matrix.configuration }}-${{ env.RYUJINX_BASE_VERSION }}+${{ steps.git_short_hash.outputs.result }}-macos_universal
+          path: "publish/*.tar.gz"
         if: github.event_name == 'pull_request'
 
       - name: Upload Ryujinx.Headless.SDL2 artifact

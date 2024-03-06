@@ -22,7 +22,7 @@ namespace Ryujinx.UI.Windows
         [GUI] Button _saveButton;
 #pragma warning restore CS0649, IDE0044
 
-        public CheatWindow(VirtualFileSystem virtualFileSystem, ulong titleId, string titleName, string titlePath) : this(new Builder("Ryujinx.UI.Windows.CheatWindow.glade"), virtualFileSystem, titleId, titleName, titlePath) { }
+        public CheatWindow(VirtualFileSystem virtualFileSystem, ulong titleId, string titleName, string titlePath) : this(new Builder("Ryujinx.Gtk3.UI.Windows.CheatWindow.glade"), virtualFileSystem, titleId, titleName, titlePath) { }
 
         private CheatWindow(Builder builder, VirtualFileSystem virtualFileSystem, ulong titleId, string titleName, string titlePath) : base(builder.GetRawOwnedObject("_cheatWindow"))
         {

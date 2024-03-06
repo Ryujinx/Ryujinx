@@ -144,7 +144,7 @@ namespace Ryujinx.UI
 
 #pragma warning restore CS0649, IDE0044, CS0169, IDE0051
 
-        public MainWindow() : this(new Builder("Ryujinx.UI.MainWindow.glade")) { }
+        public MainWindow() : this(new Builder("Ryujinx.Gtk3.UI.MainWindow.glade")) { }
 
         private MainWindow(Builder builder) : base(builder.GetRawOwnedObject("_mainWin"))
         {

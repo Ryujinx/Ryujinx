@@ -6,10 +6,6 @@ if [ -f "$SCRIPT_DIR/Ryujinx.Headless.SDL2" ]; then
     RYUJINX_BIN="Ryujinx.Headless.SDL2"
 fi
 
-if [ -f "$SCRIPT_DIR/Ryujinx.Ava" ]; then
-    RYUJINX_BIN="Ryujinx.Ava"
-fi
-
 if [ -f "$SCRIPT_DIR/Ryujinx" ]; then
     RYUJINX_BIN="Ryujinx"
 fi

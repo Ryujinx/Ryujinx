@@ -39,24 +39,24 @@ jobs:
               return core.error(`No artifacts found`);
             }
             let body = `Download the artifacts for this pull request:\n`;
-            let hidden_avalonia_artifacts = `\n\n <details><summary>Experimental GUI (Avalonia)</summary>\n`;
+            let hidden_gtk_artifacts = `\n\n <details><summary>Old GUI (GTK3)</summary>\n`;
             let hidden_headless_artifacts = `\n\n <details><summary>GUI-less (SDL2)</summary>\n`;
             let hidden_debug_artifacts = `\n\n <details><summary>Only for Developers</summary>\n`;
             for (const art of artifacts) {
               if(art.name.includes('Debug')) {
                 hidden_debug_artifacts += `\n* [${art.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip)`;
-              } else if(art.name.includes('ava-ryujinx')) {
-                hidden_avalonia_artifacts += `\n* [${art.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip)`;
+              } else if(art.name.includes('gtk-ryujinx')) {
+                hidden_gtk_artifacts += `\n* [${art.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip)`;
               } else if(art.name.includes('sdl2-ryujinx-headless')) {
                 hidden_headless_artifacts += `\n* [${art.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip)`;
               } else {
                 body += `\n* [${art.name}](https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip)`;
               }
             }
-            hidden_avalonia_artifacts += `\n</details>`;
+            hidden_gtk_artifacts += `\n</details>`;
             hidden_headless_artifacts += `\n</details>`;
             hidden_debug_artifacts += `\n</details>`;
-            body += hidden_avalonia_artifacts;
+            body += hidden_gtk_artifacts;
             body += hidden_headless_artifacts;
             body += hidden_debug_artifacts;
 

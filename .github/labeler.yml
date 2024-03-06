@@ -20,7 +20,7 @@ gpu:
 
 gui:
 - changed-files:
-  - any-glob-to-any-file: ['src/Ryujinx/**', 'src/Ryujinx.UI.Common/**', 'src/Ryujinx.UI.LocaleGenerator/**', 'src/Ryujinx.Ava/**']
+  - any-glob-to-any-file: ['src/Ryujinx/**', 'src/Ryujinx.UI.Common/**', 'src/Ryujinx.UI.LocaleGenerator/**', 'src/Ryujinx.Gtk3/**']
 
 horizon:
 - changed-files:

@@ -259,12 +259,12 @@ dotnet_diagnostic.CA1861.severity = none
 # Disable "Prefer using 'string.Equals(string, StringComparison)' to perform a case-insensitive comparison, but keep in mind that this might cause subtle changes in behavior, so make sure to conduct thorough testing after applying the suggestion, or if culturally sensitive comparison is not required, consider using 'StringComparison.OrdinalIgnoreCase'"
 dotnet_diagnostic.CA1862.severity = none
 
-[src/Ryujinx.HLE/HOS/Services/**.cs]
-# Disable "mark members as static" rule for services
+[src/Ryujinx/UI/ViewModels/**.cs]
+# Disable "mark members as static" rule for ViewModels
 dotnet_diagnostic.CA1822.severity = none
 
-[src/Ryujinx.Ava/UI/ViewModels/**.cs]
-# Disable "mark members as static" rule for ViewModels
+[src/Ryujinx.HLE/HOS/Services/**.cs]
+# Disable "mark members as static" rule for services
 dotnet_diagnostic.CA1822.severity = none
 
 [src/Ryujinx.Tests/Cpu/*.cs]

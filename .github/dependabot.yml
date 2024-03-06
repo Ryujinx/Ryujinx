@@ -7,7 +7,7 @@ updates:
     labels:
       - "infra"
     reviewers:
-      - marysaka
+      - TSRBerry
     commit-message:
       prefix: "ci"
 
@@ -19,7 +19,7 @@ updates:
     labels:
       - "infra"
     reviewers:
-      - marysaka
+      - TSRBerry
     commit-message:
       prefix: nuget
     groups:

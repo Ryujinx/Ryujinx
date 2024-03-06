@@ -76,7 +76,7 @@
                     Tag="CpuPage">
                     <ui:NavigationViewItem.IconSource>
                         <ui:FontIconSource
-                            FontFamily="avares://Ryujinx.Ava/Assets/Fonts#Segoe Fluent Icons"
+                            FontFamily="avares://Ryujinx/Assets/Fonts#Segoe Fluent Icons"
                             Glyph="{helpers:GlyphValueConverter Chip}" />
                     </ui:NavigationViewItem.IconSource>
                 </ui:NavigationViewItem>

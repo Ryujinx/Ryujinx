@@ -22,9 +22,9 @@ EXTRA_ARGS=$8
 
 if [ "$VERSION" == "1.1.0" ];
 then
-  RELEASE_TAR_FILE_NAME=test-ava-ryujinx-$CONFIGURATION-$VERSION+$SOURCE_REVISION_ID-macos_universal.app.tar
+  RELEASE_TAR_FILE_NAME=ryujinx-$CONFIGURATION-$VERSION+$SOURCE_REVISION_ID-macos_universal.app.tar
 else
-  RELEASE_TAR_FILE_NAME=test-ava-ryujinx-$VERSION-macos_universal.app.tar
+  RELEASE_TAR_FILE_NAME=ryujinx-$VERSION-macos_universal.app.tar
 fi
 
 ARM64_APP_BUNDLE="$TEMP_DIRECTORY/output_arm64/Ryujinx.app"
@@ -38,9 +38,9 @@ mkdir -p "$TEMP_DIRECTORY"
 DOTNET_COMMON_ARGS=(-p:DebugType=embedded -p:Version="$VERSION" -p:SourceRevisionId="$SOURCE_REVISION_ID" --self-contained true $EXTRA_ARGS)
 
 dotnet restore
-dotnet build -c "$CONFIGURATION" src/Ryujinx.Ava
-dotnet publish -c "$CONFIGURATION" -r osx-arm64 -o "$TEMP_DIRECTORY/publish_arm64" "${DOTNET_COMMON_ARGS[@]}" src/Ryujinx.Ava
-dotnet publish -c "$CONFIGURATION" -r osx-x64 -o "$TEMP_DIRECTORY/publish_x64" "${DOTNET_COMMON_ARGS[@]}" src/Ryujinx.Ava
+dotnet build -c "$CONFIGURATION" src/Ryujinx
+dotnet publish -c "$CONFIGURATION" -r osx-arm64 -o "$TEMP_DIRECTORY/publish_arm64" "${DOTNET_COMMON_ARGS[@]}" src/Ryujinx
+dotnet publish -c "$CONFIGURATION" -r osx-x64 -o "$TEMP_DIRECTORY/publish_x64" "${DOTNET_COMMON_ARGS[@]}" src/Ryujinx
 
 # Get rid of the support library for ARMeilleure for x64 (that's only for arm64)
 rm -rf "$TEMP_DIRECTORY/publish_x64/libarmeilleure-jitsupport.dylib"
@@ -108,6 +108,13 @@ tar --exclude "Ryujinx.app/Contents/MacOS/Ryujinx" -cvf "$RELEASE_TAR_FILE_NAME"
 python3 "$BASE_DIR/distribution/misc/add_tar_exec.py" "$RELEASE_TAR_FILE_NAME" "Ryujinx.app/Contents/MacOS/Ryujinx" "Ryujinx.app/Contents/MacOS/Ryujinx"
 gzip -9 < "$RELEASE_TAR_FILE_NAME" > "$RELEASE_TAR_FILE_NAME.gz"
 rm "$RELEASE_TAR_FILE_NAME"
+
+# Create legacy update package for Avalonia to not left behind old testers.
+if [ "$VERSION" != "1.1.0" ];
+then
+    cp $RELEASE_TAR_FILE_NAME.gz test-ava-ryujinx-$VERSION-macos_universal.app.tar.gz
+fi
+
 popd
 
 echo "Done"

@@ -25,7 +25,7 @@ namespace Ryujinx.Modules
         private readonly string _buildUrl;
         private bool _restartQuery;
 
-        public UpdateDialog(MainWindow mainWindow, Version newVersion, string buildUrl) : this(new Builder("Ryujinx.Modules.Updater.UpdateDialog.glade"), mainWindow, newVersion, buildUrl) { }
+        public UpdateDialog(MainWindow mainWindow, Version newVersion, string buildUrl) : this(new Builder("Ryujinx.Gtk3.Modules.Updater.UpdateDialog.glade"), mainWindow, newVersion, buildUrl) { }
 
         private UpdateDialog(Builder builder, MainWindow mainWindow, Version newVersion, string buildUrl) : base(builder.GetRawOwnedObject("UpdateDialog"))
         {
@@ -34,7 +34,7 @@ namespace Ryujinx.Modules
             _mainWindow = mainWindow;
             _buildUrl = buildUrl;
 
-            Icon = new Pixbuf(Assembly.GetAssembly(typeof(ConfigurationState)), "Ryujinx.UI.Common.Resources.Logo_Ryujinx.png");
+            Icon = new Pixbuf(Assembly.GetAssembly(typeof(ConfigurationState)), "Ryujinx.Gtk3.UI.Common.Resources.Logo_Ryujinx.png");
             MainText.Text = "Do you want to update Ryujinx to the latest version?";
             SecondaryText.Text = $"{Program.Version} -> {newVersion}";
 

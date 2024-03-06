@@ -120,7 +120,7 @@ namespace Ryujinx.UI.Windows
 
 #pragma warning restore CS0649, IDE0044
 
-        public SettingsWindow(MainWindow parent, VirtualFileSystem virtualFileSystem, ContentManager contentManager) : this(parent, new Builder("Ryujinx.UI.Windows.SettingsWindow.glade"), virtualFileSystem, contentManager) { }
+        public SettingsWindow(MainWindow parent, VirtualFileSystem virtualFileSystem, ContentManager contentManager) : this(parent, new Builder("Ryujinx.Gtk3.UI.Windows.SettingsWindow.glade"), virtualFileSystem, contentManager) { }
 
         private SettingsWindow(MainWindow parent, Builder builder, VirtualFileSystem virtualFileSystem, ContentManager contentManager) : base(builder.GetRawOwnedObject("_settingsWin"))
         {

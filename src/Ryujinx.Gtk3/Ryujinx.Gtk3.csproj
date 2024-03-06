@@ -1,0 +1,104 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <OutputType>Exe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>1.0.0-dirty</Version>
+    <DefineConstants Condition=" '$(ExtraDefineConstants)' != '' ">$(DefineConstants);$(ExtraDefineConstants)</DefineConstants>
+    <!-- As we already provide GTK3 on Windows via GtkSharp.Dependencies this is redundant. -->
+    <SkipGtkInstall>true</SkipGtkInstall>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <PublishSingleFile>true</PublishSingleFile>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ryujinx.GtkSharp" />
+    <PackageReference Include="GtkSharp.Dependencies" Condition="'$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64'" />
+    <PackageReference Include="GtkSharp.Dependencies.osx" Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
+    <PackageReference Include="Ryujinx.Graphics.Nvdec.Dependencies" />
+    <PackageReference Include="Ryujinx.Audio.OpenAL.Dependencies" Condition="'$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64'" />
+    <PackageReference Include="Ryujinx.Graphics.Vulkan.Dependencies.MoltenVK" Condition="'$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64' AND '$(RuntimeIdentifier)' != 'win-x64'" />
+    <PackageReference Include="OpenTK.Core" />
+    <PackageReference Include="OpenTK.Graphics" />
+    <PackageReference Include="SPB" />
+    <PackageReference Include="SharpZipLib" />
+    <PackageReference Include="SixLabors.ImageSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ryujinx.Input\Ryujinx.Input.csproj" />
+    <ProjectReference Include="..\Ryujinx.Input.SDL2\Ryujinx.Input.SDL2.csproj" />
+    <ProjectReference Include="..\Ryujinx.Audio.Backends.OpenAL\Ryujinx.Audio.Backends.OpenAL.csproj" />
+    <ProjectReference Include="..\Ryujinx.Audio.Backends.SDL2\Ryujinx.Audio.Backends.SDL2.csproj" />
+    <ProjectReference Include="..\Ryujinx.Audio.Backends.SoundIo\Ryujinx.Audio.Backends.SoundIo.csproj" />
+    <ProjectReference Include="..\Ryujinx.Common\Ryujinx.Common.csproj" />
+    <ProjectReference Include="..\Ryujinx.HLE\Ryujinx.HLE.csproj" />
+    <ProjectReference Include="..\ARMeilleure\ARMeilleure.csproj" />
+    <ProjectReference Include="..\Ryujinx.Graphics.OpenGL\Ryujinx.Graphics.OpenGL.csproj" />
+    <ProjectReference Include="..\Ryujinx.Graphics.Vulkan\Ryujinx.Graphics.Vulkan.csproj" />
+    <ProjectReference Include="..\Ryujinx.Graphics.Gpu\Ryujinx.Graphics.Gpu.csproj" />
+    <ProjectReference Include="..\Ryujinx.UI.Common\Ryujinx.UI.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\distribution\windows\alsoft.ini" Condition="'$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64' AND '$(RuntimeIdentifier)' != 'osx-x64'">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>alsoft.ini</TargetPath>
+    </Content>
+    <Content Include="..\..\distribution\legal\THIRDPARTY.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>THIRDPARTY.md</TargetPath>
+    </Content>
+    <Content Include="..\..\LICENSE.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>LICENSE.txt</TargetPath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'">
+    <Content Include="..\..\distribution\linux\Ryujinx.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\distribution\linux\mime\Ryujinx.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>mime\Ryujinx.xml</TargetPath>
+    </Content>
+  </ItemGroup>
+
+  <!-- Due to .net core 3.1 embedded resource loading -->
+  <PropertyGroup>
+    <EmbeddedResourceUseDependentUponConvention>false</EmbeddedResourceUseDependentUponConvention>
+    <ApplicationIcon>Ryujinx.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="UI\MainWindow.glade" />
+    <None Remove="UI\Widgets\ProfileDialog.glade" />
+    <None Remove="UI\Windows\CheatWindow.glade" />
+    <None Remove="UI\Windows\ControllerWindow.glade" />
+    <None Remove="UI\Windows\DlcWindow.glade" />
+    <None Remove="UI\Windows\SettingsWindow.glade" />
+    <None Remove="UI\Windows\TitleUpdateWindow.glade" />
+    <None Remove="Modules\Updater\UpdateDialog.glade" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="UI\MainWindow.glade" />
+    <EmbeddedResource Include="UI\Widgets\ProfileDialog.glade" />
+    <EmbeddedResource Include="UI\Windows\CheatWindow.glade" />
+    <EmbeddedResource Include="UI\Windows\ControllerWindow.glade" />
+    <EmbeddedResource Include="UI\Windows\DlcWindow.glade" />
+    <EmbeddedResource Include="UI\Windows\SettingsWindow.glade" />
+    <EmbeddedResource Include="UI\Windows\TitleUpdateWindow.glade" />
+    <EmbeddedResource Include="Modules\Updater\UpdateDialog.glade" />
+  </ItemGroup>
+
+</Project>
