@@ -300,6 +300,11 @@ namespace Ryujinx.Graphics.Shader.Translation
 
                     Optimizer.RunPass(context);
                     TransformPasses.RunPass(context);
+
+                    if (i == 0)
+                    {
+                        FeatureIdentification.RunPass(cfg.Blocks, Definitions.Stage, ref usedFeatures);
+                    }
                 }
 
                 funcs[i] = new Function(cfg.Blocks, $"fun{i}", false, inArgumentsCount, outArgumentsCount);
@@ -352,6 +357,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                 usedFeatures.HasFlag(FeatureFlags.InstanceId),
                 usedFeatures.HasFlag(FeatureFlags.DrawParameters),
                 usedFeatures.HasFlag(FeatureFlags.RtLayer),
+                usedFeatures.HasFlag(FeatureFlags.UnconditionalDiscard),
                 clipDistancesWritten,
                 originalDefinitions.OmapTargets);
 

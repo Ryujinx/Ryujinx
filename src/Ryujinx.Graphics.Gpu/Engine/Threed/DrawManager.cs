@@ -466,6 +466,7 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
 
             engine.UpdateState(ulong.MaxValue & ~(1UL << StateUpdater.ShaderStateIndex));
 
+            _channel.TextureManager.SignalRenderTargetsModifiable();
             _channel.TextureManager.UpdateRenderTargets();
 
             int textureId = _state.State.DrawTextureTextureId;
@@ -803,7 +804,7 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
             int index = (argument >> 6) & 0xf;
             int layer = (argument >> 10) & 0x3ff;
 
-            RenderTargetUpdateFlags updateFlags = RenderTargetUpdateFlags.SingleColor;
+            RenderTargetUpdateFlags updateFlags = RenderTargetUpdateFlags.SingleColor | RenderTargetUpdateFlags.ForClear;
 
             if (layer != 0 || layerCount > 1)
             {

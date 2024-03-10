@@ -18,6 +18,7 @@ namespace Ryujinx.Graphics.Shader
         public bool UsesInstanceId { get; }
         public bool UsesDrawParameters { get; }
         public bool UsesRtLayer { get; }
+        public bool HasUnconditionalDiscard { get; }
         public byte ClipDistancesWritten { get; }
         public int FragmentOutputMap { get; }
 
@@ -34,6 +35,7 @@ namespace Ryujinx.Graphics.Shader
             bool usesInstanceId,
             bool usesDrawParameters,
             bool usesRtLayer,
+            bool hasUnconditionalDiscard,
             byte clipDistancesWritten,
             int fragmentOutputMap)
         {
@@ -50,6 +52,7 @@ namespace Ryujinx.Graphics.Shader
             UsesInstanceId = usesInstanceId;
             UsesDrawParameters = usesDrawParameters;
             UsesRtLayer = usesRtLayer;
+            HasUnconditionalDiscard = hasUnconditionalDiscard;
             ClipDistancesWritten = clipDistancesWritten;
             FragmentOutputMap = fragmentOutputMap;
         }

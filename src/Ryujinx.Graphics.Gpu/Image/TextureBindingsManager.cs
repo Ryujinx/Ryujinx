@@ -175,7 +175,7 @@ namespace Ryujinx.Graphics.Gpu.Image
         {
             (TexturePool texturePool, SamplerPool samplerPool) = GetPools();
 
-            return (texturePool.Get(textureId), samplerPool.Get(samplerId));
+            return (texturePool?.Get(textureId), samplerPool?.Get(samplerId));
         }
 
         /// <summary>

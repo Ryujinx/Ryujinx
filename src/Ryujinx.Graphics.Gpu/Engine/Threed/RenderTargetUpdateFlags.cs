@@ -39,6 +39,11 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
         DiscardClip = 1 << 4,
 
         /// <summary>
+        /// Indicates that the render target will be used for a clear operation.
+        /// </summary>
+        ForClear = 1 << 5,
+
+        /// <summary>
         /// Default update flags for draw.
         /// </summary>
         UpdateAll = UseControl | UpdateDepthStencil,

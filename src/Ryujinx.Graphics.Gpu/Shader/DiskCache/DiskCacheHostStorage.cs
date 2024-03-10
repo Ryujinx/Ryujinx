@@ -22,7 +22,7 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
         private const ushort FileFormatVersionMajor = 1;
         private const ushort FileFormatVersionMinor = 2;
         private const uint FileFormatVersionPacked = ((uint)FileFormatVersionMajor << 16) | FileFormatVersionMinor;
-        private const uint CodeGenVersion = 6253;
+        private const uint CodeGenVersion = 6371;
 
         private const string SharedTocFileName = "shared.toc";
         private const string SharedDataFileName = "shared.data";
@@ -169,6 +169,11 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
             /// Indicates if the shader modifies the Layer built-in variable.
             /// </summary>
             public bool UsesRtLayer;
+
+            /// <summary>
+            /// Indicates that the fragment shader always discards the fragment, not producing any output for the bound render targets.
+            /// </summary>
+            public bool HasUnconditionalDiscard;
 
             /// <summary>
             /// Bit mask with the clip distances written on the vertex stage.
@@ -806,6 +811,7 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
                 dataInfo.UsesInstanceId,
                 dataInfo.UsesDrawParameters,
                 dataInfo.UsesRtLayer,
+                dataInfo.HasUnconditionalDiscard,
                 dataInfo.ClipDistancesWritten,
                 dataInfo.FragmentOutputMap);
         }
@@ -836,6 +842,7 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
                 UsesInstanceId = info.UsesInstanceId,
                 UsesDrawParameters = info.UsesDrawParameters,
                 UsesRtLayer = info.UsesRtLayer,
+                HasUnconditionalDiscard = info.HasUnconditionalDiscard,
                 ClipDistancesWritten = info.ClipDistancesWritten,
                 FragmentOutputMap = info.FragmentOutputMap,
             };

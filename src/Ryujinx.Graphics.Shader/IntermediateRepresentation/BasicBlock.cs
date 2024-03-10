@@ -23,6 +23,7 @@ namespace Ryujinx.Graphics.Shader.IntermediateRepresentation
             set => _branch = AddSuccessor(_branch, value);
         }
 
+        public bool HasSuccessor => _branch != null || _next != null;
         public bool HasBranch => _branch != null;
         public bool Reachable => Index == 0 || Predecessors.Count != 0;
 

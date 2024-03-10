@@ -18,12 +18,39 @@ namespace Ryujinx.Graphics.Gpu.Image
         private readonly TexturePoolCache _texturePoolCache;
         private readonly SamplerPoolCache _samplerPoolCache;
 
+        /// <summary>
+        /// Bound render target texture modification report state.
+        /// </summary>
+        [Flags]
+        private enum BindState : byte
+        {
+            /// <summary>
+            /// Render target texture has not been signalled for modification, and can't be modified on the next render operations.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Render target texture has been signalled for modification.
+            /// </summary>
+            Bound = 1 << 0,
+
+            /// <summary>
+            /// Render target texture might be modified on the next render operations.
+            /// </summary>
+            Modified = 1 << 1,
+
+            /// <summary>
+            /// Render target texture has been signalled for modification and might be modified on the next render operations.
+            /// </summary>
+            BoundModified = Bound | Modified,
+        }
+
         private readonly Texture[] _rtColors;
         private readonly ITexture[] _rtHostColors;
-        private readonly bool[] _rtColorsBound;
+        private readonly BindState[] _rtColorsBound;
         private Texture _rtDepthStencil;
         private ITexture _rtHostDs;
-        private bool _rtDsBound;
+        private BindState _rtDsBound;
 
         public int ClipRegionWidth { get; private set; }
         public int ClipRegionHeight { get; private set; }
@@ -53,7 +80,7 @@ namespace Ryujinx.Graphics.Gpu.Image
 
             _rtColors = new Texture[Constants.TotalRenderTargets];
             _rtHostColors = new ITexture[Constants.TotalRenderTargets];
-            _rtColorsBound = new bool[Constants.TotalRenderTargets];
+            _rtColorsBound = new BindState[Constants.TotalRenderTargets];
         }
 
         /// <summary>
@@ -149,27 +176,39 @@ namespace Ryujinx.Graphics.Gpu.Image
         /// </summary>
         /// <param name="index">The index of the color buffer to set (up to 8)</param>
         /// <param name="color">The color buffer texture</param>
+        /// <param name="modified">Indicates if the following render operations will modidify <paramref name="color"/> contents</param>
         /// <returns>True if render target scale must be updated.</returns>
-        public bool SetRenderTargetColor(int index, Texture color)
+        public bool SetRenderTargetColor(int index, Texture color, bool modified)
         {
             bool hasValue = color != null;
             bool changesScale = (hasValue != (_rtColors[index] != null)) || (hasValue && RenderTargetScale != color.ScaleFactor);
 
             if (_rtColors[index] != color)
             {
-                if (_rtColorsBound[index])
+                Texture oldColor = _rtColors[index];
+
+                if (oldColor != null)
                 {
-                    _rtColors[index]?.SignalModifying(false);
+                    if (_rtColorsBound[index].HasFlag(BindState.Bound))
+                    {
+                        oldColor.SignalModifying(false);
+                    }
+
+                    oldColor.SignalBindingChange(false);
                 }
-                else
-                {
-                    _rtColorsBound[index] = true;
-                }
+
+                _rtColorsBound[index] = modified ? BindState.BoundModified : BindState.None;
 
                 if (color != null)
                 {
                     color.SynchronizeMemory();
-                    color.SignalModifying(true);
+
+                    if (modified)
+                    {
+                        color.SignalModifying(true);
+                    }
+
+                    color.SignalBindingChange(true);
                 }
 
                 _rtColors[index] = color;
@@ -182,27 +221,39 @@ namespace Ryujinx.Graphics.Gpu.Image
         /// Sets the render target depth-stencil buffer.
         /// </summary>
         /// <param name="depthStencil">The depth-stencil buffer texture</param>
+        /// <param name="modified">Indicates if the following render operations will modidify <paramref name="depthStencil"/> contents</param>
         /// <returns>True if render target scale must be updated.</returns>
-        public bool SetRenderTargetDepthStencil(Texture depthStencil)
+        public bool SetRenderTargetDepthStencil(Texture depthStencil, bool modified)
         {
             bool hasValue = depthStencil != null;
             bool changesScale = (hasValue != (_rtDepthStencil != null)) || (hasValue && RenderTargetScale != depthStencil.ScaleFactor);
 
             if (_rtDepthStencil != depthStencil)
             {
-                if (_rtDsBound)
+                Texture oldDepthStencil = _rtDepthStencil;
+
+                if (oldDepthStencil != null)
                 {
-                    _rtDepthStencil?.SignalModifying(false);
+                    if (_rtDsBound.HasFlag(BindState.Bound))
+                    {
+                        oldDepthStencil.SignalModifying(false);
+                    }
+
+                    oldDepthStencil.SignalBindingChange(false);
                 }
-                else
-                {
-                    _rtDsBound = true;
-                }
+
+                _rtDsBound = modified ? BindState.BoundModified : BindState.None;
 
                 if (depthStencil != null)
                 {
                     depthStencil.SynchronizeMemory();
-                    depthStencil.SignalModifying(true);
+
+                    if (modified)
+                    {
+                        depthStencil.SignalModifying(true);
+                    }
+
+                    depthStencil.SignalBindingChange(true);
                 }
 
                 _rtDepthStencil = depthStencil;
@@ -437,10 +488,10 @@ namespace Ryujinx.Graphics.Gpu.Image
             {
                 hostDsTexture = dsTexture.HostTexture;
 
-                if (!_rtDsBound)
+                if (_rtDsBound == BindState.Modified)
                 {
                     dsTexture.SignalModifying(true);
-                    _rtDsBound = true;
+                    _rtDsBound |= BindState.Bound;
                 }
             }
 
@@ -459,10 +510,10 @@ namespace Ryujinx.Graphics.Gpu.Image
                 {
                     hostTexture = texture.HostTexture;
 
-                    if (!_rtColorsBound[index])
+                    if (_rtColorsBound[index] == BindState.Modified)
                     {
                         texture.SignalModifying(true);
-                        _rtColorsBound[index] = true;
+                        _rtColorsBound[index] |= BindState.Bound;
                     }
                 }
 
@@ -500,21 +551,34 @@ namespace Ryujinx.Graphics.Gpu.Image
         {
             Texture dsTexture = _rtDepthStencil;
 
-            if (dsTexture != null && _rtDsBound)
+            if (dsTexture != null && _rtDsBound.HasFlag(BindState.Bound))
             {
                 dsTexture.SignalModifying(false);
-                _rtDsBound = false;
+                _rtDsBound &= ~BindState.Bound;
             }
 
             for (int index = 0; index < _rtColors.Length; index++)
             {
                 Texture texture = _rtColors[index];
 
-                if (texture != null && _rtColorsBound[index])
+                if (texture != null && _rtColorsBound[index].HasFlag(BindState.Bound))
                 {
                     texture.SignalModifying(false);
-                    _rtColorsBound[index] = false;
+                    _rtColorsBound[index] &= ~BindState.Bound;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Indicates that the currently bound render targets might be modified, if they are used on the next render operation.
+        /// </summary>
+        public void SignalRenderTargetsModifiable()
+        {
+            _rtDsBound |= BindState.Modified;
+
+            for (int index = 0; index < _rtColorsBound.Length; index++)
+            {
+                _rtColorsBound[index] |= BindState.Modified;
             }
         }
 
@@ -554,19 +618,11 @@ namespace Ryujinx.Graphics.Gpu.Image
 
             for (int i = 0; i < _rtColors.Length; i++)
             {
-                if (_rtColorsBound[i])
-                {
-                    _rtColors[i]?.DecrementReferenceCount();
-                }
-
+                _rtColors[i]?.DecrementReferenceCount();
                 _rtColors[i] = null;
             }
 
-            if (_rtDsBound)
-            {
-                _rtDepthStencil?.DecrementReferenceCount();
-            }
-
+            _rtDepthStencil?.DecrementReferenceCount();
             _rtDepthStencil = null;
         }
     }
