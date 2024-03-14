@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using Ryujinx.Graphics.Shader;
 using Ryujinx.Graphics.Shader.Translation;
 using System;

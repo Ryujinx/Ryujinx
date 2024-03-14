@@ -1,4 +1,4 @@
-﻿using Ryujinx.Graphics.Shader.CodeGen;
+using Ryujinx.Graphics.Shader.CodeGen;
 using System;
 
 namespace Ryujinx.Graphics.Shader
