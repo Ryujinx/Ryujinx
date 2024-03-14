@@ -12,7 +12,7 @@ namespace Ryujinx.Graphics.Vulkan
         // It might be a good idea to tweak them again if those change, or maybe find a way to calculate an optimal value dynamically.
         private const uint DefaultUniformBufferPoolCapacity = 19 * DescriptorSetManager.MaxSets;
         private const uint DefaultStorageBufferPoolCapacity = 16 * DescriptorSetManager.MaxSets;
-        private const uint DefaultTexturePoolCapacity = 128 * DescriptorSetManager.MaxSets;
+        private const uint DefaultTexturePoolCapacity = 1024 * DescriptorSetManager.MaxSets;
         private const uint DefaultImagePoolCapacity = 8 * DescriptorSetManager.MaxSets;
 
         private const int MaxPoolSizesPerSet = 2;

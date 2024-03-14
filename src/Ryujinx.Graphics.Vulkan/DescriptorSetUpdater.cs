@@ -1,4 +1,4 @@
-using Ryujinx.Common.Memory;
+﻿using Ryujinx.Common.Memory;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader;
 using Silk.NET.Vulkan;
@@ -14,6 +14,9 @@ namespace Ryujinx.Graphics.Vulkan
     class DescriptorSetUpdater
     {
         private const ulong StorageBufferMaxMirrorable = 0x2000;
+
+        private const int ArrayGrowthSize = 16;
+
         private record struct BufferRef
         {
             public Auto<DisposableBuffer> Buffer;
@@ -65,6 +68,18 @@ namespace Ryujinx.Graphics.Vulkan
             }
         }
 
+        private record struct ArrayRef<T>
+        {
+            public ShaderStage Stage;
+            public T Array;
+
+            public ArrayRef(ShaderStage stage, T array)
+            {
+                Stage = stage;
+                Array = array;
+            }
+        }
+
         private readonly VulkanRenderer _gd;
         private readonly Device _device;
         private readonly PipelineBase _pipeline;
@@ -77,6 +92,9 @@ namespace Ryujinx.Graphics.Vulkan
         private readonly TextureBuffer[] _bufferTextureRefs;
         private readonly TextureBuffer[] _bufferImageRefs;
         private readonly Format[] _bufferImageFormats;
+
+        private ArrayRef<TextureArray>[] _textureArrayRefs;
+        private ArrayRef<ImageArray>[] _imageArrayRefs;
 
         private readonly DescriptorBufferInfo[] _uniformBuffers;
         private readonly DescriptorBufferInfo[] _storageBuffers;
@@ -129,6 +147,9 @@ namespace Ryujinx.Graphics.Vulkan
             _bufferTextureRefs = new TextureBuffer[Constants.MaxTextureBindings * 2];
             _bufferImageRefs = new TextureBuffer[Constants.MaxImageBindings * 2];
             _bufferImageFormats = new Format[Constants.MaxImageBindings * 2];
+
+            _textureArrayRefs = Array.Empty<ArrayRef<TextureArray>>();
+            _imageArrayRefs = Array.Empty<ArrayRef<ImageArray>>();
 
             _uniformBuffers = new DescriptorBufferInfo[Constants.MaxUniformBufferBindings];
             _storageBuffers = new DescriptorBufferInfo[Constants.MaxStorageBufferBindings];
@@ -263,10 +284,18 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 if (segment.Type == ResourceType.TextureAndSampler)
                 {
-                    for (int i = 0; i < segment.Count; i++)
+                    if (!segment.IsArray)
                     {
-                        ref var texture = ref _textureRefs[segment.Binding + i];
-                        texture.Storage?.QueueWriteToReadBarrier(cbs, AccessFlags.ShaderReadBit, texture.Stage.ConvertToPipelineStageFlags());
+                        for (int i = 0; i < segment.Count; i++)
+                        {
+                            ref var texture = ref _textureRefs[segment.Binding + i];
+                            texture.Storage?.QueueWriteToReadBarrier(cbs, AccessFlags.ShaderReadBit, texture.Stage.ConvertToPipelineStageFlags());
+                        }
+                    }
+                    else
+                    {
+                        PipelineStageFlags stageFlags = _textureArrayRefs[segment.Binding].Stage.ConvertToPipelineStageFlags();
+                        _textureArrayRefs[segment.Binding].Array?.QueueWriteToReadBarriers(cbs, stageFlags);
                     }
                 }
             }
@@ -275,10 +304,18 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 if (segment.Type == ResourceType.Image)
                 {
-                    for (int i = 0; i < segment.Count; i++)
+                    if (!segment.IsArray)
                     {
-                        ref var image = ref _imageRefs[segment.Binding + i];
-                        image.Storage?.QueueWriteToReadBarrier(cbs, AccessFlags.ShaderReadBit, image.Stage.ConvertToPipelineStageFlags());
+                        for (int i = 0; i < segment.Count; i++)
+                        {
+                            ref var image = ref _imageRefs[segment.Binding + i];
+                            image.Storage?.QueueWriteToReadBarrier(cbs, AccessFlags.ShaderReadBit, image.Stage.ConvertToPipelineStageFlags());
+                        }
+                    }
+                    else
+                    {
+                        PipelineStageFlags stageFlags = _imageArrayRefs[segment.Binding].Stage.ConvertToPipelineStageFlags();
+                        _imageArrayRefs[segment.Binding].Array?.QueueWriteToReadBarriers(cbs, stageFlags);
                     }
                 }
             }
@@ -453,6 +490,32 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 SetTextureAndSampler(cbs, stage, binding, texture, sampler);
             }
+        }
+
+        public void SetTextureArray(CommandBufferScoped cbs, ShaderStage stage, int binding, ITextureArray array)
+        {
+            if (_textureArrayRefs.Length <= binding)
+            {
+                Array.Resize(ref _textureArrayRefs, binding + ArrayGrowthSize);
+            }
+
+            _textureArrayRefs[binding] = new ArrayRef<TextureArray>(stage, array as TextureArray);
+            _textureArrayRefs[binding].Array?.QueueWriteToReadBarriers(cbs, stage.ConvertToPipelineStageFlags());
+
+            SignalDirty(DirtyFlags.Texture);
+        }
+
+        public void SetImageArray(CommandBufferScoped cbs, ShaderStage stage, int binding, IImageArray array)
+        {
+            if (_imageArrayRefs.Length <= binding)
+            {
+                Array.Resize(ref _imageArrayRefs, binding + ArrayGrowthSize);
+            }
+
+            _imageArrayRefs[binding] = new ArrayRef<ImageArray>(stage, array as ImageArray);
+            _imageArrayRefs[binding].Array?.QueueWriteToReadBarriers(cbs, stage.ConvertToPipelineStageFlags());
+
+            SignalDirty(DirtyFlags.Image);
         }
 
         public void SetUniformBuffers(CommandBuffer commandBuffer, ReadOnlySpan<BufferAssignment> buffers)
@@ -653,66 +716,94 @@ namespace Ryujinx.Graphics.Vulkan
                 }
                 else if (setIndex == PipelineBase.TextureSetIndex)
                 {
-                    if (segment.Type != ResourceType.BufferTexture)
+                    if (!segment.IsArray)
                     {
-                        Span<DescriptorImageInfo> textures = _textures;
-
-                        for (int i = 0; i < count; i++)
+                        if (segment.Type != ResourceType.BufferTexture)
                         {
-                            ref var texture = ref textures[i];
-                            ref var refs = ref _textureRefs[binding + i];
+                            Span<DescriptorImageInfo> textures = _textures;
 
-                            texture.ImageView = refs.View?.Get(cbs).Value ?? default;
-                            texture.Sampler = refs.Sampler?.Get(cbs).Value ?? default;
-
-                            if (texture.ImageView.Handle == 0)
+                            for (int i = 0; i < count; i++)
                             {
-                                texture.ImageView = _dummyTexture.GetImageView().Get(cbs).Value;
+                                ref var texture = ref textures[i];
+                                ref var refs = ref _textureRefs[binding + i];
+
+                                texture.ImageView = refs.View?.Get(cbs).Value ?? default;
+                                texture.Sampler = refs.Sampler?.Get(cbs).Value ?? default;
+
+                                if (texture.ImageView.Handle == 0)
+                                {
+                                    texture.ImageView = _dummyTexture.GetImageView().Get(cbs).Value;
+                                }
+
+                                if (texture.Sampler.Handle == 0)
+                                {
+                                    texture.Sampler = _dummySampler.GetSampler().Get(cbs).Value;
+                                }
                             }
 
-                            if (texture.Sampler.Handle == 0)
-                            {
-                                texture.Sampler = _dummySampler.GetSampler().Get(cbs).Value;
-                            }
+                            tu.Push<DescriptorImageInfo>(textures[..count]);
                         }
+                        else
+                        {
+                            Span<BufferView> bufferTextures = _bufferTextures;
 
-                        tu.Push<DescriptorImageInfo>(textures[..count]);
+                            for (int i = 0; i < count; i++)
+                            {
+                                bufferTextures[i] = _bufferTextureRefs[binding + i]?.GetBufferView(cbs, false) ?? default;
+                            }
+
+                            tu.Push<BufferView>(bufferTextures[..count]);
+                        }
                     }
                     else
                     {
-                        Span<BufferView> bufferTextures = _bufferTextures;
-
-                        for (int i = 0; i < count; i++)
+                        if (segment.Type != ResourceType.BufferTexture)
                         {
-                            bufferTextures[i] = _bufferTextureRefs[binding + i]?.GetBufferView(cbs, false) ?? default;
+                            tu.Push(_textureArrayRefs[binding].Array.GetImageInfos(_gd, cbs, _dummyTexture, _dummySampler));
                         }
-
-                        tu.Push<BufferView>(bufferTextures[..count]);
+                        else
+                        {
+                            tu.Push(_textureArrayRefs[binding].Array.GetBufferViews(cbs));
+                        }
                     }
                 }
                 else if (setIndex == PipelineBase.ImageSetIndex)
                 {
-                    if (segment.Type != ResourceType.BufferImage)
+                    if (!segment.IsArray)
                     {
-                        Span<DescriptorImageInfo> images = _images;
-
-                        for (int i = 0; i < count; i++)
+                        if (segment.Type != ResourceType.BufferImage)
                         {
-                            images[i].ImageView = _imageRefs[binding + i].View?.Get(cbs).Value ?? default;
-                        }
+                            Span<DescriptorImageInfo> images = _images;
 
-                        tu.Push<DescriptorImageInfo>(images[..count]);
+                            for (int i = 0; i < count; i++)
+                            {
+                                images[i].ImageView = _imageRefs[binding + i].View?.Get(cbs).Value ?? default;
+                            }
+
+                            tu.Push<DescriptorImageInfo>(images[..count]);
+                        }
+                        else
+                        {
+                            Span<BufferView> bufferImages = _bufferImages;
+
+                            for (int i = 0; i < count; i++)
+                            {
+                                bufferImages[i] = _bufferImageRefs[binding + i]?.GetBufferView(cbs, _bufferImageFormats[binding + i], true) ?? default;
+                            }
+
+                            tu.Push<BufferView>(bufferImages[..count]);
+                        }
                     }
                     else
                     {
-                        Span<BufferView> bufferImages = _bufferImages;
-
-                        for (int i = 0; i < count; i++)
+                        if (segment.Type != ResourceType.BufferTexture)
                         {
-                            bufferImages[i] = _bufferImageRefs[binding + i]?.GetBufferView(cbs, _bufferImageFormats[binding + i], true) ?? default;
+                            tu.Push(_imageArrayRefs[binding].Array.GetImageInfos(_gd, cbs, _dummyTexture));
                         }
-
-                        tu.Push<BufferView>(bufferImages[..count]);
+                        else
+                        {
+                            tu.Push(_imageArrayRefs[binding].Array.GetBufferViews(cbs));
+                        }
                     }
                 }
             }

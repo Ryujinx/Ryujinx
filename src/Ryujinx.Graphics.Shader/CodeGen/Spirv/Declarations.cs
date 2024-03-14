@@ -181,9 +181,27 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
 
                 var sampledImageType = context.TypeSampledImage(imageType);
                 var sampledImagePointerType = context.TypePointer(StorageClass.UniformConstant, sampledImageType);
-                var sampledImageVariable = context.Variable(sampledImagePointerType, StorageClass.UniformConstant);
+                var sampledImageArrayPointerType = sampledImagePointerType;
 
-                context.Samplers.Add(sampler.Binding, (imageType, sampledImageType, sampledImageVariable));
+                if (sampler.ArrayLength == 0)
+                {
+                    var sampledImageArrayType = context.TypeRuntimeArray(sampledImageType);
+                    sampledImageArrayPointerType = context.TypePointer(StorageClass.UniformConstant, sampledImageArrayType);
+                }
+                else if (sampler.ArrayLength != 1)
+                {
+                    var sampledImageArrayType = context.TypeArray(sampledImageType, context.Constant(context.TypeU32(), sampler.ArrayLength));
+                    sampledImageArrayPointerType = context.TypePointer(StorageClass.UniformConstant, sampledImageArrayType);
+                }
+
+                var sampledImageVariable = context.Variable(sampledImageArrayPointerType, StorageClass.UniformConstant);
+
+                context.Samplers.Add(sampler.Binding, new SamplerDeclaration(
+                    imageType,
+                    sampledImageType,
+                    sampledImagePointerType,
+                    sampledImageVariable,
+                    sampler.ArrayLength != 1));
                 context.SamplersTypes.Add(sampler.Binding, sampler.Type);
 
                 context.Name(sampledImageVariable, sampler.Name);
@@ -211,9 +229,22 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
                     GetImageFormat(image.Format));
 
                 var imagePointerType = context.TypePointer(StorageClass.UniformConstant, imageType);
-                var imageVariable = context.Variable(imagePointerType, StorageClass.UniformConstant);
+                var imageArrayPointerType = imagePointerType;
 
-                context.Images.Add(image.Binding, (imageType, imageVariable));
+                if (image.ArrayLength == 0)
+                {
+                    var imageArrayType = context.TypeRuntimeArray(imageType);
+                    imageArrayPointerType = context.TypePointer(StorageClass.UniformConstant, imageArrayType);
+                }
+                else if (image.ArrayLength != 1)
+                {
+                    var imageArrayType = context.TypeArray(imageType, context.Constant(context.TypeU32(), image.ArrayLength));
+                    imageArrayPointerType = context.TypePointer(StorageClass.UniformConstant, imageArrayType);
+                }
+
+                var imageVariable = context.Variable(imageArrayPointerType, StorageClass.UniformConstant);
+
+                context.Images.Add(image.Binding, new ImageDeclaration(imageType, imagePointerType, imageVariable, image.ArrayLength != 1));
 
                 context.Name(imageVariable, image.Name);
                 context.Decorate(imageVariable, Decoration.DescriptorSet, (LiteralInteger)setIndex);

@@ -132,6 +132,9 @@ namespace Ryujinx.Graphics.Gpu.Shader
             AddDualDescriptor(stages, ResourceType.TextureAndSampler, ResourceType.BufferTexture, TextureSetIndex, textureBinding, texturesPerStage);
             AddDualDescriptor(stages, ResourceType.Image, ResourceType.BufferImage, ImageSetIndex, imageBinding, imagesPerStage);
 
+            AddArrayDescriptors(info.Textures, stages, TextureSetIndex, isImage: false);
+            AddArrayDescriptors(info.Images, stages, TextureSetIndex, isImage: true);
+
             AddUsage(info.CBuffers, stages, UniformSetIndex, isStorage: false);
             AddUsage(info.SBuffers, stages, StorageSetIndex, isStorage: true);
             AddUsage(info.Textures, stages, TextureSetIndex, isImage: false);
@@ -170,6 +173,30 @@ namespace Ryujinx.Graphics.Gpu.Shader
         }
 
         /// <summary>
+        /// Adds all array descriptors (those with an array length greater than one).
+        /// </summary>
+        /// <param name="textures">Textures to be added</param>
+        /// <param name="stages">Stages where the textures are used</param>
+        /// <param name="setIndex">Descriptor set index where the textures will be bound</param>
+        /// <param name="isImage">True for images, false for textures</param>
+        private void AddArrayDescriptors(IEnumerable<TextureDescriptor> textures, ResourceStages stages, int setIndex, bool isImage)
+        {
+            foreach (TextureDescriptor texture in textures)
+            {
+                if (texture.ArrayLength > 1)
+                {
+                    bool isBuffer = (texture.Type & SamplerType.Mask) == SamplerType.TextureBuffer;
+
+                    ResourceType type = isBuffer
+                        ? (isImage ? ResourceType.BufferImage : ResourceType.BufferTexture)
+                        : (isImage ? ResourceType.Image : ResourceType.TextureAndSampler);
+
+                    _resourceDescriptors[setIndex].Add(new ResourceDescriptor(texture.Binding, texture.ArrayLength, type, stages));
+                }
+            }
+        }
+
+        /// <summary>
         /// Adds buffer usage information to the list of usages.
         /// </summary>
         /// <param name="stages">Shader stages where the resource is used</param>
@@ -181,7 +208,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         {
             for (int index = 0; index < count; index++)
             {
-                _resourceUsages[setIndex].Add(new ResourceUsage(binding + index, type, stages));
+                _resourceUsages[setIndex].Add(new ResourceUsage(binding + index, 1, type, stages));
             }
         }
 
@@ -198,6 +225,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
             {
                 _resourceUsages[setIndex].Add(new ResourceUsage(
                     buffer.Binding,
+                    1,
                     isStorage ? ResourceType.StorageBuffer : ResourceType.UniformBuffer,
                     stages));
             }
@@ -220,10 +248,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
                     ? (isImage ? ResourceType.BufferImage : ResourceType.BufferTexture)
                     : (isImage ? ResourceType.Image : ResourceType.TextureAndSampler);
 
-                _resourceUsages[setIndex].Add(new ResourceUsage(
-                    texture.Binding,
-                    type,
-                    stages));
+                _resourceUsages[setIndex].Add(new ResourceUsage(texture.Binding, texture.ArrayLength, type, stages));
             }
         }
 

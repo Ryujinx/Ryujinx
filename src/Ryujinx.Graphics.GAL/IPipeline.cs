@@ -59,6 +59,7 @@ namespace Ryujinx.Graphics.GAL
         void SetIndexBuffer(BufferRange buffer, IndexType type);
 
         void SetImage(ShaderStage stage, int binding, ITexture texture, Format imageFormat);
+        void SetImageArray(ShaderStage stage, int binding, IImageArray array);
 
         void SetLineParameters(float width, bool smooth);
 
@@ -89,6 +90,7 @@ namespace Ryujinx.Graphics.GAL
         void SetStorageBuffers(ReadOnlySpan<BufferAssignment> buffers);
 
         void SetTextureAndSampler(ShaderStage stage, int binding, ITexture texture, ISampler sampler);
+        void SetTextureArray(ShaderStage stage, int binding, ITextureArray array);
 
         void SetTransformFeedbackBuffers(ReadOnlySpan<BufferRange> buffers);
         void SetUniformBuffers(ReadOnlySpan<BufferAssignment> buffers);

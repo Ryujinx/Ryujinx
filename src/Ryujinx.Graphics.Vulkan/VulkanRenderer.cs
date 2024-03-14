@@ -462,6 +462,11 @@ namespace Ryujinx.Graphics.Vulkan
             return BufferManager.CreateSparse(this, storageBuffers);
         }
 
+        public IImageArray CreateImageArray(int size, bool isBuffer)
+        {
+            return new ImageArray(size, isBuffer);
+        }
+
         public IProgram CreateProgram(ShaderSource[] sources, ShaderInfo info)
         {
             bool isCompute = sources.Length == 1 && sources[0].Stage == ShaderStage.Compute;
@@ -492,6 +497,11 @@ namespace Ryujinx.Graphics.Vulkan
             }
 
             return CreateTextureView(info);
+        }
+
+        public ITextureArray CreateTextureArray(int size, bool isBuffer)
+        {
+            return new TextureArray(size, isBuffer);
         }
 
         internal TextureView CreateTextureView(TextureCreateInfo info)

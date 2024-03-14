@@ -161,5 +161,17 @@ namespace Ryujinx.Graphics.Shader.IntermediateRepresentation
             inst &= Instruction.Mask;
             return inst == Instruction.Lod || inst == Instruction.TextureQuerySamples || inst == Instruction.TextureQuerySize;
         }
+
+        public static bool IsImage(this Instruction inst)
+        {
+            inst &= Instruction.Mask;
+            return inst == Instruction.ImageAtomic || inst == Instruction.ImageLoad || inst == Instruction.ImageStore;
+        }
+
+        public static bool IsImageStore(this Instruction inst)
+        {
+            inst &= Instruction.Mask;
+            return inst == Instruction.ImageAtomic || inst == Instruction.ImageStore;
+        }
     }
 }

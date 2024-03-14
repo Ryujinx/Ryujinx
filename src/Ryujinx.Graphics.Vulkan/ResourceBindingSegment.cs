@@ -8,13 +8,15 @@ namespace Ryujinx.Graphics.Vulkan
         public readonly int Count;
         public readonly ResourceType Type;
         public readonly ResourceStages Stages;
+        public readonly bool IsArray;
 
-        public ResourceBindingSegment(int binding, int count, ResourceType type, ResourceStages stages)
+        public ResourceBindingSegment(int binding, int count, ResourceType type, ResourceStages stages, bool isArray)
         {
             Binding = binding;
             Count = count;
             Type = type;
             Stages = stages;
+            IsArray = isArray;
         }
     }
 }

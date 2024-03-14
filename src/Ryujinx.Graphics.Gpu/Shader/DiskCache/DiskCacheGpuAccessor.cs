@@ -27,6 +27,7 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
         /// <param name="cb1Data">The constant buffer 1 data of the shader</param>
         /// <param name="oldSpecState">Shader specialization state of the cached shader</param>
         /// <param name="newSpecState">Shader specialization state of the recompiled shader</param>
+        /// <param name="counts">Resource counts shared across all shader stages</param>
         /// <param name="stageIndex">Shader stage index</param>
         public DiskCacheGpuAccessor(
             GpuContext context,
@@ -109,18 +110,32 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
         }
 
         /// <inheritdoc/>
+        public SamplerType QuerySamplerType(int handle, int cbufSlot)
+        {
+            _newSpecState.RecordTextureSamplerType(_stageIndex, handle, cbufSlot);
+            return _oldSpecState.GetTextureTarget(_stageIndex, handle, cbufSlot).ConvertSamplerType();
+        }
+
+        /// <inheritdoc/>
+        public int QueryTextureArrayLengthFromBuffer(int slot)
+        {
+            if (!_oldSpecState.TextureArrayFromBufferRegistered(_stageIndex, 0, slot))
+            {
+                throw new DiskCacheLoadException(DiskCacheLoadResult.MissingTextureArrayLength);
+            }
+
+            int arrayLength = _oldSpecState.GetTextureArrayFromBufferLength(_stageIndex, 0, slot);
+            _newSpecState.RegisterTextureArrayLengthFromBuffer(_stageIndex, 0, slot, arrayLength);
+
+            return arrayLength;
+        }
+
+        /// <inheritdoc/>
         public TextureFormat QueryTextureFormat(int handle, int cbufSlot)
         {
             _newSpecState.RecordTextureFormat(_stageIndex, handle, cbufSlot);
             (uint format, bool formatSrgb) = _oldSpecState.GetFormat(_stageIndex, handle, cbufSlot);
             return ConvertToTextureFormat(format, formatSrgb);
-        }
-
-        /// <inheritdoc/>
-        public SamplerType QuerySamplerType(int handle, int cbufSlot)
-        {
-            _newSpecState.RecordTextureSamplerType(_stageIndex, handle, cbufSlot);
-            return _oldSpecState.GetTextureTarget(_stageIndex, handle, cbufSlot).ConvertSamplerType();
         }
 
         /// <inheritdoc/>

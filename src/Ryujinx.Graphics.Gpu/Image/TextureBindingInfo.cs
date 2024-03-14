@@ -25,6 +25,11 @@ namespace Ryujinx.Graphics.Gpu.Image
         public int Binding { get; }
 
         /// <summary>
+        /// For array of textures, this indicates the length of the array. A value of one indicates it is not an array.
+        /// </summary>
+        public int ArrayLength { get; }
+
+        /// <summary>
         /// Constant buffer slot with the texture handle.
         /// </summary>
         public int CbufSlot { get; }
@@ -45,14 +50,16 @@ namespace Ryujinx.Graphics.Gpu.Image
         /// <param name="target">The shader sampler target type</param>
         /// <param name="format">Format of the image as declared on the shader</param>
         /// <param name="binding">The shader texture binding point</param>
+        /// <param name="arrayLength">For array of textures, this indicates the length of the array. A value of one indicates it is not an array</param>
         /// <param name="cbufSlot">Constant buffer slot where the texture handle is located</param>
         /// <param name="handle">The shader texture handle (read index into the texture constant buffer)</param>
         /// <param name="flags">The texture's usage flags, indicating how it is used in the shader</param>
-        public TextureBindingInfo(Target target, Format format, int binding, int cbufSlot, int handle, TextureUsageFlags flags)
+        public TextureBindingInfo(Target target, Format format, int binding, int arrayLength, int cbufSlot, int handle, TextureUsageFlags flags)
         {
             Target = target;
             Format = format;
             Binding = binding;
+            ArrayLength = arrayLength;
             CbufSlot = cbufSlot;
             Handle = handle;
             Flags = flags;
@@ -63,10 +70,11 @@ namespace Ryujinx.Graphics.Gpu.Image
         /// </summary>
         /// <param name="target">The shader sampler target type</param>
         /// <param name="binding">The shader texture binding point</param>
+        /// <param name="arrayLength">For array of textures, this indicates the length of the array. A value of one indicates it is not an array</param>
         /// <param name="cbufSlot">Constant buffer slot where the texture handle is located</param>
         /// <param name="handle">The shader texture handle (read index into the texture constant buffer)</param>
         /// <param name="flags">The texture's usage flags, indicating how it is used in the shader</param>
-        public TextureBindingInfo(Target target, int binding, int cbufSlot, int handle, TextureUsageFlags flags) : this(target, (Format)0, binding, cbufSlot, handle, flags)
+        public TextureBindingInfo(Target target, int binding, int arrayLength, int cbufSlot, int handle, TextureUsageFlags flags) : this(target, (Format)0, binding, arrayLength, cbufSlot, handle, flags)
         {
         }
     }

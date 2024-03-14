@@ -1,4 +1,4 @@
-using CommandLine;
+﻿using CommandLine;
 using Ryujinx.Graphics.Shader;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
@@ -13,14 +13,52 @@ namespace Ryujinx.ShaderTools
         {
             private readonly byte[] _data;
 
+            private int _texturesCount;
+            private int _imagesCount;
+
             public GpuAccessor(byte[] data)
             {
                 _data = data;
+                _texturesCount = 0;
+                _imagesCount = 0;
+            }
+
+            public int CreateConstantBufferBinding(int index)
+            {
+                return index + 1;
+            }
+
+            public int CreateImageBinding(int count, bool isBuffer)
+            {
+                int binding = _imagesCount;
+
+                _imagesCount += count;
+
+                return binding;
+            }
+
+            public int CreateStorageBufferBinding(int index)
+            {
+                return index;
+            }
+
+            public int CreateTextureBinding(int count, bool isBuffer)
+            {
+                int binding = _texturesCount;
+
+                _texturesCount += count;
+
+                return binding;
             }
 
             public ReadOnlySpan<ulong> GetCode(ulong address, int minimumSize)
             {
                 return MemoryMarshal.Cast<byte, ulong>(new ReadOnlySpan<byte>(_data)[(int)address..]);
+            }
+
+            public int QueryTextureArrayLengthFromBuffer(int slot)
+            {
+                throw new NotImplementedException();
             }
         }
 

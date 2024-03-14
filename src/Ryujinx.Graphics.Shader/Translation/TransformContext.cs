@@ -9,6 +9,7 @@ namespace Ryujinx.Graphics.Shader.Translation
         public readonly ShaderDefinitions Definitions;
         public readonly ResourceManager ResourceManager;
         public readonly IGpuAccessor GpuAccessor;
+        public readonly TargetApi TargetApi;
         public readonly TargetLanguage TargetLanguage;
         public readonly ShaderStage Stage;
         public readonly ref FeatureFlags UsedFeatures;
@@ -19,6 +20,7 @@ namespace Ryujinx.Graphics.Shader.Translation
             ShaderDefinitions definitions,
             ResourceManager resourceManager,
             IGpuAccessor gpuAccessor,
+            TargetApi targetApi,
             TargetLanguage targetLanguage,
             ShaderStage stage,
             ref FeatureFlags usedFeatures)
@@ -28,6 +30,7 @@ namespace Ryujinx.Graphics.Shader.Translation
             Definitions = definitions;
             ResourceManager = resourceManager;
             GpuAccessor = gpuAccessor;
+            TargetApi = targetApi;
             TargetLanguage = targetLanguage;
             Stage = stage;
             UsedFeatures = ref usedFeatures;

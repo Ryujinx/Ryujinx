@@ -20,6 +20,12 @@ namespace Ryujinx.Graphics.Gpu.Shader
         private int _reservedTextures;
         private int _reservedImages;
 
+        private int _staticTexturesCount;
+        private int _staticImagesCount;
+
+        private int _dynamicTexturesCount;
+        private int _dynamicImagesCount;
+
         /// <summary>
         /// Creates a new GPU accessor.
         /// </summary>
@@ -31,6 +37,9 @@ namespace Ryujinx.Graphics.Gpu.Shader
             _context = context;
             _resourceCounts = resourceCounts;
             _stageIndex = stageIndex;
+
+            _dynamicTexturesCount = (int)GetDynamicBaseIndexDual(context.Capabilities.MaximumTexturesPerStage);
+            _dynamicImagesCount = (int)GetDynamicBaseIndexDual(context.Capabilities.MaximumImagesPerStage);
         }
 
         /// <summary>
@@ -48,7 +57,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
             _reservedImages = rrc.ReservedImages;
         }
 
-        public int QueryBindingConstantBuffer(int index)
+        public int CreateConstantBufferBinding(int index)
         {
             int binding;
 
@@ -64,7 +73,39 @@ namespace Ryujinx.Graphics.Gpu.Shader
             return binding + _reservedConstantBuffers;
         }
 
-        public int QueryBindingStorageBuffer(int index)
+        public int CreateImageBinding(int count, bool isBuffer)
+        {
+            int binding;
+
+            if (_context.Capabilities.Api == TargetApi.Vulkan)
+            {
+                if (count == 1)
+                {
+                    int index = _staticImagesCount++;
+
+                    if (isBuffer)
+                    {
+                        index += (int)_context.Capabilities.MaximumImagesPerStage;
+                    }
+
+                    binding = GetBindingFromIndex(index, _context.Capabilities.MaximumImagesPerStage * 2, "Image");
+                }
+                else
+                {
+                    binding = _dynamicImagesCount++;
+                }
+            }
+            else
+            {
+                binding = _resourceCounts.ImagesCount;
+
+                _resourceCounts.ImagesCount += count;
+            }
+
+            return binding + _reservedImages;
+        }
+
+        public int CreateStorageBufferBinding(int index)
         {
             int binding;
 
@@ -80,46 +121,36 @@ namespace Ryujinx.Graphics.Gpu.Shader
             return binding + _reservedStorageBuffers;
         }
 
-        public int QueryBindingTexture(int index, bool isBuffer)
+        public int CreateTextureBinding(int count, bool isBuffer)
         {
             int binding;
 
             if (_context.Capabilities.Api == TargetApi.Vulkan)
             {
-                if (isBuffer)
+                if (count == 1)
                 {
-                    index += (int)_context.Capabilities.MaximumTexturesPerStage;
-                }
+                    int index = _staticTexturesCount++;
 
-                binding = GetBindingFromIndex(index, _context.Capabilities.MaximumTexturesPerStage * 2, "Texture");
+                    if (isBuffer)
+                    {
+                        index += (int)_context.Capabilities.MaximumTexturesPerStage;
+                    }
+
+                    binding = GetBindingFromIndex(index, _context.Capabilities.MaximumTexturesPerStage * 2, "Texture");
+                }
+                else
+                {
+                    binding = _dynamicTexturesCount++;
+                }
             }
             else
             {
-                binding = _resourceCounts.TexturesCount++;
+                binding = _resourceCounts.TexturesCount;
+
+                _resourceCounts.TexturesCount += count;
             }
 
             return binding + _reservedTextures;
-        }
-
-        public int QueryBindingImage(int index, bool isBuffer)
-        {
-            int binding;
-
-            if (_context.Capabilities.Api == TargetApi.Vulkan)
-            {
-                if (isBuffer)
-                {
-                    index += (int)_context.Capabilities.MaximumImagesPerStage;
-                }
-
-                binding = GetBindingFromIndex(index, _context.Capabilities.MaximumImagesPerStage * 2, "Image");
-            }
-            else
-            {
-                binding = _resourceCounts.ImagesCount++;
-            }
-
-            return binding + _reservedImages;
         }
 
         private int GetBindingFromIndex(int index, uint maxPerStage, string resourceName)
@@ -146,6 +177,16 @@ namespace Ryujinx.Graphics.Gpu.Shader
                 2 => 4, // Tessellation evaluation
                 _ => 0, // Vertex/Compute
             };
+        }
+
+        private static uint GetDynamicBaseIndexDual(uint maxPerStage)
+        {
+            return GetDynamicBaseIndex(maxPerStage) * 2;
+        }
+
+        private static uint GetDynamicBaseIndex(uint maxPerStage)
+        {
+            return maxPerStage * Constants.ShaderStages;
         }
 
         public int QueryHostGatherBiasPrecision() => _context.Capabilities.GatherBiasPrecision;

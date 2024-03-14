@@ -16,9 +16,8 @@ namespace Ryujinx.Graphics.Shader
         Mask = 0xff,
 
         Array = 1 << 8,
-        Indexed = 1 << 9,
-        Multisample = 1 << 10,
-        Shadow = 1 << 11,
+        Multisample = 1 << 9,
+        Shadow = 1 << 10,
     }
 
     static class SamplerTypeExtensions

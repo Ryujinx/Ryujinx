@@ -14,9 +14,6 @@ namespace Ryujinx.Graphics.Shader.Translation
         private const int DefaultLocalMemorySize = 128;
         private const int DefaultSharedMemorySize = 4096;
 
-        // TODO: Non-hardcoded array size.
-        public const int SamplerArraySize = 4;
-
         private static readonly string[] _stagePrefixes = new string[] { "cp", "vp", "tcp", "tep", "gp", "fp" };
 
         private readonly IGpuAccessor _gpuAccessor;
@@ -32,7 +29,7 @@ namespace Ryujinx.Graphics.Shader.Translation
 
         private readonly HashSet<int> _usedConstantBufferBindings;
 
-        private readonly record struct TextureInfo(int CbufSlot, int Handle, bool Indexed, TextureFormat Format);
+        private readonly record struct TextureInfo(int CbufSlot, int Handle, int ArrayLength, TextureFormat Format);
 
         private struct TextureMeta
         {
@@ -152,7 +149,7 @@ namespace Ryujinx.Graphics.Shader.Translation
             int binding = _cbSlotToBindingMap[slot];
             if (binding < 0)
             {
-                binding = _gpuAccessor.QueryBindingConstantBuffer(slot);
+                binding = _gpuAccessor.CreateConstantBufferBinding(slot);
                 _cbSlotToBindingMap[slot] = binding;
                 string slotNumber = slot.ToString(CultureInfo.InvariantCulture);
                 AddNewConstantBuffer(binding, $"{_stagePrefix}_c{slotNumber}");
@@ -173,7 +170,7 @@ namespace Ryujinx.Graphics.Shader.Translation
 
             if (binding < 0)
             {
-                binding = _gpuAccessor.QueryBindingStorageBuffer(slot);
+                binding = _gpuAccessor.CreateStorageBufferBinding(slot);
                 _sbSlotToBindingMap[slot] = binding;
                 string slotNumber = slot.ToString(CultureInfo.InvariantCulture);
                 AddNewStorageBuffer(binding, $"{_stagePrefix}_s{slotNumber}");
@@ -227,11 +224,12 @@ namespace Ryujinx.Graphics.Shader.Translation
             TextureFormat format,
             TextureFlags flags,
             int cbufSlot,
-            int handle)
+            int handle,
+            int arrayLength = 1)
         {
             inst &= Instruction.Mask;
-            bool isImage = inst == Instruction.ImageLoad || inst == Instruction.ImageStore || inst == Instruction.ImageAtomic;
-            bool isWrite = inst == Instruction.ImageStore || inst == Instruction.ImageAtomic;
+            bool isImage = inst.IsImage();
+            bool isWrite = inst.IsImageStore();
             bool accurateType = !inst.IsTextureQuery();
             bool intCoords = isImage || flags.HasFlag(TextureFlags.IntCoords) || inst == Instruction.TextureQuerySize;
             bool coherent = flags.HasFlag(TextureFlags.Coherent);
@@ -241,7 +239,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                 format = TextureFormat.Unknown;
             }
 
-            int binding = GetTextureOrImageBinding(cbufSlot, handle, type, format, isImage, intCoords, isWrite, accurateType, coherent);
+            int binding = GetTextureOrImageBinding(cbufSlot, handle, arrayLength, type, format, isImage, intCoords, isWrite, accurateType, coherent);
 
             _gpuAccessor.RegisterTexture(handle, cbufSlot);
 
@@ -251,6 +249,7 @@ namespace Ryujinx.Graphics.Shader.Translation
         private int GetTextureOrImageBinding(
             int cbufSlot,
             int handle,
+            int arrayLength,
             SamplerType type,
             TextureFormat format,
             bool isImage,
@@ -260,7 +259,6 @@ namespace Ryujinx.Graphics.Shader.Translation
             bool coherent)
         {
             var dimensions = type.GetDimensions();
-            var isIndexed = type.HasFlag(SamplerType.Indexed);
             var dict = isImage ? _usedImages : _usedTextures;
 
             var usageFlags = TextureUsageFlags.None;
@@ -269,7 +267,7 @@ namespace Ryujinx.Graphics.Shader.Translation
             {
                 usageFlags |= TextureUsageFlags.NeedsScaleValue;
 
-                var canScale = _stage.SupportsRenderScale() && !isIndexed && !write && dimensions == 2;
+                var canScale = _stage.SupportsRenderScale() && arrayLength == 1 && !write && dimensions == 2;
 
                 if (!canScale)
                 {
@@ -289,76 +287,66 @@ namespace Ryujinx.Graphics.Shader.Translation
                 usageFlags |= TextureUsageFlags.ImageCoherent;
             }
 
-            int arraySize = isIndexed ? SamplerArraySize : 1;
-            int firstBinding = -1;
-
-            for (int layer = 0; layer < arraySize; layer++)
+            var info = new TextureInfo(cbufSlot, handle, arrayLength, format);
+            var meta = new TextureMeta()
             {
-                var info = new TextureInfo(cbufSlot, handle + layer * 2, isIndexed, format);
-                var meta = new TextureMeta()
-                {
-                    AccurateType = accurateType,
-                    Type = type,
-                    UsageFlags = usageFlags,
-                };
+                AccurateType = accurateType,
+                Type = type,
+                UsageFlags = usageFlags,
+            };
 
-                int binding;
+            int binding;
 
-                if (dict.TryGetValue(info, out var existingMeta))
-                {
-                    dict[info] = MergeTextureMeta(meta, existingMeta);
-                    binding = existingMeta.Binding;
-                }
-                else
-                {
-                    bool isBuffer = (type & SamplerType.Mask) == SamplerType.TextureBuffer;
+            if (dict.TryGetValue(info, out var existingMeta))
+            {
+                dict[info] = MergeTextureMeta(meta, existingMeta);
+                binding = existingMeta.Binding;
+            }
+            else
+            {
+                bool isBuffer = (type & SamplerType.Mask) == SamplerType.TextureBuffer;
 
-                    binding = isImage
-                        ? _gpuAccessor.QueryBindingImage(dict.Count, isBuffer)
-                        : _gpuAccessor.QueryBindingTexture(dict.Count, isBuffer);
+                binding = isImage
+                    ? _gpuAccessor.CreateImageBinding(arrayLength, isBuffer)
+                    : _gpuAccessor.CreateTextureBinding(arrayLength, isBuffer);
 
-                    meta.Binding = binding;
+                meta.Binding = binding;
 
-                    dict.Add(info, meta);
-                }
-
-                string nameSuffix;
-
-                if (isImage)
-                {
-                    nameSuffix = cbufSlot < 0
-                        ? $"i_tcb_{handle:X}_{format.ToGlslFormat()}"
-                        : $"i_cb{cbufSlot}_{handle:X}_{format.ToGlslFormat()}";
-                }
-                else
-                {
-                    nameSuffix = cbufSlot < 0 ? $"t_tcb_{handle:X}" : $"t_cb{cbufSlot}_{handle:X}";
-                }
-
-                var definition = new TextureDefinition(
-                    isImage ? 3 : 2,
-                    binding,
-                    $"{_stagePrefix}_{nameSuffix}",
-                    meta.Type,
-                    info.Format,
-                    meta.UsageFlags);
-
-                if (isImage)
-                {
-                    Properties.AddOrUpdateImage(definition);
-                }
-                else
-                {
-                    Properties.AddOrUpdateTexture(definition);
-                }
-
-                if (layer == 0)
-                {
-                    firstBinding = binding;
-                }
+                dict.Add(info, meta);
             }
 
-            return firstBinding;
+            string nameSuffix;
+
+            if (isImage)
+            {
+                nameSuffix = cbufSlot < 0
+                    ? $"i_tcb_{handle:X}_{format.ToGlslFormat()}"
+                    : $"i_cb{cbufSlot}_{handle:X}_{format.ToGlslFormat()}";
+            }
+            else
+            {
+                nameSuffix = cbufSlot < 0 ? $"t_tcb_{handle:X}" : $"t_cb{cbufSlot}_{handle:X}";
+            }
+
+            var definition = new TextureDefinition(
+                isImage ? 3 : 2,
+                binding,
+                arrayLength,
+                $"{_stagePrefix}_{nameSuffix}",
+                meta.Type,
+                info.Format,
+                meta.UsageFlags);
+
+            if (isImage)
+            {
+                Properties.AddOrUpdateImage(definition);
+            }
+            else
+            {
+                Properties.AddOrUpdateTexture(definition);
+            }
+
+            return binding;
         }
 
         private static TextureMeta MergeTextureMeta(TextureMeta meta, TextureMeta existingMeta)
@@ -399,8 +387,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                 selectedMeta.UsageFlags |= TextureUsageFlags.NeedsScaleValue;
 
                 var dimensions = type.GetDimensions();
-                var isIndexed = type.HasFlag(SamplerType.Indexed);
-                var canScale = _stage.SupportsRenderScale() && !isIndexed && dimensions == 2;
+                var canScale = _stage.SupportsRenderScale() && selectedInfo.ArrayLength == 1 && dimensions == 2;
 
                 if (!canScale)
                 {
@@ -468,34 +455,61 @@ namespace Ryujinx.Graphics.Shader.Translation
             return descriptors;
         }
 
-        public TextureDescriptor[] GetTextureDescriptors()
+        public TextureDescriptor[] GetTextureDescriptors(bool includeArrays = true)
         {
-            return GetDescriptors(_usedTextures, _usedTextures.Count);
+            return GetDescriptors(_usedTextures, includeArrays);
         }
 
-        public TextureDescriptor[] GetImageDescriptors()
+        public TextureDescriptor[] GetImageDescriptors(bool includeArrays = true)
         {
-            return GetDescriptors(_usedImages, _usedImages.Count);
+            return GetDescriptors(_usedImages, includeArrays);
         }
 
-        private static TextureDescriptor[] GetDescriptors(IReadOnlyDictionary<TextureInfo, TextureMeta> usedResources, int count)
+        private static TextureDescriptor[] GetDescriptors(IReadOnlyDictionary<TextureInfo, TextureMeta> usedResources, bool includeArrays)
         {
-            TextureDescriptor[] descriptors = new TextureDescriptor[count];
+            List<TextureDescriptor> descriptors = new();
 
-            int descriptorIndex = 0;
+            bool hasAnyArray = false;
 
             foreach ((TextureInfo info, TextureMeta meta) in usedResources)
             {
-                descriptors[descriptorIndex++] = new TextureDescriptor(
+                if (info.ArrayLength > 1)
+                {
+                    hasAnyArray = true;
+                    continue;
+                }
+
+                descriptors.Add(new TextureDescriptor(
                     meta.Binding,
                     meta.Type,
                     info.Format,
                     info.CbufSlot,
                     info.Handle,
-                    meta.UsageFlags);
+                    info.ArrayLength,
+                    meta.UsageFlags));
             }
 
-            return descriptors;
+            if (hasAnyArray && includeArrays)
+            {
+                foreach ((TextureInfo info, TextureMeta meta) in usedResources)
+                {
+                    if (info.ArrayLength <= 1)
+                    {
+                        continue;
+                    }
+
+                    descriptors.Add(new TextureDescriptor(
+                        meta.Binding,
+                        meta.Type,
+                        info.Format,
+                        info.CbufSlot,
+                        info.Handle,
+                        info.ArrayLength,
+                        meta.UsageFlags));
+                }
+            }
+
+            return descriptors.ToArray();
         }
 
         public bool TryGetCbufSlotAndHandleForTexture(int binding, out int cbufSlot, out int handle)
@@ -529,6 +543,19 @@ namespace Ryujinx.Graphics.Shader.Translation
         public int FindImageDescriptorIndex(int binding)
         {
             return FindDescriptorIndex(GetImageDescriptors(), binding);
+        }
+
+        public bool IsArrayOfTexturesOrImages(int binding, bool isImage)
+        {
+            foreach ((TextureInfo info, TextureMeta meta) in isImage ? _usedImages : _usedTextures)
+            {
+                if (meta.Binding == binding)
+                {
+                    return info.ArrayLength != 1;
+                }
+            }
+
+            return false;
         }
 
         private void AddNewConstantBuffer(int binding, string name)

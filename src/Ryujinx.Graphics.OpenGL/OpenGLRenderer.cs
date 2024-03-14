@@ -90,6 +90,11 @@ namespace Ryujinx.Graphics.OpenGL
             throw new NotSupportedException();
         }
 
+        public IImageArray CreateImageArray(int size, bool isBuffer)
+        {
+            return new ImageArray(size);
+        }
+
         public IProgram CreateProgram(ShaderSource[] shaders, ShaderInfo info)
         {
             return new Program(shaders, info.FragmentOutputMap);
@@ -110,6 +115,11 @@ namespace Ryujinx.Graphics.OpenGL
             {
                 return ResourcePool.GetTextureOrNull(info) ?? new TextureStorage(this, info).CreateDefaultView();
             }
+        }
+
+        public ITextureArray CreateTextureArray(int size, bool isBuffer)
+        {
+            return new TextureArray(size);
         }
 
         public void DeleteBuffer(BufferHandle buffer)

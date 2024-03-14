@@ -30,6 +30,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         {
             PrimitiveTopology = 1 << 1,
             TransformFeedback = 1 << 3,
+            TextureArrayFromBuffer = 1 << 4,
         }
 
         private QueriedStateFlags _queriedState;
@@ -153,6 +154,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         }
 
         private readonly Dictionary<TextureKey, Box<TextureSpecializationState>> _textureSpecialization;
+        private readonly Dictionary<TextureKey, int> _textureArraySpecialization;
         private KeyValuePair<TextureKey, Box<TextureSpecializationState>>[] _allTextures;
         private Box<TextureSpecializationState>[][] _textureByBinding;
         private Box<TextureSpecializationState>[][] _imageByBinding;
@@ -163,6 +165,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         private ShaderSpecializationState()
         {
             _textureSpecialization = new Dictionary<TextureKey, Box<TextureSpecializationState>>();
+            _textureArraySpecialization = new Dictionary<TextureKey, int>();
         }
 
         /// <summary>
@@ -324,6 +327,19 @@ namespace Ryujinx.Graphics.Gpu.Shader
         }
 
         /// <summary>
+        /// Indicates that the coordinate normalization state of a given texture was used during the shader translation process.
+        /// </summary>
+        /// <param name="stageIndex">Shader stage where the texture is used</param>
+        /// <param name="handle">Offset in words of the texture handle on the texture buffer</param>
+        /// <param name="cbufSlot">Slot of the texture buffer constant buffer</param>
+        /// <param name="length">Number of elements in the texture array</param>
+        public void RegisterTextureArrayLengthFromBuffer(int stageIndex, int handle, int cbufSlot, int length)
+        {
+            _textureArraySpecialization[new TextureKey(stageIndex, handle, cbufSlot)] = length;
+            _queriedState |= QueriedStateFlags.TextureArrayFromBuffer;
+        }
+
+        /// <summary>
         /// Indicates that the format of a given texture was used during the shader translation process.
         /// </summary>
         /// <param name="stageIndex">Shader stage where the texture is used</param>
@@ -380,6 +396,17 @@ namespace Ryujinx.Graphics.Gpu.Shader
         }
 
         /// <summary>
+        /// Checks if a given texture array (from constant buffer) was registerd on this specialization state.
+        /// </summary>
+        /// <param name="stageIndex">Shader stage where the texture is used</param>
+        /// <param name="handle">Offset in words of the texture handle on the texture buffer</param>
+        /// <param name="cbufSlot">Slot of the texture buffer constant buffer</param>
+        public bool TextureArrayFromBufferRegistered(int stageIndex, int handle, int cbufSlot)
+        {
+            return _textureArraySpecialization.ContainsKey(new TextureKey(stageIndex, handle, cbufSlot));
+        }
+
+        /// <summary>
         /// Gets the recorded format of a given texture.
         /// </summary>
         /// <param name="stageIndex">Shader stage where the texture is used</param>
@@ -411,6 +438,17 @@ namespace Ryujinx.Graphics.Gpu.Shader
         public bool GetCoordNormalized(int stageIndex, int handle, int cbufSlot)
         {
             return GetTextureSpecState(stageIndex, handle, cbufSlot).Value.CoordNormalized;
+        }
+
+        /// <summary>
+        /// Gets the recorded length of a given texture array (from constant buffer).
+        /// </summary>
+        /// <param name="stageIndex">Shader stage where the texture is used</param>
+        /// <param name="handle">Offset in words of the texture handle on the texture buffer</param>
+        /// <param name="cbufSlot">Slot of the texture buffer constant buffer</param>
+        public int GetTextureArrayFromBufferLength(int stageIndex, int handle, int cbufSlot)
+        {
+            return _textureArraySpecialization[new TextureKey(stageIndex, handle, cbufSlot)];
         }
 
         /// <summary>
@@ -548,6 +586,12 @@ namespace Ryujinx.Graphics.Gpu.Shader
             return Matches(channel, ref poolState, checkTextures, isCompute: false);
         }
 
+        /// <summary>
+        /// Converts special vertex attribute groups to their generic equivalents, for comparison purposes.
+        /// </summary>
+        /// <param name="channel">GPU channel</param>
+        /// <param name="type">Vertex attribute type</param>
+        /// <returns>Filtered attribute</returns>
         private static AttributeType FilterAttributeType(GpuChannel channel, AttributeType type)
         {
             type &= ~(AttributeType.Packed | AttributeType.PackedRgb10A2Signed);
@@ -838,6 +882,22 @@ namespace Ryujinx.Graphics.Gpu.Shader
                 specState._textureSpecialization[textureKey] = textureState;
             }
 
+            if (specState._queriedState.HasFlag(QueriedStateFlags.TextureArrayFromBuffer))
+            {
+                dataReader.Read(ref count);
+
+                for (int index = 0; index < count; index++)
+                {
+                    TextureKey textureKey = default;
+                    int length = 0;
+
+                    dataReader.ReadWithMagicAndSize(ref textureKey, TexkMagic);
+                    dataReader.Read(ref length);
+
+                    specState._textureArraySpecialization[textureKey] = length;
+                }
+            }
+
             return specState;
         }
 
@@ -901,6 +961,21 @@ namespace Ryujinx.Graphics.Gpu.Shader
 
                 dataWriter.WriteWithMagicAndSize(ref textureKey, TexkMagic);
                 dataWriter.WriteWithMagicAndSize(ref textureState.Value, TexsMagic);
+            }
+
+            if (_queriedState.HasFlag(QueriedStateFlags.TextureArrayFromBuffer))
+            {
+                count = (ushort)_textureArraySpecialization.Count;
+                dataWriter.Write(ref count);
+
+                foreach (var kv in _textureArraySpecialization)
+                {
+                    var textureKey = kv.Key;
+                    var length = kv.Value;
+
+                    dataWriter.WriteWithMagicAndSize(ref textureKey, TexkMagic);
+                    dataWriter.Write(ref length);
+                }
             }
         }
     }

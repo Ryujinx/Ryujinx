@@ -72,6 +72,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         public ReadOnlySpan<ulong> GetCode(ulong address, int minimumSize)
         {
             int size = Math.Max(minimumSize, 0x1000 - (int)(address & 0xfff));
+
             return MemoryMarshal.Cast<byte, ulong>(_channel.MemoryManager.GetSpan(address, size));
         }
 
@@ -119,19 +120,33 @@ namespace Ryujinx.Graphics.Gpu.Shader
             return _state.GraphicsState.HasUnalignedStorageBuffer || _state.ComputeState.HasUnalignedStorageBuffer;
         }
 
+        /// <inheritdoc/>
+        public SamplerType QuerySamplerType(int handle, int cbufSlot)
+        {
+            _state.SpecializationState?.RecordTextureSamplerType(_stageIndex, handle, cbufSlot);
+            return GetTextureDescriptor(handle, cbufSlot).UnpackTextureTarget().ConvertSamplerType();
+        }
+
+        /// <inheritdoc/>
+        public int QueryTextureArrayLengthFromBuffer(int slot)
+        {
+            int size = _compute
+                ? _channel.BufferManager.GetComputeUniformBufferSize(slot)
+                : _channel.BufferManager.GetGraphicsUniformBufferSize(_stageIndex, slot);
+
+            int arrayLength = size / Constants.TextureHandleSizeInBytes;
+
+            _state.SpecializationState?.RegisterTextureArrayLengthFromBuffer(_stageIndex, 0, slot, arrayLength);
+
+            return arrayLength;
+        }
+
         //// <inheritdoc/>
         public TextureFormat QueryTextureFormat(int handle, int cbufSlot)
         {
             _state.SpecializationState?.RecordTextureFormat(_stageIndex, handle, cbufSlot);
             var descriptor = GetTextureDescriptor(handle, cbufSlot);
             return ConvertToTextureFormat(descriptor.UnpackFormat(), descriptor.UnpackSrgb());
-        }
-
-        /// <inheritdoc/>
-        public SamplerType QuerySamplerType(int handle, int cbufSlot)
-        {
-            _state.SpecializationState?.RecordTextureSamplerType(_stageIndex, handle, cbufSlot);
-            return GetTextureDescriptor(handle, cbufSlot).UnpackTextureTarget().ConvertSamplerType();
         }
 
         /// <inheritdoc/>

@@ -1,12 +1,13 @@
 using Ryujinx.Graphics.Shader;
 using Ryujinx.Memory.Range;
+using System;
 
 namespace Ryujinx.Graphics.Gpu.Memory
 {
     /// <summary>
     /// Memory range used for buffers.
     /// </summary>
-    readonly struct BufferBounds
+    readonly struct BufferBounds : IEquatable<BufferBounds>
     {
         /// <summary>
         /// Physical memory ranges where the buffer is mapped.
@@ -32,6 +33,26 @@ namespace Ryujinx.Graphics.Gpu.Memory
         {
             Range = range;
             Flags = flags;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BufferBounds bounds && Equals(bounds);
+        }
+
+        public bool Equals(BufferBounds bounds)
+        {
+            return Range == bounds.Range && Flags == bounds.Flags;
+        }
+
+        public bool Equals(ref BufferBounds bounds)
+        {
+            return Range == bounds.Range && Flags == bounds.Flags;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Range, Flags);
         }
     }
 }
