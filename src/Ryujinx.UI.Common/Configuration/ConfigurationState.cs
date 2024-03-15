@@ -1460,6 +1460,33 @@ namespace Ryujinx.UI.Common.Configuration
                 configurationFileUpdated = true;
             }
 
+            if (configurationFileFormat.Version < 50)
+            {
+                Ryujinx.Common.Logging.Logger.Warning?.Print(LogClass.Application, $"Outdated configuration version {configurationFileFormat.Version}, migrating to version 50.");
+
+                configurationFileFormat.VSyncMode = VSyncMode.Switch;
+                configurationFileFormat.EnableCustomVSyncInterval = false;
+
+                configurationFileFormat.Hotkeys = new KeyboardHotkeys
+                {
+                    VSyncMode = Key.F1,
+                    Screenshot = configurationFileFormat.Hotkeys.Screenshot,
+                    ShowUI = configurationFileFormat.Hotkeys.ShowUI,
+                    Pause = configurationFileFormat.Hotkeys.Pause,
+                    ToggleMute = configurationFileFormat.Hotkeys.ToggleMute,
+                    ResScaleUp = configurationFileFormat.Hotkeys.ResScaleUp,
+                    ResScaleDown = configurationFileFormat.Hotkeys.ResScaleDown,
+                    VolumeUp = configurationFileFormat.Hotkeys.VolumeUp,
+                    VolumeDown = configurationFileFormat.Hotkeys.VolumeDown,
+                    CustomVSyncIntervalIncrement = Key.Unbound,
+                    CustomVSyncIntervalDecrement = Key.Unbound,
+                };
+
+                configurationFileFormat.CustomVSyncInterval = 120;
+
+                configurationFileUpdated = true;
+            }
+
             Logger.EnableFileLog.Value = configurationFileFormat.EnableFileLog;
             Graphics.ResScale.Value = configurationFileFormat.ResScale;
             Graphics.ResScaleCustom.Value = configurationFileFormat.ResScaleCustom;
