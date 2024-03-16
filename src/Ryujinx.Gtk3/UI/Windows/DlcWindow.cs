@@ -137,9 +137,25 @@ namespace Ryujinx.UI.Windows
             return null;
         }
 
+        private bool IsPathInStore(string path)
+        {
+            List<string> paths = [];
+
+            if (_dlcTreeView.Model.GetIterFirst(out TreeIter iter))
+            {
+                do
+                {
+                    paths.Add((string)_dlcTreeView.Model.GetValue(iter, 2));
+                }
+                while (_dlcTreeView.Model.IterNext(ref iter));
+            }
+
+            return paths.Contains(path);
+        }
+
         private void AddDlc(string path, bool ignoreNotFound = false)
         {
-            if (!File.Exists(path))
+            if (!File.Exists(path) || IsPathInStore(path))
             {
                 return;
             }

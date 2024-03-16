@@ -171,63 +171,65 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void AddUpdate(string path, bool ignoreNotFound = false)
         {
-            if (File.Exists(path) && TitleUpdates.All(x => x.Path != path))
+            if (!File.Exists(path) || TitleUpdates.Any(x => x.Path == path))
             {
-                IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
-                    ? IntegrityCheckLevel.ErrorOnInvalid
-                    : IntegrityCheckLevel.None;
+                return;
+            }
 
-                using FileStream file = new(path, FileMode.Open, FileAccess.Read);
+            IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                ? IntegrityCheckLevel.ErrorOnInvalid
+                : IntegrityCheckLevel.None;
 
-                IFileSystem pfs;
+            using FileStream file = new(path, FileMode.Open, FileAccess.Read);
 
-                try
+            IFileSystem pfs;
+
+            try
+            {
+                if (Path.GetExtension(path).ToLower() == ".xci")
                 {
-                    if (Path.GetExtension(path).ToLower() == ".xci")
+                    pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                }
+                else
+                {
+                    var pfsTemp = new PartitionFileSystem();
+                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
+                    pfs = pfsTemp;
+                }
+
+                Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel);
+
+                Nca patchNca = null;
+                Nca controlNca = null;
+
+                if (updates.TryGetValue(ApplicationData.Id, out ContentCollection content))
+                {
+                    patchNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Program);
+                    controlNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Control);
+                }
+
+                if (controlNca != null && patchNca != null)
+                {
+                    ApplicationControlProperty controlData = new();
+
+                    using UniqueRef<IFile> nacpFile = new();
+
+                    controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None).OpenFile(ref nacpFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                    nacpFile.Get.Read(out _, 0, SpanHelpers.AsByteSpan(ref controlData), ReadOption.None).ThrowIfFailure();
+
+                    TitleUpdates.Add(new TitleUpdateModel(controlData, path));
+                }
+                else
+                {
+                    if (!ignoreNotFound)
                     {
-                        pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                    }
-                    else
-                    {
-                        var pfsTemp = new PartitionFileSystem();
-                        pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                        pfs = pfsTemp;
-                    }
-
-                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel);
-
-                    Nca patchNca = null;
-                    Nca controlNca = null;
-
-                    if (updates.TryGetValue(ApplicationData.Id, out ContentCollection content))
-                    {
-                        patchNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Program);
-                        controlNca = content.GetNcaByType(VirtualFileSystem.KeySet, ContentType.Control);
-                    }
-
-                    if (controlNca != null && patchNca != null)
-                    {
-                        ApplicationControlProperty controlData = new();
-
-                        using UniqueRef<IFile> nacpFile = new();
-
-                        controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None).OpenFile(ref nacpFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
-                        nacpFile.Get.Read(out _, 0, SpanHelpers.AsByteSpan(ref controlData), ReadOption.None).ThrowIfFailure();
-
-                        TitleUpdates.Add(new TitleUpdateModel(controlData, path));
-                    }
-                    else
-                    {
-                        if (!ignoreNotFound)
-                        {
-                            Dispatcher.UIThread.InvokeAsync(() => ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogUpdateAddUpdateErrorMessage]));
-                        }
+                        Dispatcher.UIThread.InvokeAsync(() => ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogUpdateAddUpdateErrorMessage]));
                     }
                 }
-                catch (Exception ex)
-                {
-                    Dispatcher.UIThread.InvokeAsync(() => ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.DialogLoadFileErrorMessage, ex.Message, path)));
-                }
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.UIThread.InvokeAsync(() => ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance.UpdateAndGetDynamicValue(LocaleKeys.DialogLoadFileErrorMessage, ex.Message, path)));
             }
         }
 

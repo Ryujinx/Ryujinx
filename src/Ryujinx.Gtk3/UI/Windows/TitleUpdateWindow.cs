@@ -92,77 +92,79 @@ namespace Ryujinx.UI.Windows
 
         private void AddUpdate(string path, bool ignoreNotFound = false)
         {
-            if (File.Exists(path))
+            if (!File.Exists(path) || _radioButtonToPathDictionary.ContainsValue(path))
             {
-                IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
-                    ? IntegrityCheckLevel.ErrorOnInvalid
-                    : IntegrityCheckLevel.None;
+                return;
+            }
 
-                using FileStream file = new(path, FileMode.Open, FileAccess.Read);
+            IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                ? IntegrityCheckLevel.ErrorOnInvalid
+                : IntegrityCheckLevel.None;
 
-                IFileSystem pfs;
+            using FileStream file = new(path, FileMode.Open, FileAccess.Read);
 
-                try
+            IFileSystem pfs;
+
+            try
+            {
+                if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
                 {
+                    pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                }
+                else
+                {
+                    var pfsTemp = new PartitionFileSystem();
+                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
+                    pfs = pfsTemp;
+                }
+
+                Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel);
+
+                Nca patchNca = null;
+                Nca controlNca = null;
+
+                if (updates.TryGetValue(_title.Id, out ContentCollection update))
+                {
+                    patchNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Program);
+                    controlNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Control);
+                }
+
+                if (controlNca != null && patchNca != null)
+                {
+                    ApplicationControlProperty controlData = new();
+
+                    using var nacpFile = new UniqueRef<IFile>();
+
+                    controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None).OpenFile(ref nacpFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                    nacpFile.Get.Read(out _, 0, SpanHelpers.AsByteSpan(ref controlData), ReadOption.None).ThrowIfFailure();
+
+                    string radioLabel = $"Version {controlData.DisplayVersionString.ToString()} - {path}";
+
                     if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
                     {
-                        pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                    }
-                    else
-                    {
-                        var pfsTemp = new PartitionFileSystem();
-                        pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                        pfs = pfsTemp;
+                        radioLabel = "Bundled: " + radioLabel;
                     }
 
-                    Dictionary<ulong, ContentCollection> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel);
+                    RadioButton radioButton = new(radioLabel);
+                    radioButton.JoinGroup(_noUpdateRadioButton);
 
-                    Nca patchNca = null;
-                    Nca controlNca = null;
+                    _availableUpdatesBox.Add(radioButton);
+                    _radioButtonToPathDictionary.Add(radioButton, path);
 
-                    if (updates.TryGetValue(_title.Id, out ContentCollection update))
-                    {
-                        patchNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Program);
-                        controlNca = update.GetNcaByType(_virtualFileSystem.KeySet, LibHac.Ncm.ContentType.Control);
-                    }
-
-                    if (controlNca != null && patchNca != null)
-                    {
-                        ApplicationControlProperty controlData = new();
-
-                        using var nacpFile = new UniqueRef<IFile>();
-
-                        controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None).OpenFile(ref nacpFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
-                        nacpFile.Get.Read(out _, 0, SpanHelpers.AsByteSpan(ref controlData), ReadOption.None).ThrowIfFailure();
-
-                        string radioLabel = $"Version {controlData.DisplayVersionString.ToString()} - {path}";
-
-                        if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
-                        {
-                            radioLabel = "Bundled: " + radioLabel;
-                        }
-
-                        RadioButton radioButton = new(radioLabel);
-                        radioButton.JoinGroup(_noUpdateRadioButton);
-
-                        _availableUpdatesBox.Add(radioButton);
-                        _radioButtonToPathDictionary.Add(radioButton, path);
-
-                        radioButton.Show();
-                        radioButton.Active = true;
-                    }
-                    else
-                    {
-                        if (!ignoreNotFound)
-                        {
-                            GtkDialog.CreateErrorDialog("The specified file does not contain an update for the selected title!");
-                        }
-                    }
+                    radioButton.Show();
+                    radioButton.Active = true;
                 }
-                catch (Exception exception)
+                else
                 {
-                    GtkDialog.CreateErrorDialog($"{exception.Message}. Errored File: {path}");
+                    if (!ignoreNotFound)
+                    {
+                        GtkDialog.CreateErrorDialog("The specified file does not contain an update for the selected title!");
+                    }
                 }
+            }
+            catch (Exception exception)
+            {
+                GtkDialog.CreateErrorDialog($"{exception.Message}. Errored File: {path}");
             }
         }
 

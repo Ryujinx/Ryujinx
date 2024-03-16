@@ -243,7 +243,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private bool AddDownloadableContent(string path)
         {
-            if (!File.Exists(path) || DownloadableContents.FirstOrDefault(x => x.ContainerPath == path) != null)
+            if (!File.Exists(path) || DownloadableContents.Any(x => x.FullPath == path))
             {
                 return true;
             }
