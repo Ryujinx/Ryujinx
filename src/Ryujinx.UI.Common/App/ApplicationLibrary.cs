@@ -700,9 +700,9 @@ namespace Ryujinx.UI.App.Common
                                 Dictionary<ulong, ContentCollection> programs = pfs.GetApplicationData(_virtualFileSystem, _checkLevel);
                                 IFileSystem controlFs = null;
 
-                                if (programs.ContainsKey(titleId))
+                                if (programs.TryGetValue(titleId, out ContentCollection value))
                                 {
-                                    if (programs[titleId].GetNcaByType(_virtualFileSystem.KeySet, ContentType.Control) is { } controlNca)
+                                    if (value.GetNcaByType(_virtualFileSystem.KeySet, ContentType.Control) is { } controlNca)
                                     {
                                         controlFs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
                                     }
