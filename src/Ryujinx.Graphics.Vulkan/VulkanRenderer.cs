@@ -48,7 +48,6 @@ namespace Ryujinx.Graphics.Vulkan
         internal MemoryAllocator MemoryAllocator { get; private set; }
         internal HostMemoryAllocator HostMemoryAllocator { get; private set; }
         internal CommandBufferPool CommandBufferPool { get; private set; }
-        internal DescriptorSetManager DescriptorSetManager { get; private set; }
         internal PipelineLayoutCache PipelineLayoutCache { get; private set; }
         internal BackgroundResources BackgroundResources { get; private set; }
         internal Action<Action> InterruptAction { get; private set; }
@@ -368,8 +367,6 @@ namespace Ryujinx.Graphics.Vulkan
             HostMemoryAllocator = new HostMemoryAllocator(MemoryAllocator, Api, hostMemoryApi, _device);
 
             CommandBufferPool = new CommandBufferPool(Api, _device, Queue, QueueLock, queueFamilyIndex);
-
-            DescriptorSetManager = new DescriptorSetManager(_device, PipelineBase.DescriptorSetLayouts);
 
             PipelineLayoutCache = new PipelineLayoutCache();
 
@@ -928,7 +925,6 @@ namespace Ryujinx.Graphics.Vulkan
             HelperShader.Dispose();
             _pipeline.Dispose();
             BufferManager.Dispose();
-            DescriptorSetManager.Dispose();
             PipelineLayoutCache.Dispose();
             Barriers.Dispose();
 
