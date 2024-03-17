@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using GUI = Gtk.Builder.ObjectAttribute;
 
 namespace Ryujinx.UI.Windows
@@ -137,25 +138,9 @@ namespace Ryujinx.UI.Windows
             return null;
         }
 
-        private bool IsPathInStore(string path)
-        {
-            List<string> paths = [];
-
-            if (_dlcTreeView.Model.GetIterFirst(out TreeIter iter))
-            {
-                do
-                {
-                    paths.Add((string)_dlcTreeView.Model.GetValue(iter, 2));
-                }
-                while (_dlcTreeView.Model.IterNext(ref iter));
-            }
-
-            return paths.Contains(path);
-        }
-
         private void AddDlc(string path, bool ignoreNotFound = false)
         {
-            if (!File.Exists(path) || IsPathInStore(path))
+            if (!File.Exists(path) || _dlcContainerList.Any(x => x.ContainerPath == path))
             {
                 return;
             }
