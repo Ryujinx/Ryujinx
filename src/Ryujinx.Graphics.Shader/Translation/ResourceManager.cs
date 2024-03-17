@@ -29,7 +29,7 @@ namespace Ryujinx.Graphics.Shader.Translation
 
         private readonly HashSet<int> _usedConstantBufferBindings;
 
-        private readonly record struct TextureInfo(int CbufSlot, int Handle, int ArrayLength, TextureFormat Format);
+        private readonly record struct TextureInfo(int CbufSlot, int Handle, int ArrayLength, SamplerType Type, TextureFormat Format);
 
         private struct TextureMeta
         {
@@ -287,7 +287,10 @@ namespace Ryujinx.Graphics.Shader.Translation
                 usageFlags |= TextureUsageFlags.ImageCoherent;
             }
 
-            var info = new TextureInfo(cbufSlot, handle, arrayLength, format);
+            // For array textures, we also want to use type as key,
+            // since we may have texture handles stores in the same buffer, but for textures with different types.
+            var keyType = arrayLength > 1 ? type : SamplerType.None;
+            var info = new TextureInfo(cbufSlot, handle, arrayLength, keyType, format);
             var meta = new TextureMeta()
             {
                 AccurateType = accurateType,
