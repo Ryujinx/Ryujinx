@@ -37,6 +37,7 @@ using Ryujinx.UI.Windows;
 using Silk.NET.Vulkan;
 using SPB.Graphics.Vulkan;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -1368,12 +1369,15 @@ namespace Ryujinx.UI
 
             if (fileChooser.Run() == (int)ResponseType.Accept)
             {
-                ApplicationData applicationData = new()
+                if (_applicationLibrary.TryGetApplicationsFromFile(fileChooser.Filename,
+                        out List<ApplicationData> applications))
                 {
-                    Path = fileChooser.Filename,
-                };
-
-                RunApplication(applicationData);
+                    RunApplication(applications[0]);
+                }
+                else
+                {
+                    GtkDialog.CreateErrorDialog("No applications found in selected file.");
+                }
             }
         }
 

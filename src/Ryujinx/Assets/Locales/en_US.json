@@ -10,6 +10,7 @@
   "SettingsTabSystemUseHypervisor": "Use Hypervisor",
   "MenuBarFile": "_File",
   "MenuBarFileOpenFromFile": "_Load Application From File",
+  "MenuBarFileOpenFromFileError": "No applications found in selected file.",
   "MenuBarFileOpenUnpacked": "Load _Unpacked Game",
   "MenuBarFileOpenEmuFolder": "Open Ryujinx Folder",
   "MenuBarFileOpenLogsFolder": "Open Logs Folder",

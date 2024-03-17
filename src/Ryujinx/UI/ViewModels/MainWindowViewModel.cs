@@ -1462,12 +1462,15 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             if (result.Count > 0)
             {
-                ApplicationData applicationData = new()
+                if (ApplicationLibrary.TryGetApplicationsFromFile(result[0].Path.LocalPath,
+                        out List<ApplicationData> applications))
                 {
-                    Path = result[0].Path.LocalPath,
-                };
-
-                await LoadApplication(applicationData);
+                    await LoadApplication(applications[0]);
+                }
+                else
+                {
+                    await ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.MenuBarFileOpenFromFileError]);
+                }
             }
         }
 

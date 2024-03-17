@@ -257,9 +257,9 @@ namespace Ryujinx.UI.App.Common
             return applications;
         }
 
-        private bool TryGetApplicationsFromFile(string applicationPath, out List<ApplicationData> applications)
+        public bool TryGetApplicationsFromFile(string applicationPath, out List<ApplicationData> applications)
         {
-            applications = new List<ApplicationData>();
+            applications = [];
 
             long fileSize = new FileInfo(applicationPath).Length;
 
@@ -305,13 +305,6 @@ namespace Ryujinx.UI.App.Common
                         {
                             BinaryReader reader = new(file);
                             ApplicationData application = new();
-
-                            byte[] Read(long position, int size)
-                            {
-                                file.Seek(position, SeekOrigin.Begin);
-
-                                return reader.ReadBytes(size);
-                            }
 
                             try
                             {
@@ -361,6 +354,13 @@ namespace Ryujinx.UI.App.Common
                             }
 
                             break;
+
+                            byte[] Read(long position, int size)
+                            {
+                                file.Seek(position, SeekOrigin.Begin);
+
+                                return reader.ReadBytes(size);
+                            }
                         }
                     case ".nca":
                         {
