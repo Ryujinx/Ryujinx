@@ -29,6 +29,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
                 }
             }
 
+
             _avaloniaKeyboardDriver = new AvaloniaKeyboardDriver(this);
         }
 
