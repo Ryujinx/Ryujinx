@@ -11,7 +11,7 @@ namespace Ryujinx.HLE.FileSystem
     /// <summary>
     /// Thin wrapper around <see cref="Cnmt"/>
     /// </summary>
-    public class ContentCollection
+    public class ContentMetaData
     {
         private readonly IFileSystem _pfs;
         private readonly Cnmt _cnmt;
@@ -28,7 +28,7 @@ namespace Ryujinx.HLE.FileSystem
         public ulong ProgramBaseId => Id & ~0x1FFFUL;
         public bool IsSystemTitle => _cnmt.Type < ContentMetaType.Application;
 
-        public ContentCollection(IFileSystem pfs, Cnmt cnmt)
+        public ContentMetaData(IFileSystem pfs, Cnmt cnmt)
         {
             _pfs = pfs;
             _cnmt = cnmt;

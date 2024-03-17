@@ -166,7 +166,7 @@ namespace Ryujinx.UI.App.Common
             var applications = new List<ApplicationData>();
             string extension = Path.GetExtension(filePath).ToLower();
 
-            foreach ((ulong titleId, ContentCollection content) in pfs.GetApplicationData(_virtualFileSystem, _checkLevel))
+            foreach ((ulong titleId, ContentMetaData content) in pfs.GetApplicationData(_virtualFileSystem, _checkLevel))
             {
                 ApplicationData applicationData = new()
                 {
@@ -697,10 +697,10 @@ namespace Ryujinx.UI.App.Common
                             else
                             {
                                 // Store the ControlFS in variable called controlFs
-                                Dictionary<ulong, ContentCollection> programs = pfs.GetApplicationData(_virtualFileSystem, _checkLevel);
+                                Dictionary<ulong, ContentMetaData> programs = pfs.GetApplicationData(_virtualFileSystem, _checkLevel);
                                 IFileSystem controlFs = null;
 
-                                if (programs.TryGetValue(titleId, out ContentCollection value))
+                                if (programs.TryGetValue(titleId, out ContentMetaData value))
                                 {
                                     if (value.GetNcaByType(_virtualFileSystem.KeySet, ContentType.Control) is { } controlNca)
                                     {
@@ -881,7 +881,7 @@ namespace Ryujinx.UI.App.Common
         {
             updatedControlFs = null;
 
-            string updatePath = "(unknown)";
+            string updatePath = null;
 
             try
             {

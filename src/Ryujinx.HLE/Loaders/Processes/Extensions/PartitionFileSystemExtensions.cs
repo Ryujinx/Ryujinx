@@ -23,12 +23,12 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
     {
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        public static Dictionary<ulong, ContentCollection> GetApplicationData(this IFileSystem partitionFileSystem,
+        public static Dictionary<ulong, ContentMetaData> GetApplicationData(this IFileSystem partitionFileSystem,
             VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
-            var programs = new Dictionary<ulong, ContentCollection>();
+            var programs = new Dictionary<ulong, ContentMetaData>();
 
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.cnmt.nca"))
             {
@@ -39,7 +39,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     continue;
                 }
 
-                ContentCollection content = new(partitionFileSystem, cnmt);
+                ContentMetaData content = new(partitionFileSystem, cnmt);
 
                 if (content.Type != ContentMetaType.Application)
                 {
@@ -52,12 +52,12 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return programs;
         }
 
-        public static Dictionary<ulong, ContentCollection> GetUpdateData(this IFileSystem partitionFileSystem,
+        public static Dictionary<ulong, ContentMetaData> GetUpdateData(this IFileSystem partitionFileSystem,
             VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel)
         {
             fileSystem.ImportTickets(partitionFileSystem);
 
-            var programs = new Dictionary<ulong, ContentCollection>();
+            var programs = new Dictionary<ulong, ContentMetaData>();
 
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.cnmt.nca"))
             {
@@ -68,7 +68,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     continue;
                 }
 
-                ContentCollection content = new(partitionFileSystem, cnmt);
+                ContentMetaData content = new(partitionFileSystem, cnmt);
 
                 if (content.Type != ContentMetaType.Patch)
                 {
@@ -96,18 +96,18 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
             try
             {
-                Dictionary<ulong, ContentCollection> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.System.FsIntegrityCheckLevel);
+                Dictionary<ulong, ContentMetaData> applications = partitionFileSystem.GetApplicationData(device.FileSystem, device.System.FsIntegrityCheckLevel);
 
                 if (titleId == 0)
                 {
-                    foreach ((ulong _, ContentCollection content) in applications)
+                    foreach ((ulong _, ContentMetaData content) in applications)
                     {
                         mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program, device.Configuration.UserChannelPersistence.Index);
                         controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control, device.Configuration.UserChannelPersistence.Index);
                         break;
                     }
                 }
-                else if (applications.TryGetValue(titleId, out ContentCollection content))
+                else if (applications.TryGetValue(titleId, out ContentMetaData content))
                 {
                     mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program, device.Configuration.UserChannelPersistence.Index);
                     controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control, device.Configuration.UserChannelPersistence.Index);

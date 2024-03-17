@@ -130,7 +130,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
         public static (Nca, Nca) GetUpdateData(this Nca mainNca, VirtualFileSystem fileSystem, IntegrityCheckLevel checkLevel, int programIndex, out string updatePath)
         {
-            updatePath = "(unknown)";
+            updatePath = null;
 
             // Load Update NCAs.
             Nca updatePatchNca = null;
@@ -161,7 +161,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                         updatePartitionFileSystem = pfsTemp;
                     }
 
-                    foreach ((ulong updateTitleId, ContentCollection content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel))
+                    foreach ((ulong updateTitleId, ContentMetaData content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel))
                     {
                         if ((updateTitleId & ~0x1FFFUL) != titleIdBase)
                         {
@@ -262,7 +262,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             {
                 if (!ResultFs.PathNotFound.Includes(ex.ResultValue))
                 {
-                    Logger.Warning?.Print(LogClass.Application, $"Failed get cnmt for '{cnmtNca.Header.TitleId:x16}' from nca: {ex.Message}");
+                    Logger.Warning?.Print(LogClass.Application, $"Failed get CNMT for '{cnmtNca.Header.TitleId:x16}' from NCA: {ex.Message}");
                 }
             }
 
