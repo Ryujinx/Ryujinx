@@ -383,7 +383,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     ButtonMinus = ButtonMinus,
                     ButtonZl = ButtonZl,
                     ButtonSl = LeftButtonSl,
-                    ButtonSr = LeftButtonSr
+                    ButtonSr = LeftButtonSr,
                 },
                 RightJoycon = new RightJoyconCommonConfig<Key>
                 {
@@ -395,7 +395,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     ButtonSl = RightButtonSl,
                     ButtonSr = RightButtonSr,
                     ButtonR = ButtonR,
-                    ButtonZr = ButtonZr
+                    ButtonZr = ButtonZr,
                 },
                 LeftJoyconStick = new JoyconConfigKeyboardStick<Key>
                 {
@@ -403,7 +403,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     StickDown = LeftStickDown,
                     StickRight = LeftStickRight,
                     StickLeft = LeftStickLeft,
-                    StickButton = LeftStickButton
+                    StickButton = LeftStickButton,
                 },
                 RightJoyconStick = new JoyconConfigKeyboardStick<Key>
                 {
@@ -411,9 +411,9 @@ namespace Ryujinx.Ava.UI.Models.Input
                     StickDown = RightStickDown,
                     StickLeft = RightStickLeft,
                     StickRight = RightStickRight,
-                    StickButton = RightStickButton
+                    StickButton = RightStickButton,
                 },
-                Version = InputConfig.CurrentVersion
+                Version = InputConfig.CurrentVersion,
             };
 
             return config;

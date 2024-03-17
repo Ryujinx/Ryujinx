@@ -28,6 +28,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
                     button.IsCheckedChanged += Button_IsCheckedChanged;
                 }
             }
+
             _avaloniaKeyboardDriver = new AvaloniaKeyboardDriver(this);
         }
 

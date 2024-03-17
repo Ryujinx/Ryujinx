@@ -132,7 +132,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                 ResScaleUp = ResScaleUp,
                 ResScaleDown = ResScaleDown,
                 VolumeUp = VolumeUp,
-                VolumeDown = VolumeDown
+                VolumeDown = VolumeDown,
             };
 
             return config;

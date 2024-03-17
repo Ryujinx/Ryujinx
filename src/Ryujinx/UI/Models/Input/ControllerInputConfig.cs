@@ -504,7 +504,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     ButtonMinus = ButtonMinus,
                     ButtonSl = LeftButtonSl,
                     ButtonSr = LeftButtonSr,
-                    ButtonZl = ButtonZl
+                    ButtonZl = ButtonZl,
                 },
                 RightJoycon = new RightJoyconCommonConfig<GamepadInputId>
                 {
@@ -516,7 +516,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     ButtonSl = RightButtonSl,
                     ButtonSr = RightButtonSr,
                     ButtonR = ButtonR,
-                    ButtonZr = ButtonZr
+                    ButtonZr = ButtonZr,
                 },
                 LeftJoyconStick = new JoyconConfigControllerStick<GamepadInputId, StickInputId>
                 {
@@ -524,7 +524,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     InvertStickX = LeftInvertStickX,
                     InvertStickY = LeftInvertStickY,
                     Rotate90CW = LeftRotate90,
-                    StickButton = LeftStickButton
+                    StickButton = LeftStickButton,
                 },
                 RightJoyconStick = new JoyconConfigControllerStick<GamepadInputId, StickInputId>
                 {
@@ -532,20 +532,20 @@ namespace Ryujinx.Ava.UI.Models.Input
                     InvertStickX = RightInvertStickX,
                     InvertStickY = RightInvertStickY,
                     Rotate90CW = RightRotate90,
-                    StickButton = RightStickButton
+                    StickButton = RightStickButton,
                 },
                 Rumble = new RumbleConfigController
                 {
                     EnableRumble = EnableRumble,
                     WeakRumble = WeakRumble,
-                    StrongRumble = StrongRumble
+                    StrongRumble = StrongRumble,
                 },
                 Version = InputConfig.CurrentVersion,
                 DeadzoneLeft = DeadzoneLeft,
                 DeadzoneRight = DeadzoneRight,
                 RangeLeft = RangeLeft,
                 RangeRight = RangeRight,
-                TriggerThreshold = TriggerThreshold
+                TriggerThreshold = TriggerThreshold,
             };
 
             if (EnableCemuHookMotion)
@@ -560,7 +560,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     DsuServerPort = DsuServerPort,
                     Slot = Slot,
                     AltSlot = AltSlot,
-                    MirrorInput = MirrorInput
+                    MirrorInput = MirrorInput,
                 };
             }
             else
@@ -570,7 +570,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                     EnableMotion = EnableMotion,
                     MotionBackend = MotionInputBackendType.GamepadDriver,
                     GyroDeadzone = GyroDeadzone,
-                    Sensitivity = Sensitivity
+                    Sensitivity = Sensitivity,
                 };
             }
 
