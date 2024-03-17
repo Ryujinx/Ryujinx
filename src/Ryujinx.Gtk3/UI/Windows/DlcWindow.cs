@@ -10,6 +10,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.HLE.Utilities;
 using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Widgets;
 using System;
@@ -90,27 +91,12 @@ namespace Ryujinx.UI.Windows
                     bool areAllContentPacksEnabled = dlcContainer.DownloadableContentNcaList.TrueForAll((nca) => nca.Enabled);
                     TreeIter parentIter = ((TreeStore)_dlcTreeView.Model).AppendValues(areAllContentPacksEnabled, "", dlcContainer.ContainerPath);
 
-                    using FileStream containerFile = File.OpenRead(dlcContainer.ContainerPath);
+                    using IFileSystem partitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(dlcContainer.ContainerPath, _virtualFileSystem, false);
 
-                    IFileSystem partitionFileSystem;
-
-                    if (System.IO.Path.GetExtension(dlcContainer.ContainerPath).ToLower() == ".xci")
+                    if (partitionFileSystem == null)
                     {
-                        partitionFileSystem = new Xci(_virtualFileSystem.KeySet, containerFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                        continue;
                     }
-                    else
-                    {
-                        var pfsTemp = new PartitionFileSystem();
-
-                        if (pfsTemp.Initialize(containerFile.AsStorage()).IsFailure())
-                        {
-                            continue;
-                        }
-
-                        partitionFileSystem = pfsTemp;
-                    }
-
-                    _virtualFileSystem.ImportTickets(partitionFileSystem);
 
                     foreach (DownloadableContentNca dlcNca in dlcContainer.DownloadableContentNcaList)
                     {
@@ -157,24 +143,9 @@ namespace Ryujinx.UI.Windows
                 return;
             }
 
-            using FileStream containerFile = File.OpenRead(path);
-
-            IFileSystem partitionFileSystem;
-
-            if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
-            {
-                partitionFileSystem = new Xci(_virtualFileSystem.KeySet, containerFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
-            }
-            else
-            {
-                var pfsTemp = new PartitionFileSystem();
-                pfsTemp.Initialize(containerFile.AsStorage()).ThrowIfFailure();
-                partitionFileSystem = pfsTemp;
-            }
+            using IFileSystem partitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(path, _virtualFileSystem);
 
             bool containsDlc = false;
-
-            _virtualFileSystem.ImportTickets(partitionFileSystem);
 
             TreeIter? parentIter = null;
 

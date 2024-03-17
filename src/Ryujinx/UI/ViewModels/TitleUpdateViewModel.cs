@@ -18,6 +18,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.HLE.Utilities;
 using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common.Configuration;
 using System;
@@ -180,22 +181,9 @@ namespace Ryujinx.Ava.UI.ViewModels
                 ? IntegrityCheckLevel.ErrorOnInvalid
                 : IntegrityCheckLevel.None;
 
-            using FileStream file = new(path, FileMode.Open, FileAccess.Read);
-
-            IFileSystem pfs;
-
             try
             {
-                if (Path.GetExtension(path).ToLower() == ".xci")
-                {
-                    pfs = new Xci(VirtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                }
-                else
-                {
-                    var pfsTemp = new PartitionFileSystem();
-                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                    pfs = pfsTemp;
-                }
+                using IFileSystem pfs = PartitionFileSystemUtils.OpenApplicationFileSystem(path, VirtualFileSystem);
 
                 Dictionary<ulong, ContentMetaData> updates = pfs.GetUpdateData(VirtualFileSystem, checkLevel);
 

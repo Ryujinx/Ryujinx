@@ -11,6 +11,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.HLE.Utilities;
 using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Widgets;
@@ -101,22 +102,9 @@ namespace Ryujinx.UI.Windows
                 ? IntegrityCheckLevel.ErrorOnInvalid
                 : IntegrityCheckLevel.None;
 
-            using FileStream file = new(path, FileMode.Open, FileAccess.Read);
-
-            IFileSystem pfs;
-
             try
             {
-                if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
-                {
-                    pfs = new Xci(_virtualFileSystem.KeySet, file.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                }
-                else
-                {
-                    var pfsTemp = new PartitionFileSystem();
-                    pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                    pfs = pfsTemp;
-                }
+                using IFileSystem pfs = PartitionFileSystemUtils.OpenApplicationFileSystem(path, _virtualFileSystem);
 
                 Dictionary<ulong, ContentMetaData> updates = pfs.GetUpdateData(_virtualFileSystem, checkLevel);
 

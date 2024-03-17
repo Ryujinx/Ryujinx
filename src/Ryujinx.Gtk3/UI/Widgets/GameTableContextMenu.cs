@@ -17,6 +17,7 @@ using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.HLE.Utilities;
 using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
@@ -197,20 +198,7 @@ namespace Ryujinx.UI.Widgets
                         (System.IO.Path.GetExtension(_title.Path).ToLower() == ".pfs0") ||
                         (System.IO.Path.GetExtension(_title.Path).ToLower() == ".xci"))
                     {
-                        IFileSystem pfs;
-
-                        if (System.IO.Path.GetExtension(_title.Path).ToLower() == ".xci")
-                        {
-                            Xci xci = new(_virtualFileSystem.KeySet, file.AsStorage());
-
-                            pfs = xci.OpenPartition(XciPartitionType.Secure);
-                        }
-                        else
-                        {
-                            var pfsTemp = new PartitionFileSystem();
-                            pfsTemp.Initialize(file.AsStorage()).ThrowIfFailure();
-                            pfs = pfsTemp;
-                        }
+                        IFileSystem pfs = PartitionFileSystemUtils.OpenApplicationFileSystem(_title.Path, _virtualFileSystem);
 
                         foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*.nca"))
                         {

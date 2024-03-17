@@ -15,6 +15,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
+using Ryujinx.HLE.Utilities;
 using System.IO;
 using System.Linq;
 using ApplicationId = LibHac.Ncm.ApplicationId;
@@ -146,20 +147,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                 updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
                 if (File.Exists(updatePath))
                 {
-                    var updateFile = new FileStream(updatePath, FileMode.Open, FileAccess.Read);
-
-                    IFileSystem updatePartitionFileSystem;
-
-                    if (Path.GetExtension(updatePath).ToLower() == ".xci")
-                    {
-                        updatePartitionFileSystem = new Xci(fileSystem.KeySet, updateFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
-                    }
-                    else
-                    {
-                        PartitionFileSystem pfsTemp = new();
-                        pfsTemp.Initialize(updateFile.AsStorage()).ThrowIfFailure();
-                        updatePartitionFileSystem = pfsTemp;
-                    }
+                    IFileSystem updatePartitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(updatePath, fileSystem);
 
                     foreach ((ulong updateTitleId, ContentMetaData content) in updatePartitionFileSystem.GetUpdateData(fileSystem, checkLevel))
                     {
