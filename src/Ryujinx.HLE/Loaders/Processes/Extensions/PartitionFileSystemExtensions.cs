@@ -143,10 +143,8 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     controlNca = updateControlNca;
                 }
 
-                // Load contained DownloadableContents.
                 // TODO: If we want to support multi-processes in future, we shouldn't clear AddOnContent data here.
                 device.Configuration.ContentManager.ClearAocData();
-                device.Configuration.ContentManager.AddAocData(partitionFileSystem, path, mainNca.Header.TitleId, device.Configuration.FsIntegrityCheckLevel);
 
                 // Load DownloadableContents.
                 string addOnContentMetadataPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, mainNca.Header.TitleId.ToString("x16"), "dlc.json");
