@@ -78,9 +78,6 @@ namespace Ryujinx.UI.Windows
             _dlcTreeView.AppendColumn("ApplicationId", new CellRendererText(), "text", 1);
             _dlcTreeView.AppendColumn("Path", new CellRendererText(), "text", 2);
 
-            // NOTE: Try to load downloadable contents from PFS first.
-            AddDlc(title.Path, true);
-
             foreach (DownloadableContentContainer dlcContainer in _dlcContainerList)
             {
                 if (File.Exists(dlcContainer.ContainerPath))
@@ -121,6 +118,9 @@ namespace Ryujinx.UI.Windows
                     TreeIter parentIter = ((TreeStore)_dlcTreeView.Model).AppendValues(false, "", $"(MISSING) {dlcContainer.ContainerPath}");
                 }
             }
+
+            // NOTE: Try to load downloadable contents from PFS last to preserve enabled state.
+            AddDlc(title.Path, true);
         }
 
         private Nca TryCreateNca(IStorage ncaStorage, string containerPath)

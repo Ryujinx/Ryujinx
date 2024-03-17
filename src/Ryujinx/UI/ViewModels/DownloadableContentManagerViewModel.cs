@@ -127,9 +127,6 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void LoadDownloadableContents()
         {
-            // NOTE: Try to load downloadable contents from PFS first.
-            AddDownloadableContent(_applicationData.Path);
-
             foreach (DownloadableContentContainer downloadableContentContainer in _downloadableContentContainerList)
             {
                 if (File.Exists(downloadableContentContainer.ContainerPath))
@@ -171,6 +168,9 @@ namespace Ryujinx.Ava.UI.ViewModels
                     }
                 }
             }
+
+            // NOTE: Try to load downloadable contents from PFS last to preserve enabled state.
+            AddDownloadableContent(_applicationData.Path);
 
             // NOTE: Save the list again to remove leftovers.
             Save();
@@ -243,7 +243,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private bool AddDownloadableContent(string path)
         {
-            if (!File.Exists(path) || DownloadableContents.Any(x => x.FullPath == path))
+            if (!File.Exists(path) || DownloadableContents.Any(x => x.ContainerPath == path))
             {
                 return true;
             }
