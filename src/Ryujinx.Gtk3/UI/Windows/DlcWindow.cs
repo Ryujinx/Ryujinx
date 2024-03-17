@@ -92,19 +92,31 @@ namespace Ryujinx.UI.Windows
 
                     using FileStream containerFile = File.OpenRead(dlcContainer.ContainerPath);
 
-                    PartitionFileSystem pfs = new();
-                    if (pfs.Initialize(containerFile.AsStorage()).IsFailure())
+                    IFileSystem partitionFileSystem;
+
+                    if (System.IO.Path.GetExtension(dlcContainer.ContainerPath).ToLower() == ".xci")
                     {
-                        continue;
+                        partitionFileSystem = new Xci(_virtualFileSystem.KeySet, containerFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                    }
+                    else
+                    {
+                        var pfsTemp = new PartitionFileSystem();
+
+                        if (pfsTemp.Initialize(containerFile.AsStorage()).IsFailure())
+                        {
+                            continue;
+                        }
+
+                        partitionFileSystem = pfsTemp;
                     }
 
-                    _virtualFileSystem.ImportTickets(pfs);
+                    _virtualFileSystem.ImportTickets(partitionFileSystem);
 
                     foreach (DownloadableContentNca dlcNca in dlcContainer.DownloadableContentNcaList)
                     {
                         using var ncaFile = new UniqueRef<IFile>();
 
-                        pfs.OpenFile(ref ncaFile.Ref, dlcNca.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                        partitionFileSystem.OpenFile(ref ncaFile.Ref, dlcNca.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
                         Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), dlcContainer.ContainerPath);
 
                         if (nca != null)

@@ -133,11 +133,22 @@ namespace Ryujinx.Ava.UI.ViewModels
                 {
                     using FileStream containerFile = File.OpenRead(downloadableContentContainer.ContainerPath);
 
-                    PartitionFileSystem partitionFileSystem = new();
+                    IFileSystem partitionFileSystem;
 
-                    if (partitionFileSystem.Initialize(containerFile.AsStorage()).IsFailure())
+                    if (Path.GetExtension(downloadableContentContainer.ContainerPath).ToLower() == ".xci")
                     {
-                        continue;
+                        partitionFileSystem = new Xci(_virtualFileSystem.KeySet, containerFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
+                    }
+                    else
+                    {
+                        var pfsTemp = new PartitionFileSystem();
+
+                        if (pfsTemp.Initialize(containerFile.AsStorage()).IsFailure())
+                        {
+                            continue;
+                        }
+
+                        partitionFileSystem = pfsTemp;
                     }
 
                     _virtualFileSystem.ImportTickets(partitionFileSystem);
