@@ -162,20 +162,30 @@ namespace Ryujinx.UI.Windows
 
             using FileStream containerFile = File.OpenRead(path);
 
-            PartitionFileSystem pfs = new();
-            pfs.Initialize(containerFile.AsStorage()).ThrowIfFailure();
+            IFileSystem partitionFileSystem;
+
+            if (System.IO.Path.GetExtension(path).ToLower() == ".xci")
+            {
+                partitionFileSystem = new Xci(_virtualFileSystem.KeySet, containerFile.AsStorage()).OpenPartition(XciPartitionType.Secure);
+            }
+            else
+            {
+                var pfsTemp = new PartitionFileSystem();
+                pfsTemp.Initialize(containerFile.AsStorage()).ThrowIfFailure();
+                partitionFileSystem = pfsTemp;
+            }
 
             bool containsDlc = false;
 
-            _virtualFileSystem.ImportTickets(pfs);
+            _virtualFileSystem.ImportTickets(partitionFileSystem);
 
             TreeIter? parentIter = null;
 
-            foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*.nca"))
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
             {
                 using var ncaFile = new UniqueRef<IFile>();
 
-                pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                partitionFileSystem.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
                 Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), path);
 
