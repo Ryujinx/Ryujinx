@@ -158,9 +158,12 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     {
                         foreach (DownloadableContentNca downloadableContentNca in downloadableContentContainer.DownloadableContentNcaList)
                         {
-                            if (File.Exists(downloadableContentContainer.ContainerPath) && downloadableContentNca.Enabled)
+                            if (File.Exists(downloadableContentContainer.ContainerPath))
                             {
-                                device.Configuration.ContentManager.AddAocItem(downloadableContentNca.TitleId, downloadableContentContainer.ContainerPath, downloadableContentNca.FullPath);
+                                if (downloadableContentNca.Enabled)
+                                {
+                                    device.Configuration.ContentManager.AddAocItem(downloadableContentNca.TitleId, downloadableContentContainer.ContainerPath, downloadableContentNca.FullPath);
+                                }
                             }
                             else
                             {
