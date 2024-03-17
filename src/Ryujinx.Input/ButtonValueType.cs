@@ -4,6 +4,6 @@ namespace Ryujinx.Input
     {
         Key,
         GamepadButtonInputId,
-        StickId
+        StickId,
     }
 }
