@@ -10,6 +10,13 @@ using System.Runtime.Versioning;
 
 namespace Ryujinx.Graphics.Metal
 {
+    enum EncoderType
+    {
+        Blit,
+        Compute,
+        Render
+    }
+
     [SupportedOSPlatform("macos")]
     class Pipeline : IPipeline, IDisposable
     {
@@ -24,6 +31,7 @@ namespace Ryujinx.Graphics.Metal
 
         private MTLCommandBuffer _commandBuffer;
         private MTLCommandEncoder? _currentEncoder;
+        private EncoderType _currentEncoderType;
         private MTLTexture[] _renderTargets = [];
 
         private RenderEncoderState _renderEncoderState;
@@ -77,9 +85,12 @@ namespace Ryujinx.Graphics.Metal
 
         public MTLRenderCommandEncoder GetOrCreateRenderEncoder()
         {
-            if (_currentEncoder is MTLRenderCommandEncoder encoder)
+            if (_currentEncoder != null)
             {
-                return encoder;
+                if (_currentEncoderType == EncoderType.Render)
+                {
+                    return new MTLRenderCommandEncoder(_currentEncoder.Value);
+                }
             }
 
             return BeginRenderPass();
@@ -87,9 +98,12 @@ namespace Ryujinx.Graphics.Metal
 
         public MTLBlitCommandEncoder GetOrCreateBlitEncoder()
         {
-            if (_currentEncoder is MTLBlitCommandEncoder encoder)
+            if (_currentEncoder != null)
             {
-                return encoder;
+                if (_currentEncoderType == EncoderType.Blit)
+                {
+                    return new MTLBlitCommandEncoder(_currentEncoder.Value);
+                }
             }
 
             return BeginBlitPass();
@@ -97,9 +111,12 @@ namespace Ryujinx.Graphics.Metal
 
         public MTLComputeCommandEncoder GetOrCreateComputeEncoder()
         {
-            if (_currentEncoder is MTLComputeCommandEncoder encoder)
+            if (_currentEncoder != null)
             {
-                return encoder;
+                if (_currentEncoderType == EncoderType.Compute)
+                {
+                    return new MTLComputeCommandEncoder(_currentEncoder.Value);
+                }
             }
 
             return BeginComputePass();
@@ -109,8 +126,23 @@ namespace Ryujinx.Graphics.Metal
         {
             if (_currentEncoder != null)
             {
-                _currentEncoder.EndEncoding();
-                _currentEncoder = null;
+                switch (_currentEncoderType)
+                {
+                    case EncoderType.Blit:
+                        new MTLBlitCommandEncoder(_currentEncoder.Value).EndEncoding();
+                        _currentEncoder = null;
+                        break;
+                    case EncoderType.Compute:
+                        new MTLComputeCommandEncoder(_currentEncoder.Value).EndEncoding();
+                        _currentEncoder = null;
+                        break;
+                    case EncoderType.Render:
+                        new MTLRenderCommandEncoder(_currentEncoder.Value).EndEncoding();
+                        _currentEncoder = null;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
@@ -140,6 +172,7 @@ namespace Ryujinx.Graphics.Metal
             }
 
             _currentEncoder = renderCommandEncoder;
+            _currentEncoderType = EncoderType.Render;
             return renderCommandEncoder;
         }
 
@@ -151,6 +184,7 @@ namespace Ryujinx.Graphics.Metal
             var blitCommandEncoder = _commandBuffer.BlitCommandEncoder(descriptor);
 
             _currentEncoder = blitCommandEncoder;
+            _currentEncoderType = EncoderType.Blit;
             return blitCommandEncoder;
         }
 
@@ -162,6 +196,7 @@ namespace Ryujinx.Graphics.Metal
             var computeCommandEncoder = _commandBuffer.ComputeCommandEncoder(descriptor);
 
             _currentEncoder = computeCommandEncoder;
+            _currentEncoderType = EncoderType.Compute;
             return computeCommandEncoder;
         }
 
@@ -175,9 +210,13 @@ namespace Ryujinx.Graphics.Metal
             EndCurrentPass();
 
             var descriptor = new MTLRenderPassDescriptor();
-            descriptor.ColorAttachments.Object(0).Texture = drawable.Texture;
-            descriptor.ColorAttachments.Object(0).LoadAction = MTLLoadAction.Clear;
-            descriptor.ColorAttachments.Object(0).ClearColor = _clearColor;
+            var colorAttachment = descriptor.ColorAttachments.Object(0);
+
+            colorAttachment.Texture = drawable.Texture;
+            colorAttachment.LoadAction = MTLLoadAction.Clear;
+            colorAttachment.ClearColor = _clearColor;
+
+            descriptor.ColorAttachments.SetObject(colorAttachment, 0);
 
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
             _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
@@ -352,9 +391,9 @@ namespace Ryujinx.Graphics.Metal
                 depthTest.TestEnable ? depthTest.Func.Convert() : MTLCompareFunction.Always,
                 depthTest.WriteEnable);
 
-            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            if (_currentEncoderType == EncoderType.Render)
             {
-                renderCommandEncoder.SetDepthStencilState(depthStencilState);
+                new MTLRenderCommandEncoder(_currentEncoder.Value).SetDepthStencilState(depthStencilState);
             }
         }
 
@@ -362,9 +401,9 @@ namespace Ryujinx.Graphics.Metal
         {
             var cullMode = enable ? face.Convert() : MTLCullMode.None;
 
-            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            if (_currentEncoderType == EncoderType.Render)
             {
-                renderCommandEncoder.SetCullMode(cullMode);
+                new MTLRenderCommandEncoder(_currentEncoder.Value).SetCullMode(cullMode);
             }
 
             _renderEncoderState.CullMode = cullMode;
@@ -374,9 +413,9 @@ namespace Ryujinx.Graphics.Metal
         {
             var winding = frontFace.Convert();
 
-            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            if (_currentEncoderType == EncoderType.Render)
             {
-                renderCommandEncoder.SetFrontFacingWinding(winding);
+                new MTLRenderCommandEncoder(_currentEncoder.Value).SetFrontFacingWinding(winding);
             }
 
             _renderEncoderState.Winding = winding;
@@ -545,9 +584,9 @@ namespace Ryujinx.Graphics.Metal
 
             var depthStencilState = _renderEncoderState.UpdateStencilState(backFace, frontFace);
 
-            if (_currentEncoder is MTLRenderCommandEncoder renderCommandEncoder)
+            if (_currentEncoderType == EncoderType.Render)
             {
-                renderCommandEncoder.SetDepthStencilState(depthStencilState);
+                new MTLRenderCommandEncoder(_currentEncoder.Value).SetDepthStencilState(depthStencilState);
             }
         }
 
@@ -594,7 +633,11 @@ namespace Ryujinx.Graphics.Metal
             {
                 if (vertexBuffers[i].Stride != 0)
                 {
-                    _vertexDescriptor.Layouts.Object((ulong)i).Stride = (ulong)vertexBuffers[i].Stride;
+                    var layout = _vertexDescriptor.Layouts.Object(0);
+
+                    layout.Stride = (ulong)vertexBuffers[i].Stride;
+
+                    _vertexDescriptor.Layouts.SetObject(layout, (ulong)i);
                     _vertexBuffers[i] = _device.NewBuffer(
                         vertexBuffers[i].Buffer.Handle.ToIntPtr(),
                         (ulong)vertexBuffers[i].Buffer.Size,

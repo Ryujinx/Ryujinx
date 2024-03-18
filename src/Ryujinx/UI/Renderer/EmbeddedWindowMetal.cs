@@ -1,25 +1,12 @@
-using SPB.Windowing;
-using SPB.Platform.Metal;
-using System;
+using SharpMetal.QuartzCore;
 
 namespace Ryujinx.Ava.UI.Renderer
 {
     public class EmbeddedWindowMetal : EmbeddedWindow
     {
-        public SimpleMetalWindow CreateSurface()
+        public CAMetalLayer CreateSurface()
         {
-            SimpleMetalWindow simpleMetalWindow;
-
-            if (OperatingSystem.IsMacOS())
-            {
-                simpleMetalWindow = new SimpleMetalWindow(new NativeHandle(NsView), new NativeHandle(MetalLayer));
-            }
-            else
-            {
-                throw new PlatformNotSupportedException();
-            }
-
-            return simpleMetalWindow;
+            return new CAMetalLayer(MetalLayer);
         }
     }
 }

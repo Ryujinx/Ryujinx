@@ -755,7 +755,7 @@ namespace Ryujinx.Ava
             }
             else if (ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Metal && OperatingSystem.IsMacOS())
             {
-                renderer = new MetalRenderer();
+                renderer = new MetalRenderer((RendererHost.EmbeddedWindow as EmbeddedWindowMetal).CreateSurface);
             }
             else
             {
