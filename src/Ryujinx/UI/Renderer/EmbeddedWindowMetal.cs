@@ -2,7 +2,7 @@ using SPB.Windowing;
 using SPB.Platform.Metal;
 using System;
 
-namespace Ryujinx.UI.Renderer
+namespace Ryujinx.Ava.UI.Renderer
 {
     public class EmbeddedWindowMetal : EmbeddedWindow
     {

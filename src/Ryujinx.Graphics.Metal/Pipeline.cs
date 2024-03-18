@@ -23,12 +23,12 @@ namespace Ryujinx.Graphics.Metal
         private readonly HelperShaders _helperShaders;
 
         private MTLCommandBuffer _commandBuffer;
-        private MTLCommandEncoder _currentEncoder;
-        private MTLTexture[] _renderTargets = Array.Empty<MTLTexture>();
+        private MTLCommandEncoder? _currentEncoder;
+        private MTLTexture[] _renderTargets = [];
 
         private RenderEncoderState _renderEncoderState;
         private readonly MTLVertexDescriptor _vertexDescriptor = new();
-        private MTLBuffer[] _vertexBuffers = Array.Empty<MTLBuffer>();
+        private MTLBuffer[] _vertexBuffers = [];
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -391,6 +391,11 @@ namespace Ryujinx.Graphics.Metal
                 var handle = buffer.Handle;
                 _indexBuffer = new(Unsafe.As<BufferHandle, IntPtr>(ref handle));
             }
+        }
+
+        public void SetImage(ShaderStage stage, int binding, ITexture texture, Format imageFormat)
+        {
+            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void SetImage(int binding, ITexture texture, Format imageFormat)

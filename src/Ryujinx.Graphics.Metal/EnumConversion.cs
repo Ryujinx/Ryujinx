@@ -1,6 +1,6 @@
 using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.GAL;
-using SharpMetal;
+using SharpMetal.Metal;
 
 namespace Ryujinx.Graphics.Metal
 {
@@ -168,7 +168,7 @@ namespace Ryujinx.Graphics.Metal
         {
             return target switch
             {
-                Target.TextureBuffer => MTLTextureType.TypeTextureBuffer,
+                Target.TextureBuffer => MTLTextureType.TextureBuffer,
                 Target.Texture1D => MTLTextureType.Type1D,
                 Target.Texture1DArray => MTLTextureType.Type1DArray,
                 Target.Texture2D => MTLTextureType.Type2D,
@@ -176,8 +176,8 @@ namespace Ryujinx.Graphics.Metal
                 Target.Texture2DMultisample => MTLTextureType.Type2DMultisample,
                 Target.Texture2DMultisampleArray => MTLTextureType.Type2DMultisampleArray,
                 Target.Texture3D => MTLTextureType.Type3D,
-                Target.Cubemap => MTLTextureType.TypeCube,
-                Target.CubemapArray => MTLTextureType.TypeCubeArray,
+                Target.Cubemap => MTLTextureType.Cube,
+                Target.CubemapArray => MTLTextureType.CubeArray,
                 _ => LogInvalidAndReturn(target, nameof(Target), MTLTextureType.Type2D)
             };
         }
