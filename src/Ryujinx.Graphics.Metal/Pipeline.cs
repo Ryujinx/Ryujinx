@@ -31,7 +31,7 @@ namespace Ryujinx.Graphics.Metal
 
         private RenderEncoderState _renderEncoderState;
         private readonly MTLVertexDescriptor _vertexDescriptor = new();
-        private MTLBuffer[] _vertexBuffers = [];
+        private BufferInfo[] _vertexBuffers = [];
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -134,10 +134,7 @@ namespace Ryujinx.Graphics.Metal
 
             for (int i = 0; i < _vertexBuffers.Length; i++)
             {
-                if (_vertexBuffers[i] != null)
-                {
-                    renderCommandEncoder.SetVertexBuffer(_vertexBuffers[i], 0, (ulong)i);
-                }
+                renderCommandEncoder.SetVertexBuffer(new MTLBuffer(_vertexBuffers[i].Handle), (ulong)_vertexBuffers[i].Offset, (ulong)i);
             }
 
             _currentEncoder = renderCommandEncoder;
@@ -613,32 +610,32 @@ namespace Ryujinx.Graphics.Metal
                 if (!vertexAttribs[i].IsZero)
                 {
                     // TODO: Format should not be hardcoded
-                    // var attrib = _vertexDescriptor.Attributes.Object((ulong)i);
-                    // attrib.Format = MTLVertexFormat.Float4;
-                    // attrib.BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
-                    // attrib.Offset = (ulong)vertexAttribs[i].Offset;
-                    // _vertexDescriptor.Attributes.SetObject(attrib, (ulong)i);
+                    var attrib = _vertexDescriptor.Attributes.Object((ulong)i);
+                    attrib.Format = MTLVertexFormat.Float4;
+                    attrib.BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
+                    attrib.Offset = (ulong)vertexAttribs[i].Offset;
+
+                    var layout = _vertexDescriptor.Layouts.Object((ulong)vertexAttribs[i].BufferIndex);
+                    layout.Stride = 1;
                 }
             }
         }
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
-            _vertexBuffers = new MTLBuffer[vertexBuffers.Length];
+            _vertexBuffers = new BufferInfo[vertexBuffers.Length];
 
             for (int i = 0; i < vertexBuffers.Length; i++)
             {
                 if (vertexBuffers[i].Stride != 0)
                 {
-                    var layout = _vertexDescriptor.Layouts.Object(0);
-
+                    var layout = _vertexDescriptor.Layouts.Object((ulong)i);
                     layout.Stride = (ulong)vertexBuffers[i].Stride;
 
-                    _vertexDescriptor.Layouts.SetObject(layout, (ulong)i);
-                    _vertexBuffers[i] = _device.NewBuffer(
-                        vertexBuffers[i].Buffer.Handle.ToIntPtr(),
-                        (ulong)vertexBuffers[i].Buffer.Size,
-                        MTLResourceOptions.ResourceStorageModeManaged);
+                    _vertexBuffers[i] = new BufferInfo {
+                        Handle = vertexBuffers[i].Buffer.Handle.ToIntPtr(),
+                        Offset = vertexBuffers[i].Buffer.Offset
+                    };
                 }
             }
         }
