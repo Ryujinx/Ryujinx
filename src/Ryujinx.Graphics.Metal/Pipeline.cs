@@ -288,35 +288,35 @@ namespace Ryujinx.Graphics.Metal
 
         public void DrawIndexedIndirect(BufferRange indirectBuffer)
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndexedIndirectCount(BufferRange indirectBuffer, BufferRange parameterBuffer, int maxDrawCount, int stride)
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndirect(BufferRange indirectBuffer)
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndirectCount(BufferRange indirectBuffer, BufferRange parameterBuffer, int maxDrawCount, int stride)
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawTexture(ITexture texture, ISampler sampler, Extents2DF srcRegion, Extents2DF dstRegion)
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
@@ -674,7 +674,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void TextureBarrier()
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             // renderCommandEncoder.MemoryBarrier(MTLBarrierScope.Textures, );
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
@@ -682,7 +682,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void TextureBarrierTiled()
         {
-            var renderCommandEncoder = GetOrCreateRenderEncoder();
+            // var renderCommandEncoder = GetOrCreateRenderEncoder();
 
             // renderCommandEncoder.MemoryBarrier(MTLBarrierScope.Textures, );
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");

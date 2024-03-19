@@ -1,4 +1,3 @@
-using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions;
 using Ryujinx.Graphics.Shader.IntermediateRepresentation;
 using Ryujinx.Graphics.Shader.StructuredIr;

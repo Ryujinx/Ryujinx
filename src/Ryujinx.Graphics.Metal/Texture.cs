@@ -88,12 +88,12 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, Extents2D srcRegion, Extents2D dstRegion, bool linearFilter)
         {
-            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
-
-            if (destination is Texture destinationTexture)
-            {
-
-            }
+            // var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
+            //
+            // if (destination is Texture destinationTexture)
+            // {
+            //
+            // }
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
