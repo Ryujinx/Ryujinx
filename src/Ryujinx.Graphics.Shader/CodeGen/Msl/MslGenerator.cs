@@ -85,13 +85,13 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 {
                     funcKeyword = "vertex";
                     funcName = "vertexMain";
-                    returnType = "VertexOutput";
+                    returnType = "VertexOut";
                 }
                 else if (stage == ShaderStage.Fragment)
                 {
                     funcKeyword = "fragment";
                     funcName = "fragmentMain";
-                    returnType = "FragmentOutput";
+                    returnType = "FragmentOut";
                 }
                 else if (stage == ShaderStage.Compute)
                 {
@@ -106,7 +106,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     }
                     else if (stage == ShaderStage.Fragment)
                     {
-                        args = args.Prepend("FragmentIn in").ToArray();
+                        args = args.Prepend("VertexOut in").ToArray();
                     }
                     else if (stage == ShaderStage.Compute)
                     {

@@ -24,7 +24,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                 IoVariable.FrontFacing => ("front_facing", AggregateType.Bool),
                 IoVariable.InstanceId => ("instance_id", AggregateType.S32),
                 IoVariable.PointCoord => ("point_coord", AggregateType.Vector2),
-                IoVariable.PointSize => ("point_size", AggregateType.FP32),
+                IoVariable.PointSize => ("out.point_size", AggregateType.FP32),
                 IoVariable.Position => ("out.position", AggregateType.Vector4 | AggregateType.FP32),
                 IoVariable.PrimitiveId => ("primitive_id", AggregateType.S32),
                 IoVariable.UserDefined => GetUserDefinedVariableName(definitions, location, component, isOutput, isPerPatch),

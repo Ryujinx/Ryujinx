@@ -65,11 +65,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
         {
             if (stage == ShaderStage.Vertex)
             {
-                context.AppendLine("VertexOutput out;");
+                context.AppendLine("VertexOut out;");
             }
             else if (stage == ShaderStage.Fragment)
             {
-                context.AppendLine("FragmentOutput out;");
+                context.AppendLine("FragmentOut out;");
             }
 
             foreach (AstOperand decl in function.Locals)
@@ -120,17 +120,16 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     switch (context.Definitions.Stage)
                     {
                         case ShaderStage.Vertex:
-                            prefix = "Vertex";
+                            context.AppendLine($"struct VertexIn");
                             break;
                         case ShaderStage.Fragment:
-                            prefix = "Fragment";
+                            context.AppendLine($"struct VertexOut");
                             break;
                         case ShaderStage.Compute:
-                            prefix = "Compute";
+                            context.AppendLine($"struct ComputeIn");
                             break;
                     }
 
-                    context.AppendLine($"struct {prefix}In");
                     context.EnterScope();
 
                     foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
@@ -162,31 +161,38 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     switch (context.Definitions.Stage)
                     {
                         case ShaderStage.Vertex:
-                            prefix = "Vertex";
+                            context.AppendLine($"struct VertexOut");
                             break;
                         case ShaderStage.Fragment:
-                            prefix = "Fragment";
+                            context.AppendLine($"struct FragmentOut");
                             break;
                         case ShaderStage.Compute:
-                            prefix = "Compute";
+                            context.AppendLine($"struct ComputeOut");
                             break;
                     }
 
-                    context.AppendLine($"struct {prefix}Output");
                     context.EnterScope();
 
                     foreach (var ioDefinition in inputs.OrderBy(x => x.Location))
                     {
-                        string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: true));
+                        string type = ioDefinition.IoVariable switch
+                        {
+                            IoVariable.Position => "float4",
+                            IoVariable.PointSize => "float",
+                            _ => GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: true))
+                        };
                         string name = ioDefinition.IoVariable switch
                         {
                             IoVariable.Position => "position",
+                            IoVariable.PointSize => "point_size",
                             IoVariable.FragmentOutputColor => "color",
                             _ => $"{DefaultNames.OAttributePrefix}{ioDefinition.Location}"
                         };
                         string suffix = ioDefinition.IoVariable switch
                         {
                             IoVariable.Position => " [[position]]",
+                            IoVariable.PointSize => " [[point_size]]",
+                            IoVariable.FragmentOutputColor => $" [[color({ioDefinition.Location})]]",
                             _ => ""
                         };
 
