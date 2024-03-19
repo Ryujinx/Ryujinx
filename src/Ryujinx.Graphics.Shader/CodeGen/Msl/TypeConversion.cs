@@ -3,6 +3,7 @@ using Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions;
 using Ryujinx.Graphics.Shader.IntermediateRepresentation;
 using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
+using System;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 {
@@ -39,11 +40,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 switch (dstType)
                 {
                     case AggregateType.Bool:
-                        return $"(floatBitsToInt({expr}) != 0)";
+                        return $"(as_type<int>({expr}) != 0)";
                     case AggregateType.S32:
-                        return $"floatBitsToInt({expr})";
+                        return $"as_type<int>({expr})";
                     case AggregateType.U32:
-                        return $"floatBitsToUint({expr})";
+                        return $"as_type<uint>({expr})";
                 }
             }
             else if (dstType == AggregateType.FP32)
@@ -51,11 +52,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 switch (srcType)
                 {
                     case AggregateType.Bool:
-                        return $"intBitsToFloat({ReinterpretBoolToInt(expr, node, AggregateType.S32)})";
+                        return $"as_type<float>({ReinterpretBoolToInt(expr, node, AggregateType.S32)})";
                     case AggregateType.S32:
-                        return $"intBitsToFloat({expr})";
+                        return $"as_type<float>({expr})";
                     case AggregateType.U32:
-                        return $"uintBitsToFloat({expr})";
+                        return $"as_type<float>({expr})";
                 }
             }
             else if (srcType == AggregateType.Bool)
