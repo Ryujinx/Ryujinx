@@ -20,11 +20,6 @@ namespace Ryujinx.Graphics.Metal
     [SupportedOSPlatform("macos")]
     class Pipeline : IPipeline, IDisposable
     {
-        // 0 Frames = No capture
-        // Some games like Undertale trigger a stack overflow on capture end
-        private const int MaxFramesPerCapture = 0;
-        private const string CaptureLocation = "/Users/isaacmarovitz/Desktop/Captures/Trace-";
-
         private readonly MTLDevice _device;
         private readonly MTLCommandQueue _commandQueue;
         private readonly HelperShaders _helperShaders;
@@ -42,8 +37,6 @@ namespace Ryujinx.Graphics.Metal
         private MTLIndexType _indexType;
         private ulong _indexBufferOffset;
         private MTLClearColor _clearColor;
-        private int _frameCount;
-        private bool _captureEnded = true;
 
         public Pipeline(MTLDevice device, MTLCommandQueue commandQueue)
         {
@@ -57,30 +50,6 @@ namespace Ryujinx.Graphics.Metal
                 _device);
 
             _commandBuffer = _commandQueue.CommandBuffer();
-
-            if (MaxFramesPerCapture > 0)
-            {
-                StartCapture();
-            }
-        }
-
-        private void StartCapture()
-        {
-            var captureDescriptor = new MTLCaptureDescriptor
-            {
-                CaptureObject = _commandQueue,
-                Destination = MTLCaptureDestination.GPUTraceDocument,
-                OutputURL = NSURL.FileURLWithPath(StringHelper.NSString(CaptureLocation + DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ".gputrace"))
-            };
-            var captureError = new NSError(IntPtr.Zero);
-            MTLCaptureManager.SharedCaptureManager().StartCapture(captureDescriptor, ref captureError);
-            if (captureError != IntPtr.Zero)
-            {
-                Console.WriteLine($"Failed to start capture! {StringHelper.String(captureError.LocalizedDescription)}");
-
-            }
-
-            _captureEnded = false;
         }
 
         public MTLRenderCommandEncoder GetOrCreateRenderEncoder()
@@ -236,18 +205,6 @@ namespace Ryujinx.Graphics.Metal
 
             _commandBuffer.PresentDrawable(drawable);
             _commandBuffer.Commit();
-
-            if (!_captureEnded)
-            {
-                _frameCount++;
-
-                if (_frameCount >= MaxFramesPerCapture)
-                {
-                    _captureEnded = true;
-                    MTLCaptureManager.SharedCaptureManager().StopCapture();
-                    Logger.Warning?.Print(LogClass.Gpu, "Trace ended!");
-                }
-            }
 
             _commandBuffer = _commandQueue.CommandBuffer();
         }
