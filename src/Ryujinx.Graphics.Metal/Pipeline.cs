@@ -604,7 +604,39 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetTextureAndSampler(ShaderStage stage, int binding, ITexture texture, ISampler sampler)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            if (texture is Texture tex)
+            {
+                if (sampler is Sampler samp)
+                {
+                    MTLRenderCommandEncoder renderCommandEncoder;
+                    MTLComputeCommandEncoder computeCommandEncoder;
+
+                    var mtlTexture = tex.MTLTexture;
+                    var mtlSampler = samp.GetSampler();
+                    var index = (ulong)binding;
+
+                    switch (stage)
+                    {
+                        case ShaderStage.Fragment:
+                            renderCommandEncoder = GetOrCreateRenderEncoder();
+                            renderCommandEncoder.SetFragmentTexture(mtlTexture, index);
+                            renderCommandEncoder.SetFragmentSamplerState(mtlSampler, index);
+                            break;
+                        case ShaderStage.Vertex:
+                            renderCommandEncoder = GetOrCreateRenderEncoder();
+                            renderCommandEncoder.SetVertexTexture(mtlTexture, index);
+                            renderCommandEncoder.SetVertexSamplerState(mtlSampler, index);
+                            break;
+                        case ShaderStage.Compute:
+                            computeCommandEncoder = GetOrCreateComputeEncoder();
+                            computeCommandEncoder.SetTexture(mtlTexture, index);
+                            computeCommandEncoder.SetSamplerState(mtlSampler, index);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(stage), stage, "Unsupported shader stage!");
+                    }
+                }
+            }
         }
 
         public void SetUniformBuffers(ReadOnlySpan<BufferAssignment> buffers)
