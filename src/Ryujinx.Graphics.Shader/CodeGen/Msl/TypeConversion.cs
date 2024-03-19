@@ -78,9 +78,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 return $"uint({expr})";
             }
 
-            Logger.Warning?.Print(LogClass.Gpu, $"Invalid reinterpret cast from \"{srcType}\" to \"{dstType}\".");
-            // TODO: Make this an error again
-            return $"INVALID CAST ({expr})";
+            throw new ArgumentException($"Invalid reinterpret cast from \"{srcType}\" to \"{dstType}\".");
         }
 
         private static string ReinterpretBoolToInt(string expr, IAstNode node, AggregateType dstType)
