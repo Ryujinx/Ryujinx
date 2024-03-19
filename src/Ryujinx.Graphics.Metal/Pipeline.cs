@@ -613,11 +613,11 @@ namespace Ryujinx.Graphics.Metal
                 if (!vertexAttribs[i].IsZero)
                 {
                     // TODO: Format should not be hardcoded
-                    var attrib = _vertexDescriptor.Attributes.Object((ulong)i);
-                    attrib.Format = MTLVertexFormat.Float4;
-                    attrib.BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
-                    attrib.Offset = (ulong)vertexAttribs[i].Offset;
-                    _vertexDescriptor.Attributes.SetObject(attrib, (ulong)i);
+                    // var attrib = _vertexDescriptor.Attributes.Object((ulong)i);
+                    // attrib.Format = MTLVertexFormat.Float4;
+                    // attrib.BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
+                    // attrib.Offset = (ulong)vertexAttribs[i].Offset;
+                    // _vertexDescriptor.Attributes.SetObject(attrib, (ulong)i);
                 }
             }
         }
