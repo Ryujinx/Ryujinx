@@ -88,6 +88,12 @@ namespace Ryujinx.Graphics.Metal
 
         public void CopyTo(ITexture destination, Extents2D srcRegion, Extents2D dstRegion, bool linearFilter)
         {
+            var blitCommandEncoder = _pipeline.GetOrCreateBlitEncoder();
+
+            if (destination is Texture destinationTexture)
+            {
+
+            }
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
@@ -120,7 +126,7 @@ namespace Ryujinx.Graphics.Metal
         public ITexture CreateView(TextureCreateInfo info, int firstLayer, int firstLevel)
         {
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
-            return this;
+            throw new NotImplementedException();
         }
 
         public PinnedSpan<byte> GetData()

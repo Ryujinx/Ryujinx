@@ -25,7 +25,7 @@ namespace Ryujinx.Graphics.Metal
                 Logger.Error?.PrintMsg(LogClass.Gpu, $"Failed to create Library: {StringHelper.String(error.LocalizedDescription)}");
             }
 
-            BlitShader = new HelperShader(device, library, "vertexBlit", "fragmentBlit");
+            BlitShader = new HelperShader(library, "vertexBlit", "fragmentBlit");
         }
     }
 
@@ -35,7 +35,7 @@ namespace Ryujinx.Graphics.Metal
         public readonly MTLFunction VertexFunction;
         public readonly MTLFunction FragmentFunction;
 
-        public HelperShader(MTLDevice device, MTLLibrary library, string vertex, string fragment)
+        public HelperShader(MTLLibrary library, string vertex, string fragment)
         {
             VertexFunction = library.NewFunction(StringHelper.NSString(vertex));
             FragmentFunction = library.NewFunction(StringHelper.NSString(fragment));

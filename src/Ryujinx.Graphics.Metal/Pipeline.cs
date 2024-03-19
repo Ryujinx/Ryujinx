@@ -323,7 +323,6 @@ namespace Ryujinx.Graphics.Metal
         {
             var renderCommandEncoder = GetOrCreateRenderEncoder();
 
-
             // TODO: Support topology re-indexing to provide support for TriangleFans
             var primitiveType = _renderEncoderState.Topology.Convert();
 
@@ -332,26 +331,36 @@ namespace Ryujinx.Graphics.Metal
 
         public void DrawIndexedIndirect(BufferRange indirectBuffer)
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndexedIndirectCount(BufferRange indirectBuffer, BufferRange parameterBuffer, int maxDrawCount, int stride)
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndirect(BufferRange indirectBuffer)
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawIndirectCount(BufferRange indirectBuffer, BufferRange parameterBuffer, int maxDrawCount, int stride)
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void DrawTexture(ITexture texture, ISampler sampler, Extents2DF srcRegion, Extents2DF dstRegion)
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
@@ -437,15 +446,10 @@ namespace Ryujinx.Graphics.Metal
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
-        public void SetImage(int binding, ITexture texture, Format imageFormat)
-        {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
-        }
-
         public void SetLineParameters(float width, bool smooth)
         {
             // Not supported in Metal
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            Logger.Warning?.Print(LogClass.Gpu, "Wide-line is not supported without private Metal API");
         }
 
         public void SetLogicOpState(bool enable, LogicalOp op)
@@ -493,7 +497,7 @@ namespace Ryujinx.Graphics.Metal
         {
             Program prg = (Program)program;
 
-            if (prg.VertexFunction == null)
+            if (prg.VertexFunction == IntPtr.Zero)
             {
                 Logger.Error?.PrintMsg(LogClass.Gpu, "Invalid Vertex Function!");
                 return;
@@ -556,7 +560,10 @@ namespace Ryujinx.Graphics.Metal
             fixed (MTLScissorRect* pMtlScissorRects = mtlScissorRects)
             {
                 // TODO: Fix this function which currently wont accept pointer as intended
-                // _renderCommandEncoder.SetScissorRects(pMtlScissorRects, regions.Length);
+                if (_currentEncoderType == EncoderType.Render)
+                {
+                    // new MTLRenderCommandEncoder(_currentEncoder.Value).SetScissorRects(pMtlScissorRects, (ulong)regions.Length);
+                }
             }
         }
 
@@ -621,6 +628,7 @@ namespace Ryujinx.Graphics.Metal
                     attrib.Format = MTLVertexFormat.Float4;
                     attrib.BufferIndex = (ulong)vertexAttribs[i].BufferIndex;
                     attrib.Offset = (ulong)vertexAttribs[i].Offset;
+                    _vertexDescriptor.Attributes.SetObject(attrib, (ulong)i);
                 }
             }
         }
@@ -668,17 +676,26 @@ namespace Ryujinx.Graphics.Metal
             fixed (MTLViewport* pMtlViewports = mtlViewports)
             {
                 // TODO: Fix this function which currently wont accept pointer as intended
-                // _renderCommandEncoder.SetViewports(pMtlViewports, viewports.Length);
+                if (_currentEncoderType == EncoderType.Render)
+                {
+                    // new MTLRenderCommandEncoder(_currentEncoder.Value).SetViewports(pMtlViewports, (ulong)regions.Length);
+                }
             }
         }
 
         public void TextureBarrier()
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
+            // renderCommandEncoder.MemoryBarrier(MTLBarrierScope.Textures, );
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 
         public void TextureBarrierTiled()
         {
+            var renderCommandEncoder = GetOrCreateRenderEncoder();
+
+            // renderCommandEncoder.MemoryBarrier(MTLBarrierScope.Textures, );
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
         }
 

@@ -4,7 +4,6 @@ namespace Ryujinx.Graphics.Metal
 {
     class CounterEvent : ICounterEvent
     {
-
         public CounterEvent()
         {
             Invalid = false;

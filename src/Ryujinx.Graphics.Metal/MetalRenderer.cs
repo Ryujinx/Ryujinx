@@ -84,25 +84,7 @@ namespace Ryujinx.Graphics.Metal
 
         public ISampler CreateSampler(SamplerCreateInfo info)
         {
-            (MTLSamplerMinMagFilter minFilter, MTLSamplerMipFilter mipFilter) = info.MinFilter.Convert();
-
-            var sampler = _device.NewSamplerState(new MTLSamplerDescriptor
-            {
-                BorderColor = MTLSamplerBorderColor.TransparentBlack,
-                MinFilter = minFilter,
-                MagFilter = info.MagFilter.Convert(),
-                MipFilter = mipFilter,
-                CompareFunction = info.CompareOp.Convert(),
-                LodMinClamp = info.MinLod,
-                LodMaxClamp = info.MaxLod,
-                LodAverage = false,
-                MaxAnisotropy = (uint)info.MaxAnisotropy,
-                SAddressMode = info.AddressU.Convert(),
-                TAddressMode = info.AddressV.Convert(),
-                RAddressMode = info.AddressP.Convert()
-            });
-
-            return new Sampler(sampler);
+            return new Sampler(_device, info);
         }
 
         public ITexture CreateTexture(TextureCreateInfo info)
