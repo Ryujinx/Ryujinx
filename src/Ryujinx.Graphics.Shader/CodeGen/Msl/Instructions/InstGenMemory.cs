@@ -44,7 +44,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl.Instructions
                     }
 
                     StructureField field = buffer.Type.Fields[fieldIndex.Value];
-                    varName = $"{buffer.Name}.{field.Name}";
+                    varName = buffer.Name;
                     varType = field.Type;
                     break;
 
