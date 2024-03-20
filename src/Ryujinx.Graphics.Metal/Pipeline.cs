@@ -640,7 +640,8 @@ namespace Ryujinx.Graphics.Metal
                     var layout = _vertexDescriptor.Layouts.Object((ulong)i);
                     layout.Stride = (ulong)vertexBuffers[i].Stride;
 
-                    _vertexBuffers[i] = new BufferInfo {
+                    _vertexBuffers[i] = new BufferInfo
+                    {
                         Handle = vertexBuffers[i].Buffer.Handle.ToIntPtr(),
                         Offset = vertexBuffers[i].Buffer.Offset
                     };

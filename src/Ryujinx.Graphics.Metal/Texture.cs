@@ -56,7 +56,8 @@ namespace Ryujinx.Graphics.Metal
                 info.Format == Format.R5G6B5Unorm)
             {
                 (swizzleB, swizzleR) = (swizzleR, swizzleB);
-            } else if (descriptor.PixelFormat == MTLPixelFormat.ABGR4Unorm || info.Format == Format.A1B5G5R5Unorm)
+            }
+            else if (descriptor.PixelFormat == MTLPixelFormat.ABGR4Unorm || info.Format == Format.A1B5G5R5Unorm)
             {
                 var tempB = swizzleB;
                 var tempA = swizzleA;
