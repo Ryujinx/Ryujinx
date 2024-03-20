@@ -521,11 +521,8 @@ namespace Ryujinx.Graphics.Metal
 
             fixed (MTLScissorRect* pMtlScissorRects = mtlScissorRects)
             {
-                // TODO: Fix this function which currently wont accept pointer as intended
-                if (_currentEncoderType == EncoderType.Render)
-                {
-                    // new MTLRenderCommandEncoder(_currentEncoder.Value).SetScissorRects(pMtlScissorRects, (ulong)regions.Length);
-                }
+                var renderCommandEncoder = GetOrCreateRenderEncoder();
+                renderCommandEncoder.SetScissorRects((IntPtr)pMtlScissorRects, (ulong)regions.Length);
             }
         }
 
@@ -670,11 +667,8 @@ namespace Ryujinx.Graphics.Metal
 
             fixed (MTLViewport* pMtlViewports = mtlViewports)
             {
-                // TODO: Fix this function which currently wont accept pointer as intended
-                if (_currentEncoderType == EncoderType.Render)
-                {
-                    // new MTLRenderCommandEncoder(_currentEncoder.Value).SetViewports(pMtlViewports, (ulong)regions.Length);
-                }
+                var renderCommandEncoder = GetOrCreateRenderEncoder();
+                renderCommandEncoder.SetViewports((IntPtr)pMtlViewports, (ulong)viewports.Length);
             }
         }
 
