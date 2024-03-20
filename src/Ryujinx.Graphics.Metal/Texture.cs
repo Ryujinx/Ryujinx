@@ -27,15 +27,16 @@ namespace Ryujinx.Graphics.Metal
             _pipeline = pipeline;
             _info = info;
 
-            var descriptor = new MTLTextureDescriptor();
-
-            descriptor.PixelFormat = FormatTable.GetFormat(Info.Format);
-            descriptor.Usage = MTLTextureUsage.ShaderRead;
-            descriptor.SampleCount = (ulong)Info.Samples;
-            descriptor.TextureType = Info.Target.Convert();
-            descriptor.Width = (ulong)Info.Width;
-            descriptor.Height = (ulong)Info.Height;
-            descriptor.MipmapLevelCount = (ulong)Info.Levels;
+            var descriptor = new MTLTextureDescriptor
+            {
+                PixelFormat = FormatTable.GetFormat(Info.Format),
+                Usage = MTLTextureUsage.ShaderRead,
+                SampleCount = (ulong)Info.Samples,
+                TextureType = Info.Target.Convert(),
+                Width = (ulong)Info.Width,
+                Height = (ulong)Info.Height,
+                MipmapLevelCount = (ulong)Info.Levels
+            };
 
             if (info.Target == Target.Texture3D)
             {
