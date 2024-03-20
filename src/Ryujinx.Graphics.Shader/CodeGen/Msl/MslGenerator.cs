@@ -26,13 +26,6 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             {
                 for (int i = 1; i < info.Functions.Count; i++)
                 {
-                    context.AppendLine($"{GetFunctionSignature(context, info.Functions[i], parameters.Definitions.Stage)};");
-                }
-
-                context.AppendLine();
-
-                for (int i = 1; i < info.Functions.Count; i++)
-                {
                     PrintFunction(context, info.Functions[i], parameters.Definitions.Stage);
 
                     context.AppendLine();
@@ -58,7 +51,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
             context.LeaveScope();
         }
 
-        private static string GetFunctionSignature(CodeGenContext context, StructuredFunction function, ShaderStage stage, bool isMainFunc = false)
+        private static string GetFunctionSignature(
+            CodeGenContext context,
+            StructuredFunction function,
+            ShaderStage stage,
+            bool isMainFunc = false)
         {
             string[] args = new string[function.InArguments.Length + function.OutArguments.Length];
 
@@ -114,6 +111,16 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     {
                         args = args.Prepend("KernelIn in [[stage_in]]").ToArray();
                     }
+                }
+
+                foreach (var constantBuffer in context.Properties.ConstantBuffers.Values)
+                {
+                    args = args.Append($"constant float4 *{constantBuffer.Name} [[buffer({constantBuffer.Binding})]]").ToArray();
+                }
+
+                foreach (var storageBuffers in context.Properties.StorageBuffers.Values)
+                {
+                    args = args.Append($"device float4 *{storageBuffers.Name} [[buffer({storageBuffers.Binding})]]").ToArray();
                 }
             }
 
