@@ -106,7 +106,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     }
                     else if (stage == ShaderStage.Fragment)
                     {
-                        args = args.Prepend("VertexOut in").ToArray();
+                        args = args.Prepend("VertexOut in [[stage_in]]").ToArray();
                     }
                     else if (stage == ShaderStage.Compute)
                     {

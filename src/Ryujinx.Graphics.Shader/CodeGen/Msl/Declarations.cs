@@ -123,7 +123,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             context.AppendLine($"struct VertexIn");
                             break;
                         case ShaderStage.Fragment:
-                            context.AppendLine($"struct VertexOut");
+                            context.AppendLine($"struct FragmentIn");
                             break;
                         case ShaderStage.Compute:
                             context.AppendLine($"struct ComputeIn");
@@ -136,7 +136,12 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     {
                         string type = GetVarTypeName(context, context.Definitions.GetUserDefinedType(ioDefinition.Location, isOutput: false));
                         string name = $"{DefaultNames.IAttributePrefix}{ioDefinition.Location}";
-                        string suffix = context.Definitions.Stage == ShaderStage.Vertex ? $" [[attribute({ioDefinition.Location})]]" : "";
+                        string suffix = context.Definitions.Stage switch
+                        {
+                            ShaderStage.Vertex => $" [[attribute({ioDefinition.Location})]]",
+                            ShaderStage.Fragment => $" [[user(loc{ioDefinition.Location})]]",
+                            _ => ""
+                        };
 
                         context.AppendLine($"{type} {name}{suffix};");
                     }
@@ -192,6 +197,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                         {
                             IoVariable.Position => " [[position]]",
                             IoVariable.PointSize => " [[point_size]]",
+                            IoVariable.UserDefined => $" [[user(loc{ioDefinition.Location})]]",
                             IoVariable.FragmentOutputColor => $" [[color({ioDefinition.Location})]]",
                             _ => ""
                         };
