@@ -39,12 +39,34 @@ namespace Ryujinx.Graphics.Metal
             descriptor.SampleCount = (ulong)Info.Samples;
             descriptor.MipmapLevelCount = (ulong)Info.Levels;
             descriptor.TextureType = Info.Target.Convert();
+
+            var swizzleR = Info.SwizzleR.Convert();
+            var swizzleG = Info.SwizzleG.Convert();
+            var swizzleB = Info.SwizzleB.Convert();
+            var swizzleA = Info.SwizzleA.Convert();
+
+            if (info.Format == Format.R5G5B5A1Unorm ||
+                info.Format == Format.R5G5B5X1Unorm ||
+                info.Format == Format.R5G6B5Unorm)
+            {
+                (swizzleB, swizzleR) = (swizzleR, swizzleB);
+            } else if (descriptor.PixelFormat == MTLPixelFormat.ABGR4Unorm || info.Format == Format.A1B5G5R5Unorm)
+            {
+                var tempB = swizzleB;
+                var tempA = swizzleA;
+
+                swizzleB = swizzleG;
+                swizzleA = swizzleR;
+                swizzleR = tempA;
+                swizzleG = tempB;
+            }
+
             descriptor.Swizzle = new MTLTextureSwizzleChannels
             {
-                red = Info.SwizzleR.Convert(),
-                green = Info.SwizzleG.Convert(),
-                blue = Info.SwizzleB.Convert(),
-                alpha = Info.SwizzleA.Convert()
+                red = swizzleR,
+                green = swizzleG,
+                blue = swizzleB,
+                alpha = swizzleA
             };
 
             MTLTexture = _device.NewTexture(descriptor);
