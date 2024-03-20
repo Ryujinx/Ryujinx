@@ -246,8 +246,8 @@ namespace Ryujinx.Graphics.Metal
 
         public void Dispose()
         {
-            _window.Dispose();
             _pipeline.Dispose();
+            _window.Dispose();
         }
     }
 }
