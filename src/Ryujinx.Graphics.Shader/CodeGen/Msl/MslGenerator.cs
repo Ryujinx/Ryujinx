@@ -95,7 +95,9 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                 }
                 else if (stage == ShaderStage.Compute)
                 {
-                    // TODO: Compute main
+                    funcKeyword = "kernel";
+                    funcName = "kernelMain";
+                    returnType = "void";
                 }
 
                 if (context.AttributeUsage.UsedInputAttributes != 0)
@@ -106,11 +108,11 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                     }
                     else if (stage == ShaderStage.Fragment)
                     {
-                        args = args.Prepend("VertexOut in [[stage_in]]").ToArray();
+                        args = args.Prepend("FragmentIn in [[stage_in]]").ToArray();
                     }
                     else if (stage == ShaderStage.Compute)
                     {
-                        // TODO: Compute input
+                        args = args.Prepend("KernelIn in [[stage_in]]").ToArray();
                     }
                 }
             }

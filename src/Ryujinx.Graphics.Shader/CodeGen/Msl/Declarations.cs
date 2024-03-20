@@ -63,13 +63,14 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
 
         public static void DeclareLocals(CodeGenContext context, StructuredFunction function, ShaderStage stage)
         {
-            if (stage == ShaderStage.Vertex)
+            switch (stage)
             {
-                context.AppendLine("VertexOut out;");
-            }
-            else if (stage == ShaderStage.Fragment)
-            {
-                context.AppendLine("FragmentOut out;");
+                case ShaderStage.Vertex:
+                    context.AppendLine("VertexOut out;");
+                    break;
+                case ShaderStage.Fragment:
+                    context.AppendLine("FragmentOut out;");
+                    break;
             }
 
             foreach (AstOperand decl in function.Locals)
@@ -126,7 +127,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             context.AppendLine($"struct FragmentIn");
                             break;
                         case ShaderStage.Compute:
-                            context.AppendLine($"struct ComputeIn");
+                            context.AppendLine($"struct KernelIn");
                             break;
                     }
 
@@ -172,7 +173,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Msl
                             context.AppendLine($"struct FragmentOut");
                             break;
                         case ShaderStage.Compute:
-                            context.AppendLine($"struct ComputeOut");
+                            context.AppendLine($"struct KernelOut");
                             break;
                     }
 
