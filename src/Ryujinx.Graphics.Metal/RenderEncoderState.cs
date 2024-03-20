@@ -18,8 +18,8 @@ namespace Ryujinx.Graphics.Metal
         private MTLCompareFunction _depthCompareFunction = MTLCompareFunction.Always;
         private bool _depthWriteEnabled = false;
 
-        private MTLStencilDescriptor? _backFaceStencil = null;
-        private MTLStencilDescriptor? _frontFaceStencil = null;
+        private MTLStencilDescriptor _backFaceStencil = new MTLStencilDescriptor();
+        private MTLStencilDescriptor _frontFaceStencil = new MTLStencilDescriptor();
 
         public PrimitiveTopology Topology = PrimitiveTopology.Triangles;
         public MTLCullMode CullMode = MTLCullMode.None;
@@ -83,8 +83,8 @@ namespace Ryujinx.Graphics.Metal
             {
                 DepthCompareFunction = _depthCompareFunction,
                 DepthWriteEnabled = _depthWriteEnabled,
-                BackFaceStencil = _backFaceStencil.Value,
-                FrontFaceStencil = _frontFaceStencil.Value
+                BackFaceStencil = _backFaceStencil,
+                FrontFaceStencil = _frontFaceStencil
             });
 
             return _depthStencilState.Value;
@@ -95,15 +95,17 @@ namespace Ryujinx.Graphics.Metal
             _depthCompareFunction = depthCompareFunction;
             _depthWriteEnabled = depthWriteEnabled;
 
-            _depthStencilState = _device.NewDepthStencilState(new MTLDepthStencilDescriptor
+            var state = _device.NewDepthStencilState(new MTLDepthStencilDescriptor
             {
                 DepthCompareFunction = _depthCompareFunction,
                 DepthWriteEnabled = _depthWriteEnabled,
-                BackFaceStencil = _backFaceStencil.Value,
-                FrontFaceStencil = _frontFaceStencil.Value
+                BackFaceStencil = _backFaceStencil,
+                FrontFaceStencil = _frontFaceStencil
             });
 
-            return _depthStencilState.Value;
+            _depthStencilState = state;
+
+            return state;
         }
     }
 }

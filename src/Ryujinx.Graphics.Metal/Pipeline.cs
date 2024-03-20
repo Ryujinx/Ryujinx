@@ -14,7 +14,8 @@ namespace Ryujinx.Graphics.Metal
     {
         Blit,
         Compute,
-        Render
+        Render,
+        None
     }
 
     [SupportedOSPlatform("macos")]
@@ -26,7 +27,7 @@ namespace Ryujinx.Graphics.Metal
 
         private MTLCommandBuffer _commandBuffer;
         private MTLCommandEncoder? _currentEncoder;
-        private EncoderType _currentEncoderType;
+        private EncoderType _currentEncoderType = EncoderType.None;
         private MTLTexture[] _renderTargets = [];
 
         private RenderEncoderState _renderEncoderState;
@@ -112,6 +113,8 @@ namespace Ryujinx.Graphics.Metal
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
+                _currentEncoderType = EncoderType.None;
             }
         }
 
