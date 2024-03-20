@@ -6,5 +6,6 @@ namespace Ryujinx.Graphics.Metal
     {
         public IntPtr Handle;
         public int Offset;
+        public int Index;
     }
 }

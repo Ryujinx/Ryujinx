@@ -5,6 +5,7 @@ using SharpMetal.Foundation;
 using SharpMetal.Metal;
 using SharpMetal.QuartzCore;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
@@ -32,7 +33,9 @@ namespace Ryujinx.Graphics.Metal
 
         private RenderEncoderState _renderEncoderState;
         private readonly MTLVertexDescriptor _vertexDescriptor = new();
-        private BufferInfo[] _vertexBuffers = [];
+        private List<BufferInfo> _vertexBuffers = [];
+        private List<BufferInfo> _uniformBuffers = [];
+        private List<BufferInfo> _storageBuffers = [];
 
         private MTLBuffer _indexBuffer;
         private MTLIndexType _indexType;
@@ -136,10 +139,7 @@ namespace Ryujinx.Graphics.Metal
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
             _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
 
-            for (int i = 0; i < _vertexBuffers.Length; i++)
-            {
-                renderCommandEncoder.SetVertexBuffer(new MTLBuffer(_vertexBuffers[i].Handle), (ulong)_vertexBuffers[i].Offset, (ulong)i);
-            }
+            RebindBuffers(renderCommandEncoder);
 
             _currentEncoder = renderCommandEncoder;
             _currentEncoderType = EncoderType.Render;
@@ -217,6 +217,26 @@ namespace Ryujinx.Graphics.Metal
         public void Barrier()
         {
             Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+        }
+
+        public void RebindBuffers(MTLRenderCommandEncoder renderCommandEncoder)
+        {
+            foreach (var vertexBuffer in _vertexBuffers)
+            {
+                renderCommandEncoder.SetVertexBuffer(new MTLBuffer(vertexBuffer.Handle), (ulong)vertexBuffer.Offset, (ulong)vertexBuffer.Index);
+            }
+
+            foreach (var uniformBuffer in _uniformBuffers)
+            {
+                renderCommandEncoder.SetVertexBuffer(new MTLBuffer(uniformBuffer.Handle), (ulong)uniformBuffer.Offset, (ulong)uniformBuffer.Index);
+                renderCommandEncoder.SetFragmentBuffer(new MTLBuffer(uniformBuffer.Handle), (ulong)uniformBuffer.Offset, (ulong)uniformBuffer.Index);
+            }
+
+            foreach (var storageBuffer in _storageBuffers)
+            {
+                renderCommandEncoder.SetVertexBuffer(new MTLBuffer(storageBuffer.Handle), (ulong)storageBuffer.Offset, (ulong)storageBuffer.Index);
+                renderCommandEncoder.SetFragmentBuffer(new MTLBuffer(storageBuffer.Handle), (ulong)storageBuffer.Offset, (ulong)storageBuffer.Index);
+            }
         }
 
         public void ClearBuffer(BufferHandle destination, int offset, int size, uint value)
@@ -333,7 +353,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetBlendState(AdvancedBlendDescriptor blend)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            Logger.Warning?.Print(LogClass.Gpu, "Advanced blend is not supported in Metal!");
         }
 
         public void SetBlendState(int index, BlendDescriptor blend)
@@ -558,7 +578,26 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetStorageBuffers(ReadOnlySpan<BufferAssignment> buffers)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            _storageBuffers = [];
+
+            foreach (BufferAssignment buffer in buffers)
+            {
+                if (buffer.Range.Size != 0)
+                {
+                    _storageBuffers.Add(new BufferInfo
+                    {
+                        Handle = buffer.Range.Handle.ToIntPtr(),
+                        Offset = buffer.Range.Offset,
+                        Index = buffer.Binding
+                    });
+                }
+            }
+
+            if (_currentEncoderType == EncoderType.Render)
+            {
+                var renderCommandEncoder = GetOrCreateRenderEncoder();
+                RebindBuffers(renderCommandEncoder);
+            }
         }
 
         public void SetTextureAndSampler(ShaderStage stage, int binding, ITexture texture, ISampler sampler)
@@ -600,7 +639,26 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetUniformBuffers(ReadOnlySpan<BufferAssignment> buffers)
         {
-            Logger.Warning?.Print(LogClass.Gpu, "Not Implemented!");
+            _uniformBuffers = [];
+
+            foreach (BufferAssignment buffer in buffers)
+            {
+                if (buffer.Range.Size != 0)
+                {
+                    _uniformBuffers.Add(new BufferInfo
+                    {
+                        Handle = buffer.Range.Handle.ToIntPtr(),
+                        Offset = buffer.Range.Offset,
+                        Index = buffer.Binding
+                    });
+                }
+            }
+
+            if (_currentEncoderType == EncoderType.Render)
+            {
+                var renderCommandEncoder = GetOrCreateRenderEncoder();
+                RebindBuffers(renderCommandEncoder);
+            }
         }
 
         public void SetUserClipDistance(int index, bool enableClip)
@@ -628,7 +686,7 @@ namespace Ryujinx.Graphics.Metal
 
         public void SetVertexBuffers(ReadOnlySpan<VertexBufferDescriptor> vertexBuffers)
         {
-            _vertexBuffers = new BufferInfo[vertexBuffers.Length];
+            _vertexBuffers = [];
 
             for (int i = 0; i < vertexBuffers.Length; i++)
             {
@@ -637,12 +695,19 @@ namespace Ryujinx.Graphics.Metal
                     var layout = _vertexDescriptor.Layouts.Object((ulong)i);
                     layout.Stride = (ulong)vertexBuffers[i].Stride;
 
-                    _vertexBuffers[i] = new BufferInfo
+                    _vertexBuffers.Add(new BufferInfo
                     {
                         Handle = vertexBuffers[i].Buffer.Handle.ToIntPtr(),
-                        Offset = vertexBuffers[i].Buffer.Offset
-                    };
+                        Offset = vertexBuffers[i].Buffer.Offset,
+                        Index = i
+                    });
                 }
+            }
+
+            if (_currentEncoderType == EncoderType.Render)
+            {
+                var renderCommandEncoder = GetOrCreateRenderEncoder();
+                RebindBuffers(renderCommandEncoder);
             }
         }
 
