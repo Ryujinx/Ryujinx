@@ -175,6 +175,7 @@ namespace Ryujinx.Graphics.Metal
             int height = Info.Height;
             int depth = Info.Depth;
             int levels = Info.GetLevelsClamped();
+            bool is3D = Info.Target == Target.Texture3D;
 
             int offset = 0;
 
@@ -194,7 +195,7 @@ namespace Ryujinx.Graphics.Metal
                     (ulong)offset,
                     (ulong)Info.GetMipStride(level),
                     (ulong)mipSize,
-                    new MTLSize { width = (ulong)width, height = (ulong)height, depth = (ulong)depth },
+                    new MTLSize { width = (ulong)width, height = (ulong)height, depth = is3D ? (ulong)depth : 1 },
                     MTLTexture,
                     0,
                     (ulong)level,
@@ -205,7 +206,11 @@ namespace Ryujinx.Graphics.Metal
 
                 width = Math.Max(1, width >> 1);
                 height = Math.Max(1, height >> 1);
-                depth = Math.Max(1, depth >> 1);
+
+                if (is3D)
+                {
+                    depth = Math.Max(1, depth >> 1);
+                }
             }
         }
 
