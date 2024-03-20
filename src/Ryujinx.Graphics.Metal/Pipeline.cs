@@ -126,6 +126,7 @@ namespace Ryujinx.Graphics.Metal
                 {
                     var attachment = descriptor.ColorAttachments.Object((ulong)i);
                     attachment.Texture = _renderTargets[i];
+                    attachment.LoadAction = MTLLoadAction.Load;
                 }
             }
 
