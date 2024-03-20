@@ -186,6 +186,10 @@ namespace Ryujinx.Graphics.Metal
             descriptor.ColorAttachments.SetObject(colorAttachment, 0);
 
             var renderCommandEncoder = _commandBuffer.RenderCommandEncoder(descriptor);
+            _renderEncoderState = new RenderEncoderState(
+                _helperShaders.BlitShader.VertexFunction,
+                _helperShaders.BlitShader.FragmentFunction,
+                _device);
             _renderEncoderState.SetEncoderState(renderCommandEncoder, _vertexDescriptor);
 
             var sampler = _device.NewSamplerState(new MTLSamplerDescriptor
