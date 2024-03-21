@@ -528,7 +528,6 @@ namespace Ryujinx.Graphics.Metal
 
             if (maxScissors == 0) { return; }
 
-            // TODO: Test max allowed scissor rects on device
             var mtlScissorRects = new MTLScissorRect[maxScissors];
 
             for (int i = 0; i < maxScissors; i++)
@@ -721,7 +720,6 @@ namespace Ryujinx.Graphics.Metal
 
         public unsafe void SetViewports(ReadOnlySpan<Viewport> viewports)
         {
-            // TODO: Test max allowed viewports on device
             var mtlViewports = new MTLViewport[viewports.Length];
 
             for (int i = 0; i < viewports.Length; i++)
