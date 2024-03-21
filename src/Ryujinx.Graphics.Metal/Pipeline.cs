@@ -524,12 +524,17 @@ namespace Ryujinx.Graphics.Metal
 
         public unsafe void SetScissors(ReadOnlySpan<Rectangle<int>> regions)
         {
-            // TODO: Test max allowed scissor rects on device
-            var mtlScissorRects = new MTLScissorRect[regions.Length];
+            int maxScissors = Math.Min(regions.Length, _renderEncoderState.ViewportCount);
 
-            for (int i = 0; i < regions.Length; i++)
+            if (maxScissors == 0) { return; }
+
+            // TODO: Test max allowed scissor rects on device
+            var mtlScissorRects = new MTLScissorRect[maxScissors];
+
+            for (int i = 0; i < maxScissors; i++)
             {
                 var region = regions[i];
+
                 mtlScissorRects[i] = new MTLScissorRect
                 {
                     height = (ulong)region.Height,
@@ -539,10 +544,13 @@ namespace Ryujinx.Graphics.Metal
                 };
             }
 
-            fixed (MTLScissorRect* pMtlScissorRects = mtlScissorRects)
-            {
-                var renderCommandEncoder = GetOrCreateRenderEncoder();
-                renderCommandEncoder.SetScissorRects((IntPtr)pMtlScissorRects, (ulong)regions.Length);
+            _renderEncoderState.UpdateScissors(mtlScissorRects);
+            if (_currentEncoderType == EncoderType.Render) {
+                fixed (MTLScissorRect* pMtlScissorRects = mtlScissorRects)
+                {
+                    var renderCommandEncoder = GetOrCreateRenderEncoder();
+                    renderCommandEncoder.SetScissorRects((IntPtr)pMtlScissorRects, (ulong)regions.Length);
+                }
             }
         }
 
@@ -730,10 +738,14 @@ namespace Ryujinx.Graphics.Metal
                 };
             }
 
-            fixed (MTLViewport* pMtlViewports = mtlViewports)
+            _renderEncoderState.UpdateViewport(mtlViewports);
+            if (_currentEncoderType == EncoderType.Render)
             {
-                var renderCommandEncoder = GetOrCreateRenderEncoder();
-                renderCommandEncoder.SetViewports((IntPtr)pMtlViewports, (ulong)viewports.Length);
+                fixed (MTLViewport* pMtlViewports = mtlViewports)
+                {
+                    var renderCommandEncoder = GetOrCreateRenderEncoder();
+                    renderCommandEncoder.SetViewports((IntPtr)pMtlViewports, (ulong)viewports.Length);
+                }
             }
         }
 

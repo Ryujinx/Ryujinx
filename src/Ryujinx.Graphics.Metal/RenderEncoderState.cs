@@ -25,6 +25,10 @@ namespace Ryujinx.Graphics.Metal
         public MTLCullMode CullMode = MTLCullMode.None;
         public MTLWinding Winding = MTLWinding.Clockwise;
 
+        private MTLViewport[] _viewports = [];
+        private MTLScissorRect[] _scissors = [];
+        public int ViewportCount => _viewports.Length;
+
         public RenderEncoderState(MTLFunction vertexFunction, MTLFunction fragmentFunction, MTLDevice device)
         {
             _vertexFunction = vertexFunction;
@@ -32,7 +36,7 @@ namespace Ryujinx.Graphics.Metal
             _device = device;
         }
 
-        public readonly void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder, MTLVertexDescriptor vertexDescriptor)
+        public unsafe readonly void SetEncoderState(MTLRenderCommandEncoder renderCommandEncoder, MTLVertexDescriptor vertexDescriptor)
         {
             var renderPipelineDescriptor = new MTLRenderPipelineDescriptor
             {
@@ -72,6 +76,22 @@ namespace Ryujinx.Graphics.Metal
             {
                 renderCommandEncoder.SetDepthStencilState(_depthStencilState.Value);
             }
+
+            if (_viewports.Length > 0)
+            {
+                fixed (MTLViewport* pMtlViewports = _viewports)
+                {
+                    renderCommandEncoder.SetViewports((IntPtr)pMtlViewports, (ulong)_viewports.Length);
+                }
+            }
+
+            if (_scissors.Length > 0)
+            {
+                fixed (MTLScissorRect* pMtlScissors = _scissors)
+                {
+                    renderCommandEncoder.SetScissorRects((IntPtr)pMtlScissors, (ulong)_scissors.Length);
+                }
+            }
         }
 
         public MTLDepthStencilState UpdateStencilState(MTLStencilDescriptor backFace, MTLStencilDescriptor frontFace)
@@ -106,6 +126,16 @@ namespace Ryujinx.Graphics.Metal
             _depthStencilState = state;
 
             return state;
+        }
+
+        public void UpdateScissors(MTLScissorRect[] scissors)
+        {
+            _scissors = scissors;
+        }
+
+        public void UpdateViewport(MTLViewport[] viewports)
+        {
+            _viewports = viewports;
         }
     }
 }
