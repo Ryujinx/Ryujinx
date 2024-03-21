@@ -29,6 +29,12 @@ namespace Ryujinx.Graphics.Metal
         public MetalRenderer(Func<CAMetalLayer> metalLayer)
         {
             _device = MTLDevice.CreateSystemDefaultDevice();
+
+            if (_device.ArgumentBuffersSupport != MTLArgumentBuffersTier.Tier2)
+            {
+                throw new NotSupportedException("Metal backend requires Tier 2 Argument Buffer support.");
+            }
+
             _queue = _device.NewCommandQueue();
             _getMetalLayer = metalLayer;
         }
