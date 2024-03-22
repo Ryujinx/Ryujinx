@@ -6,6 +6,7 @@ namespace Ryujinx.HLE.HOS.Services.Nfc.Nfp.NfpManager
     struct VirtualAmiiboFile
     {
         public uint FileVersion { get; set; }
+        public string Nickname { get; set; }
         public byte[] TagUuid { get; set; }
         public string AmiiboId { get; set; }
         public DateTime FirstWriteDate { get; set; }
