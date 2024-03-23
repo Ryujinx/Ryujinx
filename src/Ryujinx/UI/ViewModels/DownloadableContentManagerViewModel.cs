@@ -241,6 +241,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             using IFileSystem partitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(path, _virtualFileSystem);
 
+            bool success = false;
             foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
             {
                 using var ncaFile = new UniqueRef<IFile>();
@@ -257,21 +258,24 @@ namespace Ryujinx.Ava.UI.ViewModels
                 {
                     if (nca.GetProgramIdBase() != _applicationData.IdBase)
                     {
-                        break;
+                        continue;
                     }
 
                     var content = new DownloadableContentModel(nca.Header.TitleId.ToString("X16"), path, fileEntry.FullPath, true);
                     DownloadableContents.Add(content);
                     SelectedDownloadableContents.Add(content);
 
-                    OnPropertyChanged(nameof(UpdateCount));
-                    Sort();
-
-                    return true;
+                    success = true;
                 }
             }
 
-            return false;
+            if (success)
+            {
+                OnPropertyChanged(nameof(UpdateCount));
+                Sort();
+            }
+
+            return success;
         }
 
         public void Remove(DownloadableContentModel model)

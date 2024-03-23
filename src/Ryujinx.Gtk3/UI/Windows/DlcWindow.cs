@@ -165,7 +165,7 @@ namespace Ryujinx.UI.Windows
                 {
                     if (nca.GetProgramIdBase() != (ulong.Parse(_applicationId, NumberStyles.HexNumber) & ~0x1FFFUL))
                     {
-                        break;
+                        continue;
                     }
 
                     parentIter ??= ((TreeStore)_dlcTreeView.Model).AppendValues(true, "", path);
