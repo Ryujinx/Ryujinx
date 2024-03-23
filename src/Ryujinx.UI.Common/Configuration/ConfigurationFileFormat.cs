@@ -163,6 +163,11 @@ namespace Ryujinx.UI.Common.Configuration
         public bool ShowConfirmExit { get; set; }
 
         /// <summary>
+        /// Close Ryujinx on Emulator Stop
+        /// </summary>
+        public bool CloseOnEmulatorStop { get; set; }
+
+        /// <summary>
         /// Whether to hide cursor on idle, always or never
         /// </summary>
         public HideCursorMode HideCursor { get; set; }

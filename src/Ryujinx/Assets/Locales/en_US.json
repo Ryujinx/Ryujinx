@@ -92,6 +92,7 @@
   "SettingsTabGeneralEnableDiscordRichPresence": "Enable Discord Rich Presence",
   "SettingsTabGeneralCheckUpdatesOnLaunch": "Check for Updates on Launch",
   "SettingsTabGeneralShowConfirmExitDialog": "Show \"Confirm Exit\" Dialog",
+  "SettingsTabGeneralCloseOnEmulatorStop": "Close Ryujinx on Emulator Stop",
   "SettingsTabGeneralHideCursor": "Hide Cursor:",
   "SettingsTabGeneralHideCursorNever": "Never",
   "SettingsTabGeneralHideCursorOnIdle": "On Idle",
