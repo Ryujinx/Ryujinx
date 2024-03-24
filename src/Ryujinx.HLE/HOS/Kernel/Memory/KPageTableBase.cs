@@ -648,7 +648,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
             }
         }
 
-        public Result UnmapProcessCodeMemory(ulong dst, ulong src, ulong size)
+        public Result UnmapProcessCodeMemory(ulong dst, ulong src, ulong size, bool clearRejitQueueOnly = false)
         {
             lock (_blockManager)
             {
@@ -694,7 +694,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                 {
                     ulong pagesCount = size / PageSize;
 
-                    Result result = Unmap(dst, pagesCount);
+                    Result result = Unmap(dst, pagesCount, clearRejitQueueOnly);
 
                     if (result != Result.Success)
                     {
@@ -3032,7 +3032,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
         /// <param name="address">Virtual address of the region to unmap</param>
         /// <param name="pagesCount">Number of pages to unmap</param>
         /// <returns>Result of the unmapping operation</returns>
-        protected abstract Result Unmap(ulong address, ulong pagesCount);
+        protected abstract Result Unmap(ulong address, ulong pagesCount, bool clearRejitQueueOnly = false);
 
         /// <summary>
         /// Changes the permissions of a given virtual memory region.

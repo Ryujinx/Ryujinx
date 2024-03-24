@@ -42,7 +42,7 @@ namespace Ryujinx.Memory
         /// </summary>
         /// <param name="va">Virtual address of the range to be unmapped</param>
         /// <param name="size">Size of the range to be unmapped</param>
-        void Unmap(ulong va, ulong size);
+        void Unmap(ulong va, ulong size, bool clearRejitQueueOnly = false);
 
         /// <summary>
         /// Reads data from CPU mapped memory.

@@ -16,9 +16,9 @@ namespace Ryujinx.Tests.Cpu
             memory.UnmapEvent += UnmapHandler;
         }
 
-        private void UnmapHandler(ulong address, ulong size)
+        private void UnmapHandler(ulong address, ulong size, bool clearRejitQueueOnly = false)
         {
-            _translator.InvalidateJitCacheRegion(address, size);
+            _translator.InvalidateJitCacheRegion(address, size, clearRejitQueueOnly);
         }
 
         public static ExecutionContext CreateExecutionContext()

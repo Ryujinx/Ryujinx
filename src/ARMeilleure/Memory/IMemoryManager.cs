@@ -10,7 +10,7 @@ namespace ARMeilleure.Memory
 
         MemoryManagerType Type { get; }
 
-        event Action<ulong, ulong> UnmapEvent;
+        event Action<ulong, ulong, bool> UnmapEvent;
 
         /// <summary>
         /// Reads data from CPU mapped memory.

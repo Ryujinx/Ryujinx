@@ -18,6 +18,8 @@ namespace Ryujinx.HLE.HOS.Services.Ro
     [Service("ro:1")] // 7.0.0+
     class IRoInterface : DisposableIpcService
     {
+        private const bool EnableOpt = true;
+
         private const int MaxNrr = 0x40;
         private const int MaxNro = 0x40;
         private const int MaxMapRetries = 0x200;
@@ -28,6 +30,7 @@ namespace Ryujinx.HLE.HOS.Services.Ro
 
         private readonly List<NrrInfo> _nrrInfos;
         private readonly List<NroInfo> _nroInfos;
+        private readonly List<NroInfo> _nroInfosUnloaded;
 
         private KProcess _owner;
         private IVirtualMemoryManager _ownerMm;
@@ -36,6 +39,8 @@ namespace Ryujinx.HLE.HOS.Services.Ro
         {
             _nrrInfos = new List<NrrInfo>(MaxNrr);
             _nroInfos = new List<NroInfo>(MaxNro);
+            _nroInfosUnloaded = new List<NroInfo>(MaxNro);
+
             _owner = null;
             _ownerMm = null;
         }
@@ -198,17 +203,18 @@ namespace Ryujinx.HLE.HOS.Services.Ro
             return ResultCode.Success;
         }
 
-        private ResultCode MapNro(KProcess process, NroInfo info, out ulong nroMappedAddress)
+        private ResultCode MapNro(KProcess process, NroInfo info, MapType mapType, out ulong nroMappedAddress)
         {
             KPageTableBase memMgr = process.MemoryManager;
 
             int retryCount = 0;
+            int maxMapRetries = mapType != MapType.Within ? MaxMapRetries : 1;
 
             nroMappedAddress = 0;
 
-            while (retryCount++ < MaxMapRetries)
+            while (retryCount++ < maxMapRetries)
             {
-                ResultCode result = MapCodeMemoryInProcess(process, info.NroAddress, info.NroSize, out nroMappedAddress);
+                ResultCode result = MapCodeMemoryInProcess(process, info, mapType, out nroMappedAddress);
 
                 if (result != ResultCode.Success)
                 {
@@ -262,31 +268,73 @@ namespace Ryujinx.HLE.HOS.Services.Ro
             return false;
         }
 
-        private ResultCode MapCodeMemoryInProcess(KProcess process, ulong baseAddress, ulong size, out ulong targetAddress)
+        private static bool NotOverlapsWith(ulong newAddress, ulong newSize, ulong oldAddress, ulong oldSize)
+        {
+            return newAddress + newSize <= oldAddress || oldAddress + oldSize <= newAddress;
+        }
+
+        private ResultCode MapCodeMemoryInProcess(KProcess process, NroInfo info, MapType mapType, out ulong targetAddress)
         {
             KPageTableBase memMgr = process.MemoryManager;
 
+            int retryCount = 0;
+            int maxMapRetries = mapType != MapType.Within ? MaxMapRetries : 1;
+
             targetAddress = 0;
 
-            int retryCount;
-
-            ulong addressSpacePageLimit = (memMgr.GetAddrSpaceSize() - size) >> 12;
-
-            for (retryCount = 0; retryCount < MaxMapRetries; retryCount++)
+            while (retryCount++ < maxMapRetries)
             {
-                while (true)
+                if (mapType == MapType.Default)
                 {
-                    ulong randomOffset = (ulong)(uint)Random.Shared.Next(0, (int)addressSpacePageLimit) << 12;
-
-                    targetAddress = memMgr.GetAddrSpaceBaseAddr() + randomOffset;
-
-                    if (memMgr.InsideAddrSpace(targetAddress, size) && !memMgr.InsideHeapRegion(targetAddress, size) && !memMgr.InsideAliasRegion(targetAddress, size))
+                    while (true)
                     {
-                        break;
+                        ulong addressSpacePageLimit = (memMgr.GetAddrSpaceSize() - info.NroSize) >> 12;
+                        ulong randomOffset = (ulong)(uint)Random.Shared.Next(0, (int)addressSpacePageLimit) << 12;
+
+                        targetAddress = memMgr.GetAddrSpaceBaseAddr() + randomOffset;
+
+                        if (memMgr.InsideAddrSpace(targetAddress, info.NroSize) &&
+                            !memMgr.InsideHeapRegion(targetAddress, info.NroSize) &&
+                            !memMgr.InsideAliasRegion(targetAddress, info.NroSize))
+                        {
+                            break;
+                        }
                     }
                 }
+                else if (mapType == MapType.Between)
+                {
+                    while (true)
+                    {
+                        while (true)
+                        {
+                            ulong addressSpacePageLimit = (memMgr.GetAddrSpaceSize() - info.NroSize) >> 12;
+                            ulong randomOffset = (ulong)(uint)Random.Shared.Next(0, (int)addressSpacePageLimit) << 12;
 
-                Result result = memMgr.MapProcessCodeMemory(targetAddress, baseAddress, size);
+                            targetAddress = memMgr.GetAddrSpaceBaseAddr() + randomOffset;
+
+                            if (memMgr.InsideAddrSpace(targetAddress, info.NroSize) &&
+                                !memMgr.InsideHeapRegion(targetAddress, info.NroSize) &&
+                                !memMgr.InsideAliasRegion(targetAddress, info.NroSize))
+                            {
+                                break;
+                            }
+                        }
+
+                        ulong targetAddressTmp = targetAddress; // CS1628.
+                        if (_nroInfosUnloaded.TrueForAll((infoU) => NotOverlapsWith(targetAddressTmp, info.NroSize + info.BssSize, infoU.NroMappedAddress, infoU.NroSize + infoU.BssSize)))
+                        {
+                            break;
+                        }
+                    }
+                }
+                else /* if (mapType == MapType.Within) */
+                {
+                    NroInfo infoU = _nroInfosUnloaded.Find((infoU) => infoU.Hash.SequenceEqual(info.Hash));
+
+                    targetAddress = infoU.NroMappedAddress;
+                }
+
+                Result result = memMgr.MapProcessCodeMemory(targetAddress, info.NroAddress, info.NroSize);
 
                 if (result == KernelResult.InvalidMemState)
                 {
@@ -297,7 +345,7 @@ namespace Ryujinx.HLE.HOS.Services.Ro
                     return (ResultCode)result.ErrorCode;
                 }
 
-                if (!CanAddGuardRegionsInProcess(process, targetAddress, size))
+                if (!CanAddGuardRegionsInProcess(process, targetAddress, info.NroSize))
                 {
                     continue;
                 }
@@ -305,12 +353,7 @@ namespace Ryujinx.HLE.HOS.Services.Ro
                 return ResultCode.Success;
             }
 
-            if (retryCount == MaxMapRetries)
-            {
-                return ResultCode.InsufficientAddressSpace;
-            }
-
-            return ResultCode.Success;
+            return ResultCode.InsufficientAddressSpace;
         }
 
         private Result SetNroMemoryPermissions(KProcess process, IExecutable relocatableObject, ulong baseAddress)
@@ -369,16 +412,20 @@ namespace Ryujinx.HLE.HOS.Services.Ro
             {
                 if (info.NroMappedAddress == nroMappedAddress)
                 {
+                    if (EnableOpt)
+                    {
+                        _nroInfosUnloaded.Add(info);
+                    }
                     _nroInfos.Remove(info);
 
-                    return UnmapNroFromInfo(info);
+                    return UnmapNroFromInfo(info, clearRejitQueueOnly: EnableOpt);
                 }
             }
 
             return ResultCode.NotLoaded;
         }
 
-        private ResultCode UnmapNroFromInfo(NroInfo info)
+        private ResultCode UnmapNroFromInfo(NroInfo info, bool clearRejitQueueOnly = false)
         {
             ulong textSize = (ulong)info.Executable.Text.Length;
             ulong roSize = (ulong)info.Executable.Ro.Length;
@@ -392,7 +439,7 @@ namespace Ryujinx.HLE.HOS.Services.Ro
                 result = _owner.MemoryManager.UnmapProcessCodeMemory(
                     info.NroMappedAddress + textSize + roSize + dataSize,
                     info.Executable.BssAddress,
-                    bssSize);
+                    bssSize, clearRejitQueueOnly);
             }
 
             if (result == Result.Success)
@@ -400,14 +447,14 @@ namespace Ryujinx.HLE.HOS.Services.Ro
                 result = _owner.MemoryManager.UnmapProcessCodeMemory(
                     info.NroMappedAddress + textSize + roSize,
                     info.Executable.SourceAddress + textSize + roSize,
-                    dataSize);
+                    dataSize, clearRejitQueueOnly);
 
                 if (result == Result.Success)
                 {
                     result = _owner.MemoryManager.UnmapProcessCodeMemory(
                         info.NroMappedAddress,
                         info.Executable.SourceAddress,
-                        textSize + roSize);
+                        textSize + roSize, clearRejitQueueOnly);
                 }
             }
 
@@ -423,6 +470,8 @@ namespace Ryujinx.HLE.HOS.Services.Ro
 
             return ResultCode.InvalidProcess;
         }
+
+        private enum MapType { Default, Between, Within }
 
         [CommandCmif(0)]
         // LoadNro(u64, u64, u64, u64, u64, pid) -> u64
@@ -447,7 +496,48 @@ namespace Ryujinx.HLE.HOS.Services.Ro
 
                 if (result == ResultCode.Success)
                 {
-                    result = MapNro(_owner, info, out nroMappedAddress);
+                    MapType mapType = MapType.Default;
+
+                    if (_nroInfosUnloaded.Count != 0)
+                    {
+                        mapType = _nroInfosUnloaded.Exists((infoU) => infoU.Hash.SequenceEqual(info.Hash)) // One/zero match.
+                            ? MapType.Within
+                            : MapType.Between;
+                    }
+
+                    result = MapNro(_owner, info, mapType, out nroMappedAddress);
+
+                    if (mapType == MapType.Between)
+                    {
+                        if (result != ResultCode.Success)
+                        {
+                            _nroInfosUnloaded.Clear();
+
+                            mapType = MapType.Default;
+
+                            result = MapNro(_owner, info, mapType, out nroMappedAddress);
+                        }
+                    }
+                    else if (mapType == MapType.Within)
+                    {
+                        _nroInfosUnloaded.RemoveAll((infoU) => infoU.Hash.SequenceEqual(info.Hash)); // One match.
+
+                        if (result != ResultCode.Success)
+                        {
+                            mapType = MapType.Between;
+
+                            result = MapNro(_owner, info, mapType, out nroMappedAddress);
+
+                            if (result != ResultCode.Success)
+                            {
+                                _nroInfosUnloaded.Clear();
+
+                                mapType = MapType.Default;
+
+                                result = MapNro(_owner, info, mapType, out nroMappedAddress);
+                            }
+                        }
+                    }
 
                     if (result == ResultCode.Success)
                     {
@@ -589,6 +679,7 @@ namespace Ryujinx.HLE.HOS.Services.Ro
                 }
 
                 _nroInfos.Clear();
+                _nroInfosUnloaded.Clear();
 
                 if (_ownerMm is IRefCounted rc)
                 {

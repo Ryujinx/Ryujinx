@@ -178,7 +178,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
         }
 
         /// <inheritdoc/>
-        protected override Result Unmap(ulong address, ulong pagesCount)
+        protected override Result Unmap(ulong address, ulong pagesCount, bool clearRejitQueueOnly = false)
         {
             KPageList pagesToClose = new();
 
@@ -193,7 +193,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                 }
             }
 
-            _cpuMemory.Unmap(address, pagesCount * PageSize);
+            _cpuMemory.Unmap(address, pagesCount * PageSize, clearRejitQueueOnly);
 
             pagesToClose.DecrementPagesReferenceCount(Context.MemoryManager);
 

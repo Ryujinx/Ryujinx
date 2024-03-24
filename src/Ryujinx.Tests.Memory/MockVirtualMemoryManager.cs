@@ -27,7 +27,7 @@ namespace Ryujinx.Tests.Memory
             throw new NotImplementedException();
         }
 
-        public void Unmap(ulong va, ulong size)
+        public void Unmap(ulong va, ulong size, bool clearRejitQueueOnly = false)
         {
             throw new NotImplementedException();
         }

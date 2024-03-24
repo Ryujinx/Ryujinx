@@ -496,7 +496,7 @@ namespace ARMeilleure.Translation
             context.MarkLabel(lblExit);
         }
 
-        public void InvalidateJitCacheRegion(ulong address, ulong size)
+        public void InvalidateJitCacheRegion(ulong address, ulong size, bool clearRejitQueueOnly = false)
         {
             ulong[] overlapAddresses = Array.Empty<ulong>();
 
@@ -506,6 +506,11 @@ namespace ARMeilleure.Translation
             {
                 // If rejit is running, stop it as it may be trying to rejit a function on the invalidated region.
                 ClearRejitQueue(allowRequeue: true);
+            }
+
+            if (clearRejitQueueOnly)
+            {
+                return;
             }
 
             for (int index = 0; index < overlapsCount; index++)

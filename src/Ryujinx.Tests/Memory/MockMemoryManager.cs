@@ -12,7 +12,7 @@ namespace Ryujinx.Tests.Memory
         public MemoryManagerType Type => MemoryManagerType.HostMappedUnsafe;
 
 #pragma warning disable CS0067 // The event is never used
-        public event Action<ulong, ulong> UnmapEvent;
+        public event Action<ulong, ulong, bool> UnmapEvent;
 #pragma warning restore CS0067
 
         public ref T GetRef<T>(ulong va) where T : unmanaged
