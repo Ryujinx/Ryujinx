@@ -1164,6 +1164,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         {
             RendererHostControl.WindowCreated += RendererHost_Created;
 
+            AppHost.StatusInitEvent += Init_StatusBar;
             AppHost.StatusUpdatedEvent += Update_StatusBar;
             AppHost.AppExit += AppHost_AppExit;
 
@@ -1190,6 +1191,18 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
+        private void Init_StatusBar(object sender, StatusInitEventArgs args)
+        {
+            if (ShowMenuAndStatusBar && !ShowLoadProgress)
+            {
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    GpuNameText = args.GpuName;
+                    BackendText = args.GpuBackend;
+                });
+            }
+        }
+
         private void Update_StatusBar(object sender, StatusUpdatedEventArgs args)
         {
             if (ShowMenuAndStatusBar && !ShowLoadProgress)
@@ -1212,8 +1225,6 @@ namespace Ryujinx.Ava.UI.ViewModels
                     GameStatusText = args.GameStatus;
                     VolumeStatusText = args.VolumeStatus;
                     FifoStatusText = args.FifoStatus;
-                    GpuNameText = args.GpuName;
-                    BackendText = args.GpuBackend;
 
                     ShowStatusSeparator = true;
                 });

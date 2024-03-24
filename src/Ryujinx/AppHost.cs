@@ -112,6 +112,7 @@ namespace Ryujinx.Ava
         private readonly object _lockObject = new();
 
         public event EventHandler AppExit;
+        public event EventHandler<StatusInitEventArgs> StatusInitEvent;
         public event EventHandler<StatusUpdatedEventArgs> StatusUpdatedEvent;
 
         public VirtualFileSystem VirtualFileSystem { get; }
@@ -941,6 +942,7 @@ namespace Ryujinx.Ava
                         {
                             _renderingStarted = true;
                             _viewModel.SwitchToRenderer(false);
+                            InitStatus();
                         }
 
                         Device.PresentFrame(() => (RendererHost.EmbeddedWindow as EmbeddedWindowOpenGL)?.SwapBuffers());
@@ -964,6 +966,13 @@ namespace Ryujinx.Ava
             (RendererHost.EmbeddedWindow as EmbeddedWindowOpenGL)?.MakeCurrent(true);
         }
 
+        public void InitStatus()
+        {
+            StatusInitEvent?.Invoke(this, new StatusInitEventArgs(
+                ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Vulkan ? "Vulkan" : "OpenGL",
+                $"GPU: {_renderer.GetHardwareInfo().GpuDriver}"));
+        }
+
         public void UpdateStatus()
         {
             // Run a status update only when a frame is to be drawn. This prevents from updating the ui and wasting a render when no frame is queued.
@@ -977,12 +986,10 @@ namespace Ryujinx.Ava
             StatusUpdatedEvent?.Invoke(this, new StatusUpdatedEventArgs(
                 Device.EnableDeviceVsync,
                 LocaleManager.Instance[LocaleKeys.VolumeShort] + $": {(int)(Device.GetVolume() * 100)}%",
-                ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Vulkan ? "Vulkan" : "OpenGL",
                 dockedMode,
                 ConfigurationState.Instance.Graphics.AspectRatio.Value.ToText(),
                 LocaleManager.Instance[LocaleKeys.Game] + $": {Device.Statistics.GetGameFrameRate():00.00} FPS ({Device.Statistics.GetGameFrameTime():00.00} ms)",
-                $"FIFO: {Device.Statistics.GetFifoPercent():00.00} %",
-                $"GPU: {_renderer.GetHardwareInfo().GpuDriver}"));
+                $"FIFO: {Device.Statistics.GetFifoPercent():00.00} %"));
         }
 
         public async Task ShowExitPrompt()
