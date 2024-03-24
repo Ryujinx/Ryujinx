@@ -26,8 +26,9 @@
             <Color x:Key="AppListBackgroundColor">#b3ffffff</Color>
             <Color x:Key="AppListHoverBackgroundColor">#80cccccc</Color>
             <Color x:Key="SecondaryTextColor">#A0000000</Color>
-            <Color x:Key="VsyncEnabled">#FF2EEAC9</Color>
-            <Color x:Key="VsyncDisabled">#FFFF4554</Color>
+            <Color x:Key="Switch">#FF2EEAC9</Color>
+            <Color x:Key="Unbounded">#FFFF4554</Color>
+            <Color x:Key="Custom">#6483F5</Color>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="DataGridSelectionBackgroundBrush"

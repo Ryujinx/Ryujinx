@@ -26,10 +26,10 @@
             <StackPanel Margin="10" Orientation="Vertical" Spacing="10">
                 <TextBlock Classes="h1" Text="{locale:Locale SettingsTabHotkeysHotkeys}" />
                 <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{locale:Locale SettingsTabHotkeysToggleVsyncHotkey}" Width="230" />
+                    <TextBlock VerticalAlignment="Center" Text="{locale:Locale SettingsTabHotkeysToggleVSyncModeHotkey}" Width="230" />
                     <ToggleButton Width="90" Height="27" Checked="Button_Checked" Unchecked="Button_Unchecked">
                         <TextBlock
-                            Text="{Binding KeyboardHotkeys.ToggleVsync, Mode=TwoWay, Converter={StaticResource Key}}"
+                            Text="{Binding KeyboardHotkeys.VSyncMode, Mode=TwoWay, Converter={StaticResource Key}}"
                             TextAlignment="Center" />
                     </ToggleButton>
                 </StackPanel>
@@ -94,6 +94,22 @@
                     <ToggleButton Width="90" Height="27" Checked="Button_Checked" Unchecked="Button_Unchecked">
                         <TextBlock
                             Text="{Binding KeyboardHotkeys.VolumeDown, Mode=TwoWay, Converter={StaticResource Key}}"
+                            TextAlignment="Center" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{locale:Locale SettingsTabHotkeysIncrementCustomVSyncIntervalHotkey}" Width="230" />
+                    <ToggleButton Width="90" Height="27" Checked="Button_Checked" Unchecked="Button_Unchecked">
+                        <TextBlock
+                            Text="{Binding KeyboardHotkeys.CustomVSyncIntervalIncrement, Mode=TwoWay, Converter={StaticResource Key}}"
+                            TextAlignment="Center" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{locale:Locale SettingsTabHotkeysDecrementCustomVSyncIntervalHotkey}" Width="230" />
+                    <ToggleButton Width="90" Height="27" Checked="Button_Checked" Unchecked="Button_Unchecked">
+                        <TextBlock
+                            Text="{Binding KeyboardHotkeys.CustomVSyncIntervalDecrement, Mode=TwoWay, Converter={StaticResource Key}}"
                             TextAlignment="Center" />
                     </ToggleButton>
                 </StackPanel>
