@@ -23,9 +23,6 @@ namespace Ryujinx.Graphics.Gpu.Shader
         private int _staticTexturesCount;
         private int _staticImagesCount;
 
-        private int _dynamicTexturesCount;
-        private int _dynamicImagesCount;
-
         /// <summary>
         /// Creates a new GPU accessor.
         /// </summary>
@@ -37,9 +34,6 @@ namespace Ryujinx.Graphics.Gpu.Shader
             _context = context;
             _resourceCounts = resourceCounts;
             _stageIndex = stageIndex;
-
-            _dynamicTexturesCount = (int)GetDynamicBaseIndexDual(context.Capabilities.MaximumTexturesPerStage);
-            _dynamicImagesCount = (int)GetDynamicBaseIndexDual(context.Capabilities.MaximumImagesPerStage);
         }
 
         /// <summary>
@@ -92,7 +86,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
                 }
                 else
                 {
-                    binding = _dynamicImagesCount++;
+                    binding = (int)GetDynamicBaseIndexDual(_context.Capabilities.MaximumImagesPerStage) + _resourceCounts.ImagesCount++;
                 }
             }
             else
@@ -140,7 +134,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
                 }
                 else
                 {
-                    binding = _dynamicTexturesCount++;
+                    binding = (int)GetDynamicBaseIndexDual(_context.Capabilities.MaximumTexturesPerStage) + _resourceCounts.TexturesCount++;
                 }
             }
             else
