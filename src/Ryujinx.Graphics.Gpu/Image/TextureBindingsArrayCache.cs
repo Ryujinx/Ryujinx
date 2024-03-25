@@ -176,6 +176,7 @@ namespace Ryujinx.Graphics.Gpu.Image
             private int[] _cachedSamplerBuffer;
 
             private int _lastBinding;
+            private int _lastSequenceNumber;
 
             /// <summary>
             /// Creates a new array cache entry.
@@ -192,6 +193,9 @@ namespace Ryujinx.Graphics.Gpu.Image
 
                 _texturePool = texturePool;
                 _samplerPool = samplerPool;
+
+                _lastBinding = -1;
+                _lastSequenceNumber = -1;
             }
 
             /// <summary>
@@ -216,6 +220,23 @@ namespace Ryujinx.Graphics.Gpu.Image
             public CacheEntry(ref CacheEntryKey key, IImageArray array, TexturePool texturePool, SamplerPool samplerPool) : this(ref key, texturePool, samplerPool)
             {
                 ImageArray = array;
+            }
+
+            /// <summary>
+            /// Synchronizes memory for all textures in the array.
+            /// </summary>
+            /// <param name="isStore">Indicates if the texture may be modified by the access</param>
+            public void SynchronizeMemory(bool isStore)
+            {
+                foreach (Texture texture in Textures.Keys)
+                {
+                    texture.SynchronizeMemory();
+
+                    if (isStore)
+                    {
+                        texture.SignalModified();
+                    }
+                }
             }
 
             /// <summary>
@@ -332,6 +353,23 @@ namespace Ryujinx.Graphics.Gpu.Image
                         return true;
                     }
                 }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Checks if the sequence number matches the one used on the last call to this method.
+            /// </summary>
+            /// <param name="currentSequenceNumber">Current sequence number</param>
+            /// <returns>True if the sequence numbers match, false otherwise</returns>
+            public bool MatchesSequenceNumber(int currentSequenceNumber)
+            {
+                if (_lastSequenceNumber == currentSequenceNumber)
+                {
+                    return true;
+                }
+
+                _lastSequenceNumber = currentSequenceNumber;
 
                 return false;
             }
@@ -455,28 +493,12 @@ namespace Ryujinx.Graphics.Gpu.Image
             SamplerIndex samplerIndex,
             TextureBindingInfo bindingInfo)
         {
-            ReadOnlySpan<int> cachedTextureBuffer;
-            ReadOnlySpan<int> cachedSamplerBuffer;
-
             (textureBufferIndex, int samplerBufferIndex) = TextureHandle.UnpackSlots(bindingInfo.CbufSlot, textureBufferIndex);
 
             bool separateSamplerBuffer = textureBufferIndex != samplerBufferIndex;
 
             ref BufferBounds textureBufferBounds = ref _channel.BufferManager.GetUniformBufferBounds(_isCompute, stageIndex, textureBufferIndex);
             ref BufferBounds samplerBufferBounds = ref _channel.BufferManager.GetUniformBufferBounds(_isCompute, stageIndex, samplerBufferIndex);
-
-            cachedTextureBuffer = MemoryMarshal.Cast<byte, int>(_channel.MemoryManager.Physical.GetSpan(textureBufferBounds.Range));
-
-            if (separateSamplerBuffer)
-            {
-                cachedSamplerBuffer = MemoryMarshal.Cast<byte, int>(_channel.MemoryManager.Physical.GetSpan(samplerBufferBounds.Range));
-            }
-            else
-            {
-                cachedSamplerBuffer = cachedTextureBuffer;
-            }
-
-            (_, int samplerWordOffset, _) = TextureHandle.UnpackOffsets(bindingInfo.Handle);
 
             CacheEntry entry = GetOrAddEntry(
                 texturePool,
@@ -486,30 +508,63 @@ namespace Ryujinx.Graphics.Gpu.Image
                 ref textureBufferBounds,
                 out bool isNewEnry);
 
-            bool isStore = bindingInfo.Flags.HasFlag(TextureUsageFlags.ImageStore);
             bool poolsModified = entry.PoolsModified();
+            bool isStore = bindingInfo.Flags.HasFlag(TextureUsageFlags.ImageStore);
 
-            if (!poolsModified &&
-                !isNewEnry &&
-                entry.MatchesBufferData(cachedTextureBuffer, cachedSamplerBuffer, separateSamplerBuffer, samplerWordOffset) &&
-                entry.ValidateTextures())
+            ReadOnlySpan<int> cachedTextureBuffer;
+            ReadOnlySpan<int> cachedSamplerBuffer;
+
+            if (!poolsModified && !isNewEnry && entry.ValidateTextures())
             {
-                foreach (Texture texture in entry.Textures.Keys)
+                if (entry.MatchesSequenceNumber(_context.SequenceNumber))
                 {
-                    texture.SynchronizeMemory();
+                    entry.SynchronizeMemory(isStore);
 
-                    if (isStore)
+                    if (entry.BindingChanged(this, bindingInfo.Binding))
                     {
-                        texture.SignalModified();
+                        _context.Renderer.Pipeline.SetTextureArray(stage, bindingInfo.Binding, entry.TextureArray);
                     }
+
+                    return;
                 }
 
-                if (entry.BindingChanged(this, bindingInfo.Binding))
+                cachedTextureBuffer = MemoryMarshal.Cast<byte, int>(_channel.MemoryManager.Physical.GetSpan(textureBufferBounds.Range));
+
+                if (separateSamplerBuffer)
                 {
-                    _context.Renderer.Pipeline.SetTextureArray(stage, bindingInfo.Binding, entry.TextureArray);
+                    cachedSamplerBuffer = MemoryMarshal.Cast<byte, int>(_channel.MemoryManager.Physical.GetSpan(samplerBufferBounds.Range));
+                }
+                else
+                {
+                    cachedSamplerBuffer = cachedTextureBuffer;
                 }
 
-                return;
+                (_, int samplerWordOffset, _) = TextureHandle.UnpackOffsets(bindingInfo.Handle);
+
+                if (entry.MatchesBufferData(cachedTextureBuffer, cachedSamplerBuffer, separateSamplerBuffer, samplerWordOffset))
+                {
+                    entry.SynchronizeMemory(isStore);
+
+                    if (entry.BindingChanged(this, bindingInfo.Binding))
+                    {
+                        _context.Renderer.Pipeline.SetTextureArray(stage, bindingInfo.Binding, entry.TextureArray);
+                    }
+
+                    return;
+                }
+            }
+            else
+            {
+                cachedTextureBuffer = MemoryMarshal.Cast<byte, int>(_channel.MemoryManager.Physical.GetSpan(textureBufferBounds.Range));
+
+                if (separateSamplerBuffer)
+                {
+                    cachedSamplerBuffer = MemoryMarshal.Cast<byte, int>(_channel.MemoryManager.Physical.GetSpan(samplerBufferBounds.Range));
+                }
+                else
+                {
+                    cachedSamplerBuffer = cachedTextureBuffer;
+                }
             }
 
             if (!isNewEnry)
