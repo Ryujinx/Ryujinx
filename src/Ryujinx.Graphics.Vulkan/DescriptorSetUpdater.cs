@@ -499,10 +499,13 @@ namespace Ryujinx.Graphics.Vulkan
                 Array.Resize(ref _textureArrayRefs, binding + ArrayGrowthSize);
             }
 
-            _textureArrayRefs[binding] = new ArrayRef<TextureArray>(stage, array as TextureArray);
-            _textureArrayRefs[binding].Array?.QueueWriteToReadBarriers(cbs, stage.ConvertToPipelineStageFlags());
+            if (_textureArrayRefs[binding].Stage != stage || _textureArrayRefs[binding].Array != array)
+            {
+                _textureArrayRefs[binding] = new ArrayRef<TextureArray>(stage, array as TextureArray);
+                _textureArrayRefs[binding].Array?.QueueWriteToReadBarriers(cbs, stage.ConvertToPipelineStageFlags());
 
-            SignalDirty(DirtyFlags.Texture);
+                SignalDirty(DirtyFlags.Texture);
+            }
         }
 
         public void SetImageArray(CommandBufferScoped cbs, ShaderStage stage, int binding, IImageArray array)
@@ -512,10 +515,13 @@ namespace Ryujinx.Graphics.Vulkan
                 Array.Resize(ref _imageArrayRefs, binding + ArrayGrowthSize);
             }
 
-            _imageArrayRefs[binding] = new ArrayRef<ImageArray>(stage, array as ImageArray);
-            _imageArrayRefs[binding].Array?.QueueWriteToReadBarriers(cbs, stage.ConvertToPipelineStageFlags());
+            if (_imageArrayRefs[binding].Stage != stage || _imageArrayRefs[binding].Array != array)
+            {
+                _imageArrayRefs[binding] = new ArrayRef<ImageArray>(stage, array as ImageArray);
+                _imageArrayRefs[binding].Array?.QueueWriteToReadBarriers(cbs, stage.ConvertToPipelineStageFlags());
 
-            SignalDirty(DirtyFlags.Image);
+                SignalDirty(DirtyFlags.Image);
+            }
         }
 
         public void SetUniformBuffers(CommandBuffer commandBuffer, ReadOnlySpan<BufferAssignment> buffers)

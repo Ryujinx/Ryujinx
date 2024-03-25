@@ -175,7 +175,6 @@ namespace Ryujinx.Graphics.Gpu.Image
             private int[] _cachedTextureBuffer;
             private int[] _cachedSamplerBuffer;
 
-            private int _lastBinding;
             private int _lastSequenceNumber;
 
             /// <summary>
@@ -194,7 +193,6 @@ namespace Ryujinx.Graphics.Gpu.Image
                 _texturePool = texturePool;
                 _samplerPool = samplerPool;
 
-                _lastBinding = -1;
                 _lastSequenceNumber = -1;
             }
 
@@ -250,18 +248,6 @@ namespace Ryujinx.Graphics.Gpu.Image
             }
 
             /// <summary>
-            /// Invalidates the cached binding number if it equals to <paramref name="binding"/>.
-            /// </summary>
-            /// <param name="binding">Binding number to match</param>
-            public void ClearBindingIfEqual(int binding)
-            {
-                if (_lastBinding == binding)
-                {
-                    _lastBinding = -1;
-                }
-            }
-
-            /// <summary>
             /// Updates the cached constant buffer data.
             /// </summary>
             /// <param name="cachedTextureBuffer">Constant buffer data with the texture handles (and sampler handles, if they are combined)</param>
@@ -288,35 +274,6 @@ namespace Ryujinx.Graphics.Gpu.Image
                 }
 
                 return true;
-            }
-
-            /// <summary>
-            /// Updates the cached binding number.
-            /// </summary>
-            /// <param name="parent">Cache instance</param>
-            /// <param name="newBinding">New binding number</param>
-            public void SetNewBinding(TextureBindingsArrayCache parent, int newBinding)
-            {
-                parent.ClearBindingsIfEqual(newBinding);
-                _lastBinding = newBinding;
-            }
-
-            /// <summary>
-            /// Checks if the binding number changed since the last call to this method.
-            /// </summary>
-            /// <param name="parent">Cache instance</param>
-            /// <param name="newBinding">New binding number</param>
-            /// <returns>True if the binding changed, false otherwise</returns>
-            public bool BindingChanged(TextureBindingsArrayCache parent, int newBinding)
-            {
-                if (_lastBinding != newBinding)
-                {
-                    SetNewBinding(parent, newBinding);
-
-                    return true;
-                }
-
-                return false;
             }
 
             /// <summary>
@@ -520,7 +477,11 @@ namespace Ryujinx.Graphics.Gpu.Image
                 {
                     entry.SynchronizeMemory(isStore);
 
-                    if (entry.BindingChanged(this, bindingInfo.Binding))
+                    if (isImage)
+                    {
+                        _context.Renderer.Pipeline.SetImageArray(stage, bindingInfo.Binding, entry.ImageArray);
+                    }
+                    else
                     {
                         _context.Renderer.Pipeline.SetTextureArray(stage, bindingInfo.Binding, entry.TextureArray);
                     }
@@ -545,7 +506,11 @@ namespace Ryujinx.Graphics.Gpu.Image
                 {
                     entry.SynchronizeMemory(isStore);
 
-                    if (entry.BindingChanged(this, bindingInfo.Binding))
+                    if (isImage)
+                    {
+                        _context.Renderer.Pipeline.SetImageArray(stage, bindingInfo.Binding, entry.ImageArray);
+                    }
+                    else
                     {
                         _context.Renderer.Pipeline.SetTextureArray(stage, bindingInfo.Binding, entry.TextureArray);
                     }
@@ -652,8 +617,6 @@ namespace Ryujinx.Graphics.Gpu.Image
                 }
             }
 
-            entry.SetNewBinding(this, bindingInfo.Binding);
-
             if (isImage)
             {
                 entry.ImageArray.SetFormats(0, formats);
@@ -741,18 +704,6 @@ namespace Ryujinx.Graphics.Gpu.Image
                 nextNode = nextNode.Next;
                 _cache.Remove(toRemove.Value.Key);
                 _lruCache.Remove(toRemove);
-            }
-        }
-
-        /// <summary>
-        /// Clears all cached bindings that are equal to <paramref name="binding"/>.
-        /// </summary>
-        /// <param name="binding">Binding number to clear</param>
-        private void ClearBindingsIfEqual(int binding)
-        {
-            foreach (CacheEntry entry in _cache.Values)
-            {
-                entry.ClearBindingIfEqual(binding);
             }
         }
     }
