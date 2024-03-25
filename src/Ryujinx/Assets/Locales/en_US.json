@@ -96,6 +96,8 @@
   "SettingsTabGeneralHideCursorNever": "Never",
   "SettingsTabGeneralHideCursorOnIdle": "On Idle",
   "SettingsTabGeneralHideCursorAlways": "Always",
+  "SettingsTabGeneralCursorHideIdleTime": "Seconds:",
+  "SettingsTabGeneralCursorHideIdleTimeTooltip": "Amount of seconds needed by the mouse to be spent idle to hide the cursor.",
   "SettingsTabGeneralGameDirectories": "Game Directories",
   "SettingsTabGeneralAdd": "Add",
   "SettingsTabGeneralRemove": "Remove",

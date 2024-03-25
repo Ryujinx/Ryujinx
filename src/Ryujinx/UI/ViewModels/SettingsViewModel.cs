@@ -133,6 +133,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool CheckUpdatesOnStart { get; set; }
         public bool ShowConfirmExit { get; set; }
         public int HideCursor { get; set; }
+        public int CursorHideIdleTime { get; set; }
         public bool EnableDockedMode { get; set; }
         public bool EnableKeyboard { get; set; }
         public bool EnableMouse { get; set; }
@@ -401,6 +402,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             CheckUpdatesOnStart = config.CheckUpdatesOnStart;
             ShowConfirmExit = config.ShowConfirmExit;
             HideCursor = (int)config.HideCursor.Value;
+            CursorHideIdleTime = config.CursorHideIdleTime.Value;
 
             GameDirectories.Clear();
             GameDirectories.AddRange(config.UI.GameDirs.Value);
@@ -485,6 +487,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.CheckUpdatesOnStart.Value = CheckUpdatesOnStart;
             config.ShowConfirmExit.Value = ShowConfirmExit;
             config.HideCursor.Value = (HideCursorMode)HideCursor;
+            config.CursorHideIdleTime.Value = CursorHideIdleTime;
 
             if (_directoryChanged)
             {

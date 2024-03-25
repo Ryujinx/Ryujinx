@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     mc:Ignorable="d"
@@ -53,6 +54,20 @@
                                 <TextBlock Text="{locale:Locale SettingsTabGeneralHideCursorAlways}" />
                             </ComboBoxItem>
                         </ComboBox>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{locale:Locale SettingsTabGeneralCursorHideIdleTime}"
+                            Width="150"
+                            Margin="10,0,0,0"/>
+                        <ui:NumberBox
+                            MinWidth="100"
+                            SmallChange="1"
+                            LargeChange="5"
+                            SimpleNumberFormat="F0"
+                            Maximum="100"
+                            Minimum="1"
+                            ToolTip.Tip="{locale:Locale SettingsTabGeneralCursorHideIdleTimeTooltip}"
+                            Value="{Binding CursorHideIdleTime}" />
                     </StackPanel>
                     <StackPanel Margin="0, 15, 0, 10" Orientation="Horizontal">
                         <TextBlock

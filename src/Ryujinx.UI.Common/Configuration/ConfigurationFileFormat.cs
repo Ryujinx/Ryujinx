@@ -15,7 +15,7 @@ namespace Ryujinx.UI.Common.Configuration
         /// <summary>
         /// The current version of the file format
         /// </summary>
-        public const int CurrentVersion = 49;
+        public const int CurrentVersion = 50;
 
         /// <summary>
         /// Version of the configuration file format
@@ -166,6 +166,11 @@ namespace Ryujinx.UI.Common.Configuration
         /// Whether to hide cursor on idle, always or never
         /// </summary>
         public HideCursorMode HideCursor { get; set; }
+
+        /// <summary>
+        /// Amount of seconds needed to be spent idle to hide cursor
+        /// </summary>
+        public int CursorHideIdleTime { get; set; }
 
         /// <summary>
         /// Enables or disables Vertical Sync

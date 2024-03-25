@@ -631,6 +631,11 @@ namespace Ryujinx.UI.Common.Configuration
         /// </summary>
         public ReactiveObject<HideCursorMode> HideCursor { get; private set; }
 
+        /// <summary>
+        /// Amount of seconds needed by the mouse to be spent idle to hide the cursor.
+        /// </summary>
+        public ReactiveObject<int> CursorHideIdleTime { get; private set; }
+
         private ConfigurationState()
         {
             UI = new UISection();
@@ -643,6 +648,7 @@ namespace Ryujinx.UI.Common.Configuration
             CheckUpdatesOnStart = new ReactiveObject<bool>();
             ShowConfirmExit = new ReactiveObject<bool>();
             HideCursor = new ReactiveObject<HideCursorMode>();
+            CursorHideIdleTime = new ReactiveObject<int>();
         }
 
         public ConfigurationFileFormat ToFileFormat()
@@ -679,6 +685,7 @@ namespace Ryujinx.UI.Common.Configuration
                 CheckUpdatesOnStart = CheckUpdatesOnStart,
                 ShowConfirmExit = ShowConfirmExit,
                 HideCursor = HideCursor,
+                CursorHideIdleTime = CursorHideIdleTime,
                 EnableVsync = Graphics.EnableVsync,
                 EnableShaderCache = Graphics.EnableShaderCache,
                 EnableTextureRecompression = Graphics.EnableTextureRecompression,
@@ -843,6 +850,7 @@ namespace Ryujinx.UI.Common.Configuration
             UI.WindowStartup.WindowMaximized.Value = false;
             Hid.EnableKeyboard.Value = false;
             Hid.EnableMouse.Value = false;
+            CursorHideIdleTime.Value = 5;
             Hid.Hotkeys.Value = new KeyboardHotkeys
             {
                 ToggleVsync = Key.F1,
@@ -1442,6 +1450,15 @@ namespace Ryujinx.UI.Common.Configuration
                 configurationFileUpdated = true;
             }
 
+            if (configurationFileFormat.Version < 50)
+            {
+                Ryujinx.Common.Logging.Logger.Warning?.Print(LogClass.Application, $"Outdated configuration version {configurationFileFormat.Version}, migrating to version 50.");
+
+                configurationFileFormat.CursorHideIdleTime = 5;
+
+                configurationFileUpdated = true;
+            }
+
             Logger.EnableFileLog.Value = configurationFileFormat.EnableFileLog;
             Graphics.ResScale.Value = configurationFileFormat.ResScale;
             Graphics.ResScaleCustom.Value = configurationFileFormat.ResScaleCustom;
@@ -1473,6 +1490,7 @@ namespace Ryujinx.UI.Common.Configuration
             CheckUpdatesOnStart.Value = configurationFileFormat.CheckUpdatesOnStart;
             ShowConfirmExit.Value = configurationFileFormat.ShowConfirmExit;
             HideCursor.Value = configurationFileFormat.HideCursor;
+            CursorHideIdleTime.Value = configurationFileFormat.CursorHideIdleTime;
             Graphics.EnableVsync.Value = configurationFileFormat.EnableVsync;
             Graphics.EnableShaderCache.Value = configurationFileFormat.EnableShaderCache;
             Graphics.EnableTextureRecompression.Value = configurationFileFormat.EnableTextureRecompression;
