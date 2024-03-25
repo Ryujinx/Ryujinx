@@ -15,18 +15,18 @@ namespace Ryujinx.Graphics.Gpu.Image
     class TextureBindingsArrayCache
     {
         /// <summary>
-        /// Maximum amount of entries on the cache, before entries are re-used.
+        /// Minimum timestamp delta until texture array can be removed from the cache.
         /// </summary>
-        private const int CacheCapacity = 1024;
+        private const int MinDeltaForRemoval = 20000;
 
         private readonly GpuContext _context;
         private readonly GpuChannel _channel;
         private readonly bool _isCompute;
 
         /// <summary>
-        /// Array cache entry.
+        /// Array cache entry key.
         /// </summary>
-        private struct CacheEntry
+        private readonly struct CacheEntryKey : IEquatable<CacheEntryKey>
         {
             /// <summary>
             /// Whether the entry is for an image.
@@ -48,6 +48,99 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// </summary>
             public readonly int ArrayLength;
 
+            private readonly TexturePool _texturePool;
+            private readonly SamplerPool _samplerPool;
+
+            private readonly BufferBounds _textureBufferBounds;
+
+            /// <summary>
+            /// Creates a new array cache entry.
+            /// </summary>
+            /// <param name="isImage">Whether the entry is for an image</param>
+            /// <param name="bindingInfo">Binding information for the array</param>
+            /// <param name="texturePool">Texture pool where the array textures are located</param>
+            /// <param name="samplerPool">Sampler pool where the array samplers are located</param>
+            /// <param name="textureBufferBounds">Constant buffer bounds with the texture handles</param>
+            public CacheEntryKey(
+                bool isImage,
+                TextureBindingInfo bindingInfo,
+                TexturePool texturePool,
+                SamplerPool samplerPool,
+                ref BufferBounds textureBufferBounds)
+            {
+                IsImage = isImage;
+                Target = bindingInfo.Target;
+                HandleIndex = bindingInfo.Handle;
+                ArrayLength = bindingInfo.ArrayLength;
+
+                _texturePool = texturePool;
+                _samplerPool = samplerPool;
+
+                _textureBufferBounds = textureBufferBounds;
+            }
+
+            /// <summary>
+            /// Checks if the texture and sampler pools matches the cached pools.
+            /// </summary>
+            /// <param name="texturePool">Texture pool instance</param>
+            /// <param name="samplerPool">Sampler pool instance</param>
+            /// <returns>True if the pools match, false otherwise</returns>
+            private bool MatchesPools(TexturePool texturePool, SamplerPool samplerPool)
+            {
+                return _texturePool == texturePool && _samplerPool == samplerPool;
+            }
+
+            /// <summary>
+            /// Checks if the cached constant buffer address and size matches.
+            /// </summary>
+            /// <param name="textureBufferBounds">New buffer address and size</param>
+            /// <returns>True if the address and size matches, false otherwise</returns>
+            private bool MatchesBufferBounds(BufferBounds textureBufferBounds)
+            {
+                return _textureBufferBounds.Equals(textureBufferBounds);
+            }
+
+            public bool Equals(CacheEntryKey other)
+            {
+                return IsImage == other.IsImage &&
+                    Target == other.Target &&
+                    HandleIndex == other.HandleIndex &&
+                    ArrayLength == other.ArrayLength &&
+                    MatchesPools(other._texturePool, other._samplerPool) &&
+                    MatchesBufferBounds(other._textureBufferBounds);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is CacheEntryKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return _textureBufferBounds.Range.GetHashCode();
+            }
+        }
+
+        /// <summary>
+        /// Array cache entry.
+        /// </summary>
+        private class CacheEntry
+        {
+            /// <summary>
+            /// Key for this entry on the cache.
+            /// </summary>
+            public readonly CacheEntryKey Key;
+
+            /// <summary>
+            /// Linked list node used on the texture bindings array cache.
+            /// </summary>
+            public LinkedListNode<CacheEntry> CacheNode;
+
+            /// <summary>
+            /// Timestamp set on the last use of the array by the cache.
+            /// </summary>
+            public int CacheTimestamp;
+
             /// <summary>
             /// All cached textures, along with their invalidated sequence number as value.
             /// </summary>
@@ -64,12 +157,12 @@ namespace Ryujinx.Graphics.Gpu.Image
             public readonly Dictionary<int, Sampler> SamplerIds;
 
             /// <summary>
-            /// Backend texture array if <see cref="IsImage"/> is false, otherwise null.
+            /// Backend texture array if the entry is for a texture, otherwise null.
             /// </summary>
             public readonly ITextureArray TextureArray;
 
             /// <summary>
-            /// Backend image array if <see cref="IsImage"/> is true, otherwise null.
+            /// Backend image array if the entry is for an image, otherwise null.
             /// </summary>
             public readonly IImageArray ImageArray;
 
@@ -79,8 +172,6 @@ namespace Ryujinx.Graphics.Gpu.Image
             private int _texturePoolSequence;
             private int _samplerPoolSequence;
 
-            private readonly BufferBounds _textureBufferBounds;
-
             private int[] _cachedTextureBuffer;
             private int[] _cachedSamplerBuffer;
 
@@ -89,47 +180,28 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// <summary>
             /// Creates a new array cache entry.
             /// </summary>
-            /// <param name="isImage">Whether the entry is for an image</param>
-            /// <param name="bindingInfo">Binding information for the array</param>
+            /// <param name="key">Key for this entry on the cache</param>
             /// <param name="texturePool">Texture pool where the array textures are located</param>
             /// <param name="samplerPool">Sampler pool where the array samplers are located</param>
-            /// <param name="textureBufferBounds">Constant buffer bounds with the texture handles</param>
-            private CacheEntry(
-                bool isImage,
-                TextureBindingInfo bindingInfo,
-                TexturePool texturePool,
-                SamplerPool samplerPool,
-                ref BufferBounds textureBufferBounds)
+            private CacheEntry(ref CacheEntryKey key, TexturePool texturePool, SamplerPool samplerPool)
             {
-                IsImage = isImage;
-                Target = bindingInfo.Target;
-                HandleIndex = bindingInfo.Handle;
-                ArrayLength = bindingInfo.ArrayLength;
-
+                Key = key;
                 Textures = new Dictionary<Texture, int>();
                 TextureIds = new Dictionary<int, Texture>();
                 SamplerIds = new Dictionary<int, Sampler>();
 
                 _texturePool = texturePool;
                 _samplerPool = samplerPool;
-
-                _textureBufferBounds = textureBufferBounds;
             }
 
             /// <summary>
             /// Creates a new array cache entry.
             /// </summary>
-            /// <param name="isImage">Whether the entry is for an image</param>
+            /// <param name="key">Key for this entry on the cache</param>
             /// <param name="array">Backend texture array</param>
             /// <param name="texturePool">Texture pool where the array textures are located</param>
             /// <param name="samplerPool">Sampler pool where the array samplers are located</param>
-            /// <param name="textureBufferBounds">Constant buffer bounds with the texture handles</param>
-            public CacheEntry(
-                TextureBindingInfo bindingInfo,
-                ITextureArray array,
-                TexturePool texturePool,
-                SamplerPool samplerPool,
-                ref BufferBounds textureBufferBounds) : this(isImage: false, bindingInfo, texturePool, samplerPool, ref textureBufferBounds)
+            public CacheEntry(ref CacheEntryKey key, ITextureArray array, TexturePool texturePool, SamplerPool samplerPool) : this(ref key, texturePool, samplerPool)
             {
                 TextureArray = array;
             }
@@ -137,17 +209,11 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// <summary>
             /// Creates a new array cache entry.
             /// </summary>
-            /// <param name="isImage">Whether the entry is for an image</param>
+            /// <param name="key">Key for this entry on the cache</param>
             /// <param name="array">Backend image array</param>
             /// <param name="texturePool">Texture pool where the array textures are located</param>
             /// <param name="samplerPool">Sampler pool where the array samplers are located</param>
-            /// <param name="textureBufferBounds">Constant buffer bounds with the texture handles</param>
-            public CacheEntry(
-                TextureBindingInfo bindingInfo,
-                IImageArray array,
-                TexturePool texturePool,
-                SamplerPool samplerPool,
-                ref BufferBounds textureBufferBounds) : this(isImage: true, bindingInfo, texturePool, samplerPool, ref textureBufferBounds)
+            public CacheEntry(ref CacheEntryKey key, IImageArray array, TexturePool texturePool, SamplerPool samplerPool) : this(ref key, texturePool, samplerPool)
             {
                 ImageArray = array;
             }
@@ -155,7 +221,7 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// <summary>
             /// Clears all cached texture instances.
             /// </summary>
-            public readonly void Reset()
+            public void Reset()
             {
                 Textures.Clear();
                 TextureIds.Clear();
@@ -190,7 +256,7 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// Checks if any texture has been deleted since the last call to this method.
             /// </summary>
             /// <returns>True if one or more textures have been deleted, false otherwise</returns>
-            public readonly bool ValidateTextures()
+            public bool ValidateTextures()
             {
                 foreach ((Texture texture, int invalidatedSequence) in Textures)
                 {
@@ -271,27 +337,6 @@ namespace Ryujinx.Graphics.Gpu.Image
             }
 
             /// <summary>
-            /// Checks if the texture and sampler pools matches the cached pools.
-            /// </summary>
-            /// <param name="texturePool">Texture pool instance</param>
-            /// <param name="samplerPool">Sampler pool instance</param>
-            /// <returns>True if the pools match, false otherwise</returns>
-            public readonly bool MatchesPools(TexturePool texturePool, SamplerPool samplerPool)
-            {
-                return _texturePool == texturePool && _samplerPool == samplerPool;
-            }
-
-            /// <summary>
-            /// Checks if the cached constant buffer address and size matches.
-            /// </summary>
-            /// <param name="textureBufferBounds">New buffer address and size</param>
-            /// <returns>True if the address and size matches, false otherwise</returns>
-            public readonly bool MatchesBufferBounds(ref BufferBounds textureBufferBounds)
-            {
-                return _textureBufferBounds.Equals(ref textureBufferBounds);
-            }
-
-            /// <summary>
             /// Checks if the buffer data matches the cached data.
             /// </summary>
             /// <param name="cachedTextureBuffer">New texture buffer data</param>
@@ -299,7 +344,7 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// <param name="separateSamplerBuffer">Whether <paramref name="cachedTextureBuffer"/> and <paramref name="cachedSamplerBuffer"/> comes from different buffers</param>
             /// <param name="samplerWordOffset">Word offset of the sampler constant buffer handle that is used</param>
             /// <returns>True if the data matches, false otherwise</returns>
-            public readonly bool MatchesBufferData(
+            public bool MatchesBufferData(
                 ReadOnlySpan<int> cachedTextureBuffer,
                 ReadOnlySpan<int> cachedSamplerBuffer,
                 bool separateSamplerBuffer,
@@ -334,7 +379,10 @@ namespace Ryujinx.Graphics.Gpu.Image
             }
         }
 
-        private CacheEntry[] _cache;
+        private readonly Dictionary<CacheEntryKey, CacheEntry> _cache;
+        private readonly LinkedList<CacheEntry> _lruCache;
+
+        private int _currentTimestamp;
 
         /// <summary>
         /// Creates a new instance of the texture bindings array cache.
@@ -347,7 +395,8 @@ namespace Ryujinx.Graphics.Gpu.Image
             _context = context;
             _channel = channel;
             _isCompute = isCompute;
-            _cache = Array.Empty<CacheEntry>();
+            _cache = new Dictionary<CacheEntryKey, CacheEntry>();
+            _lruCache = new LinkedList<CacheEntry>();
         }
 
         /// <summary>
@@ -429,7 +478,7 @@ namespace Ryujinx.Graphics.Gpu.Image
 
             (_, int samplerWordOffset, _) = TextureHandle.UnpackOffsets(bindingInfo.Handle);
 
-            ref CacheEntry entry = ref GetOrAddEntry(
+            CacheEntry entry = GetOrAddEntry(
                 texturePool,
                 samplerPool,
                 bindingInfo,
@@ -575,8 +624,8 @@ namespace Ryujinx.Graphics.Gpu.Image
         /// <param name="isImage">Whether the array is a image or texture array</param>
         /// <param name="textureBufferBounds">Constant buffer bounds with the texture handles</param>
         /// <param name="isNew">Whether a new entry was created, or an existing one was returned</param>
-        /// <returns>Cache entry reference</returns>
-        private ref CacheEntry GetOrAddEntry(
+        /// <returns>Cache entry</returns>
+        private CacheEntry GetOrAddEntry(
             TexturePool texturePool,
             SamplerPool samplerPool,
             TextureBindingInfo bindingInfo,
@@ -584,67 +633,60 @@ namespace Ryujinx.Graphics.Gpu.Image
             ref BufferBounds textureBufferBounds,
             out bool isNew)
         {
-            int matchIndex = -1;
-            int arrayLength = bindingInfo.ArrayLength;
+            CacheEntryKey key = new CacheEntryKey(
+                isImage,
+                bindingInfo,
+                texturePool,
+                samplerPool,
+                ref textureBufferBounds);
 
-            for (int index = 0; index < _cache.Length; index++)
+            isNew = !_cache.TryGetValue(key, out CacheEntry entry);
+
+            if (isNew)
             {
-                ref CacheEntry entry = ref _cache[index];
-
-                if (entry.IsImage == isImage &&
-                    entry.Target == bindingInfo.Target &&
-                    entry.HandleIndex == bindingInfo.Handle &&
-                    entry.ArrayLength == arrayLength &&
-                    entry.MatchesPools(texturePool, samplerPool) &&
-                    entry.MatchesBufferBounds(ref textureBufferBounds))
-                {
-                    matchIndex = index;
-                    break;
-                }
-            }
-
-            if (matchIndex < 0)
-            {
-                if (_cache.Length < CacheCapacity)
-                {
-                    matchIndex = _cache.Length;
-                    Array.Resize(ref _cache, matchIndex + 1);
-                }
-                else
-                {
-                    matchIndex = CacheCapacity - 1;
-                }
+                int arrayLength = bindingInfo.ArrayLength;
 
                 if (isImage)
                 {
                     IImageArray array = _context.Renderer.CreateImageArray(arrayLength, bindingInfo.Target == Target.TextureBuffer);
 
-                    _cache[matchIndex] = new CacheEntry(bindingInfo, array, texturePool, samplerPool, ref textureBufferBounds);
+                    _cache.Add(key, entry = new CacheEntry(ref key, array, texturePool, samplerPool));
                 }
                 else
                 {
                     ITextureArray array = _context.Renderer.CreateTextureArray(arrayLength, bindingInfo.Target == Target.TextureBuffer);
 
-                    _cache[matchIndex] = new CacheEntry(bindingInfo, array, texturePool, samplerPool, ref textureBufferBounds);
+                    _cache.Add(key, entry = new CacheEntry(ref key, array, texturePool, samplerPool));
                 }
-
-                isNew = true;
             }
-            else
+
+            if (entry.CacheNode != null)
             {
-                isNew = false;
+                _lruCache.Remove(entry.CacheNode);
             }
 
-            if (matchIndex > 0)
+            entry.CacheNode = _lruCache.AddLast(entry);
+            entry.CacheTimestamp = ++_currentTimestamp;
+
+            RemoveLeastUsedEntries();
+
+            return entry;
+        }
+
+        /// <summary>
+        /// Remove entries from the cache that have not been used for some time.
+        /// </summary>
+        private void RemoveLeastUsedEntries()
+        {
+            LinkedListNode<CacheEntry> nextNode = _lruCache.First;
+
+            while (nextNode != null && _currentTimestamp - nextNode.Value.CacheTimestamp >= MinDeltaForRemoval)
             {
-                CacheEntry temp = _cache[matchIndex];
-
-                Array.Copy(_cache, 0, _cache, 1, matchIndex);
-
-                _cache[0] = temp;
+                LinkedListNode<CacheEntry> toRemove = nextNode;
+                nextNode = nextNode.Next;
+                _cache.Remove(toRemove.Value.Key);
+                _lruCache.Remove(toRemove);
             }
-
-            return ref _cache[0];
         }
 
         /// <summary>
@@ -653,9 +695,9 @@ namespace Ryujinx.Graphics.Gpu.Image
         /// <param name="binding">Binding number to clear</param>
         private void ClearBindingsIfEqual(int binding)
         {
-            for (int index = 0; index < _cache.Length; index++)
+            foreach (CacheEntry entry in _cache.Values)
             {
-                _cache[index].ClearBindingIfEqual(binding);
+                entry.ClearBindingIfEqual(binding);
             }
         }
     }
