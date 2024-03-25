@@ -128,13 +128,13 @@ namespace Ryujinx.Graphics.Gpu.Memory
 
             if (_useGranular)
             {
-                _memoryTrackingGranular = physicalMemory.BeginGranularTracking(address, size, ResourceKind.Buffer, baseHandles);
+                _memoryTrackingGranular = physicalMemory.BeginGranularTracking(address, size, ResourceKind.Buffer, RegionFlags.UnalignedAccess, baseHandles);
 
                 _memoryTrackingGranular.RegisterPreciseAction(address, size, PreciseAction);
             }
             else
             {
-                _memoryTracking = physicalMemory.BeginTracking(address, size, ResourceKind.Buffer);
+                _memoryTracking = physicalMemory.BeginTracking(address, size, ResourceKind.Buffer, RegionFlags.UnalignedAccess);
 
                 if (baseHandles != null)
                 {

@@ -10,8 +10,8 @@ namespace Ryujinx.Graphics.Vulkan.Queries
     class BufferedQuery : IDisposable
     {
         private const int MaxQueryRetries = 5000;
-        private const long DefaultValue = -1;
-        private const long DefaultValueInt = 0xFFFFFFFF;
+        private const long DefaultValue = unchecked((long)0xFFFFFFFEFFFFFFFE);
+        private const long DefaultValueInt = 0xFFFFFFFE;
         private const ulong HighMask = 0xFFFFFFFF00000000;
 
         private readonly Vk _api;

@@ -141,80 +141,10 @@ namespace Ryujinx.Ava.UI.Renderer
 
             _wndProcDelegate = delegate (IntPtr hWnd, WindowsMessages msg, IntPtr wParam, IntPtr lParam)
             {
-                if (VisualRoot != null)
+                switch (msg)
                 {
-                    if (msg == WindowsMessages.Lbuttondown ||
-                        msg == WindowsMessages.Rbuttondown ||
-                        msg == WindowsMessages.Lbuttonup ||
-                        msg == WindowsMessages.Rbuttonup ||
-                        msg == WindowsMessages.Mousemove)
-                    {
-                        Point rootVisualPosition = this.TranslatePoint(new Point((long)lParam & 0xFFFF, (long)lParam >> 16 & 0xFFFF), this).Value;
-                        Pointer pointer = new(0, PointerType.Mouse, true);
-
-#pragma warning disable CS0618 // Type or member is obsolete (As of Avalonia 11, the constructors for PointerPressedEventArgs & PointerEventArgs are marked as obsolete)
-                        switch (msg)
-                        {
-                            case WindowsMessages.Lbuttondown:
-                            case WindowsMessages.Rbuttondown:
-                                {
-                                    bool isLeft = msg == WindowsMessages.Lbuttondown;
-                                    RawInputModifiers pointerPointModifier = isLeft ? RawInputModifiers.LeftMouseButton : RawInputModifiers.RightMouseButton;
-                                    PointerPointProperties properties = new(pointerPointModifier, isLeft ? PointerUpdateKind.LeftButtonPressed : PointerUpdateKind.RightButtonPressed);
-
-                                    var evnt = new PointerPressedEventArgs(
-                                        this,
-                                        pointer,
-                                        this,
-                                        rootVisualPosition,
-                                        (ulong)Environment.TickCount64,
-                                        properties,
-                                        KeyModifiers.None);
-
-                                    RaiseEvent(evnt);
-
-                                    break;
-                                }
-                            case WindowsMessages.Lbuttonup:
-                            case WindowsMessages.Rbuttonup:
-                                {
-                                    bool isLeft = msg == WindowsMessages.Lbuttonup;
-                                    RawInputModifiers pointerPointModifier = isLeft ? RawInputModifiers.LeftMouseButton : RawInputModifiers.RightMouseButton;
-                                    PointerPointProperties properties = new(pointerPointModifier, isLeft ? PointerUpdateKind.LeftButtonReleased : PointerUpdateKind.RightButtonReleased);
-
-                                    var evnt = new PointerReleasedEventArgs(
-                                        this,
-                                        pointer,
-                                        this,
-                                        rootVisualPosition,
-                                        (ulong)Environment.TickCount64,
-                                        properties,
-                                        KeyModifiers.None,
-                                        isLeft ? MouseButton.Left : MouseButton.Right);
-
-                                    RaiseEvent(evnt);
-
-                                    break;
-                                }
-                            case WindowsMessages.Mousemove:
-                                {
-                                    var evnt = new PointerEventArgs(
-                                        PointerMovedEvent,
-                                        this,
-                                        pointer,
-                                        this,
-                                        rootVisualPosition,
-                                        (ulong)Environment.TickCount64,
-                                        new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.Other),
-                                        KeyModifiers.None);
-
-                                    RaiseEvent(evnt);
-
-                                    break;
-                                }
-                        }
-#pragma warning restore CS0618
-                    }
+                    case WindowsMessages.NcHitTest:
+                        return -1;
                 }
 
                 return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -233,6 +163,8 @@ namespace Ryujinx.Ava.UI.Renderer
             RegisterClassEx(ref wndClassEx);
 
             WindowHandle = CreateWindowEx(0, _className, "NativeWindow", WindowStyles.WsChild, 0, 0, 640, 480, control.Handle, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+
+            SetWindowLongPtrW(control.Handle, GWLP_WNDPROC, wndClassEx.lpfnWndProc);
 
             Marshal.FreeHGlobal(wndClassEx.lpszClassName);
 

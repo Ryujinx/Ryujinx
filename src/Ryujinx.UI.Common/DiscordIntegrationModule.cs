@@ -7,7 +7,7 @@ namespace Ryujinx.UI.Common
     public static class DiscordIntegrationModule
     {
         private const string Description = "A simple, experimental Nintendo Switch emulator.";
-        private const string CliendId = "568815339807309834";
+        private const string ApplicationId = "1216775165866807456";
 
         private static DiscordRpcClient _discordClient;
         private static RichPresence _discordPresenceMain;
@@ -24,14 +24,14 @@ namespace Ryujinx.UI.Common
                 Details = "Main Menu",
                 State = "Idling",
                 Timestamps = Timestamps.Now,
-                Buttons = new[]
-                {
+                Buttons =
+                [
                     new Button
                     {
                         Label = "Website",
-                        Url   = "https://ryujinx.org/",
+                        Url = "https://ryujinx.org/",
                     },
-                },
+                ],
             };
 
             ConfigurationState.Instance.EnableDiscordIntegration.Event += Update;
@@ -52,7 +52,7 @@ namespace Ryujinx.UI.Common
                 // If we need to activate it and the client isn't active, initialize it
                 if (evnt.NewValue && _discordClient == null)
                 {
-                    _discordClient = new DiscordRpcClient(CliendId);
+                    _discordClient = new DiscordRpcClient(ApplicationId);
 
                     _discordClient.Initialize();
                     _discordClient.SetPresence(_discordPresenceMain);
@@ -74,14 +74,14 @@ namespace Ryujinx.UI.Common
                 Details = $"Playing {titleName}",
                 State = (titleId == "0000000000000000") ? "Homebrew" : titleId.ToUpper(),
                 Timestamps = Timestamps.Now,
-                Buttons = new[]
-                {
+                Buttons =
+                [
                     new Button
                     {
                         Label = "Website",
                         Url = "https://ryujinx.org/",
                     },
-                },
+                ],
             });
         }
 

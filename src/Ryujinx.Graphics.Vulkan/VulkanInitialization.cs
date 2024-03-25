@@ -136,7 +136,7 @@ namespace Ryujinx.Graphics.Vulkan
         {
             instance.EnumeratePhysicalDevices(out var physicalDevices).ThrowOnError();
 
-            // First we try to pick the the user preferred GPU.
+            // First we try to pick the user preferred GPU.
             for (int i = 0; i < physicalDevices.Length; i++)
             {
                 if (IsPreferredAndSuitableDevice(api, physicalDevices[i], surface, preferredGpuId))

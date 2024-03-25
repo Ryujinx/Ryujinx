@@ -257,7 +257,7 @@ namespace Ryujinx.Cpu.LightningJit.Arm64.Target.Arm64
 
                 (name, flags, AddressForm addressForm) = InstTable.GetInstNameAndFlags(encoding, cpuPreset.Version, cpuPreset.Features);
 
-                if (name.IsPrivileged())
+                if (name.IsPrivileged() || (name == InstName.Sys && IsPrivilegedSys(encoding)))
                 {
                     name = InstName.UdfPermUndef;
                     flags = InstFlags.None;
@@ -339,6 +339,11 @@ namespace Ryujinx.Cpu.LightningJit.Arm64.Target.Arm64
             useMask = new(gprUseMask, fpSimdUseMask, pStateUseMask);
 
             return new(startAddress, address, insts, !isTruncated && !name.IsException(), isTruncated, isLoopEnd);
+        }
+
+        private static bool IsPrivilegedSys(uint encoding)
+        {
+            return !SysUtils.IsCacheInstEl0(encoding);
         }
 
         private static bool IsMrsNzcv(uint encoding)

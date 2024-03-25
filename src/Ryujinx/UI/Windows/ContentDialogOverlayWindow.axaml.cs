@@ -9,7 +9,6 @@ namespace Ryujinx.Ava.UI.Windows
         {
             InitializeComponent();
 
-            ExtendClientAreaToDecorationsHint = true;
             TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent };
             WindowStartupLocation = WindowStartupLocation.Manual;
             SystemDecorations = SystemDecorations.None;

@@ -343,11 +343,22 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
 
             bool unalignedChanged = _currentSpecState.SetHasUnalignedStorageBuffer(_channel.BufferManager.HasUnalignedStorageBuffers);
 
-            if (!_channel.TextureManager.CommitGraphicsBindings(_shaderSpecState) || unalignedChanged)
+            bool scaleMismatch;
+            do
             {
-                // Shader must be reloaded. _vtgWritesRtLayer should not change.
-                UpdateShaderState();
+                if (!_channel.TextureManager.CommitGraphicsBindings(_shaderSpecState, out scaleMismatch) || unalignedChanged)
+                {
+                    // Shader must be reloaded. _vtgWritesRtLayer should not change.
+                    UpdateShaderState();
+                }
+
+                if (scaleMismatch)
+                {
+                    // Binding textures changed scale of the bound render targets, correct the render target scale and rebind.
+                    UpdateRenderTargetState();
+                }
             }
+            while (scaleMismatch);
 
             _channel.BufferManager.CommitGraphicsBindings(_drawState.DrawIndexed);
         }

@@ -174,7 +174,7 @@ namespace Ryujinx.Memory
         /// <param name="offset">Starting offset of the range being read</param>
         /// <param name="data">Span where the bytes being read will be copied to</param>
         /// <exception cref="ObjectDisposedException">Throw when the memory block has already been disposed</exception>
-        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the the data is out of range</exception>
+        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the data is out of range</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Read(ulong offset, Span<byte> data)
         {
@@ -188,7 +188,7 @@ namespace Ryujinx.Memory
         /// <param name="offset">Offset where the data is located</param>
         /// <returns>Data at the specified address</returns>
         /// <exception cref="ObjectDisposedException">Throw when the memory block has already been disposed</exception>
-        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the the data is out of range</exception>
+        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the data is out of range</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Read<T>(ulong offset) where T : unmanaged
         {
@@ -201,7 +201,7 @@ namespace Ryujinx.Memory
         /// <param name="offset">Starting offset of the range being written</param>
         /// <param name="data">Span where the bytes being written will be copied from</param>
         /// <exception cref="ObjectDisposedException">Throw when the memory block has already been disposed</exception>
-        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the the data is out of range</exception>
+        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the data is out of range</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(ulong offset, ReadOnlySpan<byte> data)
         {
@@ -215,7 +215,7 @@ namespace Ryujinx.Memory
         /// <param name="offset">Offset to write the data into</param>
         /// <param name="data">Data to be written</param>
         /// <exception cref="ObjectDisposedException">Throw when the memory block has already been disposed</exception>
-        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the the data is out of range</exception>
+        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified for the data is out of range</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(ulong offset, T data) where T : unmanaged
         {

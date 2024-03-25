@@ -173,7 +173,7 @@ namespace Ryujinx.Graphics.Gpu.Memory
 
             ShrinkOverlapsBufferIfNeeded();
 
-            // If the the range is not properly aligned for sparse mapping,
+            // If the range is not properly aligned for sparse mapping,
             // let's just force it to a single range.
             // This might cause issues in some applications that uses sparse
             // mappings.

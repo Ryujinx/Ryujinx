@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Ryujinx.Common.Utilities
 {
@@ -43,6 +45,12 @@ namespace Ryujinx.Common.Utilities
         {
             CopyDirectory(sourceDir, destinationDir, true);
             Directory.Delete(sourceDir, true);
+        }
+
+        public static string SanitizeFileName(string fileName)
+        {
+            var reservedChars = new HashSet<char>(Path.GetInvalidFileNameChars());
+            return string.Concat(fileName.Select(c => reservedChars.Contains(c) ? '_' : c));
         }
     }
 }

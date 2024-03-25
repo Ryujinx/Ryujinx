@@ -214,6 +214,7 @@ namespace Ryujinx.Memory
         /// <param name="va">Virtual address base</param>
         /// <param name="size">Size of the region to protect</param>
         /// <param name="protection">Memory protection to set</param>
-        void TrackingReprotect(ulong va, ulong size, MemoryPermission protection);
+        /// <param name="guest">True if the protection is for guest access, false otherwise</param>
+        void TrackingReprotect(ulong va, ulong size, MemoryPermission protection, bool guest);
     }
 }

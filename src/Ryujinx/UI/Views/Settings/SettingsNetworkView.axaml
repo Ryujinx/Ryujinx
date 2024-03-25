@@ -32,8 +32,14 @@
                     <ComboBox SelectedIndex="{Binding MultiplayerModeIndex}"
                         ToolTip.Tip="{locale:Locale MultiplayerModeTooltip}"
                         HorizontalContentAlignment="Left"
-                        ItemsSource="{Binding MultiplayerModes}"
-                        Width="250" />
+                        Width="250">
+                        <ComboBoxItem>
+                            <TextBlock Text="{locale:Locale MultiplayerModeDisabled}" />
+                        </ComboBoxItem>
+                        <ComboBoxItem>
+                            <TextBlock Text="{locale:Locale MultiplayerModeLdnMitm}" />
+                        </ComboBoxItem>
+                    </ComboBox>
                 </StackPanel>
                 <Separator Height="1" />
                 <TextBlock Classes="h1" Text="{locale:Locale SettingsTabNetworkConnection}" />

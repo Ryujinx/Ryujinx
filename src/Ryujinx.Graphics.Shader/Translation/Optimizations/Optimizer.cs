@@ -322,7 +322,7 @@ namespace Ryujinx.Graphics.Shader.Translation.Optimizations
             Operand lhs = operation.GetSource(0);
             Operand rhs = operation.GetSource(1);
 
-            // Check LHS of the the main multiplication operation. We expect an input being multiplied by gl_FragCoord.w.
+            // Check LHS of the main multiplication operation. We expect an input being multiplied by gl_FragCoord.w.
             if (lhs.AsgOp is not Operation attrMulOp || attrMulOp.Inst != (Instruction.FP32 | Instruction.Multiply))
             {
                 return;

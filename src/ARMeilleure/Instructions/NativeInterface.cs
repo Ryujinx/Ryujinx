@@ -91,54 +91,54 @@ namespace ARMeilleure.Instructions
         #region "Read"
         public static byte ReadByte(ulong address)
         {
-            return GetMemoryManager().ReadTracked<byte>(address);
+            return GetMemoryManager().ReadGuest<byte>(address);
         }
 
         public static ushort ReadUInt16(ulong address)
         {
-            return GetMemoryManager().ReadTracked<ushort>(address);
+            return GetMemoryManager().ReadGuest<ushort>(address);
         }
 
         public static uint ReadUInt32(ulong address)
         {
-            return GetMemoryManager().ReadTracked<uint>(address);
+            return GetMemoryManager().ReadGuest<uint>(address);
         }
 
         public static ulong ReadUInt64(ulong address)
         {
-            return GetMemoryManager().ReadTracked<ulong>(address);
+            return GetMemoryManager().ReadGuest<ulong>(address);
         }
 
         public static V128 ReadVector128(ulong address)
         {
-            return GetMemoryManager().ReadTracked<V128>(address);
+            return GetMemoryManager().ReadGuest<V128>(address);
         }
         #endregion
 
         #region "Write"
         public static void WriteByte(ulong address, byte value)
         {
-            GetMemoryManager().Write(address, value);
+            GetMemoryManager().WriteGuest(address, value);
         }
 
         public static void WriteUInt16(ulong address, ushort value)
         {
-            GetMemoryManager().Write(address, value);
+            GetMemoryManager().WriteGuest(address, value);
         }
 
         public static void WriteUInt32(ulong address, uint value)
         {
-            GetMemoryManager().Write(address, value);
+            GetMemoryManager().WriteGuest(address, value);
         }
 
         public static void WriteUInt64(ulong address, ulong value)
         {
-            GetMemoryManager().Write(address, value);
+            GetMemoryManager().WriteGuest(address, value);
         }
 
         public static void WriteVector128(ulong address, V128 value)
         {
-            GetMemoryManager().Write(address, value);
+            GetMemoryManager().WriteGuest(address, value);
         }
         #endregion
 

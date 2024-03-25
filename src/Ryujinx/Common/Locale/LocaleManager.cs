@@ -30,28 +30,22 @@ namespace Ryujinx.Ava.Common.Locale
             Load();
         }
 
-        public void Load()
+        private void Load()
         {
-            // Load the system Language Code.
-            string localeLanguageCode = CultureInfo.CurrentCulture.Name.Replace('-', '_');
+            var localeLanguageCode = !string.IsNullOrEmpty(ConfigurationState.Instance.UI.LanguageCode.Value) ?
+                ConfigurationState.Instance.UI.LanguageCode.Value : CultureInfo.CurrentCulture.Name.Replace('-', '_');
 
-            // If the view is loaded with the UI Previewer detached, then override it with the saved one or default.
+            // Load en_US as default, if the target language translation is missing or incomplete.
+            LoadDefaultLanguage();
+            LoadLanguage(localeLanguageCode);
+
+            // Save whatever we ended up with.
             if (Program.PreviewerDetached)
             {
-                if (!string.IsNullOrEmpty(ConfigurationState.Instance.UI.LanguageCode.Value))
-                {
-                    localeLanguageCode = ConfigurationState.Instance.UI.LanguageCode.Value;
-                }
-                else
-                {
-                    localeLanguageCode = DefaultLanguageCode;
-                }
+                ConfigurationState.Instance.UI.LanguageCode.Value = _localeLanguageCode;
+
+                ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
             }
-
-            // Load en_US as default, if the target language translation is incomplete.
-            LoadDefaultLanguage();
-
-            LoadLanguage(localeLanguageCode);
         }
 
         public string this[LocaleKeys key]
@@ -110,7 +104,7 @@ namespace Ryujinx.Ava.Common.Locale
         {
             return _localeLanguageCode switch
             {
-                "he_IL" => true,
+                "ar_SA" or "he_IL" => true,
                 _ => false
             };
         }
@@ -126,24 +120,42 @@ namespace Ryujinx.Ava.Common.Locale
 
         private void LoadDefaultLanguage()
         {
-            _localeDefaultStrings = LoadJsonLanguage();
+            _localeDefaultStrings = LoadJsonLanguage(DefaultLanguageCode);
         }
 
         public void LoadLanguage(string languageCode)
         {
-            foreach (var item in LoadJsonLanguage(languageCode))
+            var locale = LoadJsonLanguage(languageCode);
+
+            if (locale == null)
+            {
+                _localeLanguageCode = DefaultLanguageCode;
+                locale = _localeDefaultStrings;
+            }
+            else
+            {
+                _localeLanguageCode = languageCode;
+            }
+
+            foreach (var item in locale)
             {
                 this[item.Key] = item.Value;
             }
 
-            _localeLanguageCode = languageCode;
             LocaleChanged?.Invoke();
         }
 
-        private static Dictionary<LocaleKeys, string> LoadJsonLanguage(string languageCode = DefaultLanguageCode)
+        private static Dictionary<LocaleKeys, string> LoadJsonLanguage(string languageCode)
         {
             var localeStrings = new Dictionary<LocaleKeys, string>();
             string languageJson = EmbeddedResources.ReadAllText($"Ryujinx/Assets/Locales/{languageCode}.json");
+
+            if (languageJson == null)
+            {
+                // We were unable to find file for that language code.
+                return null;
+            }
+
             var strings = JsonHelper.Deserialize(languageJson, CommonJsonContext.Default.StringDictionary);
 
             foreach (var item in strings)

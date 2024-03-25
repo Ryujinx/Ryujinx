@@ -14,8 +14,13 @@ namespace Ryujinx.Memory.Tracking
 
         // Only use these from within the lock.
         private readonly NonOverlappingRangeList<VirtualRegion> _virtualRegions;
+        // Guest virtual regions are a subset of the normal virtual regions, with potentially different protection
+        // and expanded area of effect on platforms that don't support misaligned page protection.
+        private readonly NonOverlappingRangeList<VirtualRegion> _guestVirtualRegions;
 
         private readonly int _pageSize;
+
+        private readonly bool _singleByteGuestTracking;
 
         /// <summary>
         /// This lock must be obtained when traversing or updating the region-handle hierarchy.
@@ -27,16 +32,27 @@ namespace Ryujinx.Memory.Tracking
         /// Create a new tracking structure for the given "physical" memory block,
         /// with a given "virtual" memory manager that will provide mappings and virtual memory protection.
         /// </summary>
+        /// <remarks>
+        /// If <paramref name="singleByteGuestTracking" /> is true, the memory manager must also support protection on partially
+        /// unmapped regions without throwing exceptions or dropping protection on the mapped portion.
+        /// </remarks>
         /// <param name="memoryManager">Virtual memory manager</param>
-        /// <param name="block">Physical memory block</param>
         /// <param name="pageSize">Page size of the virtual memory space</param>
-        public MemoryTracking(IVirtualMemoryManager memoryManager, int pageSize, InvalidAccessHandler invalidAccessHandler = null)
+        /// <param name="invalidAccessHandler">Method to call for invalid memory accesses</param>
+        /// <param name="singleByteGuestTracking">True if the guest only signals writes for the first byte</param>
+        public MemoryTracking(
+            IVirtualMemoryManager memoryManager,
+            int pageSize,
+            InvalidAccessHandler invalidAccessHandler = null,
+            bool singleByteGuestTracking = false)
         {
             _memoryManager = memoryManager;
             _pageSize = pageSize;
             _invalidAccessHandler = invalidAccessHandler;
+            _singleByteGuestTracking = singleByteGuestTracking;
 
             _virtualRegions = new NonOverlappingRangeList<VirtualRegion>();
+            _guestVirtualRegions = new NonOverlappingRangeList<VirtualRegion>();
         }
 
         private (ulong address, ulong size) PageAlign(ulong address, ulong size)
@@ -62,20 +78,25 @@ namespace Ryujinx.Memory.Tracking
             {
                 ref var overlaps = ref ThreadStaticArray<VirtualRegion>.Get();
 
-                int count = _virtualRegions.FindOverlapsNonOverlapping(va, size, ref overlaps);
-
-                for (int i = 0; i < count; i++)
+                for (int type = 0; type < 2; type++)
                 {
-                    VirtualRegion region = overlaps[i];
+                    NonOverlappingRangeList<VirtualRegion> regions = type == 0 ? _virtualRegions : _guestVirtualRegions;
 
-                    // If the region has been fully remapped, signal that it has been mapped again.
-                    bool remapped = _memoryManager.IsRangeMapped(region.Address, region.Size);
-                    if (remapped)
+                    int count = regions.FindOverlapsNonOverlapping(va, size, ref overlaps);
+
+                    for (int i = 0; i < count; i++)
                     {
-                        region.SignalMappingChanged(true);
-                    }
+                        VirtualRegion region = overlaps[i];
 
-                    region.UpdateProtection();
+                        // If the region has been fully remapped, signal that it has been mapped again.
+                        bool remapped = _memoryManager.IsRangeMapped(region.Address, region.Size);
+                        if (remapped)
+                        {
+                            region.SignalMappingChanged(true);
+                        }
+
+                        region.UpdateProtection();
+                    }
                 }
             }
         }
@@ -95,14 +116,43 @@ namespace Ryujinx.Memory.Tracking
             {
                 ref var overlaps = ref ThreadStaticArray<VirtualRegion>.Get();
 
-                int count = _virtualRegions.FindOverlapsNonOverlapping(va, size, ref overlaps);
-
-                for (int i = 0; i < count; i++)
+                for (int type = 0; type < 2; type++)
                 {
-                    VirtualRegion region = overlaps[i];
+                    NonOverlappingRangeList<VirtualRegion> regions = type == 0 ? _virtualRegions : _guestVirtualRegions;
 
-                    region.SignalMappingChanged(false);
+                    int count = regions.FindOverlapsNonOverlapping(va, size, ref overlaps);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        VirtualRegion region = overlaps[i];
+
+                        region.SignalMappingChanged(false);
+                    }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Alter a tracked memory region to properly capture unaligned accesses.
+        /// For most memory manager modes, this does nothing.
+        /// </summary>
+        /// <param name="address">Original region address</param>
+        /// <param name="size">Original region size</param>
+        /// <returns>A new address and size for tracking unaligned accesses</returns>
+        internal (ulong newAddress, ulong newSize) GetUnalignedSafeRegion(ulong address, ulong size)
+        {
+            if (_singleByteGuestTracking)
+            {
+                // The guest only signals the first byte of each memory access with the current memory manager.
+                // To catch unaligned access properly, we need to also protect the page before the address.
+
+                // Assume that the address and size are already aligned.
+
+                return (address - (ulong)_pageSize, size + (ulong)_pageSize);
+            }
+            else
+            {
+                return (address, size);
             }
         }
 
@@ -111,11 +161,13 @@ namespace Ryujinx.Memory.Tracking
         /// </summary>
         /// <param name="va">Starting virtual memory address of the handle</param>
         /// <param name="size">Size of the handle's memory region</param>
+        /// <param name="guest">True if getting handles for guest protection, false otherwise</param>
         /// <returns>A list of virtual regions within the given range</returns>
-        internal List<VirtualRegion> GetVirtualRegionsForHandle(ulong va, ulong size)
+        internal List<VirtualRegion> GetVirtualRegionsForHandle(ulong va, ulong size, bool guest)
         {
             List<VirtualRegion> result = new();
-            _virtualRegions.GetOrAddRegions(result, va, size, (va, size) => new VirtualRegion(this, va, size));
+            NonOverlappingRangeList<VirtualRegion> regions = guest ? _guestVirtualRegions : _virtualRegions;
+            regions.GetOrAddRegions(result, va, size, (va, size) => new VirtualRegion(this, va, size, guest));
 
             return result;
         }
@@ -126,7 +178,14 @@ namespace Ryujinx.Memory.Tracking
         /// <param name="region">Region to remove</param>
         internal void RemoveVirtual(VirtualRegion region)
         {
-            _virtualRegions.Remove(region);
+            if (region.Guest)
+            {
+                _guestVirtualRegions.Remove(region);
+            }
+            else
+            {
+                _virtualRegions.Remove(region);
+            }
         }
 
         /// <summary>
@@ -137,10 +196,11 @@ namespace Ryujinx.Memory.Tracking
         /// <param name="handles">Handles to inherit state from or reuse. When none are present, provide null</param>
         /// <param name="granularity">Desired granularity of write tracking</param>
         /// <param name="id">Handle ID</param>
+        /// <param name="flags">Region flags</param>
         /// <returns>The memory tracking handle</returns>
-        public MultiRegionHandle BeginGranularTracking(ulong address, ulong size, IEnumerable<IRegionHandle> handles, ulong granularity, int id)
+        public MultiRegionHandle BeginGranularTracking(ulong address, ulong size, IEnumerable<IRegionHandle> handles, ulong granularity, int id, RegionFlags flags = RegionFlags.None)
         {
-            return new MultiRegionHandle(this, address, size, handles, granularity, id);
+            return new MultiRegionHandle(this, address, size, handles, granularity, id, flags);
         }
 
         /// <summary>
@@ -164,15 +224,16 @@ namespace Ryujinx.Memory.Tracking
         /// <param name="address">CPU virtual address of the region</param>
         /// <param name="size">Size of the region</param>
         /// <param name="id">Handle ID</param>
+        /// <param name="flags">Region flags</param>
         /// <returns>The memory tracking handle</returns>
-        public RegionHandle BeginTracking(ulong address, ulong size, int id)
+        public RegionHandle BeginTracking(ulong address, ulong size, int id, RegionFlags flags = RegionFlags.None)
         {
             var (paAddress, paSize) = PageAlign(address, size);
 
             lock (TrackingLock)
             {
                 bool mapped = _memoryManager.IsRangeMapped(address, size);
-                RegionHandle handle = new(this, paAddress, paSize, address, size, id, mapped);
+                RegionHandle handle = new(this, paAddress, paSize, address, size, id, flags, mapped);
 
                 return handle;
             }
@@ -186,15 +247,16 @@ namespace Ryujinx.Memory.Tracking
         /// <param name="bitmap">The bitmap owning the dirty flag for this handle</param>
         /// <param name="bit">The bit of this handle within the dirty flag</param>
         /// <param name="id">Handle ID</param>
+        /// <param name="flags">Region flags</param>
         /// <returns>The memory tracking handle</returns>
-        internal RegionHandle BeginTrackingBitmap(ulong address, ulong size, ConcurrentBitmap bitmap, int bit, int id)
+        internal RegionHandle BeginTrackingBitmap(ulong address, ulong size, ConcurrentBitmap bitmap, int bit, int id, RegionFlags flags = RegionFlags.None)
         {
             var (paAddress, paSize) = PageAlign(address, size);
 
             lock (TrackingLock)
             {
                 bool mapped = _memoryManager.IsRangeMapped(address, size);
-                RegionHandle handle = new(this, paAddress, paSize, address, size, bitmap, bit, id, mapped);
+                RegionHandle handle = new(this, paAddress, paSize, address, size, bitmap, bit, id, flags, mapped);
 
                 return handle;
             }
@@ -202,6 +264,7 @@ namespace Ryujinx.Memory.Tracking
 
         /// <summary>
         /// Signal that a virtual memory event happened at the given location.
+        /// The memory event is assumed to be triggered by guest code.
         /// </summary>
         /// <param name="address">Virtual address accessed</param>
         /// <param name="size">Size of the region affected in bytes</param>
@@ -209,7 +272,7 @@ namespace Ryujinx.Memory.Tracking
         /// <returns>True if the event triggered any tracking regions, false otherwise</returns>
         public bool VirtualMemoryEvent(ulong address, ulong size, bool write)
         {
-            return VirtualMemoryEvent(address, size, write, precise: false, null);
+            return VirtualMemoryEvent(address, size, write, precise: false, exemptId: null, guest: true);
         }
 
         /// <summary>
@@ -222,8 +285,9 @@ namespace Ryujinx.Memory.Tracking
         /// <param name="write">Whether the region was written to or read</param>
         /// <param name="precise">True if the access is precise, false otherwise</param>
         /// <param name="exemptId">Optional ID that of the handles that should not be signalled</param>
+        /// <param name="guest">True if the access is from the guest, false otherwise</param>
         /// <returns>True if the event triggered any tracking regions, false otherwise</returns>
-        public bool VirtualMemoryEvent(ulong address, ulong size, bool write, bool precise, int? exemptId = null)
+        public bool VirtualMemoryEvent(ulong address, ulong size, bool write, bool precise, int? exemptId = null, bool guest = false)
         {
             // Look up the virtual region using the region list.
             // Signal up the chain to relevant handles.
@@ -234,7 +298,9 @@ namespace Ryujinx.Memory.Tracking
             {
                 ref var overlaps = ref ThreadStaticArray<VirtualRegion>.Get();
 
-                int count = _virtualRegions.FindOverlapsNonOverlapping(address, size, ref overlaps);
+                NonOverlappingRangeList<VirtualRegion> regions = guest ? _guestVirtualRegions : _virtualRegions;
+
+                int count = regions.FindOverlapsNonOverlapping(address, size, ref overlaps);
 
                 if (count == 0 && !precise)
                 {
@@ -242,7 +308,7 @@ namespace Ryujinx.Memory.Tracking
                     {
                         // TODO: There is currently the possibility that a page can be protected after its virtual region is removed.
                         // This code handles that case when it happens, but it would be better to find out how this happens.
-                        _memoryManager.TrackingReprotect(address & ~(ulong)(_pageSize - 1), (ulong)_pageSize, MemoryPermission.ReadAndWrite);
+                        _memoryManager.TrackingReprotect(address & ~(ulong)(_pageSize - 1), (ulong)_pageSize, MemoryPermission.ReadAndWrite, guest);
                         return true; // This memory _should_ be mapped, so we need to try again.
                     }
                     else
@@ -252,6 +318,12 @@ namespace Ryujinx.Memory.Tracking
                 }
                 else
                 {
+                    if (guest && _singleByteGuestTracking)
+                    {
+                        // Increase the access size to trigger handles with misaligned accesses.
+                        size += (ulong)_pageSize;
+                    }
+
                     for (int i = 0; i < count; i++)
                     {
                         VirtualRegion region = overlaps[i];
@@ -285,9 +357,10 @@ namespace Ryujinx.Memory.Tracking
         /// </summary>
         /// <param name="region">Region to reprotect</param>
         /// <param name="permission">Memory permission to protect with</param>
-        internal void ProtectVirtualRegion(VirtualRegion region, MemoryPermission permission)
+        /// <param name="guest">True if the protection is for guest access, false otherwise</param>
+        internal void ProtectVirtualRegion(VirtualRegion region, MemoryPermission permission, bool guest)
         {
-            _memoryManager.TrackingReprotect(region.Address, region.Size, permission);
+            _memoryManager.TrackingReprotect(region.Address, region.Size, permission, guest);
         }
 
         /// <summary>

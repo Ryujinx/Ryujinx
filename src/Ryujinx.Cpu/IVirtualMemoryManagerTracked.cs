@@ -28,8 +28,9 @@ namespace Ryujinx.Cpu
         /// <param name="address">CPU virtual address of the region</param>
         /// <param name="size">Size of the region</param>
         /// <param name="id">Handle ID</param>
+        /// <param name="flags">Region flags</param>
         /// <returns>The memory tracking handle</returns>
-        RegionHandle BeginTracking(ulong address, ulong size, int id);
+        RegionHandle BeginTracking(ulong address, ulong size, int id, RegionFlags flags = RegionFlags.None);
 
         /// <summary>
         /// Obtains a memory tracking handle for the given virtual region, with a specified granularity. This should be disposed when finished with.
@@ -39,8 +40,9 @@ namespace Ryujinx.Cpu
         /// <param name="handles">Handles to inherit state from or reuse. When none are present, provide null</param>
         /// <param name="granularity">Desired granularity of write tracking</param>
         /// <param name="id">Handle ID</param>
+        /// <param name="flags">Region flags</param>
         /// <returns>The memory tracking handle</returns>
-        MultiRegionHandle BeginGranularTracking(ulong address, ulong size, IEnumerable<IRegionHandle> handles, ulong granularity, int id);
+        MultiRegionHandle BeginGranularTracking(ulong address, ulong size, IEnumerable<IRegionHandle> handles, ulong granularity, int id, RegionFlags flags = RegionFlags.None);
 
         /// <summary>
         /// Obtains a smart memory tracking handle for the given virtual region, with a specified granularity. This should be disposed when finished with.

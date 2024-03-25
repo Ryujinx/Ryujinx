@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
@@ -55,9 +55,6 @@
     <PackageReference Include="SPB" />
     <PackageReference Include="SharpZipLib" />
     <PackageReference Include="SixLabors.ImageSharp" />
-
-    <!--NOTE: DO NOT REMOVE, THIS IS REQUIRED AS A RESULT OF A TRIMMING ISSUE IN AVALONIA -->
-    <PackageReference Include="System.Drawing.Common" />
   </ItemGroup>
 
   <ItemGroup>
@@ -113,6 +110,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Locales\ar_SA.json" />
     <None Remove="Assets\Locales\el_GR.json" />
     <None Remove="Assets\Locales\en_US.json" />
     <None Remove="Assets\Locales\es_ES.json" />
@@ -125,6 +123,7 @@
     <None Remove="Assets\Locales\pl_PL.json" />
     <None Remove="Assets\Locales\pt_BR.json" />
     <None Remove="Assets\Locales\ru_RU.json" />
+    <None Remove="Assets\Locales\th_TH.json" />
     <None Remove="Assets\Locales\tr_TR.json" />
     <None Remove="Assets\Locales\uk_UA.json" />
     <None Remove="Assets\Locales\zh_CN.json" />
@@ -138,6 +137,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\Locales\ar_SA.json" />
     <EmbeddedResource Include="Assets\Locales\el_GR.json" />
     <EmbeddedResource Include="Assets\Locales\en_US.json" />
     <EmbeddedResource Include="Assets\Locales\es_ES.json" />
@@ -150,6 +150,7 @@
     <EmbeddedResource Include="Assets\Locales\pl_PL.json" />
     <EmbeddedResource Include="Assets\Locales\pt_BR.json" />
     <EmbeddedResource Include="Assets\Locales\ru_RU.json" />
+    <EmbeddedResource Include="Assets\Locales\th_TH.json" />
     <EmbeddedResource Include="Assets\Locales\tr_TR.json" />
     <EmbeddedResource Include="Assets\Locales\uk_UA.json" />
     <EmbeddedResource Include="Assets\Locales\zh_CN.json" />

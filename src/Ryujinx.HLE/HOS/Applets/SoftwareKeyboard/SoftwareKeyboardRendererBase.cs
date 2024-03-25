@@ -44,10 +44,10 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
         private readonly Color _textSelectedColor;
         private readonly Color _textOverCursorColor;
 
-        private readonly IBrush _panelBrush;
-        private readonly IBrush _disabledBrush;
-        private readonly IBrush _cursorBrush;
-        private readonly IBrush _selectionBoxBrush;
+        private readonly Brush _panelBrush;
+        private readonly Brush _disabledBrush;
+        private readonly Brush _cursorBrush;
+        private readonly Brush _selectionBoxBrush;
 
         private readonly Pen _textBoxOutlinePen;
         private readonly Pen _cursorPen;
@@ -97,10 +97,10 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
             _cursorBrush = new SolidBrush(_textNormalColor);
             _selectionBoxBrush = new SolidBrush(selectionBackgroundColor);
 
-            _textBoxOutlinePen = new Pen(borderColor, _textBoxOutlineWidth);
-            _cursorPen = new Pen(_textNormalColor, cursorWidth);
-            _selectionBoxPen = new Pen(selectionBackgroundColor, cursorWidth);
-            _padPressedPen = new Pen(borderColor, _padPressedPenWidth);
+            _textBoxOutlinePen = Pens.Solid(borderColor, _textBoxOutlineWidth);
+            _cursorPen = Pens.Solid(_textNormalColor, cursorWidth);
+            _selectionBoxPen = Pens.Solid(selectionBackgroundColor, cursorWidth);
+            _padPressedPen = Pens.Solid(borderColor, _padPressedPenWidth);
 
             _inputTextFontSize = 20;
 
@@ -178,7 +178,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
         private static void SetGraphicsOptions(IImageProcessingContext context)
         {
             context.GetGraphicsOptions().Antialias = true;
-            context.GetShapeGraphicsOptions().GraphicsOptions.Antialias = true;
+            context.GetDrawingOptions().GraphicsOptions.Antialias = true;
         }
 
         private void DrawImmutableElements()
@@ -293,31 +293,31 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
         }
         private static RectangleF MeasureString(string text, Font font)
         {
-            RendererOptions options = new(font);
+            TextOptions options = new(font);
 
             if (text == "")
             {
-                FontRectangle emptyRectangle = TextMeasurer.Measure(" ", options);
+                FontRectangle emptyRectangle = TextMeasurer.MeasureSize(" ", options);
 
                 return new RectangleF(0, emptyRectangle.Y, 0, emptyRectangle.Height);
             }
 
-            FontRectangle rectangle = TextMeasurer.Measure(text, options);
+            FontRectangle rectangle = TextMeasurer.MeasureSize(text, options);
 
             return new RectangleF(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
         }
 
         private static RectangleF MeasureString(ReadOnlySpan<char> text, Font font)
         {
-            RendererOptions options = new(font);
+            TextOptions options = new(font);
 
             if (text == "")
             {
-                FontRectangle emptyRectangle = TextMeasurer.Measure(" ", options);
+                FontRectangle emptyRectangle = TextMeasurer.MeasureSize(" ", options);
                 return new RectangleF(0, emptyRectangle.Y, 0, emptyRectangle.Height);
             }
 
-            FontRectangle rectangle = TextMeasurer.Measure(text, options);
+            FontRectangle rectangle = TextMeasurer.MeasureSize(text, options);
 
             return new RectangleF(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
         }
@@ -350,7 +350,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
             // Draw the cursor on top of the text and redraw the text with a different color if necessary.
 
             Color cursorTextColor;
-            IBrush cursorBrush;
+            Brush cursorBrush;
             Pen cursorPen;
 
             float cursorPositionYTop = inputTextY + 1;
@@ -435,7 +435,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
                         new PointF(cursorPositionXLeft, cursorPositionYBottom),
                     };
 
-                    context.DrawLines(cursorPen, points);
+                    context.DrawLine(cursorPen, points);
                 }
                 else
                 {
@@ -466,7 +466,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
 
         private void DrawPadButton(IImageProcessingContext context, PointF point, Image icon, string label, bool pressed, bool enabled)
         {
-            // Use relative positions so we can center the the entire drawing later.
+            // Use relative positions so we can center the entire drawing later.
 
             float iconX = 0;
             float iconY = 0;
@@ -522,7 +522,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
         {
             var labelRectangle = MeasureString(ControllerToggleText, _labelsTextFont);
 
-            // Use relative positions so we can center the the entire drawing later.
+            // Use relative positions so we can center the entire drawing later.
 
             float keyWidth = _keyModeIcon.Width;
             float keyHeight = _keyModeIcon.Height;
@@ -562,12 +562,12 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
 
                 // Convert the pixel format used in the image to the one used in the Switch surface.
 
-                if (!_surface.TryGetSinglePixelSpan(out Span<Argb32> pixels))
+                if (!_surface.DangerousTryGetSinglePixelMemory(out Memory<Argb32> pixels))
                 {
                     return;
                 }
 
-                _bufferData = MemoryMarshal.AsBytes(pixels).ToArray();
+                _bufferData = MemoryMarshal.AsBytes(pixels.Span).ToArray();
                 Span<uint> dataConvert = MemoryMarshal.Cast<byte, uint>(_bufferData);
 
                 Debug.Assert(_bufferData.Length == _surfaceInfo.Size);

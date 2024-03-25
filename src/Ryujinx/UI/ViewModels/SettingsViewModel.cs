@@ -241,7 +241,16 @@ namespace Ryujinx.Ava.UI.ViewModels
             get => new(Enum.GetNames<MultiplayerMode>());
         }
 
-        public HotkeysConfig KeyboardHotkeys { get; set; }
+        public HotkeysConfig KeyboardHotkeys
+        {
+            get => _keyboardHotkeys;
+            set
+            {
+                _keyboardHotkeys = value;
+
+                OnPropertyChanged();
+            }
+        }
 
         public int NetworkInterfaceIndex
         {

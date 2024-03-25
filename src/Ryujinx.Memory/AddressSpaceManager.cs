@@ -11,12 +11,8 @@ namespace Ryujinx.Memory
     /// Represents a address space manager.
     /// Supports virtual memory region mapping, address translation and read/write access to mapped regions.
     /// </summary>
-    public sealed class AddressSpaceManager : IVirtualMemoryManager, IWritableBlock
+    public sealed class AddressSpaceManager : VirtualMemoryManagerBase<ulong, nuint>, IVirtualMemoryManager, IWritableBlock
     {
-        public const int PageBits = PageTable<nuint>.PageBits;
-        public const int PageSize = PageTable<nuint>.PageSize;
-        public const int PageMask = PageTable<nuint>.PageMask;
-
         /// <inheritdoc/>
         public bool Supports4KBPages => true;
 
@@ -25,10 +21,10 @@ namespace Ryujinx.Memory
         /// </summary>
         public int AddressSpaceBits { get; }
 
-        private readonly ulong _addressSpaceSize;
-
         private readonly MemoryBlock _backingMemory;
         private readonly PageTable<nuint> _pageTable;
+
+        protected override ulong AddressSpaceSize { get; }
 
         /// <summary>
         /// Creates a new instance of the memory manager.
@@ -47,7 +43,7 @@ namespace Ryujinx.Memory
             }
 
             AddressSpaceBits = asBits;
-            _addressSpaceSize = asSize;
+            AddressSpaceSize = asSize;
             _backingMemory = backingMemory;
             _pageTable = new PageTable<nuint>();
         }
@@ -100,12 +96,6 @@ namespace Ryujinx.Memory
         public T Read<T>(ulong va) where T : unmanaged
         {
             return MemoryMarshal.Cast<byte, T>(GetSpan(va, Unsafe.SizeOf<T>()))[0];
-        }
-
-        /// <inheritdoc/>
-        public void Read(ulong va, Span<byte> data)
-        {
-            ReadImpl(va, data);
         }
 
         /// <inheritdoc/>
@@ -174,7 +164,7 @@ namespace Ryujinx.Memory
             {
                 Span<byte> data = new byte[size];
 
-                ReadImpl(va, data);
+                Read(va, data);
 
                 return data;
             }
@@ -346,34 +336,6 @@ namespace Ryujinx.Memory
             return regions;
         }
 
-        private void ReadImpl(ulong va, Span<byte> data)
-        {
-            if (data.Length == 0)
-            {
-                return;
-            }
-
-            AssertValidAddressAndSize(va, (ulong)data.Length);
-
-            int offset = 0, size;
-
-            if ((va & PageMask) != 0)
-            {
-                size = Math.Min(data.Length, PageSize - (int)(va & PageMask));
-
-                GetHostSpanContiguous(va, size).CopyTo(data[..size]);
-
-                offset += size;
-            }
-
-            for (; offset < data.Length; offset += size)
-            {
-                size = Math.Min(data.Length - offset, PageSize);
-
-                GetHostSpanContiguous(va + (ulong)offset, size).CopyTo(data.Slice(offset, size));
-            }
-        }
-
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsMapped(ulong va)
@@ -414,37 +376,6 @@ namespace Ryujinx.Memory
             return true;
         }
 
-        private bool ValidateAddress(ulong va)
-        {
-            return va < _addressSpaceSize;
-        }
-
-        /// <summary>
-        /// Checks if the combination of virtual address and size is part of the addressable space.
-        /// </summary>
-        /// <param name="va">Virtual address of the range</param>
-        /// <param name="size">Size of the range in bytes</param>
-        /// <returns>True if the combination of virtual address and size is part of the addressable space</returns>
-        private bool ValidateAddressAndSize(ulong va, ulong size)
-        {
-            ulong endVa = va + size;
-            return endVa >= va && endVa >= size && endVa <= _addressSpaceSize;
-        }
-
-        /// <summary>
-        /// Ensures the combination of virtual address and size is part of the addressable space.
-        /// </summary>
-        /// <param name="va">Virtual address of the range</param>
-        /// <param name="size">Size of the range in bytes</param>
-        /// <exception cref="InvalidMemoryRegionException">Throw when the memory region specified outside the addressable space</exception>
-        private void AssertValidAddressAndSize(ulong va, ulong size)
-        {
-            if (!ValidateAddressAndSize(va, size))
-            {
-                throw new InvalidMemoryRegionException($"va=0x{va:X16}, size=0x{size:X16}");
-            }
-        }
-
         private unsafe Span<byte> GetHostSpanContiguous(ulong va, int size)
         {
             return new Span<byte>((void*)GetHostAddress(va), size);
@@ -461,7 +392,7 @@ namespace Ryujinx.Memory
         }
 
         /// <inheritdoc/>
-        public void TrackingReprotect(ulong va, ulong size, MemoryPermission protection)
+        public void TrackingReprotect(ulong va, ulong size, MemoryPermission protection, bool guest = false)
         {
             throw new NotImplementedException();
         }
@@ -471,5 +402,11 @@ namespace Ryujinx.Memory
         {
             // Only the ARM Memory Manager has tracking for now.
         }
+
+        protected override unsafe Span<byte> GetPhysicalAddressSpan(nuint pa, int size)
+            => new((void*)pa, size);
+
+        protected override nuint TranslateVirtualAddressForRead(ulong va)
+            => GetHostAddress(va);
     }
 }

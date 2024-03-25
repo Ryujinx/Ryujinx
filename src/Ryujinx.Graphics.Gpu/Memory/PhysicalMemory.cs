@@ -368,10 +368,11 @@ namespace Ryujinx.Graphics.Gpu.Memory
         /// <param name="address">CPU virtual address of the region</param>
         /// <param name="size">Size of the region</param>
         /// <param name="kind">Kind of the resource being tracked</param>
+        /// <param name="flags">Region flags</param>
         /// <returns>The memory tracking handle</returns>
-        public RegionHandle BeginTracking(ulong address, ulong size, ResourceKind kind)
+        public RegionHandle BeginTracking(ulong address, ulong size, ResourceKind kind, RegionFlags flags = RegionFlags.None)
         {
-            return _cpuMemory.BeginTracking(address, size, (int)kind);
+            return _cpuMemory.BeginTracking(address, size, (int)kind, flags);
         }
 
         /// <summary>
@@ -408,12 +409,19 @@ namespace Ryujinx.Graphics.Gpu.Memory
         /// <param name="address">CPU virtual address of the region</param>
         /// <param name="size">Size of the region</param>
         /// <param name="kind">Kind of the resource being tracked</param>
+        /// <param name="flags">Region flags</param>
         /// <param name="handles">Handles to inherit state from or reuse</param>
         /// <param name="granularity">Desired granularity of write tracking</param>
         /// <returns>The memory tracking handle</returns>
-        public MultiRegionHandle BeginGranularTracking(ulong address, ulong size, ResourceKind kind, IEnumerable<IRegionHandle> handles = null, ulong granularity = 4096)
+        public MultiRegionHandle BeginGranularTracking(
+            ulong address,
+            ulong size,
+            ResourceKind kind,
+            RegionFlags flags = RegionFlags.None,
+            IEnumerable<IRegionHandle> handles = null,
+            ulong granularity = 4096)
         {
-            return _cpuMemory.BeginGranularTracking(address, size, handles, granularity, (int)kind);
+            return _cpuMemory.BeginGranularTracking(address, size, handles, granularity, (int)kind, flags);
         }
 
         /// <summary>

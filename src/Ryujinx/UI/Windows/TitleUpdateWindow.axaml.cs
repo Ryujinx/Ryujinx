@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using FluentAvalonia.UI.Controls;
@@ -47,7 +49,7 @@ namespace Ryujinx.Ava.UI.Windows
 
             contentDialog.Styles.Add(bottomBorder);
 
-            await ContentDialogHelper.ShowAsync(contentDialog);
+            await contentDialog.ShowAsync();
         }
 
         private void Close(object sender, RoutedEventArgs e)
@@ -59,9 +61,15 @@ namespace Ryujinx.Ava.UI.Windows
         {
             ViewModel.Save();
 
-            if (VisualRoot is MainWindow window)
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime al)
             {
-                window.LoadApplications();
+                foreach (Window window in al.Windows)
+                {
+                    if (window is MainWindow mainWindow)
+                    {
+                        mainWindow.LoadApplications();
+                    }
+                }
             }
 
             ((ContentDialog)Parent).Hide();

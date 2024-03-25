@@ -1106,6 +1106,7 @@ namespace Ryujinx.Cpu.LightningJit.Arm64
                 case InstName.Mrs:
                 case InstName.MsrImm:
                 case InstName.MsrReg:
+                case InstName.Sysl:
                     return true;
             }
 

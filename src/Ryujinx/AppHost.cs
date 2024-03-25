@@ -22,6 +22,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.SystemInterop;
+using Ryujinx.Common.Utilities;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.GAL.Multithreading;
 using Ryujinx.Graphics.Gpu;
@@ -279,8 +280,11 @@ namespace Ryujinx.Ava
                 {
                     lock (_lockObject)
                     {
+                        string applicationName = Device.Processes.ActiveApplication.Name;
+                        string sanitizedApplicationName = FileSystemUtils.SanitizeFileName(applicationName);
                         DateTime currentTime = DateTime.Now;
-                        string filename = $"ryujinx_capture_{currentTime.Year}-{currentTime.Month:D2}-{currentTime.Day:D2}_{currentTime.Hour:D2}-{currentTime.Minute:D2}-{currentTime.Second:D2}.png";
+
+                        string filename = $"{sanitizedApplicationName}_{currentTime.Year}-{currentTime.Month:D2}-{currentTime.Day:D2}_{currentTime.Hour:D2}-{currentTime.Minute:D2}-{currentTime.Second:D2}.png";
 
                         string directory = AppDataManager.Mode switch
                         {

@@ -29,12 +29,34 @@ namespace ARMeilleure.Memory
         T ReadTracked<T>(ulong va) where T : unmanaged;
 
         /// <summary>
+        /// Reads data from CPU mapped memory, from guest code. (with read tracking)
+        /// </summary>
+        /// <typeparam name="T">Type of the data being read</typeparam>
+        /// <param name="va">Virtual address of the data in memory</param>
+        /// <returns>The data</returns>
+        T ReadGuest<T>(ulong va) where T : unmanaged
+        {
+            return ReadTracked<T>(va);
+        }
+
+        /// <summary>
         /// Writes data to CPU mapped memory.
         /// </summary>
         /// <typeparam name="T">Type of the data being written</typeparam>
         /// <param name="va">Virtual address to write the data into</param>
         /// <param name="value">Data to be written</param>
         void Write<T>(ulong va, T value) where T : unmanaged;
+
+        /// <summary>
+        /// Writes data to CPU mapped memory, from guest code.
+        /// </summary>
+        /// <typeparam name="T">Type of the data being written</typeparam>
+        /// <param name="va">Virtual address to write the data into</param>
+        /// <param name="value">Data to be written</param>
+        void WriteGuest<T>(ulong va, T value) where T : unmanaged
+        {
+            Write(va, value);
+        }
 
         /// <summary>
         /// Gets a read-only span of data from CPU mapped memory.

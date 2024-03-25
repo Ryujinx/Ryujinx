@@ -107,7 +107,7 @@ namespace Ryujinx.Tests.Memory
             throw new NotImplementedException();
         }
 
-        public void TrackingReprotect(ulong va, ulong size, MemoryPermission protection)
+        public void TrackingReprotect(ulong va, ulong size, MemoryPermission protection, bool guest)
         {
             OnProtect?.Invoke(va, size, protection);
         }

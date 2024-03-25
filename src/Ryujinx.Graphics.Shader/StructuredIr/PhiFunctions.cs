@@ -24,17 +24,21 @@ namespace Ryujinx.Graphics.Shader.StructuredIr
                         continue;
                     }
 
+                    Operand temp = OperandHelper.Local();
+
                     for (int index = 0; index < phi.SourcesCount; index++)
                     {
                         Operand src = phi.GetSource(index);
-
                         BasicBlock srcBlock = phi.GetBlock(index);
 
-                        Operation copyOp = new(Instruction.Copy, phi.Dest, src);
+                        Operation copyOp = new(Instruction.Copy, temp, src);
 
                         srcBlock.Append(copyOp);
                     }
 
+                    Operation copyOp2 = new(Instruction.Copy, phi.Dest, temp);
+
+                    nextNode = block.Operations.AddAfter(node, copyOp2).Next;
                     block.Operations.Remove(node);
 
                     node = nextNode;
