@@ -288,7 +288,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 
             if (Config is StandardControllerInputConfig controllerInputConfig)
             {
-                ConfigViewModel = new ControllerInputViewModel(this, new ControllerInputConfig(controllerInputConfig));
+                ConfigViewModel = new ControllerInputViewModel(this, new GamepadInputConfig(controllerInputConfig));
             }
         }
 

@@ -1,6 +1,6 @@
 namespace Ryujinx.Input
 {
-    public enum ButtonValueType
+    public enum ButtonType
     {
         Key,
         GamepadButtonInputId,

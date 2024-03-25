@@ -31,9 +31,9 @@ namespace Ryujinx.Input.Assigner
             return _keyboardState.IsPressed(Key.Escape);
         }
 
-        public ButtonValue? GetPressedButton()
+        public Button? GetPressedButton()
         {
-            ButtonValue? keyPressed = null;
+            Button? keyPressed = null;
 
             for (Key key = Key.Unknown; key < Key.Count; key++)
             {

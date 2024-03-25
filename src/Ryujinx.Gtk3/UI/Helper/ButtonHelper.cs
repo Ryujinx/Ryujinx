@@ -7,7 +7,7 @@ using StickInputId = Ryujinx.Common.Configuration.Hid.Controller.StickInputId;
 
 namespace Ryujinx.UI.Helper
 {
-    public static class ButtonValueHelper
+    public static class ButtonHelper
     {
         private static readonly Dictionary<Key, string> _keysMap = new()
         {
@@ -117,35 +117,35 @@ namespace Ryujinx.UI.Helper
             { StickInputId.Unbound, "Unbound" },
         };
 
-        public static string ToString(ButtonValue buttonValue)
+        public static string ToString(Button button)
         {
             string keyString = "";
 
-            if (buttonValue.Type == ButtonValueType.Key)
+            if (button.Type == ButtonType.Key)
             {
-                var key = buttonValue.AsHidType<Key>();
+                var key = button.AsHidType<Key>();
 
-                if (!_keysMap.TryGetValue(buttonValue.AsHidType<Key>(), out keyString))
+                if (!_keysMap.TryGetValue(button.AsHidType<Key>(), out keyString))
                 {
                     keyString = key.ToString();
                 }
             }
 
-            if (buttonValue.Type == ButtonValueType.GamepadButtonInputId)
+            if (button.Type == ButtonType.GamepadButtonInputId)
             {
-                var gamepadButton = buttonValue.AsHidType<GamepadInputId>();
+                var gamepadButton = button.AsHidType<GamepadInputId>();
 
-                if (!_gamepadInputIdMap.TryGetValue(buttonValue.AsHidType<GamepadInputId>(), out keyString))
+                if (!_gamepadInputIdMap.TryGetValue(button.AsHidType<GamepadInputId>(), out keyString))
                 {
                     keyString = gamepadButton.ToString();
                 }
             }
 
-            if (buttonValue.Type == ButtonValueType.StickId)
+            if (button.Type == ButtonType.StickId)
             {
-                var stickInput = buttonValue.AsHidType<StickInputId>();
+                var stickInput = button.AsHidType<StickInputId>();
 
-                if (!_stickInputIdMap.TryGetValue(buttonValue.AsHidType<StickInputId>(), out keyString))
+                if (!_stickInputIdMap.TryGetValue(button.AsHidType<StickInputId>(), out keyString))
                 {
                     keyString = stickInput.ToString();
                 }

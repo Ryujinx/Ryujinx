@@ -236,21 +236,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             get => new(_networkInterfaces.Keys);
         }
 
-        public AvaloniaList<string> MultiplayerModes
-        {
-            get => new(Enum.GetNames<MultiplayerMode>());
-        }
-
-        public HotkeysConfig KeyboardHotkeys
-        {
-            get => _keyboardHotkeys;
-            set
-            {
-                _keyboardHotkeys = value;
-
-                OnPropertyChanged();
-            }
-        }
+        public HotkeyConfig KeyboardHotkey { get; set; }
 
         public int NetworkInterfaceIndex
         {
@@ -417,7 +403,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             EnableMouse = config.Hid.EnableMouse;
 
             // Keyboard Hotkeys
-            KeyboardHotkeys = new HotkeysConfig(config.Hid.Hotkeys.Value);
+            KeyboardHotkey = new HotkeyConfig(config.Hid.Hotkeys.Value);
 
             // System
             Region = (int)config.System.Region.Value;
@@ -504,7 +490,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.Hid.EnableMouse.Value = EnableMouse;
 
             // Keyboard Hotkeys
-            config.Hid.Hotkeys.Value = KeyboardHotkeys.GetConfig();
+            config.Hid.Hotkeys.Value = KeyboardHotkey.GetConfig();
 
             // System
             config.System.Region.Value = (Region)Region;

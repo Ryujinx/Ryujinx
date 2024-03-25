@@ -18,6 +18,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
+using Button = Ryujinx.Input.Button;
 using ConfigGamepadInputId = Ryujinx.Common.Configuration.Hid.Controller.GamepadInputId;
 using ConfigStickInputId = Ryujinx.Common.Configuration.Hid.Controller.StickInputId;
 using GUI = Gtk.Builder.ObjectAttribute;
@@ -894,7 +895,7 @@ namespace Ryujinx.UI.Windows
                     }
                 }
 
-                string pressedButton = ButtonValueHelper.ToString(assigner.GetPressedButton() ?? new ButtonValue(Input.Key.Unknown));
+                string pressedButton = ButtonHelper.ToString(assigner.GetPressedButton() ?? new Button(Input.Key.Unknown));
 
                 Application.Invoke(delegate
                 {

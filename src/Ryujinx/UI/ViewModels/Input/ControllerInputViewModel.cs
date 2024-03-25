@@ -6,8 +6,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 {
     public class ControllerInputViewModel : BaseModel
     {
-        private ControllerInputConfig _config;
-        public ControllerInputConfig Config
+        private GamepadInputConfig _config;
+        public GamepadInputConfig Config
         {
             get => _config;
             set
@@ -56,7 +56,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 
         public InputViewModel parentModel;
 
-        public ControllerInputViewModel(InputViewModel model, ControllerInputConfig config)
+        public ControllerInputViewModel(InputViewModel model, GamepadInputConfig config)
         {
             parentModel = model;
             model.NotifyChangesEvent += OnParentModelChanged;

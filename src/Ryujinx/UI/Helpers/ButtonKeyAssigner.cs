@@ -12,9 +12,9 @@ namespace Ryujinx.Ava.UI.Helpers
         internal class ButtonAssignedEventArgs : EventArgs
         {
             public ToggleButton Button { get; }
-            public ButtonValue? ButtonValue { get; }
+            public Button? ButtonValue { get; }
 
-            public ButtonAssignedEventArgs(ToggleButton button, ButtonValue? buttonValue)
+            public ButtonAssignedEventArgs(ToggleButton button, Button? buttonValue)
             {
                 Button = button;
                 ButtonValue = buttonValue;
@@ -75,7 +75,7 @@ namespace Ryujinx.Ava.UI.Helpers
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                ButtonValue? pressedButton = assigner.GetPressedButton();
+                Button? pressedButton = assigner.GetPressedButton();
 
                 if (_shouldUnbind)
                 {

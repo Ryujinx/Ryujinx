@@ -3,7 +3,7 @@ using Ryujinx.Common.Configuration.Hid;
 
 namespace Ryujinx.Ava.UI.Models.Input
 {
-    public class HotkeysConfig : BaseModel
+    public class HotkeyConfig : BaseModel
     {
         private Key _toggleVsync;
         public Key ToggleVsync
@@ -104,7 +104,7 @@ namespace Ryujinx.Ava.UI.Models.Input
             }
         }
 
-        public HotkeysConfig(KeyboardHotkeys config)
+        public HotkeyConfig(KeyboardHotkeys config)
         {
             if (config != null)
             {

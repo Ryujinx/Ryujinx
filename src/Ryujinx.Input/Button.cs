@@ -2,26 +2,26 @@ using System;
 
 namespace Ryujinx.Input
 {
-    public readonly struct ButtonValue
+    public readonly struct Button
     {
-        public readonly ButtonValueType Type;
+        public readonly ButtonType Type;
         private readonly uint _rawValue;
 
-        public ButtonValue(Key key)
+        public Button(Key key)
         {
-            Type = ButtonValueType.Key;
+            Type = ButtonType.Key;
             _rawValue = (uint)key;
         }
 
-        public ButtonValue(GamepadButtonInputId gamepad)
+        public Button(GamepadButtonInputId gamepad)
         {
-            Type = ButtonValueType.GamepadButtonInputId;
+            Type = ButtonType.GamepadButtonInputId;
             _rawValue = (uint)gamepad;
         }
 
-        public ButtonValue(StickInputId stick)
+        public Button(StickInputId stick)
         {
-            Type = ButtonValueType.StickId;
+            Type = ButtonType.StickId;
             _rawValue = (uint)stick;
         }
 

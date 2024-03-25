@@ -6,7 +6,7 @@ using System;
 
 namespace Ryujinx.Ava.UI.Models.Input
 {
-    public class ControllerInputConfig : BaseModel
+    public class GamepadInputConfig : BaseModel
     {
         public bool EnableCemuHookMotion { get; set; }
         public string DsuServerHost { get; set; }
@@ -409,7 +409,7 @@ namespace Ryujinx.Ava.UI.Models.Input
             }
         }
 
-        public ControllerInputConfig(InputConfig config)
+        public GamepadInputConfig(InputConfig config)
         {
             if (config != null)
             {
