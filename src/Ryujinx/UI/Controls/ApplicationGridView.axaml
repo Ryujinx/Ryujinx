@@ -69,7 +69,16 @@
                                     Grid.Row="0"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Top"
+                                    IsVisible="{Binding IsGame}"
                                     Source="{Binding Icon, Converter={StaticResource ByteImage}}" />
+                                <ui:SymbolIcon
+                                    Grid.Row="0"
+                                    Classes.gridHuge="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridHuge}"
+                                    Classes.gridLarge="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridLarge}"
+                                    Classes.gridNormal="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridMedium}"
+                                    Classes.gridSmall="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridSmall}"
+                                    IsVisible="{Binding IsFolder}"
+                                    Symbol="Folder" />
                                 <Panel
                                     Grid.Row="1"
                                     Height="50"

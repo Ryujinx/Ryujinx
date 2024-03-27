@@ -51,6 +51,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private const int HotKeyPressDelayMs = 500;
 
         private ObservableCollection<ApplicationData> _applications;
+        private readonly Stack<string> _pathHistory;
         private string _aspectStatusText;
 
         private string _loadHeading;
@@ -84,6 +85,8 @@ namespace Ryujinx.Ava.UI.ViewModels
         private bool _showAll;
         private string _lastScannedAmiiboId;
         private bool _statusBarVisible;
+        private bool _isInFolder;
+        private bool _foldersEnabled;
         private ReadOnlyObservableCollection<ApplicationData> _appsObservableList;
 
         private string _showUiKey = "F4";
@@ -120,6 +123,8 @@ namespace Ryujinx.Ava.UI.ViewModels
                 .Bind(out _appsObservableList).AsObservableList();
 
             _rendererWaitEvent = new AutoResetEvent(false);
+            _pathHistory = new Stack<string>();
+            FoldersEnabled = ConfigurationState.Instance.UI.UseSystemGameFolders;
 
             if (Program.PreviewerDetached)
             {
@@ -213,6 +218,8 @@ namespace Ryujinx.Ava.UI.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public Stack<string> PathHistory => _pathHistory;
 
         public bool IsPaused
         {
@@ -668,6 +675,26 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public bool IsGrid => Glyph == Glyph.Grid;
         public bool IsList => Glyph == Glyph.List;
+        public bool IsInFolder
+        {
+            get => _isInFolder;
+            set
+            {
+                _isInFolder = value;
+
+                OnPropertyChanged();
+            }
+        }
+        public bool FoldersEnabled
+        {
+            get => _foldersEnabled;
+            set
+            {
+                _foldersEnabled = value;
+
+                OnPropertyChanged();
+            }
+        }
 
         internal void Sort(bool isAscending)
         {
@@ -1279,6 +1306,37 @@ namespace Ryujinx.Ava.UI.ViewModels
         public void ToggleShowConsole()
         {
             ShowConsole = !ShowConsole;
+        }
+
+        public void OpenFolder(string path)
+        {
+            _pathHistory.Push(path);
+            IsInFolder = _pathHistory.Count != 0;
+
+            Applications.Clear();
+            List<string> SearchPaths = new List<string>();
+            SearchPaths.Add(path);
+            ApplicationLibrary.LoadApplications(SearchPaths, ConfigurationState.Instance.System.Language);
+        }
+
+        public void NavigateBack()
+        {
+            if (_pathHistory.Count != 0)
+            {
+                _pathHistory.Pop();
+                Applications.Clear();
+                if (_pathHistory.Count == 0)
+                {
+                    ApplicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
+                }
+                else
+                {
+                    List<string> SearchPaths = new();
+                    SearchPaths.Add(_pathHistory.Peek());
+                    ApplicationLibrary.LoadApplications(SearchPaths, ConfigurationState.Instance.System.Language);
+                }
+            }
+            IsInFolder = _pathHistory.Count != 0;
         }
 
         public void SetListMode()

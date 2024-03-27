@@ -86,6 +86,38 @@
         <Setter Property="Width"
                 Value="120" />
     </Style>
+    <Style Selector="ui|SymbolIcon.listSmall">
+        <Setter Property="FontSize"
+                Value="50" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.listNormal">
+        <Setter Property="FontSize"
+                Value="80" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.listLarge">
+        <Setter Property="FontSize"
+                Value="100" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.listHuge">
+        <Setter Property="FontSize"
+                Value="120" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.gridSmall">
+        <Setter Property="FontSize"
+                Value="100" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.gridNormal">
+        <Setter Property="FontSize"
+                Value="120" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.gridLarge">
+        <Setter Property="FontSize"
+                Value="160" />
+    </Style>
+    <Style Selector="ui|SymbolIcon.gridHuge">
+        <Setter Property="FontSize"
+                Value="200" />
+    </Style>
     <Style Selector="#TitleBarHost &gt; Image">
         <Setter Property="Margin"
                 Value="10" />

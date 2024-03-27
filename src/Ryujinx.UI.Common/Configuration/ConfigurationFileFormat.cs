@@ -15,7 +15,7 @@ namespace Ryujinx.UI.Common.Configuration
         /// <summary>
         /// The current version of the file format
         /// </summary>
-        public const int CurrentVersion = 49;
+        public const int CurrentVersion = 50;
 
         /// <summary>
         /// Version of the configuration file format
@@ -316,6 +316,11 @@ namespace Ryujinx.UI.Common.Configuration
         /// Show console window
         /// </summary>
         public bool ShowConsole { get; set; }
+
+        /// <summary>
+        /// use system directories when listing games
+        /// </summary>
+        public bool UseSystemGameFolders { get; set; }
 
         /// <summary>
         /// Enable or disable keyboard support (Independent from controllers binding)

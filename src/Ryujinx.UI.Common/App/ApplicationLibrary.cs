@@ -45,6 +45,7 @@ namespace Ryujinx.UI.App.Common
         private readonly VirtualFileSystem _virtualFileSystem;
         private Language _desiredTitleLanguage;
         private CancellationTokenSource _cancellationToken;
+        private bool _isLoading;
 
         private static readonly ApplicationJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
         private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
@@ -62,6 +63,11 @@ namespace Ryujinx.UI.App.Common
 
         private static byte[] GetResourceBytes(string resourceName)
         {
+            if (resourceName == "")
+            {
+                return Array.Empty<byte>();
+            }
+
             Stream resourceStream = Assembly.GetCallingAssembly().GetManifestResourceStream(resourceName);
             byte[] resourceByteArray = new byte[resourceStream.Length];
 
@@ -84,6 +90,28 @@ namespace Ryujinx.UI.App.Common
         }
 
         public void LoadApplications(List<string> appDirs, Language desiredTitleLanguage)
+        {
+            if (_isLoading)
+            {
+                return;
+            }
+
+            _isLoading = true;
+
+            Thread applicationLibraryThread = new(() =>
+            {
+                LoadApplicationsReal(appDirs, desiredTitleLanguage);
+
+                _isLoading = false;
+            })
+            {
+                Name = "GUI.ApplicationLibraryThread",
+                IsBackground = true,
+            };
+            applicationLibraryThread.Start();
+        }
+
+        private void LoadApplicationsReal(List<string> appDirs, Language desiredTitleLanguage)
         {
             int numApplicationsFound = 0;
             int numApplicationsLoaded = 0;
@@ -113,7 +141,37 @@ namespace Ryujinx.UI.App.Common
 
                     try
                     {
-                        IEnumerable<string> files = Directory.EnumerateFiles(appDir, "*", SearchOption.AllDirectories).Where(file =>
+                        var FileSearchOption = SearchOption.AllDirectories;
+
+                        if (ConfigurationState.Instance.UI.UseSystemGameFolders)
+                        {
+                            IEnumerable<string> folders = Directory.EnumerateDirectories(appDir, "*", SearchOption.TopDirectoryOnly);
+                            foreach (string folder in folders)
+                            {
+                                if (_cancellationToken.Token.IsCancellationRequested)
+                                {
+                                    return;
+                                }
+
+                                var fileInfo = new FileInfo(folder);
+
+                                var fullPath = fileInfo.ResolveLinkTarget(true)?.FullName ?? fileInfo.FullName;
+                                ApplicationData folderData = new()
+                                {
+                                    TitleName = fileInfo.Name,
+                                    FileExtension = "Folder",
+                                    Path = fullPath,
+                                };
+                                OnApplicationAdded(new ApplicationAddedEventArgs
+                                {
+                                    AppData = folderData,
+                                });
+                            }
+
+                            FileSearchOption = SearchOption.TopDirectoryOnly;
+                        }
+
+                        IEnumerable<string> files = Directory.EnumerateFiles(appDir, "*", FileSearchOption).Where(file =>
                         {
                             return
                             (Path.GetExtension(file).ToLower() is ".nsp" && ConfigurationState.Instance.UI.ShownFileTypes.NSP.Value) ||

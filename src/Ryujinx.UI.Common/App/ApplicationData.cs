@@ -36,6 +36,10 @@ namespace Ryujinx.UI.App.Common
 
         public string FileSizeString => ValueFormatUtils.FormatFileSize(FileSize);
 
+        public bool IsGame => FileExtension != "Folder";
+
+        public bool IsFolder => FileExtension == "Folder";
+
         public static string GetApplicationBuildId(VirtualFileSystem virtualFileSystem, string titleFilePath)
         {
             using FileStream file = new(titleFilePath, FileMode.Open, FileAccess.Read);

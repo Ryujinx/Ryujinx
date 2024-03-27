@@ -39,9 +39,18 @@ namespace Ryujinx.Ava.UI.Windows
         {
             InputPage.ControllerSettings?.SaveCurrentProfile();
 
-            if (Owner is MainWindow window && ViewModel.DirectoryChanged)
+            if (Owner is MainWindow window)
             {
-                window.LoadApplications();
+                if (ViewModel.DirectoryChanged)
+                {
+                    window.LoadApplications();
+                }
+
+                if (ViewModel.FolderModeChanged)
+                {
+                    window.LoadApplications();
+                    window.ViewModel.FoldersEnabled = ViewModel.UseSystemGameFolders;
+                }
             }
         }
 

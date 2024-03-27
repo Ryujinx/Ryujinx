@@ -36,6 +36,9 @@
                     <CheckBox IsChecked="{Binding ShowConfirmExit}">
                         <TextBlock Text="{locale:Locale SettingsTabGeneralShowConfirmExitDialog}" />
                     </CheckBox>
+                    <CheckBox IsChecked="{Binding UseSystemGameFolders}">
+                        <TextBlock Text="{locale:Locale SettingsTabGeneralUseSystemGameFolders}" />
+                    </CheckBox>
                     <StackPanel Margin="0, 15, 0, 0" Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center"
                                    Text="{locale:Locale SettingsTabGeneralHideCursor}"

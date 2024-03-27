@@ -19,6 +19,16 @@
         Height="35"
         HorizontalAlignment="Stretch">
         <Button
+            Width="80"
+            MinWidth="80"
+            Margin="5,2,0,2"
+            VerticalAlignment="Stretch"
+            Command="{Binding NavigateBack}"
+            IsVisible="{Binding FoldersEnabled}"
+            IsEnabled="{Binding IsInFolder}">
+            <ui:SymbolIcon Symbol="Back" />
+        </Button>
+        <Button
             Width="40"
             MinWidth="40"
             Margin="5,2,0,2"

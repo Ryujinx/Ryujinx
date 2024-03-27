@@ -23,6 +23,7 @@ using Ryujinx.UI.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -33,8 +34,6 @@ namespace Ryujinx.Ava.UI.Windows
     public partial class MainWindow : StyleableWindow
     {
         internal static MainWindowViewModel MainWindowViewModel { get; private set; }
-
-        private bool _isLoading;
 
         private UserChannelPersistence _userChannelPersistence;
         private static bool _deferLoad;
@@ -137,6 +136,11 @@ namespace Ryujinx.Ava.UI.Windows
         {
             if (args.Application != null)
             {
+                if (args.Application.FileExtension == "Folder")
+                {
+                    ViewModel.OpenFolder(args.Application.Path);
+                    return;
+                }
                 ViewModel.SelectedIcon = args.Application.Icon;
 
                 string path = new FileInfo(args.Application.Path).FullName;
@@ -528,24 +532,22 @@ namespace Ryujinx.Ava.UI.Windows
 
         private void ReloadGameList()
         {
-            if (_isLoading)
+            if (ViewModel.IsInFolder && !ConfigurationState.Instance.UI.UseSystemGameFolders)
             {
-                return;
+                ViewModel.PathHistory.Clear();
+                ViewModel.IsInFolder = false;
             }
 
-            _isLoading = true;
-
-            Thread applicationLibraryThread = new(() =>
+            if (ViewModel.IsInFolder)
+            {
+                List<string> SearchPaths = new();
+                SearchPaths.Add(ViewModel.PathHistory.Peek());
+                ApplicationLibrary.LoadApplications(SearchPaths, ConfigurationState.Instance.System.Language);
+            }
+            else
             {
                 ApplicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
-
-                _isLoading = false;
-            })
-            {
-                Name = "GUI.ApplicationLibraryThread",
-                IsBackground = true,
-            };
-            applicationLibraryThread.Start();
+            }
         }
     }
 }

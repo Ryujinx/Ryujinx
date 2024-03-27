@@ -186,6 +186,11 @@ namespace Ryujinx.UI.Common.Configuration
             /// </summary>
             public ReactiveObject<bool> IsAscendingOrder { get; private set; }
 
+            /// <summary>
+            /// use system directories when listing games
+            /// </summary>
+            public ReactiveObject<bool> UseSystemGameFolders { get; private set; }
+
             public UISection()
             {
                 GuiColumns = new Columns();
@@ -204,6 +209,7 @@ namespace Ryujinx.UI.Common.Configuration
                 IsAscendingOrder = new ReactiveObject<bool>();
                 LanguageCode = new ReactiveObject<string>();
                 ShowConsole = new ReactiveObject<bool>();
+                UseSystemGameFolders = new ReactiveObject<bool>();
                 ShowConsole.Event += static (s, e) => { ConsoleHelper.SetConsoleWindowState(e.NewValue); };
             }
         }
@@ -741,6 +747,7 @@ namespace Ryujinx.UI.Common.Configuration
                 IsAscendingOrder = UI.IsAscendingOrder,
                 StartFullscreen = UI.StartFullscreen,
                 ShowConsole = UI.ShowConsole,
+                UseSystemGameFolders = UI.UseSystemGameFolders,
                 EnableKeyboard = Hid.EnableKeyboard,
                 EnableMouse = Hid.EnableMouse,
                 Hotkeys = Hid.Hotkeys,
@@ -836,6 +843,7 @@ namespace Ryujinx.UI.Common.Configuration
             UI.IsAscendingOrder.Value = true;
             UI.StartFullscreen.Value = false;
             UI.ShowConsole.Value = true;
+            UI.UseSystemGameFolders.Value = true;
             UI.WindowStartup.WindowSizeWidth.Value = 1280;
             UI.WindowStartup.WindowSizeHeight.Value = 760;
             UI.WindowStartup.WindowPositionX.Value = 0;
@@ -1442,6 +1450,15 @@ namespace Ryujinx.UI.Common.Configuration
                 configurationFileUpdated = true;
             }
 
+            if (configurationFileFormat.Version < 50)
+            {
+                Ryujinx.Common.Logging.Logger.Warning?.Print(LogClass.Application, $"Outdated configuration version {configurationFileFormat.Version}, migrating to version 50.");
+
+                configurationFileFormat.UseSystemGameFolders = true;
+
+                configurationFileUpdated = true;
+            }
+
             Logger.EnableFileLog.Value = configurationFileFormat.EnableFileLog;
             Graphics.ResScale.Value = configurationFileFormat.ResScale;
             Graphics.ResScaleCustom.Value = configurationFileFormat.ResScaleCustom;
@@ -1518,6 +1535,7 @@ namespace Ryujinx.UI.Common.Configuration
             UI.ApplicationSort.Value = configurationFileFormat.ApplicationSort;
             UI.StartFullscreen.Value = configurationFileFormat.StartFullscreen;
             UI.ShowConsole.Value = configurationFileFormat.ShowConsole;
+            UI.UseSystemGameFolders.Value = configurationFileFormat.UseSystemGameFolders;
             UI.WindowStartup.WindowSizeWidth.Value = configurationFileFormat.WindowStartup.WindowSizeWidth;
             UI.WindowStartup.WindowSizeHeight.Value = configurationFileFormat.WindowStartup.WindowSizeHeight;
             UI.WindowStartup.WindowPositionX.Value = configurationFileFormat.WindowStartup.WindowPositionX;

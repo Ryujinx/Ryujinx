@@ -116,6 +116,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public bool IsHypervisorAvailable => OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
+        public bool FolderModeChanged;
         public bool DirectoryChanged
         {
             get => _directoryChanged;
@@ -132,6 +133,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool EnableDiscordIntegration { get; set; }
         public bool CheckUpdatesOnStart { get; set; }
         public bool ShowConfirmExit { get; set; }
+        public bool UseSystemGameFolders { get; set; }
         public int HideCursor { get; set; }
         public bool EnableDockedMode { get; set; }
         public bool EnableKeyboard { get; set; }
@@ -400,6 +402,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             EnableDiscordIntegration = config.EnableDiscordIntegration;
             CheckUpdatesOnStart = config.CheckUpdatesOnStart;
             ShowConfirmExit = config.ShowConfirmExit;
+            UseSystemGameFolders = config.UI.UseSystemGameFolders;
             HideCursor = (int)config.HideCursor.Value;
 
             GameDirectories.Clear();
@@ -492,6 +495,12 @@ namespace Ryujinx.Ava.UI.ViewModels
                 config.UI.GameDirs.Value = gameDirs;
             }
 
+            if (UseSystemGameFolders != config.UI.UseSystemGameFolders.Value)
+            {
+                FolderModeChanged = true;
+            }
+            config.UI.UseSystemGameFolders.Value = UseSystemGameFolders;
+
             config.UI.BaseStyle.Value = BaseStyleIndex == 0 ? "Light" : "Dark";
 
             // Input
@@ -582,6 +591,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             SaveSettingsEvent?.Invoke();
 
             _directoryChanged = false;
+            FolderModeChanged = false;
         }
 
         private static void RevertIfNotSaved()

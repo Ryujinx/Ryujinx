@@ -215,6 +215,8 @@ namespace Ryujinx.UI
                 _startFullScreen.Active = true;
             }
 
+            ConfigurationState.Instance.UI.UseSystemGameFolders.Value = false;
+
             _showConsole.Active = ConfigurationState.Instance.UI.ShowConsole.Value;
             _showConsole.Visible = ConsoleHelper.SetConsoleWindowStateSupported;
 

@@ -71,7 +71,17 @@
                                     Classes.large="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridLarge}"
                                     Classes.normal="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridMedium}"
                                     Classes.small="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridSmall}"
+                                    IsVisible="{Binding IsGame}"
                                     Source="{Binding Icon, Converter={StaticResource ByteImage}}" />
+                                <ui:SymbolIcon
+                                    Grid.RowSpan="3"
+                                    Grid.Column="0"
+                                    Classes.listHuge="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridHuge}"
+                                    Classes.listLarge="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridLarge}"
+                                    Classes.listNormal="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridMedium}"
+                                    Classes.listSmall="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridSmall}"
+                                    IsVisible="{Binding IsFolder}"
+                                    Symbol="Folder" />
                                 <Border
                                     Grid.Column="2"
                                     Margin="0,0,5,0"
@@ -123,6 +133,7 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
                                     Orientation="Vertical"
+                                    IsVisible="{Binding IsGame}"
                                     Spacing="5">
                                     <TextBlock
                                         HorizontalAlignment="Stretch"
