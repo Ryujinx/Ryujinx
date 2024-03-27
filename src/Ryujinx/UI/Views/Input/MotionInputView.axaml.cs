@@ -1,9 +1,7 @@
 using Avalonia.Controls;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
-using Ryujinx.Ava.UI.Models;
-using Ryujinx.Ava.UI.ViewModels;
-using Ryujinx.Common.Configuration.Hid.Controller;
+using Ryujinx.Ava.UI.ViewModels.Input;
 using System.Threading.Tasks;
 
 namespace Ryujinx.Ava.UI.Views.Input
@@ -19,7 +17,7 @@ namespace Ryujinx.Ava.UI.Views.Input
 
         public MotionInputView(ControllerInputViewModel viewModel)
         {
-            var config = viewModel.Configuration as InputConfiguration<GamepadInputId, StickInputId>;
+            var config = viewModel.Config;
 
             _viewModel = new MotionInputViewModel
             {
@@ -51,7 +49,7 @@ namespace Ryujinx.Ava.UI.Views.Input
             };
             contentDialog.PrimaryButtonClick += (sender, args) =>
             {
-                var config = viewModel.Configuration as InputConfiguration<GamepadInputId, StickInputId>;
+                var config = viewModel.Config;
                 config.Slot = content._viewModel.Slot;
                 config.Sensitivity = content._viewModel.Sensitivity;
                 config.GyroDeadzone = content._viewModel.GyroDeadzone;

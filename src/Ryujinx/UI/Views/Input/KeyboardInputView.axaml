@@ -4,20 +4,19 @@
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="clr-namespace:Ryujinx.Ava.UI.Controls"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Input"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
     HorizontalAlignment="Stretch"
     VerticalAlignment="Stretch"
     d:DesignHeight="800"
     d:DesignWidth="800"
-    x:Class="Ryujinx.Ava.UI.Views.Input.ControllerInputView"
-    x:DataType="viewModels:ControllerInputViewModel"
+    x:Class="Ryujinx.Ava.UI.Views.Input.KeyboardInputView"
+    x:DataType="viewModels:KeyboardInputViewModel"
     x:CompileBindings="True"
     mc:Ignorable="d"
     Focusable="True">
     <Design.DataContext>
-        <viewModels:ControllerInputViewModel />
+        <viewModels:KeyboardInputViewModel />
     </Design.DataContext>
     <UserControl.Resources>
         <helpers:KeyValueConverter x:Key="Key" />
@@ -129,10 +128,11 @@
                             Margin="0,0,0,10"
                             HorizontalAlignment="Center"
                             Text="{locale:Locale ControllerSettingsLStick}" />
-                        <!-- Left Joystick Controller -->
+                        <!-- Left Joystick Keyboard -->
                         <StackPanel Orientation="Vertical">
                             <!-- Left Joystick Button -->
                             <StackPanel
+                                Margin="0,0,0,4"
                                 Orientation="Horizontal">
                                 <TextBlock
                                     Margin="0,0,10,0"
@@ -147,79 +147,73 @@
                                         TextAlignment="Center" />
                                 </ToggleButton>
                             </StackPanel>
-                            <!-- Left Joystick Stick -->
+                            <!-- Left Joystick Up -->
                             <StackPanel
-                                Margin="0,4,0,4"
+                                Margin="0,0,0,4"
                                 Orientation="Horizontal">
                                 <TextBlock
                                     Margin="0,0,10,0"
                                     Width="120"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsStickStick}"
+                                    Text="{locale:Locale ControllerSettingsStickUp}"
                                     TextAlignment="Center" />
-                                <ToggleButton Name="LeftJoystick" Tag="stick">
+                                <ToggleButton Name="LeftStickUp">
                                     <TextBlock
-                                        Text="{Binding Config.LeftJoystick, Converter={StaticResource Key}}"
+                                        Text="{Binding Config.LeftStickUp, Converter={StaticResource Key}}"
                                         TextAlignment="Center" />
                                 </ToggleButton>
                             </StackPanel>
-                            <Separator
-                                Margin="0,8,0,8"
-                                Height="1" />
-                            <CheckBox IsChecked="{Binding Config.LeftInvertStickX}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsStickInvertXAxis}" />
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding Config.LeftInvertStickY}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsStickInvertYAxis}" />
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding Config.LeftRotate90}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsRotate90}" />
-                            </CheckBox>
-                            <Separator
-                                Margin="0,8,0,8"
-                                Height="1" />
-                            <StackPanel Orientation="Vertical">
+                            <!-- Left Joystick Down -->
+                            <StackPanel
+                                Margin="0,0,0,4"
+                                Orientation="Horizontal">
                                 <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsStickDeadzone}" />
-                                <StackPanel
+                                    Margin="0,0,10,0"
+                                    Width="120"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <controls:SliderScroll
-                                        Width="130"
-                                        Maximum="1"
-                                        TickFrequency="0.01"
-                                        IsSnapToTickEnabled="True"
-                                        SmallChange="0.01"
-                                        Minimum="0"
-                                        Value="{Binding Config.DeadzoneLeft, Mode=TwoWay}" />
+                                    Text="{locale:Locale ControllerSettingsStickDown}"
+                                    TextAlignment="Center" />
+                                <ToggleButton Name="LeftStickDown">
                                     <TextBlock
-                                        VerticalAlignment="Center"
-                                        Width="25"
-                                        Text="{Binding Config.DeadzoneLeft, StringFormat=\{0:0.00\}}" />
-                                </StackPanel>
+                                        Text="{Binding Config.LeftStickDown, Converter={StaticResource Key}}"
+                                        TextAlignment="Center" />
+                                </ToggleButton>
+                            </StackPanel>
+                            <!-- Left Joystick Left -->
+                            <StackPanel
+                                Margin="0,0,0,4"
+                                Orientation="Horizontal">
                                 <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsStickRange}" />
-                                <StackPanel
+                                    Margin="0,0,10,0"
+                                    Width="120"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <controls:SliderScroll
-                                        Width="130"
-                                        Maximum="2"
-                                        TickFrequency="0.01"
-                                        IsSnapToTickEnabled="True"
-                                        SmallChange="0.01"
-                                        Minimum="0"
-                                        Value="{Binding Config.RangeLeft, Mode=TwoWay}" />
+                                    Text="{locale:Locale ControllerSettingsStickLeft}"
+                                    TextAlignment="Center" />
+                                <ToggleButton Name="LeftStickLeft">
                                     <TextBlock
-                                        VerticalAlignment="Center"
-                                        Width="25"
-                                        Text="{Binding Config.RangeLeft, StringFormat=\{0:0.00\}}" />
-                                </StackPanel>
+                                        Text="{Binding Config.LeftStickLeft, Converter={StaticResource Key}}"
+                                        TextAlignment="Center" />
+                                </ToggleButton>
+                            </StackPanel>
+                            <!-- Left Joystick Right -->
+                            <StackPanel
+                                Margin="0,0,0,4"
+                                Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,10,0"
+                                    Width="120"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="{locale:Locale ControllerSettingsStickRight}"
+                                    TextAlignment="Center" />
+                                <ToggleButton Name="LeftStickRight">
+                                    <TextBlock
+                                        Text="{Binding Config.LeftStickRight, Converter={StaticResource Key}}"
+                                        TextAlignment="Center" />
+                                </ToggleButton>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -328,165 +322,85 @@
                     BorderBrush="{DynamicResource ThemeControlBorderColor}"
                     BorderThickness="1"
                     CornerRadius="5"
-                    MinHeight="90">
+                    MinHeight="90"
+                    IsVisible="{Binding HasSides}">
                     <StackPanel
                         Margin="8"
                         Orientation="Vertical">
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            Text="{locale:Locale ControllerSettingsTriggerThreshold}" />
                         <StackPanel
+                            Margin="0,4,0,0"
                             HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsLeft}"
                             Orientation="Horizontal">
-                            <controls:SliderScroll
-                                Width="130"
-                                Maximum="1"
-                                TickFrequency="0.01"
-                                IsSnapToTickEnabled="True"
-                                SmallChange="0.01"
-                                Minimum="0"
-                                Value="{Binding Config.TriggerThreshold, Mode=TwoWay}" />
                             <TextBlock
-                              Width="25"
-                              Text="{Binding Config.TriggerThreshold, StringFormat=\{0:0.00\}}" />
+                                Width="20"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Text="{locale:Locale ControllerSettingsLeftSR}"
+                                TextAlignment="Center" />
+                            <ToggleButton Name="LeftButtonSr">
+                                <TextBlock
+                                    Text="{Binding Config.LeftButtonSr, Converter={StaticResource Key}}"
+                                    TextAlignment="Center" />
+                            </ToggleButton>
                         </StackPanel>
                         <StackPanel
-                            Orientation="Vertical"
-                            IsVisible="{Binding HasSides}">
-                            <StackPanel
-                                Margin="0,4,0,0"
+                            Margin="0,4,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsLeft}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="20"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                IsVisible="{Binding IsLeft}"
-                                Orientation="Horizontal">
+                                Text="{locale:Locale ControllerSettingsLeftSL}"
+                                TextAlignment="Center" />
+                            <ToggleButton Name="LeftButtonSl">
                                 <TextBlock
-                                    Width="20"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsLeftSR}"
+                                    Text="{Binding Config.LeftButtonSl, Converter={StaticResource Key}}"
                                     TextAlignment="Center" />
-                                <ToggleButton Name="LeftButtonSr">
-                                    <TextBlock
-                                        Text="{Binding Config.LeftButtonSr, Converter={StaticResource Key}}"
-                                        TextAlignment="Center" />
-                                </ToggleButton>
-                            </StackPanel>
-                            <StackPanel
-                                Margin="0,4,0,0"
+                            </ToggleButton>
+                        </StackPanel>
+                        <StackPanel
+                            Margin="0,4,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsRight}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="20"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                IsVisible="{Binding IsLeft}"
-                                Orientation="Horizontal">
+                                Text="{locale:Locale ControllerSettingsRightSR}"
+                                TextAlignment="Center" />
+                            <ToggleButton Name="RightButtonSr">
                                 <TextBlock
-                                    Width="20"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsLeftSL}"
+                                    Text="{Binding Config.RightButtonSr, Converter={StaticResource Key}}"
                                     TextAlignment="Center" />
-                                <ToggleButton Name="LeftButtonSl">
-                                    <TextBlock
-                                        Text="{Binding Config.LeftButtonSl, Converter={StaticResource Key}}"
-                                        TextAlignment="Center" />
-                                </ToggleButton>
-                            </StackPanel>
-                            <StackPanel
-                                Margin="0,4,0,0"
+                            </ToggleButton>
+                        </StackPanel>
+                        <StackPanel
+                            Margin="0,4,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsRight}"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Width="20"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                IsVisible="{Binding IsRight}"
-                                Orientation="Horizontal">
+                                Text="{locale:Locale ControllerSettingsRightSL}"
+                                TextAlignment="Center" />
+                            <ToggleButton Name="RightButtonSl">
                                 <TextBlock
-                                    Width="20"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsRightSR}"
+                                    Text="{Binding Config.RightButtonSl, Converter={StaticResource Key}}"
                                     TextAlignment="Center" />
-                                <ToggleButton Name="RightButtonSr">
-                                    <TextBlock
-                                        Text="{Binding Config.RightButtonSr, Converter={StaticResource Key}}"
-                                        TextAlignment="Center" />
-                                </ToggleButton>
-                            </StackPanel>
-                            <StackPanel
-                                Margin="0,4,0,0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                IsVisible="{Binding IsRight}"
-                                Orientation="Horizontal">
-                                <TextBlock
-                                    Width="20"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsRightSL}"
-                                    TextAlignment="Center" />
-                                <ToggleButton Name="RightButtonSl">
-                                    <TextBlock
-                                        Text="{Binding Config.RightButtonSl, Converter={StaticResource Key}}"
-                                        TextAlignment="Center" />
-                                </ToggleButton>
-                            </StackPanel>
+                            </ToggleButton>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <!-- Motion + Rumble -->
-                <StackPanel
-                    Margin="0,10,0,0"
-                    Spacing="5"
-                    Orientation="Vertical"
-                    VerticalAlignment="Bottom">
-                    <Border
-                        BorderBrush="{DynamicResource ThemeControlBorderColor}"
-                        BorderThickness="1"
-                        CornerRadius="5"
-                        VerticalAlignment="Bottom"
-                        HorizontalAlignment="Stretch">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <CheckBox
-                                Margin="10"
-                                MinWidth="0"
-                                Grid.Column="0"
-                                IsChecked="{Binding Config.EnableMotion, Mode=TwoWay}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsMotion}" />
-                            </CheckBox>
-                            <Button
-                                Margin="10"
-                                Grid.Column="1"
-                                Command="{Binding ShowMotionConfig}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsConfigureGeneral}" />
-                            </Button>
-                        </Grid>
-                    </Border>
-                    <Border
-                        BorderBrush="{DynamicResource ThemeControlBorderColor}"
-                        BorderThickness="1"
-                        CornerRadius="5"
-                        HorizontalAlignment="Stretch"
-                        Margin="0,-1,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <CheckBox
-                                Margin="10"
-                                MinWidth="0"
-                                Grid.Column="0"
-                                IsChecked="{Binding Config.EnableRumble, Mode=TwoWay}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsRumble}" />
-                            </CheckBox>
-                            <Button
-                                Margin="10"
-                                Grid.Column="1"
-                                Command="{Binding ShowRumbleConfig}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsConfigureGeneral}" />
-                            </Button>
-                        </Grid>
-                    </Border>
-                </StackPanel>
             </StackPanel>
             <!-- Right Controls -->
             <StackPanel
@@ -665,10 +579,11 @@
                             Margin="0,0,0,10"
                             HorizontalAlignment="Center"
                             Text="{locale:Locale ControllerSettingsRStick}" />
-                        <!-- Right Joystick Controller -->
+                        <!-- Right Joystick Keyboard -->
                         <StackPanel Orientation="Vertical">
                             <!-- Right Joystick Button -->
                             <StackPanel
+                                Margin="0,0,0,4"
                                 Orientation="Horizontal">
                                 <TextBlock
                                     Margin="0,0,10,0"
@@ -683,78 +598,73 @@
                                         TextAlignment="Center" />
                                 </ToggleButton>
                             </StackPanel>
-                            <!-- Right Joystick Stick -->
+                            <!-- Right Joystick Up -->
                             <StackPanel
-                                Margin="0,4,0,4"
-                                Background="{DynamicResource ThemeDarkColor}"
+                                Margin="0,0,0,4"
                                 Orientation="Horizontal">
                                 <TextBlock
                                     Margin="0,0,10,0"
                                     Width="120"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsStickStick}"
+                                    Text="{locale:Locale ControllerSettingsStickUp}"
                                     TextAlignment="Center" />
-                                <ToggleButton Name="RightJoystick" Tag="stick">
+                                <ToggleButton Name="RightStickUp">
                                     <TextBlock
-                                        Text="{Binding Config.RightJoystick, Converter={StaticResource Key}}"
+                                        Text="{Binding Config.RightStickUp, Converter={StaticResource Key}}"
                                         TextAlignment="Center" />
                                 </ToggleButton>
                             </StackPanel>
-                            <Separator Margin="0,8,0,8" Height="1" />
-                            <CheckBox IsChecked="{Binding Config.RightInvertStickX}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsStickInvertXAxis}" />
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding Config.RightInvertStickY}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsStickInvertYAxis}" />
-                            </CheckBox>
-                            <CheckBox IsChecked="{Binding Config.RightRotate90}">
-                                <TextBlock Text="{locale:Locale ControllerSettingsRotate90}" />
-                            </CheckBox>
-                            <Separator Margin="0,8,0,8" Height="1" />
-                            <StackPanel Orientation="Vertical">
+                            <!-- Right Joystick Down -->
+                            <StackPanel
+                                Margin="0,0,0,4"
+                                Orientation="Horizontal">
                                 <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsStickDeadzone}" />
-                                <StackPanel
+                                    Margin="0,0,10,0"
+                                    Width="120"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <controls:SliderScroll
-                                        Width="130"
-                                        Maximum="1"
-                                        TickFrequency="0.01"
-                                        IsSnapToTickEnabled="True"
-                                        SmallChange="0.01"
-                                        Padding="0"
-                                        VerticalAlignment="Center"
-                                        Minimum="0"
-                                        Value="{Binding Config.DeadzoneRight, Mode=TwoWay}" />
+                                    Text="{locale:Locale ControllerSettingsStickDown}"
+                                    TextAlignment="Center" />
+                                <ToggleButton Name="RightStickDown">
                                     <TextBlock
-                                        VerticalAlignment="Center"
-                                        Width="25"
-                                        Text="{Binding Config.DeadzoneRight, StringFormat=\{0:0.00\}}" />
-                                </StackPanel>
+                                        Text="{Binding Config.RightStickDown, Converter={StaticResource Key}}"
+                                        TextAlignment="Center" />
+                                </ToggleButton>
+                            </StackPanel>
+                            <!-- Right Joystick Left -->
+                            <StackPanel
+                                Margin="0,0,0,4"
+                                Orientation="Horizontal">
                                 <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Text="{locale:Locale ControllerSettingsStickRange}" />
-                                <StackPanel
+                                    Margin="0,0,10,0"
+                                    Width="120"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <controls:SliderScroll
-                                        Width="130"
-                                        Maximum="2"
-                                        TickFrequency="0.01"
-                                        IsSnapToTickEnabled="True"
-                                        SmallChange="0.01"
-                                        Minimum="0"
-                                        Value="{Binding Config.RangeRight, Mode=TwoWay}" />
+                                    Text="{locale:Locale ControllerSettingsStickLeft}"
+                                    TextAlignment="Center" />
+                                <ToggleButton Name="RightStickLeft">
                                     <TextBlock
-                                        VerticalAlignment="Center"
-                                        Width="25"
-                                        Text="{Binding Config.RangeRight, StringFormat=\{0:0.00\}}" />
-                                </StackPanel>
+                                        Text="{Binding Config.RightStickLeft, Converter={StaticResource Key}}"
+                                        TextAlignment="Center" />
+                                </ToggleButton>
+                            </StackPanel>
+                            <!-- Right Joystick Right -->
+                            <StackPanel
+                                Margin="0,0,0,4"
+                                Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,10,0"
+                                    Width="120"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="{locale:Locale ControllerSettingsStickRight}"
+                                    TextAlignment="Center" />
+                                <ToggleButton Name="RightStickRight">
+                                    <TextBlock
+                                        Text="{Binding Config.RightStickRight, Converter={StaticResource Key}}"
+                                        TextAlignment="Center" />
+                                </ToggleButton>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

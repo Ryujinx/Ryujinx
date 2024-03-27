@@ -1,4 +1,4 @@
-namespace Ryujinx.Ava.UI.ViewModels
+namespace Ryujinx.Ava.UI.ViewModels.Input
 {
     public class RumbleInputViewModel : BaseModel
     {

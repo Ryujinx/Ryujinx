@@ -1,9 +1,7 @@
 using Avalonia.Controls;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
-using Ryujinx.Ava.UI.Models;
-using Ryujinx.Ava.UI.ViewModels;
-using Ryujinx.Common.Configuration.Hid.Controller;
+using Ryujinx.Ava.UI.ViewModels.Input;
 using System.Threading.Tasks;
 
 namespace Ryujinx.Ava.UI.Views.Input
@@ -19,7 +17,7 @@ namespace Ryujinx.Ava.UI.Views.Input
 
         public RumbleInputView(ControllerInputViewModel viewModel)
         {
-            var config = viewModel.Configuration as InputConfiguration<GamepadInputId, StickInputId>;
+            var config = viewModel.Config;
 
             _viewModel = new RumbleInputViewModel
             {
@@ -47,7 +45,7 @@ namespace Ryujinx.Ava.UI.Views.Input
 
             contentDialog.PrimaryButtonClick += (sender, args) =>
             {
-                var config = viewModel.Configuration as InputConfiguration<GamepadInputId, StickInputId>;
+                var config = viewModel.Config;
                 config.StrongRumble = content._viewModel.StrongRumble;
                 config.WeakRumble = content._viewModel.WeakRumble;
             };
