@@ -14,5 +14,8 @@
     <EmbeddedResource Include="CodeGen\Glsl\HelperFunctions\MultiplyHighU32.glsl" />
     <EmbeddedResource Include="CodeGen\Glsl\HelperFunctions\SwizzleAdd.glsl" />
   </ItemGroup>
-
+    
+  <ItemGroup>
+    <EmbeddedResource Include="CodeGen\Msl\HelperFunctions\VoteAllEqual.metal" />  
+  </ItemGroup>  
 </Project>
