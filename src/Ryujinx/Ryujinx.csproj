@@ -102,7 +102,10 @@
     <AvaloniaResource Include="UI\**\*.xaml">
       <SubType>Designer</SubType>
     </AvaloniaResource>
-    <AvaloniaResource Include="Assets\Fonts\SegoeFluentIcons.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\FluentSystemIcons-Resizable.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\FluentSystemIconsResizable.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaResource>
     <AvaloniaResource Include="Assets\Styles\Themes.xaml">
       <Generator>MSBuild:Compile</Generator>
     </AvaloniaResource>

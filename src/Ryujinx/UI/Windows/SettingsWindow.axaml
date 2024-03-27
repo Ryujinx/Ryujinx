@@ -17,7 +17,18 @@
     WindowStartupLocation="CenterOwner"
     x:DataType="viewModels:SettingsViewModel"
     mc:Ignorable="d"
-    Focusable="True">
+    Focusable="True"
+    UseLayoutRounding="True"
+    RenderOptions.TextRenderingMode="Antialias">
+    <window:StyleableWindow.Resources>
+        <ResourceDictionary>
+            <x:Double x:Key="NavigationViewItemOnLeftIconBoxHeight">20</x:Double>
+            
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source="/Assets/Fonts/FluentSystemIconsResizable.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </window:StyleableWindow.Resources>
     <Design.DataContext>
         <viewModels:SettingsViewModel />
     </Design.DataContext>
@@ -58,44 +69,39 @@
                     IsSelected="True"
                     Content="{locale:Locale SettingsTabGeneral}"
                     Tag="UiPage"
-                    IconSource="New" />
+                    IconSource="{StaticResource New}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabInput}"
                     Tag="InputPage"
-                    IconSource="Games" />
+                    IconSource="{StaticResource Games}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabHotkeys}"
                     Tag="HotkeysPage"
-                    IconSource="Keyboard" />
+                    IconSource="{StaticResource Keyboard}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabSystem}"
                     Tag="SystemPage"
-                    IconSource="Settings" />
+                    IconSource="{StaticResource Settings}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabCpu}"
-                    Tag="CpuPage">
-                    <ui:NavigationViewItem.IconSource>
-                        <ui:FontIconSource
-                            FontFamily="avares://Ryujinx/Assets/Fonts#Segoe Fluent Icons"
-                            Glyph="{helpers:GlyphValueConverter Chip}" />
-                    </ui:NavigationViewItem.IconSource>
-                </ui:NavigationViewItem>
+                    Tag="CpuPage"
+                    IconSource="{StaticResource DeveloperBoard}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabGraphics}"
                     Tag="GraphicsPage"
-                    IconSource="Image" />
+                    IconSource="{StaticResource Image}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabAudio}"
-                    IconSource="Audio"
-                    Tag="AudioPage" />
+                    Tag="AudioPage"
+                    IconSource="{StaticResource MusicNote}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabNetwork}"
                     Tag="NetworkPage"
-                    IconSource="Globe" />
+                    IconSource="{StaticResource Globe}" />
                 <ui:NavigationViewItem
                     Content="{locale:Locale SettingsTabLogging}"
                     Tag="LoggingPage"
-                    IconSource="Document" />
+                    IconSource="{StaticResource Document}" />
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.Styles>
                 <Style Selector="Grid#PlaceholderGrid">

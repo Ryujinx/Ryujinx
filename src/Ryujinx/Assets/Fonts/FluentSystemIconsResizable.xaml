@@ -1,0 +1,64 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                    xmlns:local="clr-namespace:Ryujinx.Assets.Fonts">
+    
+    <FontFamily x:Key="FluentSystemIconsResizable">avares://Ryujinx/Assets/Fonts#FluentSystemIcons-Resizable</FontFamily>
+
+    <!-- This value matches the overridden value for NavigationViewItemOnLeftIconBoxHeight in SettingsWindow.axaml -->
+    <x:Double x:Key="FontIconSize">20</x:Double> 
+
+    <ui:FontIconSource
+        x:Key="New"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.New}" />
+
+    <ui:FontIconSource
+        x:Key="Games"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.Games}" />
+
+    <ui:FontIconSource
+        x:Key="Keyboard"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.Keyboard}" />
+
+    <ui:FontIconSource
+        x:Key="Settings"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.Settings}" />
+
+    <ui:FontIconSource
+        x:Key="DeveloperBoard"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.DeveloperBoard}" />
+    
+    <ui:FontIconSource
+        x:Key="Image"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.Image}" />
+
+    <ui:FontIconSource
+        x:Key="MusicNote"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.MusicNote2}" />
+
+    <ui:FontIconSource
+        x:Key="Globe"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.Globe}" />
+
+    <ui:FontIconSource
+        x:Key="Document"
+        FontFamily="{StaticResource FluentSystemIconsResizable}"
+        FontSize="{StaticResource FontIconSize}"
+        Glyph="{x:Static local:FluentSystemIconsResizable.Document}" />
+</ResourceDictionary>
