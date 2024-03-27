@@ -54,8 +54,6 @@ using System.Threading.Tasks;
 using static Ryujinx.Ava.UI.Helpers.Win32NativeInterop;
 using AntiAliasing = Ryujinx.Common.Configuration.AntiAliasing;
 using Image = SixLabors.ImageSharp.Image;
-using InputManager = Ryujinx.Input.HLE.InputManager;
-using IRenderer = Ryujinx.Graphics.GAL.IRenderer;
 using Key = Ryujinx.Input.Key;
 using MouseButton = Ryujinx.Input.MouseButton;
 using ScalingFilter = Ryujinx.Common.Configuration.ScalingFilter;
@@ -123,12 +121,14 @@ namespace Ryujinx.Ava
         public int Width { get; private set; }
         public int Height { get; private set; }
         public string ApplicationPath { get; private set; }
+        public ulong ApplicationId { get; private set; }
         public bool ScreenshotRequested { get; set; }
 
         public AppHost(
             RendererHost renderer,
             InputManager inputManager,
             string applicationPath,
+            ulong applicationId,
             VirtualFileSystem virtualFileSystem,
             ContentManager contentManager,
             AccountManager accountManager,
@@ -152,6 +152,7 @@ namespace Ryujinx.Ava
             NpadManager = _inputManager.CreateNpadManager();
             TouchScreenManager = _inputManager.CreateTouchScreenManager();
             ApplicationPath = applicationPath;
+            ApplicationId = applicationId;
             VirtualFileSystem = virtualFileSystem;
             ContentManager = contentManager;
 
@@ -643,7 +644,7 @@ namespace Ryujinx.Ava
                         {
                             Logger.Info?.Print(LogClass.Application, "Loading as XCI.");
 
-                            if (!Device.LoadXci(ApplicationPath))
+                            if (!Device.LoadXci(ApplicationPath, ApplicationId))
                             {
                                 Device.Dispose();
 
@@ -670,7 +671,7 @@ namespace Ryujinx.Ava
                         {
                             Logger.Info?.Print(LogClass.Application, "Loading as NSP.");
 
-                            if (!Device.LoadNsp(ApplicationPath))
+                            if (!Device.LoadNsp(ApplicationPath, ApplicationId))
                             {
                                 Device.Dispose();
 

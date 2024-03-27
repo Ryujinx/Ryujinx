@@ -1,7 +1,9 @@
 using Gtk;
+using LibHac.Tools.FsSystem;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
 using Ryujinx.UI.App.Common;
+using Ryujinx.UI.Common.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,8 +29,13 @@ namespace Ryujinx.UI.Windows
         private CheatWindow(Builder builder, VirtualFileSystem virtualFileSystem, ulong titleId, string titleName, string titlePath) : base(builder.GetRawOwnedObject("_cheatWindow"))
         {
             builder.Autoconnect(this);
+
+            IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                ? IntegrityCheckLevel.ErrorOnInvalid
+                : IntegrityCheckLevel.None;
+
             _baseTitleInfoLabel.Text = $"Cheats Available for {titleName} [{titleId:X16}]";
-            _buildIdTextView.Buffer.Text = $"BuildId: {ApplicationData.GetApplicationBuildId(virtualFileSystem, titlePath)}";
+            _buildIdTextView.Buffer.Text = $"BuildId: {ApplicationData.GetBuildId(virtualFileSystem, checkLevel, titlePath)}";
 
             string modsBasePath = ModLoader.GetModsBasePath();
             string titleModsPath = ModLoader.GetApplicationDir(modsBasePath, titleId.ToString("X16"));

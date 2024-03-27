@@ -85,7 +85,7 @@
                                         <TextBlock
                                             HorizontalAlignment="Stretch"
                                             FontWeight="Bold"
-                                            Text="{Binding TitleName}"
+                                            Text="{Binding Name}"
                                             TextAlignment="Start"
                                             TextWrapping="Wrap" />
                                         <TextBlock
@@ -109,7 +109,7 @@
                                     Spacing="5">
                                     <TextBlock
                                         HorizontalAlignment="Stretch"
-                                        Text="{Binding TitleId}"
+                                        Text="{Binding Id, StringFormat=X16}"
                                         TextAlignment="Start"
                                         TextWrapping="Wrap" />
                                     <TextBlock
