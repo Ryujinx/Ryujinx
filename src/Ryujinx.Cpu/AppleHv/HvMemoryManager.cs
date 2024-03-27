@@ -3,10 +3,10 @@ using Ryujinx.Memory;
 using Ryujinx.Memory.Range;
 using Ryujinx.Memory.Tracking;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace Ryujinx.Cpu.AppleHv
@@ -15,7 +15,7 @@ namespace Ryujinx.Cpu.AppleHv
     /// Represents a CPU memory manager which maps guest virtual memory directly onto the Hypervisor page table.
     /// </summary>
     [SupportedOSPlatform("macos")]
-    public class HvMemoryManager : VirtualMemoryManagerRefCountedBase<ulong, ulong>, IMemoryManager, IVirtualMemoryManagerTracked, IWritableBlock
+    public class HvMemoryManager : VirtualMemoryManagerRefCountedBase, IMemoryManager, IVirtualMemoryManagerTracked
     {
         private readonly InvalidAccessHandler _invalidAccessHandler;
 
@@ -97,12 +97,6 @@ namespace Ryujinx.Cpu.AppleHv
         }
 
         /// <inheritdoc/>
-        public void MapForeign(ulong va, nuint hostPointer, ulong size)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <inheritdoc/>
         public void Unmap(ulong va, ulong size)
         {
             AssertValidAddressAndSize(va, size);
@@ -126,20 +120,11 @@ namespace Ryujinx.Cpu.AppleHv
             }
         }
 
-        /// <inheritdoc/>
-        public T Read<T>(ulong va) where T : unmanaged
-        {
-            return MemoryMarshal.Cast<byte, T>(GetSpan(va, Unsafe.SizeOf<T>()))[0];
-        }
-
-        /// <inheritdoc/>
-        public T ReadTracked<T>(ulong va) where T : unmanaged
+        public override T ReadTracked<T>(ulong va)
         {
             try
             {
-                SignalMemoryTracking(va, (ulong)Unsafe.SizeOf<T>(), false);
-
-                return Read<T>(va);
+                return base.ReadTracked<T>(va);
             }
             catch (InvalidMemoryRegionException)
             {
@@ -152,7 +137,6 @@ namespace Ryujinx.Cpu.AppleHv
             }
         }
 
-        /// <inheritdoc/>
         public override void Read(ulong va, Span<byte> data)
         {
             try
@@ -168,101 +152,11 @@ namespace Ryujinx.Cpu.AppleHv
             }
         }
 
-        /// <inheritdoc/>
-        public void Write<T>(ulong va, T value) where T : unmanaged
-        {
-            Write(va, MemoryMarshal.Cast<T, byte>(MemoryMarshal.CreateSpan(ref value, 1)));
-        }
-
-        /// <inheritdoc/>
-        public void Write(ulong va, ReadOnlySpan<byte> data)
-        {
-            if (data.Length == 0)
-            {
-                return;
-            }
-
-            SignalMemoryTracking(va, (ulong)data.Length, true);
-
-            WriteImpl(va, data);
-        }
-
-        /// <inheritdoc/>
-        public void WriteUntracked(ulong va, ReadOnlySpan<byte> data)
-        {
-            if (data.Length == 0)
-            {
-                return;
-            }
-
-            WriteImpl(va, data);
-        }
-
-        /// <inheritdoc/>
-        public bool WriteWithRedundancyCheck(ulong va, ReadOnlySpan<byte> data)
-        {
-            if (data.Length == 0)
-            {
-                return false;
-            }
-
-            SignalMemoryTracking(va, (ulong)data.Length, false);
-
-            if (IsContiguousAndMapped(va, data.Length))
-            {
-                var target = _backingMemory.GetSpan(GetPhysicalAddressInternal(va), data.Length);
-
-                bool changed = !data.SequenceEqual(target);
-
-                if (changed)
-                {
-                    data.CopyTo(target);
-                }
-
-                return changed;
-            }
-            else
-            {
-                WriteImpl(va, data);
-
-                return true;
-            }
-        }
-
-        private void WriteImpl(ulong va, ReadOnlySpan<byte> data)
+        public override void Write(ulong va, ReadOnlySpan<byte> data)
         {
             try
             {
-                AssertValidAddressAndSize(va, (ulong)data.Length);
-
-                if (IsContiguousAndMapped(va, data.Length))
-                {
-                    data.CopyTo(_backingMemory.GetSpan(GetPhysicalAddressInternal(va), data.Length));
-                }
-                else
-                {
-                    int offset = 0, size;
-
-                    if ((va & PageMask) != 0)
-                    {
-                        ulong pa = GetPhysicalAddressChecked(va);
-
-                        size = Math.Min(data.Length, PageSize - (int)(va & PageMask));
-
-                        data[..size].CopyTo(_backingMemory.GetSpan(pa, size));
-
-                        offset += size;
-                    }
-
-                    for (; offset < data.Length; offset += size)
-                    {
-                        ulong pa = GetPhysicalAddressChecked(va + (ulong)offset);
-
-                        size = Math.Min(data.Length - offset, PageSize);
-
-                        data.Slice(offset, size).CopyTo(_backingMemory.GetSpan(pa, size));
-                    }
-                }
+                base.Write(va, data);
             }
             catch (InvalidMemoryRegionException)
             {
@@ -273,61 +167,38 @@ namespace Ryujinx.Cpu.AppleHv
             }
         }
 
-        /// <inheritdoc/>
-        public ReadOnlySpan<byte> GetSpan(ulong va, int size, bool tracked = false)
+        public override void WriteUntracked(ulong va, ReadOnlySpan<byte> data)
         {
-            if (size == 0)
+            try
             {
-                return ReadOnlySpan<byte>.Empty;
+                base.WriteUntracked(va, data);
             }
-
-            if (tracked)
+            catch (InvalidMemoryRegionException)
             {
-                SignalMemoryTracking(va, (ulong)size, false);
-            }
-
-            if (IsContiguousAndMapped(va, size))
-            {
-                return _backingMemory.GetSpan(GetPhysicalAddressInternal(va), size);
-            }
-            else
-            {
-                Span<byte> data = new byte[size];
-
-                base.Read(va, data);
-
-                return data;
+                if (_invalidAccessHandler == null || !_invalidAccessHandler(va))
+                {
+                    throw;
+                }
             }
         }
 
-        /// <inheritdoc/>
-        public WritableRegion GetWritableRegion(ulong va, int size, bool tracked = false)
+        public override ReadOnlySequence<byte> GetReadOnlySequence(ulong va, int size, bool tracked = false)
         {
-            if (size == 0)
+            try
             {
-                return new WritableRegion(null, va, Memory<byte>.Empty);
+                return base.GetReadOnlySequence(va, size, tracked);
             }
-
-            if (tracked)
+            catch (InvalidMemoryRegionException)
             {
-                SignalMemoryTracking(va, (ulong)size, true);
-            }
+                if (_invalidAccessHandler == null || !_invalidAccessHandler(va))
+                {
+                    throw;
+                }
 
-            if (IsContiguousAndMapped(va, size))
-            {
-                return new WritableRegion(null, va, _backingMemory.GetMemory(GetPhysicalAddressInternal(va), size));
-            }
-            else
-            {
-                Memory<byte> memory = new byte[size];
-
-                base.Read(va, memory.Span);
-
-                return new WritableRegion(this, va, memory);
+                return ReadOnlySequence<byte>.Empty;
             }
         }
 
-        /// <inheritdoc/>
         public ref T GetRef<T>(ulong va) where T : unmanaged
         {
             if (!IsContiguous(va, Unsafe.SizeOf<T>()))
@@ -340,9 +211,8 @@ namespace Ryujinx.Cpu.AppleHv
             return ref _backingMemory.GetRef<T>(GetPhysicalAddressChecked(va));
         }
 
-        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsMapped(ulong va)
+        public override bool IsMapped(ulong va)
         {
             return ValidateAddress(va) && _pages.IsMapped(va);
         }
@@ -353,39 +223,6 @@ namespace Ryujinx.Cpu.AppleHv
             AssertValidAddressAndSize(va, size);
 
             return _pages.IsRangeMapped(va, size);
-        }
-
-        private static void ThrowMemoryNotContiguous() => throw new MemoryNotContiguousException();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsContiguousAndMapped(ulong va, int size) => IsContiguous(va, size) && IsMapped(va);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsContiguous(ulong va, int size)
-        {
-            if (!ValidateAddress(va) || !ValidateAddressAndSize(va, (ulong)size))
-            {
-                return false;
-            }
-
-            int pages = GetPagesCount(va, (uint)size, out va);
-
-            for (int page = 0; page < pages - 1; page++)
-            {
-                if (!ValidateAddress(va + PageSize))
-                {
-                    return false;
-                }
-
-                if (GetPhysicalAddressInternal(va) + PageSize != GetPhysicalAddressInternal(va + PageSize))
-                {
-                    return false;
-                }
-
-                va += PageSize;
-            }
-
-            return true;
         }
 
         /// <inheritdoc/>
@@ -464,11 +301,10 @@ namespace Ryujinx.Cpu.AppleHv
             return regions;
         }
 
-        /// <inheritdoc/>
         /// <remarks>
         /// This function also validates that the given range is both valid and mapped, and will throw if it is not.
         /// </remarks>
-        public void SignalMemoryTracking(ulong va, ulong size, bool write, bool precise = false, int? exemptId = null)
+        public override void SignalMemoryTracking(ulong va, ulong size, bool write, bool precise = false, int? exemptId = null)
         {
             AssertValidAddressAndSize(va, size);
 
@@ -481,24 +317,6 @@ namespace Ryujinx.Cpu.AppleHv
             _pages.SignalMemoryTracking(Tracking, va, size, write, exemptId);
         }
 
-        /// <summary>
-        /// Computes the number of pages in a virtual address range.
-        /// </summary>
-        /// <param name="va">Virtual address of the range</param>
-        /// <param name="size">Size of the range</param>
-        /// <param name="startVa">The virtual address of the beginning of the first page</param>
-        /// <remarks>This function does not differentiate between allocated and unallocated pages.</remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetPagesCount(ulong va, ulong size, out ulong startVa)
-        {
-            // WARNING: Always check if ulong does not overflow during the operations.
-            startVa = va & ~(ulong)PageMask;
-            ulong vaSpan = (va - startVa + size + PageMask) & ~(ulong)PageMask;
-
-            return (int)(vaSpan / PageSize);
-        }
-
-        /// <inheritdoc/>
         public void Reprotect(ulong va, ulong size, MemoryPermission protection)
         {
             // TODO
@@ -535,7 +353,7 @@ namespace Ryujinx.Cpu.AppleHv
             return Tracking.BeginSmartGranularTracking(address, size, granularity, id);
         }
 
-        private ulong GetPhysicalAddressChecked(ulong va)
+        private nuint GetPhysicalAddressChecked(ulong va)
         {
             if (!IsMapped(va))
             {
@@ -545,9 +363,9 @@ namespace Ryujinx.Cpu.AppleHv
             return GetPhysicalAddressInternal(va);
         }
 
-        private ulong GetPhysicalAddressInternal(ulong va)
+        private nuint GetPhysicalAddressInternal(ulong va)
         {
-            return _pageTable.Read(va) + (va & PageMask);
+            return (nuint)(_pageTable.Read(va) + (va & PageMask));
         }
 
         /// <summary>
@@ -558,10 +376,16 @@ namespace Ryujinx.Cpu.AppleHv
             _addressSpace.Dispose();
         }
 
-        protected override Span<byte> GetPhysicalAddressSpan(ulong pa, int size)
+        protected override Memory<byte> GetPhysicalAddressMemory(nuint pa, int size)
+            => _backingMemory.GetMemory(pa, size);
+
+        protected override Span<byte> GetPhysicalAddressSpan(nuint pa, int size)
             => _backingMemory.GetSpan(pa, size);
 
-        protected override ulong TranslateVirtualAddressForRead(ulong va)
+        protected override nuint TranslateVirtualAddressChecked(ulong va)
             => GetPhysicalAddressChecked(va);
+
+        protected override nuint TranslateVirtualAddressUnchecked(ulong va)
+            => GetPhysicalAddressInternal(va);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 
 namespace Ryujinx.Memory
 {
@@ -6,6 +7,7 @@ namespace Ryujinx.Memory
     {
         private readonly IWritableBlock _block;
         private readonly ulong _va;
+        private readonly IMemoryOwner<byte> _memoryOwner;
         private readonly bool _tracked;
 
         private bool NeedsWriteback => _block != null;
@@ -18,6 +20,12 @@ namespace Ryujinx.Memory
             _va = va;
             _tracked = tracked;
             Memory = memory;
+        }
+
+        public WritableRegion(IWritableBlock block, ulong va, IMemoryOwner<byte> memoryOwner, bool tracked = false)
+            : this(block, va, memoryOwner.Memory, tracked)
+        {
+            _memoryOwner = memoryOwner;
         }
 
         public void Dispose()
@@ -33,6 +41,8 @@ namespace Ryujinx.Memory
                     _block.WriteUntracked(_va, Memory.Span);
                 }
             }
+
+            _memoryOwner?.Dispose();
         }
     }
 }

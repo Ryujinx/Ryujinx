@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Ryujinx.Common.Memory
 {
-    public sealed partial class ByteMemoryPool
+    public partial class ByteMemoryPool
     {
         /// <summary>
         /// Represents a <see cref="IMemoryOwner{Byte}"/> that wraps an array rented from

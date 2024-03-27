@@ -6,24 +6,8 @@ namespace Ryujinx.Common.Memory
     /// <summary>
     /// Provides a pool of re-usable byte array instances.
     /// </summary>
-    public sealed partial class ByteMemoryPool
+    public static partial class ByteMemoryPool
     {
-        private static readonly ByteMemoryPool _shared = new();
-
-        /// <summary>
-        /// Constructs a <see cref="ByteMemoryPool"/> instance. Private to force access through
-        /// the <see cref="ByteMemoryPool.Shared"/> instance.
-        /// </summary>
-        private ByteMemoryPool()
-        {
-            // No implementation
-        }
-
-        /// <summary>
-        /// Retrieves a shared <see cref="ByteMemoryPool"/> instance.
-        /// </summary>
-        public static ByteMemoryPool Shared => _shared;
-
         /// <summary>
         /// Returns the maximum buffer size supported by this pool.
         /// </summary>
@@ -93,6 +77,20 @@ namespace Ryujinx.Common.Memory
             buffer.Memory.Span.Clear();
 
             return buffer;
+        }
+
+        /// <summary>
+        /// Copies <paramref name="buffer"/> into a newly rented byte memory buffer.
+        /// </summary>
+        /// <param name="buffer">The byte buffer to copy</param>
+        /// <returns>A <see cref="IMemoryOwner{Byte}"/> wrapping the rented memory with <paramref name="buffer"/> copied to it</returns>
+        public static IMemoryOwner<byte> RentCopy(ReadOnlySpan<byte> buffer)
+        {
+            var copy = RentImpl(buffer.Length);
+
+            buffer.CopyTo(copy.Memory.Span);
+
+            return copy;
         }
 
         private static ByteMemoryPoolBuffer RentImpl(int length)

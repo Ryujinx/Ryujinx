@@ -14,6 +14,10 @@ namespace Ryujinx.Memory
             _length = length;
         }
 
+        public unsafe T* Pointer => _pointer;
+
+        public int Length => _length;
+
         public override Span<T> GetSpan()
         {
             return new Span<T>((void*)_pointer, _length);

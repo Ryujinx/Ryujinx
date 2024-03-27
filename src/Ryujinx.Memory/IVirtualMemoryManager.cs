@@ -125,6 +125,16 @@ namespace Ryujinx.Memory
         }
 
         /// <summary>
+        /// Gets a read-only sequence of read-only memory blocks from CPU mapped memory.
+        /// </summary>
+        /// <param name="va">Virtual address of the data</param>
+        /// <param name="size">Size of the data</param>
+        /// <param name="tracked">True if read tracking is triggered on the memory</param>
+        /// <returns>A read-only sequence of read-only memory of the data</returns>
+        /// <exception cref="InvalidMemoryRegionException">Throw for unhandled invalid or unmapped memory accesses</exception>
+        ReadOnlySequence<byte> GetReadOnlySequence(ulong va, int size, bool tracked = false);
+
+        /// <summary>
         /// Gets a read-only span of data from CPU mapped memory.
         /// </summary>
         /// <param name="va">Virtual address of the data</param>

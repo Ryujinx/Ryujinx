@@ -1,13 +1,10 @@
 using Ryujinx.Memory;
 using System.Diagnostics;
-using System.Numerics;
 using System.Threading;
 
 namespace Ryujinx.Cpu
 {
-    public abstract class VirtualMemoryManagerRefCountedBase<TVirtual, TPhysical> : VirtualMemoryManagerBase<TVirtual, TPhysical>, IRefCounted
-        where TVirtual : IBinaryInteger<TVirtual>
-        where TPhysical : IBinaryInteger<TPhysical>
+    public abstract class VirtualMemoryManagerRefCountedBase : VirtualMemoryManagerBase, IRefCounted
     {
         private int _referenceCount;
 
