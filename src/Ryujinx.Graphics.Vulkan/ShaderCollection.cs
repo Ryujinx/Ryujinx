@@ -21,6 +21,7 @@ namespace Ryujinx.Graphics.Vulkan
         public bool HasMinimalLayout { get; }
         public bool UsePushDescriptors { get; }
         public bool IsCompute { get; }
+        public bool HasTessellationControlShader => (Stages & (1u << 3)) != 0;
 
         public uint Stages { get; }
 
@@ -461,6 +462,7 @@ namespace Ryujinx.Graphics.Vulkan
                 stages[i] = _shaders[i].GetInfo();
             }
 
+            pipeline.HasTessellationControlShader = HasTessellationControlShader;
             pipeline.StagesCount = (uint)_shaders.Length;
             pipeline.PipelineLayout = PipelineLayout;
 

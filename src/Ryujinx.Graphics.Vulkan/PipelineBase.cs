@@ -981,6 +981,7 @@ namespace Ryujinx.Graphics.Vulkan
             _bindingBarriersDirty = true;
 
             _newState.PipelineLayout = internalProgram.PipelineLayout;
+            _newState.HasTessellationControlShader = internalProgram.HasTessellationControlShader;
             _newState.StagesCount = (uint)stages.Length;
 
             stages.CopyTo(_newState.Stages.AsSpan()[..stages.Length]);

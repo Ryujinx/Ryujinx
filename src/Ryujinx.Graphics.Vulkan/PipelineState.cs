@@ -311,6 +311,7 @@ namespace Ryujinx.Graphics.Vulkan
             set => Internal.Id9 = (Internal.Id9 & 0xFFFFFFFFFFFFFFBF) | ((value ? 1UL : 0UL) << 6);
         }
 
+        public bool HasTessellationControlShader;
         public NativeArray<PipelineShaderStageCreateInfo> Stages;
         public PipelineLayout PipelineLayout;
         public SpecData SpecializationData;
@@ -319,6 +320,7 @@ namespace Ryujinx.Graphics.Vulkan
 
         public void Initialize()
         {
+            HasTessellationControlShader = false;
             Stages = new NativeArray<PipelineShaderStageCreateInfo>(Constants.MaxShaderStages);
 
             AdvancedBlendSrcPreMultiplied = true;
@@ -418,6 +420,15 @@ namespace Ryujinx.Graphics.Vulkan
                     VertexBindingDescriptionCount = VertexBindingDescriptionsCount,
                     PVertexBindingDescriptions = pVertexBindingDescriptions,
                 };
+
+                // Using patches topology without a tessellation shader is invalid.
+                // If we find such a case, return null pipeline to skip the draw.
+                if (Topology == PrimitiveTopology.PatchList && !HasTessellationControlShader)
+                {
+                    program.AddGraphicsPipeline(ref Internal, null);
+
+                    return null;
+                }
 
                 bool primitiveRestartEnable = PrimitiveRestartEnable;
 
