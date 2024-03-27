@@ -8,6 +8,7 @@ namespace Ryujinx.UI.Common.Helper
         public static string[] Arguments { get; private set; }
 
         public static bool? OverrideDockedMode { get; private set; }
+        public static bool? OverrideHardwareAcceleration { get; private set; }
         public static string OverrideGraphicsBackend { get; private set; }
         public static string OverrideHideCursor { get; private set; }
         public static string BaseDirPathArg { get; private set; }
@@ -86,6 +87,12 @@ namespace Ryujinx.UI.Common.Helper
                         }
 
                         OverrideHideCursor = args[++i];
+                        break;
+                    case "--software-gui":
+                        OverrideHardwareAcceleration = false;
+                        break;
+                    case "--hardware-gui":
+                        OverrideHardwareAcceleration = true;
                         break;
                     default:
                         LaunchPathArg = arg;
