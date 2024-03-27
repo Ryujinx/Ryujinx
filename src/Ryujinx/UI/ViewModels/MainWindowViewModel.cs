@@ -32,14 +32,13 @@ using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Image = SixLabors.ImageSharp.Image;
 using Key = Ryujinx.Input.Key;
 using MissingKeyException = LibHac.Common.Keys.MissingKeyException;
 using ShaderCacheLoadingState = Ryujinx.Graphics.Gpu.Shader.ShaderCacheState;
@@ -1144,17 +1143,17 @@ namespace Ryujinx.Ava.UI.ViewModels
         private void PrepareLoadScreen()
         {
             using MemoryStream stream = new(SelectedIcon);
-            using var gameIconBmp = Image.Load<Bgra32>(stream);
+            using var gameIconBmp = SKBitmap.Decode(stream);
 
-            var dominantColor = IconColorPicker.GetFilteredColor(gameIconBmp).ToPixel<Bgra32>();
+            var dominantColor = IconColorPicker.GetFilteredColor(gameIconBmp);
 
             const float ColorMultiple = 0.5f;
 
-            Color progressFgColor = Color.FromRgb(dominantColor.R, dominantColor.G, dominantColor.B);
+            Color progressFgColor = Color.FromRgb(dominantColor.Red, dominantColor.Green, dominantColor.Blue);
             Color progressBgColor = Color.FromRgb(
-                (byte)(dominantColor.R * ColorMultiple),
-                (byte)(dominantColor.G * ColorMultiple),
-                (byte)(dominantColor.B * ColorMultiple));
+                (byte)(dominantColor.Red * ColorMultiple),
+                (byte)(dominantColor.Green * ColorMultiple),
+                (byte)(dominantColor.Blue * ColorMultiple));
 
             ProgressBarForegroundColor = new SolidColorBrush(progressFgColor);
             ProgressBarBackgroundColor = new SolidColorBrush(progressBgColor);
