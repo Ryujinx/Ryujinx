@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Gtk3", "src\Ryujinx.Gtk3\Ryujinx.Gtk3.csproj", "{074045D4-3ED2-4711-9169-E385F2BFB5A0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Tests", "src\Ryujinx.Tests\Ryujinx.Tests.csproj", "{EBB55AEA-C7D7-4DEB-BF96-FA1789E225E9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Tests.Unicorn", "src\Ryujinx.Tests.Unicorn\Ryujinx.Tests.Unicorn.csproj", "{D8F72938-78EF-4E8C-BAFE-531C9C3C8F15}"
@@ -93,10 +91,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{074045D4-3ED2-4711-9169-E385F2BFB5A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{074045D4-3ED2-4711-9169-E385F2BFB5A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{074045D4-3ED2-4711-9169-E385F2BFB5A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{074045D4-3ED2-4711-9169-E385F2BFB5A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EBB55AEA-C7D7-4DEB-BF96-FA1789E225E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBB55AEA-C7D7-4DEB-BF96-FA1789E225E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBB55AEA-C7D7-4DEB-BF96-FA1789E225E9}.Release|Any CPU.ActiveCfg = Release|Any CPU

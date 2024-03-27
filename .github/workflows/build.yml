@@ -67,15 +67,10 @@ jobs:
         run: dotnet publish -c "${{ matrix.configuration }}" -r "${{ matrix.platform.name }}" -o ./publish_sdl2_headless -p:Version="${{ env.RYUJINX_BASE_VERSION }}" -p:DebugType=embedded -p:SourceRevisionId="${{ steps.git_short_hash.outputs.result }}" -p:ExtraDefineConstants=DISABLE_UPDATER src/Ryujinx.Headless.SDL2 --self-contained true
         if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
 
-      - name: Publish Ryujinx.Gtk3
-        run: dotnet publish -c "${{ matrix.configuration }}" -r "${{ matrix.platform.name }}" -o ./publish_gtk -p:Version="${{ env.RYUJINX_BASE_VERSION }}" -p:DebugType=embedded -p:SourceRevisionId="${{ steps.git_short_hash.outputs.result }}" -p:ExtraDefineConstants=DISABLE_UPDATER src/Ryujinx.Gtk3 --self-contained true
-        if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
-
       - name: Set executable bit
         run: |
           chmod +x ./publish/Ryujinx ./publish/Ryujinx.sh
           chmod +x ./publish_sdl2_headless/Ryujinx.Headless.SDL2 ./publish_sdl2_headless/Ryujinx.sh
-          chmod +x ./publish_gtk/Ryujinx.Gtk3 ./publish_gtk/Ryujinx.sh
         if: github.event_name == 'pull_request' && matrix.platform.os == 'ubuntu-latest'
 
       - name: Upload Ryujinx artifact
@@ -90,13 +85,6 @@ jobs:
         with:
           name: sdl2-ryujinx-headless-${{ matrix.configuration }}-${{ env.RYUJINX_BASE_VERSION }}+${{ steps.git_short_hash.outputs.result }}-${{ matrix.platform.zip_os_name }}
           path: publish_sdl2_headless
-        if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
-
-      - name: Upload Ryujinx.Gtk3 artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gtk-ryujinx-${{ matrix.configuration }}-${{ env.RYUJINX_BASE_VERSION }}+${{ steps.git_short_hash.outputs.result }}-${{ matrix.platform.zip_os_name }}
-          path: publish_gtk
         if: github.event_name == 'pull_request' && matrix.platform.os != 'macOS-latest'
 
   build_macos:
