@@ -11,6 +11,7 @@ using Ryujinx.Horizon.Ngc;
 using Ryujinx.Horizon.Ovln;
 using Ryujinx.Horizon.Prepo;
 using Ryujinx.Horizon.Psc;
+using Ryujinx.Horizon.Ptm;
 using Ryujinx.Horizon.Sdk.Arp;
 using Ryujinx.Horizon.Srepo;
 using Ryujinx.Horizon.Usb;
@@ -54,6 +55,7 @@ namespace Ryujinx.Horizon
             RegisterService<PrepoMain>();
             RegisterService<PscMain>();
             RegisterService<SrepoMain>();
+            RegisterService<TsMain>();
             RegisterService<UsbMain>();
             RegisterService<WlanMain>();
 
