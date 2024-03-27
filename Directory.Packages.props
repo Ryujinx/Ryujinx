@@ -20,7 +20,7 @@
     <PackageVersion Include="LibHac" Version="0.19.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.4.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
     <PackageVersion Include="MsgPack.Cli" Version="1.0.1" />
