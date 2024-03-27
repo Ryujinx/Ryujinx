@@ -571,7 +571,8 @@ namespace Ryujinx.Headless.SDL2
                 options.AudioVolume,
                 options.UseHypervisor ?? true,
                 options.MultiplayerLanInterfaceId,
-                Common.Configuration.Multiplayer.MultiplayerMode.Disabled);
+                Common.Configuration.Multiplayer.MultiplayerMode.Disabled,
+                options.TurboMultiplier);
 
             return new Switch(configuration);
         }

@@ -365,6 +365,11 @@ namespace Ryujinx.UI.Common.Configuration
             /// </summary>
             public ReactiveObject<bool> UseHypervisor { get; private set; }
 
+            /// <summary>
+            /// Turbo mode clock speed multiplier
+            /// </summary>
+            public ReactiveObject<long> TurboMultiplier { get; private set; }
+
             public SystemSection()
             {
                 Language = new ReactiveObject<Language>();
@@ -393,6 +398,8 @@ namespace Ryujinx.UI.Common.Configuration
                 AudioVolume.Event += static (sender, e) => LogValueChange(e, nameof(AudioVolume));
                 UseHypervisor = new ReactiveObject<bool>();
                 UseHypervisor.Event += static (sender, e) => LogValueChange(e, nameof(UseHypervisor));
+                TurboMultiplier = new ReactiveObject<long>();
+                TurboMultiplier.Event += static (sender, e) => LogValueChange(e, nameof(TurboMultiplier));
             }
         }
 
@@ -675,6 +682,7 @@ namespace Ryujinx.UI.Common.Configuration
                 SystemTimeZone = System.TimeZone,
                 SystemTimeOffset = System.SystemTimeOffset,
                 DockedMode = System.EnableDockedMode,
+                TurboMultiplier = System.TurboMultiplier,
                 EnableDiscordIntegration = EnableDiscordIntegration,
                 CheckUpdatesOnStart = CheckUpdatesOnStart,
                 ShowConfirmExit = ShowConfirmExit,
@@ -782,6 +790,7 @@ namespace Ryujinx.UI.Common.Configuration
             System.TimeZone.Value = "UTC";
             System.SystemTimeOffset.Value = 0;
             System.EnableDockedMode.Value = true;
+            System.TurboMultiplier.Value = 200;
             EnableDiscordIntegration.Value = true;
             CheckUpdatesOnStart.Value = true;
             ShowConfirmExit.Value = true;
@@ -854,6 +863,8 @@ namespace Ryujinx.UI.Common.Configuration
                 ResScaleDown = Key.Unbound,
                 VolumeUp = Key.Unbound,
                 VolumeDown = Key.Unbound,
+                ToggleTurbo = Key.Unbound,
+                TurboWhileHeld = false,
             };
             Hid.InputConfig.Value = new List<InputConfig>
             {
@@ -1442,6 +1453,30 @@ namespace Ryujinx.UI.Common.Configuration
                 configurationFileUpdated = true;
             }
 
+            if (configurationFileFormat.Version < 50)
+            {
+                Ryujinx.Common.Logging.Logger.Warning?.Print(LogClass.Application, $"Outdated configuration version {configurationFileFormat.Version}, migrating to version 50.");
+
+                configurationFileFormat.TurboMultiplier = 200;
+
+                configurationFileFormat.Hotkeys = new KeyboardHotkeys
+                {
+                    ToggleTurbo = Key.Unbound,
+                    TurboWhileHeld = false,
+                    Screenshot = configurationFileFormat.Hotkeys.Screenshot,
+                    ShowUI = configurationFileFormat.Hotkeys.ShowUI,
+                    Pause = configurationFileFormat.Hotkeys.Pause,
+                    ToggleMute = configurationFileFormat.Hotkeys.ToggleMute,
+                    ResScaleUp = configurationFileFormat.Hotkeys.ResScaleUp,
+                    ResScaleDown = configurationFileFormat.Hotkeys.ResScaleDown,
+                    VolumeUp = configurationFileFormat.Hotkeys.VolumeUp,
+                    VolumeDown = configurationFileFormat.Hotkeys.VolumeDown,
+                    ToggleVsync = configurationFileFormat.Hotkeys.ToggleVsync,
+                };
+
+                configurationFileUpdated = true;
+            }
+
             Logger.EnableFileLog.Value = configurationFileFormat.EnableFileLog;
             Graphics.ResScale.Value = configurationFileFormat.ResScale;
             Graphics.ResScaleCustom.Value = configurationFileFormat.ResScaleCustom;
@@ -1469,6 +1504,7 @@ namespace Ryujinx.UI.Common.Configuration
             System.TimeZone.Value = configurationFileFormat.SystemTimeZone;
             System.SystemTimeOffset.Value = configurationFileFormat.SystemTimeOffset;
             System.EnableDockedMode.Value = configurationFileFormat.DockedMode;
+            System.TurboMultiplier.Value = configurationFileFormat.TurboMultiplier;
             EnableDiscordIntegration.Value = configurationFileFormat.EnableDiscordIntegration;
             CheckUpdatesOnStart.Value = configurationFileFormat.CheckUpdatesOnStart;
             ShowConfirmExit.Value = configurationFileFormat.ShowConfirmExit;

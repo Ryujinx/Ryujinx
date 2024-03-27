@@ -12,5 +12,6 @@ namespace Ryujinx.Ava.Common
         ResScaleDown,
         VolumeUp,
         VolumeDown,
+        ToggleTurbo,
     }
 }
