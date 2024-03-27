@@ -18,8 +18,11 @@ namespace Ryujinx.Graphics.OpenGL.Queries
         private readonly IntPtr _bufferMap;
         private readonly QueryTarget _type;
 
-        public BufferedQuery(QueryTarget type)
+        private readonly Counters _parent;
+
+        public BufferedQuery(Counters parent, QueryTarget type)
         {
+            _parent = parent;
             _buffer = GL.GenBuffer();
             Query = GL.GenQuery();
             _type = type;
@@ -42,20 +45,31 @@ namespace Ryujinx.Graphics.OpenGL.Queries
 
         public void Begin()
         {
+            Marshal.WriteInt64(_bufferMap, -1L);
             GL.BeginQuery(_type, Query);
         }
 
-        public unsafe void End(bool withResult)
+        public unsafe void CopyQueryResult(bool withBarrier)
+        {
+            GL.BindBuffer(BufferTarget.QueryBuffer, _buffer);
+            GL.GetQueryObject(Query, GetQueryObjectParam.QueryResult, (long*)0);
+
+            if (withBarrier)
+            {
+                GL.MemoryBarrier(MemoryBarrierFlags.QueryBufferBarrierBit | MemoryBarrierFlags.ClientMappedBufferBarrierBit);
+            }
+        }
+
+        public void End(bool withResult)
         {
             GL.EndQuery(_type);
 
             if (withResult)
             {
-                GL.BindBuffer(BufferTarget.QueryBuffer, _buffer);
-
-                Marshal.WriteInt64(_bufferMap, -1L);
-                GL.GetQueryObject(Query, GetQueryObjectParam.QueryResult, (long*)0);
-                GL.MemoryBarrier(MemoryBarrierFlags.QueryBufferBarrierBit | MemoryBarrierFlags.ClientMappedBufferBarrierBit);
+                if (!_parent.QueueCopy(this))
+                {
+                    CopyQueryResult(true);
+                }
             }
             else
             {

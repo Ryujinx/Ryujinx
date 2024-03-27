@@ -45,8 +45,8 @@ namespace Ryujinx.Graphics.OpenGL
 
         public OpenGLRenderer()
         {
-            _pipeline = new Pipeline();
             _counters = new Counters();
+            _pipeline = new Pipeline(_counters);
             _window = new Window(this);
             _textureCopy = new TextureCopy(this);
             _backgroundTextureCopy = new TextureCopy(this);
@@ -205,7 +205,7 @@ namespace Ryujinx.Graphics.OpenGL
             ResourcePool.Tick();
         }
 
-        public ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, bool hostReserved)
+        public ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, int hostReserved)
         {
             return _counters.QueueReport(type, resultHandler, divisor, _pipeline.DrawCount, hostReserved);
         }
@@ -241,7 +241,7 @@ namespace Ryujinx.Graphics.OpenGL
 
         public void ResetCounter(CounterType type)
         {
-            _counters.QueueReset(type);
+            _counters.QueueReset(type, _pipeline.DrawCount);
         }
 
         public void BackgroundContextAction(Action action, bool alwaysBackground = false)
@@ -283,6 +283,7 @@ namespace Ryujinx.Graphics.OpenGL
 
         public void CreateSync(ulong id, bool strict)
         {
+            _counters.CopyPending();
             _sync.Create(id);
         }
 

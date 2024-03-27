@@ -16,12 +16,12 @@ namespace Ryujinx.Graphics.OpenGL.Queries
         public bool Disposed { get; private set; }
         public bool Invalid { get; set; }
 
-        public ulong DrawIndex { get; }
+        public ulong DrawIndex { get; private set; }
 
         private readonly CounterQueue _queue;
         private readonly BufferedQuery _counter;
 
-        private bool _hostAccessReserved = false;
+        private int _hostAccessReserved = 0;
         private int _refCount = 1; // Starts with a reference from the counter queue.
 
         private readonly object _lock = new();
@@ -40,10 +40,11 @@ namespace Ryujinx.Graphics.OpenGL.Queries
             _counter.Begin();
         }
 
-        internal void Clear()
+        internal void Clear(ulong drawIndex)
         {
             _counter.Reset();
             ClearCounter = true;
+            DrawIndex = drawIndex;
         }
 
         internal void Complete(bool withResult, double divisor)
@@ -114,12 +115,7 @@ namespace Ryujinx.Graphics.OpenGL.Queries
 
         public bool ReserveForHostAccess()
         {
-            if (_hostAccessReserved)
-            {
-                return true;
-            }
-
-            if (IsValueAvailable())
+            if (_hostAccessReserved == 0 && IsValueAvailable())
             {
                 return false;
             }
@@ -131,14 +127,14 @@ namespace Ryujinx.Graphics.OpenGL.Queries
                 return false;
             }
 
-            _hostAccessReserved = true;
+            Interlocked.Increment(ref _hostAccessReserved);
 
             return true;
         }
 
         public void ReleaseHostAccess()
         {
-            _hostAccessReserved = false;
+            Interlocked.Decrement(ref _hostAccessReserved);
 
             DecrementRefCount();
         }

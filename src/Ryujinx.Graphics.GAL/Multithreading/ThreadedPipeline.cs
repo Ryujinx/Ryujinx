@@ -333,7 +333,7 @@ namespace Ryujinx.Graphics.GAL.Multithreading
             _renderer.QueueCommand();
         }
 
-        public bool TryHostConditionalRendering(ICounterEvent value, ulong compare, bool isEqual)
+        public bool TryHostConditionalRendering(ICounterEvent value, ulong compare, bool isEqual, bool forwarded = false)
         {
             var evt = value as ThreadedCounterEvent;
             if (evt != null)
