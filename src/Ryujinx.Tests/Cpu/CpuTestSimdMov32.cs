@@ -1,21 +1,28 @@
-#define SimdMov32
+﻿#define SimdMov32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdMov32")]
+    [Collection("SimdMov32")]
     public sealed class CpuTestSimdMov32 : CpuTest32
     {
+        public CpuTestSimdMov32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdMov32
         private const int RndCntImm = 2;
 
-        [Test, Pairwise, Description("VMOV.I<size> <Dd/Qd>, #<imm>")]
-        public void Movi_V([Range(0u, 10u)] uint variant,
-                           [Values(0u, 1u, 2u, 3u)] uint vd,
-                           [Values(0x0u)] uint imm,
-                           [Values] bool q)
+        [Theory(DisplayName = "VMOV.I<size> <Dd/Qd>, #<imm>")]
+        [PairwiseData]
+        public void Movi_V([CombinatorialRange(0u, 10u, 1)] uint variant,
+                           [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                           [CombinatorialValues(0x0u)] uint imm,
+                           bool q)
         {
             uint[] variants =
             {
@@ -59,10 +66,11 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMOV.F<size> <Sd>, #<imm>")]
-        public void Movi_S([Range(2u, 3u)] uint size,
-                           [Values(0u, 1u, 2u, 3u)] uint vd,
-                           [Values(0x0u)] uint imm)
+        [Theory(DisplayName = "VMOV.F<size> <Sd>, #<imm>")]
+        [PairwiseData]
+        public void Movi_S([CombinatorialRange(2u, 3u, 1)] uint size,
+                           [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                           [CombinatorialValues(0x0u)] uint imm)
         {
             uint opcode = 0xeeb00800u;
             opcode |= (size & 3) << 8;
@@ -84,13 +92,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMOV <Rd>, <Sd>")]
-        public void Mov_GP([Values(0u, 1u, 2u, 3u)] uint vn,
-                           [Values(0u, 1u, 2u, 3u)] uint rt,
-                           [Random(RndCntImm)] uint valueRn,
-                           [Random(RndCntImm)] ulong valueVn1,
-                           [Random(RndCntImm)] ulong valueVn2,
-                           [Values] bool op)
+        [Theory(DisplayName = "VMOV <Rd>, <Sd>")]
+        [PairwiseData]
+        public void Mov_GP([CombinatorialValues(0u, 1u, 2u, 3u)] uint vn,
+                           [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt,
+                           [CombinatorialRandomData(Count = RndCntImm)] uint valueRn,
+                           [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn1,
+                           [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn2,
+                           bool op)
         {
             uint opcode = 0xee000a10u; // VMOV S0, R0
             opcode |= (vn & 1) << 7;
@@ -107,16 +116,30 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMOV.<size> <Rt>, <Dn[x]>")]
-        public void Mov_GP_Elem([Range(0u, 7u)] uint vn,
-                                [Values(0u, 1u, 2u, 3u)] uint rt,
-                                [Range(0u, 2u)] uint size,
-                                [Range(0u, 7u)] uint index,
-                                [Random(1)] uint valueRn,
-                                [Random(1)] ulong valueVn1,
-                                [Random(1)] ulong valueVn2,
-                                [Values] bool op,
-                                [Values] bool u)
+        public static readonly uint[] RandomRn =
+        {
+            Random.Shared.NextUInt(),
+        };
+        public static readonly ulong[] RandomVn1 =
+        {
+            Random.Shared.NextULong(),
+        };
+        public static readonly ulong[] RandomVn2 =
+        {
+            Random.Shared.NextULong(),
+        };
+
+        [Theory(DisplayName = "VMOV.<size> <Rt>, <Dn[x]>")]
+        [PairwiseData]
+        public void Mov_GP_Elem([CombinatorialRange(0u, 7u, 1)] uint vn,
+                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt,
+                                [CombinatorialRange(0u, 2u, 1)] uint size,
+                                [CombinatorialRange(0u, 7u, 1)] uint index,
+                                [CombinatorialMemberData(nameof(RandomRn))] uint valueRn,
+                                [CombinatorialMemberData(nameof(RandomVn1))] ulong valueVn1,
+                                [CombinatorialMemberData(nameof(RandomVn2))] ulong valueVn2,
+                                bool op,
+                                bool u)
         {
             uint opcode = 0xee000b10u; // VMOV.32 D0[0], R0
 
@@ -154,15 +177,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("(VMOV <Rt>, <Rt2>, <Dm>), (VMOV <Dm>, <Rt>, <Rt2>)")]
-        public void Mov_GP_D([Values(0u, 1u, 2u, 3u)] uint vm,
-                             [Values(0u, 1u, 2u, 3u)] uint rt,
-                             [Values(0u, 1u, 2u, 3u)] uint rt2,
-                             [Random(RndCntImm)] uint valueRt1,
-                             [Random(RndCntImm)] uint valueRt2,
-                             [Random(RndCntImm)] ulong valueVn1,
-                             [Random(RndCntImm)] ulong valueVn2,
-                             [Values] bool op)
+        [Theory(DisplayName = "(VMOV <Rt>, <Rt2>, <Dm>), (VMOV <Dm>, <Rt>, <Rt2>)")]
+        [PairwiseData]
+        public void Mov_GP_D([CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                             [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt,
+                             [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt2,
+                             [CombinatorialRandomData(Count = RndCntImm)] uint valueRt1,
+                             [CombinatorialRandomData(Count = RndCntImm)] uint valueRt2,
+                             [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn1,
+                             [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn2,
+                             bool op)
         {
             uint opcode = 0xec400b10u; // VMOV D0, R0, R0
             opcode |= (vm & 0x10) << 1;
@@ -180,15 +204,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("(VMOV <Rt>, <Rt2>, <Sm>, <Sm1>), (VMOV <Sm>, <Sm1>, <Rt>, <Rt2>)")]
-        public void Mov_GP_2([Range(0u, 7u)] uint vm,
-                             [Values(0u, 1u, 2u, 3u)] uint rt,
-                             [Values(0u, 1u, 2u, 3u)] uint rt2,
-                             [Random(RndCntImm)] uint valueRt1,
-                             [Random(RndCntImm)] uint valueRt2,
-                             [Random(RndCntImm)] ulong valueVn1,
-                             [Random(RndCntImm)] ulong valueVn2,
-                             [Values] bool op)
+        [Theory(DisplayName = "(VMOV <Rt>, <Rt2>, <Sm>, <Sm1>), (VMOV <Sm>, <Sm1>, <Rt>, <Rt2>)")]
+        [PairwiseData]
+        public void Mov_GP_2([CombinatorialRange(0u, 7u, 1)] uint vm,
+                             [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt,
+                             [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt2,
+                             [CombinatorialRandomData(Count = RndCntImm)] uint valueRt1,
+                             [CombinatorialRandomData(Count = RndCntImm)] uint valueRt2,
+                             [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn1,
+                             [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn2,
+                             bool op)
         {
             uint opcode = 0xec400a10u; // VMOV S0, S1, R0, R0
             opcode |= (vm & 1) << 5;
@@ -206,10 +231,11 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMOVN.<size> <Dt>, <Qm>")]
-        public void Movn_V([Range(0u, 1u, 2u)] uint size,
-                           [Values(0u, 1u, 2u, 3u)] uint vd,
-                           [Values(0u, 2u, 4u, 8u)] uint vm)
+        [Theory(DisplayName = "VMOVN.<size> <Dt>, <Qm>")]
+        [PairwiseData]
+        public void Movn_V([CombinatorialRange(0u, 1u, 2u)] uint size,
+                           [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                           [CombinatorialValues(0u, 2u, 4u, 8u)] uint vm)
         {
             uint opcode = 0xf3b20200u; // VMOVN.I16 D0, Q0
 
@@ -220,21 +246,22 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((vd & 0x10) << 18);
             opcode |= ((vd & 0xf) << 12);
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMOVL.<size> <Qd>, <Dm>")]
-        public void Vmovl([Values(0u, 1u, 2u, 3u)] uint vm,
-                          [Values(0u, 2u, 4u, 6u)] uint vd,
-                          [Values(1u, 2u, 4u)] uint imm3H,
-                          [Values] bool u)
+        [Theory(DisplayName = "VMOVL.<size> <Qd>, <Dm>")]
+        [PairwiseData]
+        public void Vmovl([CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                          [CombinatorialValues(0u, 2u, 4u, 6u)] uint vd,
+                          [CombinatorialValues(1u, 2u, 4u)] uint imm3H,
+                          bool u)
         {
             // This is not VMOVL because imm3H = 0, but once
             // we shift in the imm3H value it turns into VMOVL.
@@ -250,21 +277,22 @@ namespace Ryujinx.Tests.Cpu
                 opcode |= 1 << 24;
             }
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMVN.<size> <Vt>, <Vm>")]
-        public void Vmvn([Range(0u, 1u, 2u)] uint size,
-                         [Values(0u, 1u, 2u, 3u)] uint vd,
-                         [Values(0u, 2u, 4u, 8u)] uint vm,
-                         [Values] bool q)
+        [Theory(DisplayName = "VMVN.<size> <Vt>, <Vm>")]
+        [PairwiseData]
+        public void Vmvn([CombinatorialRange(0u, 1u, 2u)] uint size,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                         [CombinatorialValues(0u, 2u, 4u, 8u)] uint vm,
+                         bool q)
         {
             uint opcode = 0xf3b00580u; // VMVN D0, D0
 
@@ -282,21 +310,22 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (vd & 0x10) << 18;
             opcode |= (vd & 0xf) << 12;
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMVN.I<size> <Dd/Qd>, #<imm>")]
-        public void Mvni_V([Range(0u, 7u)] uint variant,
-                           [Values(0u, 1u, 2u, 3u)] uint vd,
-                           [Values(0x0u)] uint imm,
-                           [Values] bool q)
+        [Theory(DisplayName = "VMVN.I<size> <Dd/Qd>, #<imm>")]
+        [PairwiseData]
+        public void Mvni_V([CombinatorialRange(0u, 7u, 1)] uint variant,
+                           [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                           [CombinatorialValues(0x0u)] uint imm,
+                           bool q)
         {
             uint[] variants =
             {
@@ -336,11 +365,12 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VTRN.<size> <Vd>, <Vm>")]
-        public void Vtrn([Values(0u, 1u, 2u, 3u)] uint vm,
-                         [Values(0u, 1u, 2u, 3u)] uint vd,
-                         [Values(0u, 1u, 2u)] uint size,
-                         [Values] bool q)
+        [Theory(DisplayName = "VTRN.<size> <Vd>, <Vm>")]
+        [PairwiseData]
+        public void Vtrn([CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                         [CombinatorialValues(0u, 1u, 2u)] uint size,
+                         bool q)
         {
             uint opcode = 0xf3b20080u; // VTRN.8 D0, D0
             if (vm == vd)
@@ -361,21 +391,22 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (vd & 0xf) << 12;
             opcode |= (size & 0x3) << 18;
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VZIP.<size> <Vd>, <Vm>")]
-        public void Vzip([Values(0u, 1u, 2u, 3u)] uint vm,
-                         [Values(0u, 1u, 2u, 3u)] uint vd,
-                         [Values(0u, 1u, 2u)] uint size,
-                         [Values] bool q)
+        [Theory(DisplayName = "VZIP.<size> <Vd>, <Vm>")]
+        [PairwiseData]
+        public void Vzip([CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                         [CombinatorialValues(0u, 1u, 2u)] uint size,
+                         bool q)
         {
             uint opcode = 0xf3b20180u; // VZIP.8 D0, D0
             if (vm == vd || (size == 2 && !q))
@@ -396,21 +427,22 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (vd & 0xf) << 12;
             opcode |= (size & 0x3) << 18;
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VUZP.<size> <Vd>, <Vm>")]
-        public void Vuzp([Values(0u, 1u, 2u, 3u)] uint vm,
-                         [Values(0u, 1u, 2u, 3u)] uint vd,
-                         [Values(0u, 1u, 2u)] uint size,
-                         [Values] bool q)
+        [Theory(DisplayName = "VUZP.<size> <Vd>, <Vm>")]
+        [PairwiseData]
+        public void Vuzp([CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                         [CombinatorialValues(0u, 1u, 2u)] uint size,
+                         bool q)
         {
             uint opcode = 0xf3b20100u; // VUZP.8 d0, d0
             if (vm == vd || (size == 2 && !q))
@@ -431,22 +463,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (vd & 0xf) << 12;
             opcode |= (size & 0x3) << 18;
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VTBL.8 <Dd>, {list}, <Dm>")]
-        public void Vtbl([Range(0u, 6u)] uint vm, // Indices, include potentially invalid.
-                         [Range(4u, 12u)] uint vn, // Selection.
-                         [Values(0u, 1u)] uint vd, // Destinations.
-                         [Range(0u, 3u)] uint length,
-                         [Values] bool x)
+        [Theory(DisplayName = "VTBL.8 <Dd>, {list}, <Dm>")]
+        [PairwiseData]
+        public void Vtbl([CombinatorialRange(0u, 6u, 1)] uint vm, // Indices, include potentially invalid.
+                         [CombinatorialRange(4u, 12u, 1)] uint vn, // Selection.
+                         [CombinatorialValues(0u, 1u)] uint vd, // Destinations.
+                         [CombinatorialRange(0u, 3u, 1)] uint length,
+                         bool x)
         {
             uint opcode = 0xf3b00800u; // VTBL.8 D0, {D0}, D0
             if (vn + length > 31)
@@ -467,11 +500,11 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (vn & 0xf) << 16;
             opcode |= (length & 0x3) << 8;
 
-            var rnd = TestContext.CurrentContext.Random;
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v4 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v5 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            var rnd = Random.Shared;
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v4 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v5 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             byte maxIndex = (byte)(length * 8 - 1);
             byte[] b0 = new byte[16];
@@ -490,12 +523,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VEXT.8 {<Vd>,} <Vn>, <Vm>, #<imm>")]
-        public void Vext([Values(0u, 1u, 2u, 3u)] uint vm,
-                         [Values(0u, 1u, 2u, 3u)] uint vn,
-                         [Values(0u, 1u, 2u, 3u)] uint vd,
-                         [Values(0u, 15u)] uint imm4,
-                         [Values] bool q)
+        [Theory(DisplayName = "VEXT.8 {<Vd>,} <Vn>, <Vm>, #<imm>")]
+        [PairwiseData]
+        public void Vext([CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint vn,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                         [CombinatorialValues(0u, 15u)] uint imm4,
+                         bool q)
         {
             uint opcode = 0xf2b00000; // VEXT.32 D0, D0, D0, #0
 
@@ -518,24 +552,25 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (vn & 0xf) << 16;
             opcode |= (imm4 & 0xf) << 8;
 
-            V128 v0 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v0 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, v3: v3);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VDUP.<size> <Vd>, <Rt>")]
-        public void Vdup_GP([Values(0u, 1u, 2u, 3u)] uint vd,
-                            [Values(0u, 1u, 2u, 3u)] uint rt,
-                            [Values(0u, 1u, 2u)] uint size,
-                            [Random(RndCntImm)] uint valueRn,
-                            [Random(RndCntImm)] ulong valueVn1,
-                            [Random(RndCntImm)] ulong valueVn2,
-                            [Values] bool q)
+        [Theory(DisplayName = "VDUP.<size> <Vd>, <Rt>")]
+        [PairwiseData]
+        public void Vdup_GP([CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                            [CombinatorialValues(0u, 1u, 2u, 3u)] uint rt,
+                            [CombinatorialValues(0u, 1u, 2u)] uint size,
+                            [CombinatorialRandomData(Count = RndCntImm)] uint valueRn,
+                            [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn1,
+                            [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn2,
+                            bool q)
         {
             uint opcode = 0xee800b10; // VDUP.32 d0, r0
 
@@ -552,21 +587,22 @@ namespace Ryujinx.Tests.Cpu
             opcode |= (size & 1) << 5; // E
             opcode |= (size & 2) << 21; // B
 
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, r0: valueRn, r1: valueRn, r2: valueRn, r3: valueRn, v0: new V128(valueVn1, valueVn2), v1: v1);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VDUP.<size> <Vd>, <Dm[x]>")]
-        public void Vdup_S([Values(0u, 1u, 2u, 3u)] uint vd,
-                           [Values(0u, 1u, 2u, 3u)] uint vm,
-                           [Values(0u, 1u, 2u)] uint size,
-                           [Range(0u, 7u)] uint index,
-                           [Random(RndCntImm)] ulong valueVn1,
-                           [Random(RndCntImm)] ulong valueVn2,
-                           [Values] bool q)
+        [Theory(DisplayName = "VDUP.<size> <Vd>, <Dm[x]>")]
+        [PairwiseData]
+        public void Vdup_S([CombinatorialValues(0u, 1u, 2u, 3u)] uint vd,
+                           [CombinatorialValues(0u, 1u, 2u, 3u)] uint vm,
+                           [CombinatorialValues(0u, 1u, 2u)] uint size,
+                           [CombinatorialRange(0u, 7u, 1)] uint index,
+                           [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn1,
+                           [CombinatorialRandomData(Count = RndCntImm)] ulong valueVn2,
+                           bool q)
         {
             uint opcode = 0xf3b00c00;
 
@@ -597,9 +633,9 @@ namespace Ryujinx.Tests.Cpu
 
             opcode |= imm4 << 16;
 
-            V128 v1 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v2 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
-            V128 v3 = new(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong());
+            V128 v1 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v2 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
+            V128 v3 = new(Random.Shared.NextULong(), Random.Shared.NextULong());
 
             SingleOpcode(opcode, v0: new V128(valueVn1, valueVn2), v1: v1, v2: v2, v3: v3);
 

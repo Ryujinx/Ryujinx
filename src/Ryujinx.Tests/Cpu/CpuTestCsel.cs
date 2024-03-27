@@ -1,23 +1,30 @@
 #define Csel
 
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("Csel")]
+    [Collection("Csel")]
     public sealed class CpuTestCsel : CpuTest
     {
+        public CpuTestCsel(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if Csel
 
-        [Test, Pairwise, Description("CSEL <Xd>, <Xn>, <Xm>, <cond>")]
-        public void Csel_64bit([Values(0u, 31u)] uint rd,
-                               [Values(1u, 31u)] uint rn,
-                               [Values(2u, 31u)] uint rm,
-                               [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory(DisplayName = "CSEL <Xd>, <Xn>, <Xm>, <cond>")]
+        [PairwiseData]
+        public void Csel_64bit([CombinatorialValues(0u, 31u)] uint rd,
+                               [CombinatorialValues(1u, 31u)] uint rn,
+                               [CombinatorialValues(2u, 31u)] uint rm,
+                               [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                        0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                               [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+                               [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                        0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xm,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                        0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                        0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                        0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -26,22 +33,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcode, x1: xn, x2: xm, x31: x31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSEL <Wd>, <Wn>, <Wm>, <cond>")]
-        public void Csel_32bit([Values(0u, 31u)] uint rd,
-                               [Values(1u, 31u)] uint rn,
-                               [Values(2u, 31u)] uint rm,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory(DisplayName = "CSEL <Wd>, <Wn>, <Wm>, <cond>")]
+        [PairwiseData]
+        public void Csel_32bit([CombinatorialValues(0u, 31u)] uint rd,
+                               [CombinatorialValues(1u, 31u)] uint rn,
+                               [CombinatorialValues(2u, 31u)] uint rm,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wn,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wm,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                        0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                        0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                        0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -50,22 +58,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, x1: wn, x2: wm, x31: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSINC <Xd>, <Xn>, <Xm>, <cond>")]
-        public void Csinc_64bit([Values(0u, 31u)] uint rd,
-                                [Values(1u, 31u)] uint rn,
-                                [Values(2u, 31u)] uint rm,
-                                [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory(DisplayName = "CSINC <Xd>, <Xn>, <Xm>, <cond>")]
+        [PairwiseData]
+        public void Csinc_64bit([CombinatorialValues(0u, 31u)] uint rd,
+                                [CombinatorialValues(1u, 31u)] uint rn,
+                                [CombinatorialValues(2u, 31u)] uint rm,
+                                [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                         0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                                [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+                                [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                         0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xm,
-                                [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                                [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                         0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                         0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                         0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -74,22 +83,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcode, x1: xn, x2: xm, x31: x31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSINC <Wd>, <Wn>, <Wm>, <cond>")]
-        public void Csinc_32bit([Values(0u, 31u)] uint rd,
-                                [Values(1u, 31u)] uint rn,
-                                [Values(2u, 31u)] uint rm,
-                                [Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory(DisplayName = "CSINC <Wd>, <Wn>, <Wm>, <cond>")]
+        [PairwiseData]
+        public void Csinc_32bit([CombinatorialValues(0u, 31u)] uint rd,
+                                [CombinatorialValues(1u, 31u)] uint rn,
+                                [CombinatorialValues(2u, 31u)] uint rm,
+                                [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                         0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                [Values(0x00000000u, 0x7FFFFFFFu,
+                                [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                         0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                                [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                         0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                         0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                         0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -98,22 +108,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, x1: wn, x2: wm, x31: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSINV <Xd>, <Xn>, <Xm>, <cond>")]
-        public void Csinv_64bit([Values(0u, 31u)] uint rd,
-                                [Values(1u, 31u)] uint rn,
-                                [Values(2u, 31u)] uint rm,
-                                [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory(DisplayName = "CSINV <Xd>, <Xn>, <Xm>, <cond>")]
+        [PairwiseData]
+        public void Csinv_64bit([CombinatorialValues(0u, 31u)] uint rd,
+                                [CombinatorialValues(1u, 31u)] uint rn,
+                                [CombinatorialValues(2u, 31u)] uint rm,
+                                [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                         0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                                [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+                                [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                         0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xm,
-                                [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                                [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                         0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                         0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                         0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -122,22 +133,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcode, x1: xn, x2: xm, x31: x31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSINV <Wd>, <Wn>, <Wm>, <cond>")]
-        public void Csinv_32bit([Values(0u, 31u)] uint rd,
-                                [Values(1u, 31u)] uint rn,
-                                [Values(2u, 31u)] uint rm,
-                                [Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory(DisplayName = "CSINV <Wd>, <Wn>, <Wm>, <cond>")]
+        [PairwiseData]
+        public void Csinv_32bit([CombinatorialValues(0u, 31u)] uint rd,
+                                [CombinatorialValues(1u, 31u)] uint rn,
+                                [CombinatorialValues(2u, 31u)] uint rm,
+                                [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                         0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                [Values(0x00000000u, 0x7FFFFFFFu,
+                                [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                         0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                                [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                         0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                         0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                         0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -146,22 +158,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, x1: wn, x2: wm, x31: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSNEG <Xd>, <Xn>, <Xm>, <cond>")]
-        public void Csneg_64bit([Values(0u, 31u)] uint rd,
-                                [Values(1u, 31u)] uint rn,
-                                [Values(2u, 31u)] uint rm,
-                                [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory(DisplayName = "CSNEG <Xd>, <Xn>, <Xm>, <cond>")]
+        [PairwiseData]
+        public void Csneg_64bit([CombinatorialValues(0u, 31u)] uint rd,
+                                [CombinatorialValues(1u, 31u)] uint rn,
+                                [CombinatorialValues(2u, 31u)] uint rm,
+                                [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                         0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                                [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+                                [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                         0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xm,
-                                [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                                [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                         0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                         0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                         0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -170,22 +183,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcode, x1: xn, x2: xm, x31: x31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CSNEG <Wd>, <Wn>, <Wm>, <cond>")]
-        public void Csneg_32bit([Values(0u, 31u)] uint rd,
-                                [Values(1u, 31u)] uint rn,
-                                [Values(2u, 31u)] uint rm,
-                                [Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory(DisplayName = "CSNEG <Wd>, <Wn>, <Wm>, <cond>")]
+        [PairwiseData]
+        public void Csneg_32bit([CombinatorialValues(0u, 31u)] uint rd,
+                                [CombinatorialValues(1u, 31u)] uint rn,
+                                [CombinatorialValues(2u, 31u)] uint rm,
+                                [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                         0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                [Values(0x00000000u, 0x7FFFFFFFu,
+                                [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                         0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                                [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                         0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                         0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                         0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -194,7 +208,7 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcode |= ((cond & 15) << 12);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, x1: wn, x2: wm, x31: w31);
 

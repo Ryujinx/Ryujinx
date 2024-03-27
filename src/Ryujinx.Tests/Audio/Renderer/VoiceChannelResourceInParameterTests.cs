@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer
 {
-    class VoiceChannelResourceInParameterTests
+    public class VoiceChannelResourceInParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x70, Unsafe.SizeOf<VoiceChannelResourceInParameter>());
+            Assert.Equal(0x70, Unsafe.SizeOf<VoiceChannelResourceInParameter>());
         }
     }
 }

@@ -1,24 +1,35 @@
 #define CcmpReg
 
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("CcmpReg")]
+    [Collection("CcmpReg")]
     public sealed class CpuTestCcmpReg : CpuTest
     {
-#if CcmpReg
-        private const int RndCntNzcv = 2;
+        public CpuTestCcmpReg(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
 
-        [Test, Pairwise, Description("CCMN <Xn>, <Xm>, #<nzcv>, <cond>")]
-        public void Ccmn_64bit([Values(1u, 31u)] uint rn,
-                               [Values(2u, 31u)] uint rm,
-                               [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+#if CcmpReg
+        public static readonly uint[] RandomNzcv =
+        {
+            Random.Shared.NextUInt(15u),
+            Random.Shared.NextUInt(15u),
+        };
+
+        [SkippableTheory(DisplayName = "CCMN <Xn>, <Xm>, #<nzcv>, <cond>")]
+        [PairwiseData]
+        public void Ccmn_64bit([CombinatorialValues(1u, 31u)] uint rn,
+                               [CombinatorialValues(2u, 31u)] uint rm,
+                               [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                        0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                               [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+                               [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                        0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xm,
-                               [Random(0u, 15u, RndCntNzcv)] uint nzcv,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                               [CombinatorialMemberData(nameof(RandomNzcv))] uint nzcv,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                        0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                        0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                        0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -27,22 +38,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5);
             opcode |= ((cond & 15) << 12) | ((nzcv & 15) << 0);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcode, x1: xn, x2: xm, x31: x31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CCMN <Wn>, <Wm>, #<nzcv>, <cond>")]
-        public void Ccmn_32bit([Values(1u, 31u)] uint rn,
-                               [Values(2u, 31u)] uint rm,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory(DisplayName = "CCMN <Wn>, <Wm>, #<nzcv>, <cond>")]
+        [PairwiseData]
+        public void Ccmn_32bit([CombinatorialValues(1u, 31u)] uint rn,
+                               [CombinatorialValues(2u, 31u)] uint rm,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wn,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wm,
-                               [Random(0u, 15u, RndCntNzcv)] uint nzcv,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                               [CombinatorialMemberData(nameof(RandomNzcv))] uint nzcv,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                        0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                        0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                        0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -51,22 +63,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5);
             opcode |= ((cond & 15) << 12) | ((nzcv & 15) << 0);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, x1: wn, x2: wm, x31: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CCMP <Xn>, <Xm>, #<nzcv>, <cond>")]
-        public void Ccmp_64bit([Values(1u, 31u)] uint rn,
-                               [Values(2u, 31u)] uint rm,
-                               [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory(DisplayName = "CCMP <Xn>, <Xm>, #<nzcv>, <cond>")]
+        [PairwiseData]
+        public void Ccmp_64bit([CombinatorialValues(1u, 31u)] uint rn,
+                               [CombinatorialValues(2u, 31u)] uint rm,
+                               [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                        0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                               [Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+                               [CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                        0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xm,
-                               [Random(0u, 15u, RndCntNzcv)] uint nzcv,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                               [CombinatorialMemberData(nameof(RandomNzcv))] uint nzcv,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                        0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                        0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                        0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -75,22 +88,23 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5);
             opcode |= ((cond & 15) << 12) | ((nzcv & 15) << 0);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcode, x1: xn, x2: xm, x31: x31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CCMP <Wn>, <Wm>, #<nzcv>, <cond>")]
-        public void Ccmp_32bit([Values(1u, 31u)] uint rn,
-                               [Values(2u, 31u)] uint rm,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory(DisplayName = "CCMP <Wn>, <Wm>, #<nzcv>, <cond>")]
+        [PairwiseData]
+        public void Ccmp_32bit([CombinatorialValues(1u, 31u)] uint rn,
+                               [CombinatorialValues(2u, 31u)] uint rm,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wn,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wm,
-                               [Random(0u, 15u, RndCntNzcv)] uint nzcv,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
+                               [CombinatorialMemberData(nameof(RandomNzcv))] uint nzcv,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
                                        0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
                                        0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
                                        0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
@@ -99,7 +113,7 @@ namespace Ryujinx.Tests.Cpu
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5);
             opcode |= ((cond & 15) << 12) | ((nzcv & 15) << 0);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, x1: wn, x2: wm, x31: w31);
 

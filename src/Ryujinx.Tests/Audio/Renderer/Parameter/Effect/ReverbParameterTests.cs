@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter.Effect;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter.Effect
 {
-    class ReverbParameterTests
+    public class ReverbParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x41, Unsafe.SizeOf<ReverbParameter>());
+            Assert.Equal(0x41, Unsafe.SizeOf<ReverbParameter>());
         }
     }
 }

@@ -1,15 +1,21 @@
-#define SimdReg32
+﻿#define SimdReg32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdReg32")]
+    [Collection("SimdReg32")]
     public sealed class CpuTestSimdReg32 : CpuTest32
     {
+        public CpuTestSimdReg32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdReg32
 
         #region "ValueSource (Opcodes)"
@@ -178,7 +184,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
                 ulong rnd1 = GenNormalS();
                 ulong rnd2 = GenSubnormalS();
 
@@ -276,19 +282,20 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noInfs = false;
         private static readonly bool _noNaNs = false;
 
-        [Test, Pairwise, Description("SHA256H.32 <Qd>, <Qn>, <Qm>")]
-        public void Sha256h_V([Values(0xF3000C40u)] uint opcode,
-                              [Values(0u)] uint rd,
-                              [Values(2u)] uint rn,
-                              [Values(4u)] uint rm,
-                              [Values(0xAEE65C11943FB939ul)] ulong z0,
-                              [Values(0xA89A87F110291DA3ul)] ulong z1,
-                              [Values(0xE9F766DB7A49EA7Dul)] ulong a0,
-                              [Values(0x3053F46B0C2F3507ul)] ulong a1,
-                              [Values(0x6E86A473B9D4A778ul)] ulong b0,
-                              [Values(0x7BE4F9E638156BB1ul)] ulong b1,
-                              [Values(0x1F1DC4A98DA9C132ul)] ulong resultL,
-                              [Values(0xDB9A2A7B47031A0Dul)] ulong resultH)
+        [Theory(DisplayName = "SHA256H.32 <Qd>, <Qn>, <Qm>")]
+        [PairwiseData]
+        public void Sha256h_V([CombinatorialValues(0xF3000C40u)] uint opcode,
+                              [CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(2u)] uint rn,
+                              [CombinatorialValues(4u)] uint rm,
+                              [CombinatorialValues(0xAEE65C11943FB939ul)] ulong z0,
+                              [CombinatorialValues(0xA89A87F110291DA3ul)] ulong z1,
+                              [CombinatorialValues(0xE9F766DB7A49EA7Dul)] ulong a0,
+                              [CombinatorialValues(0x3053F46B0C2F3507ul)] ulong a1,
+                              [CombinatorialValues(0x6E86A473B9D4A778ul)] ulong b0,
+                              [CombinatorialValues(0x7BE4F9E638156BB1ul)] ulong b1,
+                              [CombinatorialValues(0x1F1DC4A98DA9C132ul)] ulong resultL,
+                              [CombinatorialValues(0xDB9A2A7B47031A0Dul)] ulong resultH)
         {
             opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
             opcode |= ((rn & 0xf) << 16) | ((rn & 0x10) << 3);
@@ -302,27 +309,28 @@ namespace Ryujinx.Tests.Cpu
 
             Assert.Multiple(() =>
             {
-                Assert.That(GetVectorE0(context.GetV(0)), Is.EqualTo(resultL));
-                Assert.That(GetVectorE1(context.GetV(0)), Is.EqualTo(resultH));
+                Assert.Equal(resultL, GetVectorE0(context.GetV(0)));
+                Assert.Equal(resultH, GetVectorE1(context.GetV(0)));
             });
 
             // Unicorn does not yet support hash instructions in A32.
             // CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SHA256H2.32 <Qd>, <Qn>, <Qm>")]
-        public void Sha256h2_V([Values(0xF3100C40u)] uint opcode,
-                               [Values(0u)] uint rd,
-                               [Values(2u)] uint rn,
-                               [Values(4u)] uint rm,
-                               [Values(0xAEE65C11943FB939ul)] ulong z0,
-                               [Values(0xA89A87F110291DA3ul)] ulong z1,
-                               [Values(0xE9F766DB7A49EA7Dul)] ulong a0,
-                               [Values(0x3053F46B0C2F3507ul)] ulong a1,
-                               [Values(0x6E86A473B9D4A778ul)] ulong b0,
-                               [Values(0x7BE4F9E638156BB1ul)] ulong b1,
-                               [Values(0x0A1177E9D9C9B611ul)] ulong resultL,
-                               [Values(0xF5A826404928A515ul)] ulong resultH)
+        [Theory(DisplayName = "SHA256H2.32 <Qd>, <Qn>, <Qm>")]
+        [PairwiseData]
+        public void Sha256h2_V([CombinatorialValues(0xF3100C40u)] uint opcode,
+                               [CombinatorialValues(0u)] uint rd,
+                               [CombinatorialValues(2u)] uint rn,
+                               [CombinatorialValues(4u)] uint rm,
+                               [CombinatorialValues(0xAEE65C11943FB939ul)] ulong z0,
+                               [CombinatorialValues(0xA89A87F110291DA3ul)] ulong z1,
+                               [CombinatorialValues(0xE9F766DB7A49EA7Dul)] ulong a0,
+                               [CombinatorialValues(0x3053F46B0C2F3507ul)] ulong a1,
+                               [CombinatorialValues(0x6E86A473B9D4A778ul)] ulong b0,
+                               [CombinatorialValues(0x7BE4F9E638156BB1ul)] ulong b1,
+                               [CombinatorialValues(0x0A1177E9D9C9B611ul)] ulong resultL,
+                               [CombinatorialValues(0xF5A826404928A515ul)] ulong resultH)
         {
             opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
             opcode |= ((rn & 0xf) << 16) | ((rn & 0x10) << 3);
@@ -336,27 +344,28 @@ namespace Ryujinx.Tests.Cpu
 
             Assert.Multiple(() =>
             {
-                Assert.That(GetVectorE0(context.GetV(0)), Is.EqualTo(resultL));
-                Assert.That(GetVectorE1(context.GetV(0)), Is.EqualTo(resultH));
+                Assert.Equal(resultL, GetVectorE0(context.GetV(0)));
+                Assert.Equal(resultH, GetVectorE1(context.GetV(0)));
             });
 
             // Unicorn does not yet support hash instructions in A32.
             // CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SHA256SU1.32 <Qd>, <Qn>, <Qm>")]
-        public void Sha256su1_V([Values(0xF3200C40u)] uint opcode,
-                                [Values(0u)] uint rd,
-                                [Values(2u)] uint rn,
-                                [Values(4u)] uint rm,
-                                [Values(0xAEE65C11943FB939ul)] ulong z0,
-                                [Values(0xA89A87F110291DA3ul)] ulong z1,
-                                [Values(0xE9F766DB7A49EA7Dul)] ulong a0,
-                                [Values(0x3053F46B0C2F3507ul)] ulong a1,
-                                [Values(0x6E86A473B9D4A778ul)] ulong b0,
-                                [Values(0x7BE4F9E638156BB1ul)] ulong b1,
-                                [Values(0x9EE69CC896D7DE66ul)] ulong resultL,
-                                [Values(0x004A147155573E54ul)] ulong resultH)
+        [Theory(DisplayName = "SHA256SU1.32 <Qd>, <Qn>, <Qm>")]
+        [PairwiseData]
+        public void Sha256su1_V([CombinatorialValues(0xF3200C40u)] uint opcode,
+                                [CombinatorialValues(0u)] uint rd,
+                                [CombinatorialValues(2u)] uint rn,
+                                [CombinatorialValues(4u)] uint rm,
+                                [CombinatorialValues(0xAEE65C11943FB939ul)] ulong z0,
+                                [CombinatorialValues(0xA89A87F110291DA3ul)] ulong z1,
+                                [CombinatorialValues(0xE9F766DB7A49EA7Dul)] ulong a0,
+                                [CombinatorialValues(0x3053F46B0C2F3507ul)] ulong a1,
+                                [CombinatorialValues(0x6E86A473B9D4A778ul)] ulong b0,
+                                [CombinatorialValues(0x7BE4F9E638156BB1ul)] ulong b1,
+                                [CombinatorialValues(0x9EE69CC896D7DE66ul)] ulong resultL,
+                                [CombinatorialValues(0x004A147155573E54ul)] ulong resultH)
         {
             opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
             opcode |= ((rn & 0xf) << 16) | ((rn & 0x10) << 3);
@@ -370,26 +379,26 @@ namespace Ryujinx.Tests.Cpu
 
             Assert.Multiple(() =>
             {
-                Assert.That(GetVectorE0(context.GetV(0)), Is.EqualTo(resultL));
-                Assert.That(GetVectorE1(context.GetV(0)), Is.EqualTo(resultH));
+                Assert.Equal(resultL, GetVectorE0(context.GetV(0)));
+                Assert.Equal(resultH, GetVectorE1(context.GetV(0)));
             });
 
             // Unicorn does not yet support hash instructions in A32.
             // CompareAgainstUnicorn();
         }
 
-        [Explicit]
-        [Test, Pairwise, Description("VADD.f32 V0, V0, V0")]
-        public void Vadd_F32([Values(0u)] uint rd,
-                             [Values(0u, 1u)] uint rn,
-                             [Values(0u, 2u)] uint rm,
-                             [ValueSource(nameof(_2S_F_))] ulong z0,
-                             [ValueSource(nameof(_2S_F_))] ulong z1,
-                             [ValueSource(nameof(_2S_F_))] ulong a0,
-                             [ValueSource(nameof(_2S_F_))] ulong a1,
-                             [ValueSource(nameof(_2S_F_))] ulong b0,
-                             [ValueSource(nameof(_2S_F_))] ulong b1,
-                             [Values] bool q)
+        [Theory(DisplayName = "VADD.f32 V0, V0, V0")]
+        [PairwiseData]
+        public void Vadd_F32([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(0u, 1u)] uint rn,
+                             [CombinatorialValues(0u, 2u)] uint rm,
+                             [CombinatorialMemberData(nameof(_2S_F_))] ulong z0,
+                             [CombinatorialMemberData(nameof(_2S_F_))] ulong z1,
+                             [CombinatorialMemberData(nameof(_2S_F_))] ulong a0,
+                             [CombinatorialMemberData(nameof(_2S_F_))] ulong a1,
+                             [CombinatorialMemberData(nameof(_2S_F_))] ulong b0,
+                             [CombinatorialMemberData(nameof(_2S_F_))] ulong b1,
+                             bool q)
         {
             uint opcode = 0xf2000d00u; // VADD.F32 D0, D0, D0
             if (q)
@@ -413,16 +422,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void V_Add_Sub_Long_Wide_I([ValueSource(nameof(_V_Add_Sub_Long_Wide_I_))] uint opcode,
-                                          [Range(0u, 5u)] uint rd,
-                                          [Range(0u, 5u)] uint rn,
-                                          [Range(0u, 5u)] uint rm,
-                                          [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                          [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                          [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                          [Values(0u, 1u, 2u)] uint size, // <SU8, SU16, SU32>
-                                          [Values] bool u) // <S, U>
+        [Theory]
+        [PairwiseData]
+        public void V_Add_Sub_Long_Wide_I([CombinatorialMemberData(nameof(_V_Add_Sub_Long_Wide_I_))] uint opcode,
+                                          [CombinatorialRange(0u, 5u, 1)] uint rd,
+                                          [CombinatorialRange(0u, 5u, 1)] uint rn,
+                                          [CombinatorialRange(0u, 5u, 1)] uint rm,
+                                          [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                          [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                          [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                          [CombinatorialValues(0u, 1u, 2u)] uint size, // <SU8, SU16, SU32>
+                                          bool u) // <S, U>
         {
             if (u)
             {
@@ -449,11 +459,12 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VCMP.f<size> Vd, Vm")]
-        public void Vcmp([Values(2u, 3u)] uint size,
-                         [ValueSource(nameof(_1S_F_))] ulong a,
-                         [ValueSource(nameof(_1S_F_))] ulong b,
-                         [Values] bool e)
+        [Theory(DisplayName = "VCMP.f<size> Vd, Vm")]
+        [PairwiseData]
+        public void Vcmp([CombinatorialValues(2u, 3u)] uint size,
+                         [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                         [CombinatorialMemberData(nameof(_1S_F_))] ulong b,
+                         bool e)
         {
             uint opcode = 0xeeb40840u;
             uint rm = 1;
@@ -479,7 +490,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int fpscr = (int)(TestContext.CurrentContext.Random.NextUInt(0xf) << 28);
+            int fpscr = (int)(Random.Shared.NextUInt(0xf) << 28);
 
             SingleOpcode(opcode, v1: v1, v2: v2, fpscr: fpscr);
 
@@ -487,16 +498,16 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void Vfma_Vfms_Vfnma_Vfnms_S_F32([ValueSource(nameof(_Vfma_Vfms_Vfnma_Vfnms_S_F32_))] uint opcode,
-                                                [Values(0u, 1u, 2u, 3u)] uint rd,
-                                                [Values(0u, 1u, 2u, 3u)] uint rn,
-                                                [Values(0u, 1u, 2u, 3u)] uint rm,
-                                                [ValueSource(nameof(_1S_F_))] ulong s0,
-                                                [ValueSource(nameof(_1S_F_))] ulong s1,
-                                                [ValueSource(nameof(_1S_F_))] ulong s2,
-                                                [ValueSource(nameof(_1S_F_))] ulong s3)
+        [Theory]
+        [PairwiseData]
+        public void Vfma_Vfms_Vfnma_Vfnms_S_F32([CombinatorialMemberData(nameof(_Vfma_Vfms_Vfnma_Vfnms_S_F32_))] uint opcode,
+                                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rd,
+                                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rn,
+                                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rm,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s0,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s1,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s2,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s3)
         {
             opcode |= (((rd & 0x1) << 22) | (rd & 0x1e) << 11);
             opcode |= (((rn & 0x1) << 7) | (rn & 0x1e) << 15);
@@ -510,14 +521,14 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void Vfma_Vfms_Vfnma_Vfnms_S_F64([ValueSource(nameof(_Vfma_Vfms_Vfnma_Vfnms_S_F64_))] uint opcode,
-                                                [Values(0u, 1u)] uint rd,
-                                                [Values(0u, 1u)] uint rn,
-                                                [Values(0u, 1u)] uint rm,
-                                                [ValueSource(nameof(_1D_F_))] ulong d0,
-                                                [ValueSource(nameof(_1D_F_))] ulong d1)
+        [Theory]
+        [PairwiseData]
+        public void Vfma_Vfms_Vfnma_Vfnms_S_F64([CombinatorialMemberData(nameof(_Vfma_Vfms_Vfnma_Vfnms_S_F64_))] uint opcode,
+                                                [CombinatorialValues(0u, 1u)] uint rd,
+                                                [CombinatorialValues(0u, 1u)] uint rn,
+                                                [CombinatorialValues(0u, 1u)] uint rm,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong d0,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong d1)
         {
             opcode |= (((rd & 0x10) << 18) | (rd & 0xf) << 12);
             opcode |= (((rn & 0x10) << 3) | (rn & 0xf) << 16);
@@ -531,17 +542,17 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void Vfma_Vfms_V_F32([ValueSource(nameof(_Vfma_Vfms_V_F32_))] uint opcode,
-                                    [Values(0u, 1u, 2u, 3u)] uint rd,
-                                    [Values(0u, 1u, 2u, 3u)] uint rn,
-                                    [Values(0u, 1u, 2u, 3u)] uint rm,
-                                    [ValueSource(nameof(_2S_F_))] ulong d0,
-                                    [ValueSource(nameof(_2S_F_))] ulong d1,
-                                    [ValueSource(nameof(_2S_F_))] ulong d2,
-                                    [ValueSource(nameof(_2S_F_))] ulong d3,
-                                    [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vfma_Vfms_V_F32([CombinatorialMemberData(nameof(_Vfma_Vfms_V_F32_))] uint opcode,
+                                    [CombinatorialValues(0u, 1u, 2u, 3u)] uint rd,
+                                    [CombinatorialValues(0u, 1u, 2u, 3u)] uint rn,
+                                    [CombinatorialValues(0u, 1u, 2u, 3u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_2S_F_))] ulong d0,
+                                    [CombinatorialMemberData(nameof(_2S_F_))] ulong d1,
+                                    [CombinatorialMemberData(nameof(_2S_F_))] ulong d2,
+                                    [CombinatorialMemberData(nameof(_2S_F_))] ulong d3,
+                                    bool q)
         {
             if (q)
             {
@@ -567,16 +578,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void Vmla_Vmls_Vnmla_Vnmls_S_F32([ValueSource(nameof(_Vmla_Vmls_Vnmla_Vnmls_S_F32_))] uint opcode,
-                                                [Values(0u, 1u, 2u, 3u)] uint rd,
-                                                [Values(0u, 1u, 2u, 3u)] uint rn,
-                                                [Values(0u, 1u, 2u, 3u)] uint rm,
-                                                [ValueSource(nameof(_1S_F_))] ulong s0,
-                                                [ValueSource(nameof(_1S_F_))] ulong s1,
-                                                [ValueSource(nameof(_1S_F_))] ulong s2,
-                                                [ValueSource(nameof(_1S_F_))] ulong s3)
+        [Theory]
+        [PairwiseData]
+        public void Vmla_Vmls_Vnmla_Vnmls_S_F32([CombinatorialMemberData(nameof(_Vmla_Vmls_Vnmla_Vnmls_S_F32_))] uint opcode,
+                                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rd,
+                                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rn,
+                                                [CombinatorialValues(0u, 1u, 2u, 3u)] uint rm,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s0,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s1,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s2,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong s3)
         {
             opcode |= (((rd & 0x1) << 22) | (rd & 0x1e) << 11);
             opcode |= (((rn & 0x1) << 7) | (rn & 0x1e) << 15);
@@ -589,14 +600,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void Vmla_Vmls_Vnmla_Vnmls_S_F64([ValueSource(nameof(_Vmla_Vmls_Vnmla_Vnmls_S_F64_))] uint opcode,
-                                                [Values(0u, 1u)] uint rd,
-                                                [Values(0u, 1u)] uint rn,
-                                                [Values(0u, 1u)] uint rm,
-                                                [ValueSource(nameof(_1D_F_))] ulong d0,
-                                                [ValueSource(nameof(_1D_F_))] ulong d1)
+        [Theory]
+        [PairwiseData]
+        public void Vmla_Vmls_Vnmla_Vnmls_S_F64([CombinatorialMemberData(nameof(_Vmla_Vmls_Vnmla_Vnmls_S_F64_))] uint opcode,
+                                                [CombinatorialValues(0u, 1u)] uint rd,
+                                                [CombinatorialValues(0u, 1u)] uint rn,
+                                                [CombinatorialValues(0u, 1u)] uint rm,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong d0,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong d1)
         {
             opcode |= (((rd & 0x10) << 18) | (rd & 0xf) << 12);
             opcode |= (((rn & 0x10) << 3) | (rn & 0xf) << 16);
@@ -609,16 +620,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Vmlal_Vmlsl_I([ValueSource(nameof(_Vmlal_Vmlsl_V_I_))] uint opcode,
-                                  [Values(0u)] uint rd,
-                                  [Values(1u, 0u)] uint rn,
-                                  [Values(2u, 0u)] uint rm,
-                                  [Values(0u, 1u, 2u)] uint size,
-                                  [Random(RndCnt)] ulong z,
-                                  [Random(RndCnt)] ulong a,
-                                  [Random(RndCnt)] ulong b,
-                                  [Values] bool u)
+        [Theory]
+        [PairwiseData]
+        public void Vmlal_Vmlsl_I([CombinatorialMemberData(nameof(_Vmlal_Vmlsl_V_I_))] uint opcode,
+                                  [CombinatorialValues(0u)] uint rd,
+                                  [CombinatorialValues(1u, 0u)] uint rn,
+                                  [CombinatorialValues(2u, 0u)] uint rm,
+                                  [CombinatorialValues(0u, 1u, 2u)] uint size,
+                                  [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                                  [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                  [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                  bool u)
         {
             opcode |= ((rm & 0xf) << 0) | ((rm & 0x10) << 1);
             opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
@@ -640,16 +652,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMULL.<size> <Vd>, <Vn>, <Vm>")]
-        public void Vmull_I([Values(0u)] uint rd,
-                            [Values(1u, 0u)] uint rn,
-                            [Values(2u, 0u)] uint rm,
-                            [Values(0u, 1u, 2u)] uint size,
-                            [Random(RndCnt)] ulong z,
-                            [Random(RndCnt)] ulong a,
-                            [Random(RndCnt)] ulong b,
-                            [Values] bool op,
-                            [Values] bool u)
+        [Theory(DisplayName = "VMULL.<size> <Vd>, <Vn>, <Vm>")]
+        [PairwiseData]
+        public void Vmull_I([CombinatorialValues(0u)] uint rd,
+                            [CombinatorialValues(1u, 0u)] uint rn,
+                            [CombinatorialValues(2u, 0u)] uint rm,
+                            [CombinatorialValues(0u, 1u, 2u)] uint size,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                            bool op,
+                            bool u)
         {
             uint opcode = 0xf2800c00u; // VMULL.S8 Q0, D0, D0
 
@@ -680,13 +693,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMULL.<P8, P64> <Qd>, <Dn>, <Dm>")]
-        public void Vmull_I_P8_P64([Values(0u, 1u)] uint rd,
-                                   [Values(0u, 1u)] uint rn,
-                                   [Values(0u, 1u)] uint rm,
-                                   [ValueSource(nameof(_8B1D_))] ulong d0,
-                                   [ValueSource(nameof(_8B1D_))] ulong d1,
-                                   [Values(0u/*, 2u*/)] uint size) // <P8, P64>
+        [Theory(DisplayName = "VMULL.<P8, P64> <Qd>, <Dn>, <Dm>")]
+        [PairwiseData]
+        public void Vmull_I_P8_P64([CombinatorialValues(0u, 1u)] uint rd,
+                                   [CombinatorialValues(0u, 1u)] uint rn,
+                                   [CombinatorialValues(0u, 1u)] uint rm,
+                                   [CombinatorialMemberData(nameof(_8B1D_))] ulong d0,
+                                   [CombinatorialMemberData(nameof(_8B1D_))] ulong d1,
+                                   [CombinatorialValues(0u/*, 2u*/)] uint size) // <P8, P64>
         {
             /*if (size == 2u)
             {
@@ -711,21 +725,19 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VSHL.<size> {<Vd>}, <Vm>, <Vn>")]
-        public void Vshl([Values(0u)] uint rd,
-                         [Values(1u, 0u)] uint rn,
-                         [Values(2u, 0u)] uint rm,
-                         [Values(0u, 1u, 2u, 3u)] uint size,
-                         [Random(RndCnt)] ulong z,
-                         [Random(RndCnt)] ulong a,
-                         [Random(RndCnt)] ulong b,
-                         [Values] bool q,
-                         [Values] bool u)
+        [Theory(DisplayName = "VSHL.<size> {<Vd>}, <Vm>, <Vn>")]
+        [PairwiseData]
+        public void Vshl([CombinatorialValues(0u)] uint rd,
+                         [CombinatorialValues(1u, 0u)] uint rn,
+                         [CombinatorialValues(2u, 0u)] uint rm,
+                         [CombinatorialValues(0u, 1u, 2u, 3u)] uint size,
+                         [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                         [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                         [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                         bool q,
+                         bool u)
         {
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-            {
-                Assert.Ignore("Unicorn on ARM64 crash while executing this test");
-            }
+            Skip.If(RuntimeInformation.ProcessArchitecture == Architecture.Arm64, "Unicorn on ARM64 crashes while executing this test");
 
             uint opcode = 0xf2000400u; // VSHL.S8 D0, D0, D0
             if (q)
@@ -756,18 +768,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Explicit]
-        [Test, Pairwise]
-        public void Vp_Add_Max_Min_F([ValueSource(nameof(_Vp_Add_Max_Min_F_))] uint opcode,
-                                     [Values(0u)] uint rd,
-                                     [Range(0u, 7u)] uint rn,
-                                     [Range(0u, 7u)] uint rm,
-                                     [ValueSource(nameof(_2S_F_))] ulong z0,
-                                     [ValueSource(nameof(_2S_F_))] ulong z1,
-                                     [ValueSource(nameof(_2S_F_))] ulong a0,
-                                     [ValueSource(nameof(_2S_F_))] ulong a1,
-                                     [ValueSource(nameof(_2S_F_))] ulong b0,
-                                     [ValueSource(nameof(_2S_F_))] ulong b1)
+        [Theory]
+        [PairwiseData]
+        public void Vp_Add_Max_Min_F([CombinatorialMemberData(nameof(_Vp_Add_Max_Min_F_))] uint opcode,
+                                     [CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialRange(0u, 7u, 1)] uint rn,
+                                     [CombinatorialRange(0u, 7u, 1)] uint rm,
+                                     [CombinatorialMemberData(nameof(_2S_F_))] ulong z0,
+                                     [CombinatorialMemberData(nameof(_2S_F_))] ulong z1,
+                                     [CombinatorialMemberData(nameof(_2S_F_))] ulong a0,
+                                     [CombinatorialMemberData(nameof(_2S_F_))] ulong a1,
+                                     [CombinatorialMemberData(nameof(_2S_F_))] ulong b0,
+                                     [CombinatorialMemberData(nameof(_2S_F_))] ulong b1)
         {
             opcode |= ((rm & 0xf) << 0) | ((rm & 0x10) << 1);
             opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
@@ -782,15 +794,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Vp_Add_I([ValueSource(nameof(_Vp_Add_I_))] uint opcode,
-                             [Values(0u)] uint rd,
-                             [Range(0u, 5u)] uint rn,
-                             [Range(0u, 5u)] uint rm,
-                             [Values(0u, 1u, 2u)] uint size,
-                             [Random(RndCnt)] ulong z,
-                             [Random(RndCnt)] ulong a,
-                             [Random(RndCnt)] ulong b)
+        [Theory]
+        [PairwiseData]
+        public void Vp_Add_I([CombinatorialMemberData(nameof(_Vp_Add_I_))] uint opcode,
+                             [CombinatorialValues(0u)] uint rd,
+                             [CombinatorialRange(0u, 5u, 1)] uint rn,
+                             [CombinatorialRange(0u, 5u, 1)] uint rm,
+                             [CombinatorialValues(0u, 1u, 2u)] uint size,
+                             [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                             [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                             [CombinatorialRandomData(Count = RndCnt)] ulong b)
         {
             opcode |= ((rm & 0xf) << 0) | ((rm & 0x10) << 1);
             opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
@@ -807,16 +820,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void V_Pmax_Pmin_Rhadd_I([ValueSource(nameof(_V_Pmax_Pmin_Rhadd_I_))] uint opcode,
-                                        [Values(0u)] uint rd,
-                                        [Range(0u, 5u)] uint rn,
-                                        [Range(0u, 5u)] uint rm,
-                                        [Values(0u, 1u, 2u)] uint size,
-                                        [Random(RndCnt)] ulong z,
-                                        [Random(RndCnt)] ulong a,
-                                        [Random(RndCnt)] ulong b,
-                                        [Values] bool u)
+        [Theory]
+        [PairwiseData]
+        public void V_Pmax_Pmin_Rhadd_I([CombinatorialMemberData(nameof(_V_Pmax_Pmin_Rhadd_I_))] uint opcode,
+                                        [CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialRange(0u, 5u, 1)] uint rn,
+                                        [CombinatorialRange(0u, 5u, 1)] uint rm,
+                                        [CombinatorialValues(0u, 1u, 2u)] uint size,
+                                        [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                                        [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                        [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                        bool u)
         {
             if (u)
             {
@@ -838,16 +852,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Vq_Add_Sub_I([ValueSource(nameof(_Vq_Add_Sub_I_))] uint opcode,
-                                 [Range(0u, 5u)] uint rd,
-                                 [Range(0u, 5u)] uint rn,
-                                 [Range(0u, 5u)] uint rm,
-                                 [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                 [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                 [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                 [Values(0u, 1u, 2u)] uint size, // <SU8, SU16, SU32>
-                                 [Values] bool u) // <S, U>
+        [Theory]
+        [PairwiseData]
+        public void Vq_Add_Sub_I([CombinatorialMemberData(nameof(_Vq_Add_Sub_I_))] uint opcode,
+                                 [CombinatorialRange(0u, 5u, 1)] uint rd,
+                                 [CombinatorialRange(0u, 5u, 1)] uint rn,
+                                 [CombinatorialRange(0u, 5u, 1)] uint rm,
+                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                 [CombinatorialValues(0u, 1u, 2u)] uint size, // <SU8, SU16, SU32>
+                                 bool u) // <S, U>
         {
             if (u)
             {
@@ -876,14 +891,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VQDMULH.<S16, S32> <Qd>, <Qn>, <Qm>")]
-        public void Vqdmulh_I([Range(0u, 5u)] uint rd,
-                              [Range(0u, 5u)] uint rn,
-                              [Range(0u, 5u)] uint rm,
-                              [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                              [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                              [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                              [Values(1u, 2u)] uint size) // <S16, S32>
+        [Theory(DisplayName = "VQDMULH.<S16, S32> <Qd>, <Qn>, <Qm>")]
+        [PairwiseData]
+        public void Vqdmulh_I([CombinatorialRange(0u, 5u, 1)] uint rd,
+                              [CombinatorialRange(0u, 5u, 1)] uint rn,
+                              [CombinatorialRange(0u, 5u, 1)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                              [CombinatorialValues(1u, 2u)] uint size) // <S16, S32>
         {
             rd >>= 1;
             rd <<= 1;
@@ -903,44 +919,6 @@ namespace Ryujinx.Tests.Cpu
             V128 v0 = MakeVectorE0E1(z, ~z);
             V128 v1 = MakeVectorE0E1(a, ~a);
             V128 v2 = MakeVectorE0E1(b, ~b);
-
-            SingleOpcode(opcode, v0: v0, v1: v1, v2: v2);
-
-            CompareAgainstUnicorn();
-        }
-
-        [Test, Pairwise]
-        public void Vp_Add_Long_Accumulate([Values(0u, 2u, 4u, 8u)] uint rd,
-                                           [Values(0u, 2u, 4u, 8u)] uint rm,
-                                           [Values(0u, 1u, 2u)] uint size,
-                                           [Random(RndCnt)] ulong z,
-                                           [Random(RndCnt)] ulong a,
-                                           [Random(RndCnt)] ulong b,
-                                           [Values] bool q,
-                                           [Values] bool unsigned)
-        {
-            uint opcode = 0xF3B00600; // VPADAL.S8 D0, Q0
-
-            if (q)
-            {
-                opcode |= 1 << 6;
-                rm <<= 1;
-                rd <<= 1;
-            }
-
-            if (unsigned)
-            {
-                opcode |= 1 << 7;
-            }
-
-            opcode |= ((rm & 0xf) << 0) | ((rm & 0x10) << 1);
-            opcode |= ((rd & 0xf) << 12) | ((rd & 0x10) << 18);
-
-            opcode |= size << 18;
-
-            V128 v0 = MakeVectorE0E1(z, z);
-            V128 v1 = MakeVectorE0E1(a, z);
-            V128 v2 = MakeVectorE0E1(b, z);
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2);
 

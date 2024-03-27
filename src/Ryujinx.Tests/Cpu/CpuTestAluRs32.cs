@@ -1,12 +1,18 @@
-#define AluRs32
+﻿#define AluRs32
 
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("AluRs32")]
+    [Collection("AluRs32")]
     public sealed class CpuTestAluRs32 : CpuTest32
     {
+        public CpuTestAluRs32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if AluRs32
 
         #region "ValueSource (Opcodes)"
@@ -36,42 +42,44 @@ namespace Ryujinx.Tests.Cpu
         #endregion
 
 
-        [Test, Pairwise]
-        public void Adc_Adcs_Rsc_Rscs_Sbc_Sbcs([ValueSource(nameof(_Adc_Adcs_Rsc_Rscs_Sbc_Sbcs_))] uint opcode,
-                                               [Values(0u, 13u)] uint rd,
-                                               [Values(1u, 13u)] uint rn,
-                                               [Values(2u, 13u)] uint rm,
-                                               [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory]
+        [PairwiseData]
+        public void Adc_Adcs_Rsc_Rscs_Sbc_Sbcs([CombinatorialMemberData(nameof(_Adc_Adcs_Rsc_Rscs_Sbc_Sbcs_))] uint opcode,
+                                               [CombinatorialValues(0u, 13u)] uint rd,
+                                               [CombinatorialValues(1u, 13u)] uint rn,
+                                               [CombinatorialValues(2u, 13u)] uint rm,
+                                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                                        0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                               [Values(0x00000000u, 0x7FFFFFFFu,
+                                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                                        0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                               [Values] bool carryIn)
+                                               bool carryIn)
         {
             opcode |= ((rm & 15) << 0) | ((rn & 15) << 16) | ((rd & 15) << 12);
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: wn, r2: wm, sp: sp, carry: carryIn);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Add_Adds_Rsb_Rsbs([ValueSource(nameof(_Add_Adds_Rsb_Rsbs_))] uint opcode,
-                                      [Values(0u, 13u)] uint rd,
-                                      [Values(1u, 13u)] uint rn,
-                                      [Values(2u, 13u)] uint rm,
-                                      [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory]
+        [PairwiseData]
+        public void Add_Adds_Rsb_Rsbs([CombinatorialMemberData(nameof(_Add_Adds_Rsb_Rsbs_))] uint opcode,
+                                      [CombinatorialValues(0u, 13u)] uint rd,
+                                      [CombinatorialValues(1u, 13u)] uint rn,
+                                      [CombinatorialValues(2u, 13u)] uint rm,
+                                      [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                               0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                      [Values(0x00000000u, 0x7FFFFFFFu,
+                                      [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                               0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                      [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint shift, // <LSL, LSR, ASR, ROR>
-                                      [Values(0u, 15u, 16u, 31u)] uint amount)
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint shift, // <LSL, LSR, ASR, ROR>
+                                      [CombinatorialValues(0u, 15u, 16u, 31u)] uint amount)
         {
             opcode |= ((rm & 15) << 0) | ((rn & 15) << 16) | ((rd & 15) << 12);
             opcode |= ((shift & 3) << 5) | ((amount & 31) << 7);
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: wn, r2: wm, sp: sp);
 

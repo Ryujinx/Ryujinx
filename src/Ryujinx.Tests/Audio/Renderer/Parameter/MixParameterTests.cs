@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter
 {
-    class MixParameterTests
+    public class MixParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x930, Unsafe.SizeOf<MixParameter>());
+            Assert.Equal(0x930, Unsafe.SizeOf<MixParameter>());
         }
     }
 }

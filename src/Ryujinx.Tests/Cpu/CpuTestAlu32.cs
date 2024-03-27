@@ -1,12 +1,18 @@
-#define Alu32
+﻿#define Alu32
 
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("Alu32")]
+    [Collection("Alu32")]
     public sealed class CpuTestAlu32 : CpuTest32
     {
+        public CpuTestAlu32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if Alu32
 
         #region "ValueSource (Opcodes)"
@@ -59,27 +65,29 @@ namespace Ryujinx.Tests.Cpu
 
         private const int RndCnt = 2;
 
-        [Test, Pairwise, Description("RBIT <Rd>, <Rn>")]
-        public void Rbit_32bit([Values(0u, 0xdu)] uint rd,
-                               [Values(1u, 0xdu)] uint rm,
-                               [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory(DisplayName = "RBIT <Rd>, <Rn>")]
+        [PairwiseData]
+        public void Rbit_32bit([CombinatorialValues(0u, 0xdu)] uint rd,
+                               [CombinatorialValues(1u, 0xdu)] uint rm,
+                               [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                        0x80000000u, 0xFFFFFFFFu)] uint wn)
         {
             uint opcode = 0xe6ff0f30u; // RBIT R0, R0
             opcode |= ((rm & 15) << 0) | ((rd & 15) << 12);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: wn, sp: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Lsr_Lsl_Asr_Ror([ValueSource(nameof(LsrLslAsrRor))] uint opcode,
-                                    [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory]
+        [PairwiseData]
+        public void Lsr_Lsl_Asr_Ror([CombinatorialMemberData(nameof(LsrLslAsrRor))] uint opcode,
+                                    [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                             0x80000000u, 0xFFFFFFFFu)] uint shiftValue,
-                                    [Range(0, 31)] int shiftAmount)
+                                    [CombinatorialRange(0, 31, 1)] int shiftAmount)
         {
             uint rd = 0;
             uint rm = 1;
@@ -91,104 +99,110 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Shadd8([Values(0u, 0xdu)] uint rd,
-                           [Values(1u)] uint rm,
-                           [Values(2u)] uint rn,
-                           [Random(RndCnt)] uint w0,
-                           [Random(RndCnt)] uint w1,
-                           [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void Shadd8([CombinatorialValues(0u, 0xdu)] uint rd,
+                           [CombinatorialValues(1u)] uint rm,
+                           [CombinatorialValues(2u)] uint rn,
+                           [CombinatorialRandomData(Count = RndCnt)] uint w0,
+                           [CombinatorialRandomData(Count = RndCnt)] uint w1,
+                           [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             uint opcode = 0xE6300F90u; // SHADD8 R0, R0, R0
 
             opcode |= ((rm & 15) << 0) | ((rd & 15) << 12) | ((rn & 15) << 16);
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: w0, r1: w1, r2: w2, sp: sp);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Shsub8([Values(0u, 0xdu)] uint rd,
-                           [Values(1u)] uint rm,
-                           [Values(2u)] uint rn,
-                           [Random(RndCnt)] uint w0,
-                           [Random(RndCnt)] uint w1,
-                           [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void Shsub8([CombinatorialValues(0u, 0xdu)] uint rd,
+                           [CombinatorialValues(1u)] uint rm,
+                           [CombinatorialValues(2u)] uint rn,
+                           [CombinatorialRandomData(Count = RndCnt)] uint w0,
+                           [CombinatorialRandomData(Count = RndCnt)] uint w1,
+                           [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             uint opcode = 0xE6300FF0u; // SHSUB8 R0, R0, R0
 
             opcode |= ((rm & 15) << 0) | ((rd & 15) << 12) | ((rn & 15) << 16);
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: w0, r1: w1, r2: w2, sp: sp);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Ssat_Usat([ValueSource(nameof(SsatUsat))] uint opcode,
-                              [Values(0u, 0xdu)] uint rd,
-                              [Values(1u, 0xdu)] uint rn,
-                              [Values(0u, 7u, 8u, 0xfu, 0x10u, 0x1fu)] uint sat,
-                              [Values(0u, 7u, 8u, 0xfu, 0x10u, 0x1fu)] uint shift,
-                              [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory]
+        [PairwiseData]
+        public void Ssat_Usat([CombinatorialMemberData(nameof(SsatUsat))] uint opcode,
+                              [CombinatorialValues(0u, 0xdu)] uint rd,
+                              [CombinatorialValues(1u, 0xdu)] uint rn,
+                              [CombinatorialValues(0u, 7u, 8u, 0xfu, 0x10u, 0x1fu)] uint sat,
+                              [CombinatorialValues(0u, 7u, 8u, 0xfu, 0x10u, 0x1fu)] uint shift,
+                              [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                       0x80000000u, 0xFFFFFFFFu)] uint wn)
         {
             opcode |= ((rn & 15) << 0) | ((shift & 31) << 7) | ((rd & 15) << 12) | ((sat & 31) << 16);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: wn, sp: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Ssat16_Usat16([ValueSource(nameof(Ssat16Usat16))] uint opcode,
-                                  [Values(0u, 0xdu)] uint rd,
-                                  [Values(1u, 0xdu)] uint rn,
-                                  [Values(0u, 7u, 8u, 0xfu)] uint sat,
-                                  [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory]
+        [PairwiseData]
+        public void Ssat16_Usat16([CombinatorialMemberData(nameof(Ssat16Usat16))] uint opcode,
+                                  [CombinatorialValues(0u, 0xdu)] uint rd,
+                                  [CombinatorialValues(1u, 0xdu)] uint rn,
+                                  [CombinatorialValues(0u, 7u, 8u, 0xfu)] uint sat,
+                                  [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                           0x80000000u, 0xFFFFFFFFu)] uint wn)
         {
             opcode |= ((rn & 15) << 0) | ((rd & 15) << 12) | ((sat & 15) << 16);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: wn, sp: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void SU_H_AddSub_8([ValueSource(nameof(SuHAddSub8))] uint opcode,
-                                  [Values(0u, 0xdu)] uint rd,
-                                  [Values(1u)] uint rm,
-                                  [Values(2u)] uint rn,
-                                  [Random(RndCnt)] uint w0,
-                                  [Random(RndCnt)] uint w1,
-                                  [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void SU_H_AddSub_8([CombinatorialMemberData(nameof(SuHAddSub8))] uint opcode,
+                                  [CombinatorialValues(0u, 0xdu)] uint rd,
+                                  [CombinatorialValues(1u)] uint rm,
+                                  [CombinatorialValues(2u)] uint rn,
+                                  [CombinatorialRandomData(Count = RndCnt)] uint w0,
+                                  [CombinatorialRandomData(Count = RndCnt)] uint w1,
+                                  [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             opcode |= ((rm & 15) << 0) | ((rd & 15) << 12) | ((rn & 15) << 16);
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: w0, r1: w1, r2: w2, sp: sp);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Uadd8_Sel([Values(0u)] uint rd,
-                              [Values(1u)] uint rm,
-                              [Values(2u)] uint rn,
-                              [Random(RndCnt)] uint w0,
-                              [Random(RndCnt)] uint w1,
-                              [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void Uadd8_Sel([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u)] uint rm,
+                              [CombinatorialValues(2u)] uint rn,
+                              [CombinatorialRandomData(Count = RndCnt)] uint w0,
+                              [CombinatorialRandomData(Count = RndCnt)] uint w1,
+                              [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             uint opUadd8 = 0xE6500F90; // UADD8 R0, R0, R0
             uint opSel = 0xE6800FB0; // SEL R0, R0, R0

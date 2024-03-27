@@ -1,25 +1,25 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Dsp;
 using Ryujinx.Audio.Renderer.Parameter;
 using System;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Dsp
 {
-    class ResamplerTests
+    public class ResamplerTests
     {
-        [Test]
-        [TestCase(VoiceInParameter.SampleRateConversionQuality.Low)]
-        [TestCase(VoiceInParameter.SampleRateConversionQuality.Default)]
-        [TestCase(VoiceInParameter.SampleRateConversionQuality.High)]
+        [Theory]
+        [InlineData(VoiceInParameter.SampleRateConversionQuality.Low)]
+        [InlineData(VoiceInParameter.SampleRateConversionQuality.Default)]
+        [InlineData(VoiceInParameter.SampleRateConversionQuality.High)]
         public void TestResamplerConsistencyUpsampling(VoiceInParameter.SampleRateConversionQuality quality)
         {
             DoResamplingTest(44100, 48000, quality);
         }
 
-        [Test]
-        [TestCase(VoiceInParameter.SampleRateConversionQuality.Low)]
-        [TestCase(VoiceInParameter.SampleRateConversionQuality.Default)]
-        [TestCase(VoiceInParameter.SampleRateConversionQuality.High)]
+        [Theory]
+        [InlineData(VoiceInParameter.SampleRateConversionQuality.Low)]
+        [InlineData(VoiceInParameter.SampleRateConversionQuality.Default)]
+        [InlineData(VoiceInParameter.SampleRateConversionQuality.High)]
         public void TestResamplerConsistencyDownsampling(VoiceInParameter.SampleRateConversionQuality quality)
         {
             DoResamplingTest(48000, 44100, quality);
@@ -74,13 +74,13 @@ namespace Ryujinx.Tests.Audio.Renderer.Dsp
                 float thisDelta = Math.Abs(expectedOutput[sample] - outputBuffer[sample]);
 
                 // Ensure no discontinuities
-                Assert.IsTrue(thisDelta < 0.1f);
+                Assert.True(thisDelta < 0.1f);
                 sumDifference += thisDelta;
             }
 
             sumDifference /= outputSampleCount;
             // Expect the output to be 99% similar to the expected resampled sine wave
-            Assert.IsTrue(sumDifference < 0.01f);
+            Assert.True(sumDifference < 0.01f);
         }
     }
 }

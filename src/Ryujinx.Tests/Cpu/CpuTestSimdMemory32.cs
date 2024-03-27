@@ -1,15 +1,20 @@
-#define SimdMemory32
+﻿#define SimdMemory32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using Xunit;
 using Ryujinx.Memory;
 using System;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdMemory32")]
+    [Collection("SimdMemory32")]
     public sealed class CpuTestSimdMemory32 : CpuTest32
     {
+        public CpuTestSimdMemory32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
         private static readonly uint _testOffset = DataBaseAddress + 0x500;
 #if SimdMemory32
 
@@ -35,14 +40,15 @@ namespace Ryujinx.Tests.Cpu
             0b0001,
         };
 
-        [Test, Pairwise, Description("VLDn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (single n element structure)")]
-        public void Vldn_Single([Values(0u, 1u, 2u)] uint size,
-                                [Values(0u, 13u)] uint rn,
-                                [Values(1u, 13u, 15u)] uint rm,
-                                [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
-                                [Range(0u, 7u)] uint index,
-                                [Range(0u, 3u)] uint n,
-                                [Values(0x0u)] uint offset)
+        [Theory(DisplayName = "VLDn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (single n element structure)")]
+        [PairwiseData]
+        public void Vldn_Single([CombinatorialValues(0u, 1u, 2u)] uint size,
+                                [CombinatorialValues(0u, 13u)] uint rn,
+                                [CombinatorialValues(1u, 13u, 15u)] uint rm,
+                                [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
+                                [CombinatorialRange(0u, 7u, 1)] uint index,
+                                [CombinatorialRange(0u, 3u, 1)] uint n,
+                                [CombinatorialValues(0x0u)] uint offset)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -65,14 +71,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VLDn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (all lanes)")]
-        public void Vldn_All([Values(0u, 13u)] uint rn,
-                             [Values(1u, 13u, 15u)] uint rm,
-                             [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
-                             [Range(0u, 3u)] uint n,
-                             [Range(0u, 2u)] uint size,
-                             [Values] bool t,
-                             [Values(0x0u)] uint offset)
+        [Theory(DisplayName = "VLDn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (all lanes)")]
+        [PairwiseData]
+        public void Vldn_All([CombinatorialValues(0u, 13u)] uint rn,
+                             [CombinatorialValues(1u, 13u, 15u)] uint rm,
+                             [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
+                             [CombinatorialRange(0u, 3u, 1)] uint n,
+                             [CombinatorialRange(0u, 2u, 1)] uint size,
+                             bool t,
+                             [CombinatorialValues(0x0u)] uint offset)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -95,13 +102,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VLDn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (multiple n element structures)")]
-        public void Vldn_Pair([Values(0u, 1u, 2u, 3u)] uint size,
-                              [Values(0u, 13u)] uint rn,
-                              [Values(1u, 13u, 15u)] uint rm,
-                              [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
-                              [Range(0u, 10u)] uint mode,
-                              [Values(0x0u)] uint offset)
+        [Theory(DisplayName = "VLDn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (multiple n element structures)")]
+        [PairwiseData]
+        public void Vldn_Pair([CombinatorialValues(0u, 1u, 2u, 3u)] uint size,
+                              [CombinatorialValues(0u, 13u)] uint rn,
+                              [CombinatorialValues(1u, 13u, 15u)] uint rm,
+                              [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
+                              [CombinatorialRange(0u, 10u, 1)] uint mode,
+                              [CombinatorialValues(0x0u)] uint offset)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -124,14 +132,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VSTn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (single n element structure)")]
-        public void Vstn_Single([Values(0u, 1u, 2u)] uint size,
-                                [Values(0u, 13u)] uint rn,
-                                [Values(1u, 13u, 15u)] uint rm,
-                                [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
-                                [Range(0u, 7u)] uint index,
-                                [Range(0u, 3u)] uint n,
-                                [Values(0x0u)] uint offset)
+        [Theory(DisplayName = "VSTn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (single n element structure)")]
+        [PairwiseData]
+        public void Vstn_Single([CombinatorialValues(0u, 1u, 2u)] uint size,
+                                [CombinatorialValues(0u, 13u)] uint rn,
+                                [CombinatorialValues(1u, 13u, 15u)] uint rm,
+                                [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
+                                [CombinatorialRange(0u, 7u, 1)] uint index,
+                                [CombinatorialRange(0u, 3u, 1)] uint n,
+                                [CombinatorialValues(0x0u)] uint offset)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -156,13 +165,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VSTn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (multiple n element structures)")]
-        public void Vstn_Pair([Values(0u, 1u, 2u, 3u)] uint size,
-                              [Values(0u, 13u)] uint rn,
-                              [Values(1u, 13u, 15u)] uint rm,
-                              [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
-                              [Range(0u, 10u)] uint mode,
-                              [Values(0x0u)] uint offset)
+        [Theory(DisplayName = "VSTn.<size> <list>, [<Rn> {:<align>}]{ /!/, <Rm>} (multiple n element structures)")]
+        [PairwiseData]
+        public void Vstn_Pair([CombinatorialValues(0u, 1u, 2u, 3u)] uint size,
+                              [CombinatorialValues(0u, 13u)] uint rn,
+                              [CombinatorialValues(1u, 13u, 15u)] uint rm,
+                              [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
+                              [CombinatorialRange(0u, 10u, 1)] uint mode,
+                              [CombinatorialValues(0x0u)] uint offset)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -187,12 +197,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VLDM.<size> <Rn>{!}, <d/sreglist>")]
-        public void Vldm([Values(0u, 13u)] uint rn,
-                         [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
-                         [Range(0u, 2u)] uint mode,
-                         [Values(0x1u, 0x32u)] uint regs,
-                         [Values] bool single)
+        [Theory(DisplayName = "VLDM.<size> <Rn>{!}, <d/sreglist>")]
+        [PairwiseData]
+        public void Vldm([CombinatorialValues(0u, 13u)] uint rn,
+                         [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint vd,
+                         [CombinatorialRange(0u, 2u, 1)] uint mode,
+                         [CombinatorialValues(0x1u, 0x32u)] uint regs,
+                         bool single)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -239,12 +250,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VLDR.<size> <Sd>, [<Rn> {, #{+/-}<imm>}]")]
-        public void Vldr([Values(2u, 3u)] uint size, // FP16 is not supported for now
-                         [Values(0u)] uint rn,
-                         [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint sd,
-                         [Values(0x0u)] uint imm,
-                         [Values] bool sub)
+        [Theory(DisplayName = "VLDR.<size> <Sd>, [<Rn> {, #{+/-}<imm>}]")]
+        [PairwiseData]
+        public void Vldr([CombinatorialValues(2u, 3u)] uint size, // FP16 is not supported for now
+                         [CombinatorialValues(0u)] uint rn,
+                         [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint sd,
+                         [CombinatorialValues(0x0u)] uint imm,
+                         bool sub)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);
@@ -274,12 +286,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VSTR.<size> <Sd>, [<Rn> {, #{+/-}<imm>}]")]
-        public void Vstr([Values(2u, 3u)] uint size, // FP16 is not supported for now
-                [Values(0u)] uint rn,
-                [Values(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint sd,
-                [Values(0x0u)] uint imm,
-                [Values] bool sub)
+        [Theory(DisplayName = "VSTR.<size> <Sd>, [<Rn> {, #{+/-}<imm>}]")]
+        [PairwiseData]
+        public void Vstr([CombinatorialValues(2u, 3u)] uint size, // FP16 is not supported for now
+                [CombinatorialValues(0u)] uint rn,
+                [CombinatorialValues(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u)] uint sd,
+                [CombinatorialValues(0x0u)] uint imm,
+                bool sub)
         {
             var data = GenerateVectorSequence((int)MemoryBlock.GetPageSize());
             SetWorkingMemory(0, data);

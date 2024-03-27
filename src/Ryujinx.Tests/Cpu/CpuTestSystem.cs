@@ -1,14 +1,20 @@
 #define System
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("System")]
+    [Collection("System")]
     public sealed class CpuTestSystem : CpuTest
     {
+        public CpuTestSystem(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if System
 
         #region "ValueSource (Types)"
@@ -19,10 +25,10 @@ namespace Ryujinx.Tests.Cpu
             yield return 0x8000000000000000ul;
             yield return 0xFFFFFFFFFFFFFFFFul;
 
-            bool v = TestContext.CurrentContext.Random.NextBool();
-            bool c = TestContext.CurrentContext.Random.NextBool();
-            bool z = TestContext.CurrentContext.Random.NextBool();
-            bool n = TestContext.CurrentContext.Random.NextBool();
+            bool v = Random.Shared.NextBool();
+            bool c = Random.Shared.NextBool();
+            bool z = Random.Shared.NextBool();
+            bool n = Random.Shared.NextBool();
 
             ulong rnd = 0UL;
 
@@ -46,19 +52,20 @@ namespace Ryujinx.Tests.Cpu
         }
         #endregion
 
-        [Test, Pairwise]
-        public void MrsMsr_Nzcv([ValueSource(nameof(_MrsMsr_Nzcv_))] uint opcodes,
-                                [Values(0u, 1u, 31u)] uint rt,
-                                [ValueSource(nameof(_GenNzcv_))] ulong xt)
+        [SkippableTheory]
+        [PairwiseData]
+        public void MrsMsr_Nzcv([CombinatorialMemberData(nameof(_MrsMsr_Nzcv_))] uint opcodes,
+                                [CombinatorialValues(0u, 1u, 31u)] uint rt,
+                                [CombinatorialMemberData(nameof(_GenNzcv_))] ulong xt)
         {
             opcodes |= (rt & 31) << 0;
 
-            bool v = TestContext.CurrentContext.Random.NextBool();
-            bool c = TestContext.CurrentContext.Random.NextBool();
-            bool z = TestContext.CurrentContext.Random.NextBool();
-            bool n = TestContext.CurrentContext.Random.NextBool();
+            bool v = Random.Shared.NextBool();
+            bool c = Random.Shared.NextBool();
+            bool z = Random.Shared.NextBool();
+            bool n = Random.Shared.NextBool();
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
 
             SingleOpcode(opcodes, x0: xt, x1: xt, x31: x31, overflow: v, carry: c, zero: z, negative: n);
 

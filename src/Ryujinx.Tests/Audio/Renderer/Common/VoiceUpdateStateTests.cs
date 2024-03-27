@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Common;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Common
 {
-    class VoiceUpdateStateTests
+    public class VoiceUpdateStateTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.LessOrEqual(Unsafe.SizeOf<VoiceUpdateState>(), 0x100);
+            Assert.True(Unsafe.SizeOf<VoiceUpdateState>() <= 0x100);
         }
     }
 }

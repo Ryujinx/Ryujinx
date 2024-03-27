@@ -1,14 +1,20 @@
 #define SimdFcond
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
+using Xunit;
 using System.Collections.Generic;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdFcond")]
+    [Collection("SimdFcond")]
     public sealed class CpuTestSimdFcond : CpuTest
     {
+        public CpuTestSimdFcond(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdFcond
 
         #region "ValueSource (Types)"
@@ -45,7 +51,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
                 ulong rnd1 = GenNormalS();
                 ulong rnd2 = GenSubnormalS();
 
@@ -139,71 +145,77 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noInfs = false;
         private static readonly bool _noNaNs = false;
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Ccmp_Ccmpe_S_S([ValueSource(nameof(_F_Ccmp_Ccmpe_S_S_))] uint opcodes,
-                                     [ValueSource(nameof(_1S_F_))] ulong a,
-                                     [ValueSource(nameof(_1S_F_))] ulong b,
-                                     [Random(0u, 15u, RndCntNzcv)] uint nzcv,
-                                     [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
-                                             0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
-                                             0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
-                                             0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
+        public static readonly uint[] RandomNzcv =
+        {
+            Random.Shared.NextUInt(15u),
+            Random.Shared.NextUInt(15u),
+        };
+
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Ccmp_Ccmpe_S_S([CombinatorialMemberData(nameof(_F_Ccmp_Ccmpe_S_S_))] uint opcodes,
+                                     [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_1S_F_))] ulong b,
+                                     [CombinatorialMemberData(nameof(RandomNzcv))] uint nzcv,
+                                     [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                             0b0100u, 0b0101u, 0b0110u, 0b0111u,              //  MI, PL, VS, VC,
+                                             0b1000u, 0b1001u, 0b1010u, 0b1011u,              //  HI, LS, GE, LT,
+                                             0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond)  //  GT, LE, AL, NV>
         {
             opcodes |= ((cond & 15) << 12) | ((nzcv & 15) << 0);
 
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            bool v = TestContext.CurrentContext.Random.NextBool();
-            bool c = TestContext.CurrentContext.Random.NextBool();
-            bool z = TestContext.CurrentContext.Random.NextBool();
-            bool n = TestContext.CurrentContext.Random.NextBool();
+            bool v = Random.Shared.NextBool();
+            bool c = Random.Shared.NextBool();
+            bool z = Random.Shared.NextBool();
+            bool n = Random.Shared.NextBool();
 
             SingleOpcode(opcodes, v1: v1, v2: v2, overflow: v, carry: c, zero: z, negative: n);
 
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Ccmp_Ccmpe_S_D([ValueSource(nameof(_F_Ccmp_Ccmpe_S_D_))] uint opcodes,
-                                     [ValueSource(nameof(_1D_F_))] ulong a,
-                                     [ValueSource(nameof(_1D_F_))] ulong b,
-                                     [Random(0u, 15u, RndCntNzcv)] uint nzcv,
-                                     [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
-                                             0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
-                                             0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
-                                             0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Ccmp_Ccmpe_S_D([CombinatorialMemberData(nameof(_F_Ccmp_Ccmpe_S_D_))] uint opcodes,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                                     [CombinatorialMemberData(nameof(RandomNzcv))] uint nzcv,
+                                     [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                             0b0100u, 0b0101u, 0b0110u, 0b0111u,              //  MI, PL, VS, VC,
+                                             0b1000u, 0b1001u, 0b1010u, 0b1011u,              //  HI, LS, GE, LT,
+                                             0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond)  //  GT, LE, AL, NV>
         {
             opcodes |= ((cond & 15) << 12) | ((nzcv & 15) << 0);
 
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            bool v = TestContext.CurrentContext.Random.NextBool();
-            bool c = TestContext.CurrentContext.Random.NextBool();
-            bool z = TestContext.CurrentContext.Random.NextBool();
-            bool n = TestContext.CurrentContext.Random.NextBool();
+            bool v = Random.Shared.NextBool();
+            bool c = Random.Shared.NextBool();
+            bool z = Random.Shared.NextBool();
+            bool n = Random.Shared.NextBool();
 
             SingleOpcode(opcodes, v1: v1, v2: v2, overflow: v, carry: c, zero: z, negative: n);
 
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Csel_S_S([ValueSource(nameof(_F_Csel_S_S_))] uint opcodes,
-                               [ValueSource(nameof(_1S_F_))] ulong a,
-                               [ValueSource(nameof(_1S_F_))] ulong b,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
-                                       0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
-                                       0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
-                                       0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Csel_S_S([CombinatorialMemberData(nameof(_F_Csel_S_S_))] uint opcodes,
+                               [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                               [CombinatorialMemberData(nameof(_1S_F_))] ulong b,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                       0b0100u, 0b0101u, 0b0110u, 0b0111u,              //  MI, PL, VS, VC,
+                                       0b1000u, 0b1001u, 0b1010u, 0b1011u,              //  HI, LS, GE, LT,
+                                       0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond)  //  GT, LE, AL, NV>
         {
             opcodes |= ((cond & 15) << 12);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
@@ -213,19 +225,19 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Csel_S_D([ValueSource(nameof(_F_Csel_S_D_))] uint opcodes,
-                               [ValueSource(nameof(_1D_F_))] ulong a,
-                               [ValueSource(nameof(_1D_F_))] ulong b,
-                               [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u,             // <EQ, NE, CS/HS, CC/LO,
-                                       0b0100u, 0b0101u, 0b0110u, 0b0111u,             //  MI, PL, VS, VC,
-                                       0b1000u, 0b1001u, 0b1010u, 0b1011u,             //  HI, LS, GE, LT,
-                                       0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond) //  GT, LE, AL, NV>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Csel_S_D([CombinatorialMemberData(nameof(_F_Csel_S_D_))] uint opcodes,
+                               [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                               [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                               [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                       0b0100u, 0b0101u, 0b0110u, 0b0111u,              //  MI, PL, VS, VC,
+                                       0b1000u, 0b1001u, 0b1010u, 0b1011u,              //  HI, LS, GE, LT,
+                                       0b1100u, 0b1101u, 0b1110u, 0b1111u)] uint cond)  //  GT, LE, AL, NV>
         {
             opcodes |= ((cond & 15) << 12);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);

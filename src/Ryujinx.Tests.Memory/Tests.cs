@@ -1,49 +1,49 @@
-using NUnit.Framework;
 using Ryujinx.Memory;
 using System;
 using System.Runtime.InteropServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Memory
 {
-    public class Tests
+    public class Tests : IDisposable
     {
         private static readonly ulong _memorySize = MemoryBlock.GetPageSize() * 8;
 
-        private MemoryBlock _memoryBlock;
+        private readonly MemoryBlock _memoryBlock;
 
-        [SetUp]
-        public void Setup()
+        public Tests()
         {
             _memoryBlock = new MemoryBlock(_memorySize);
         }
 
-        [TearDown]
-        public void Teardown()
+        public void Dispose()
         {
+            GC.SuppressFinalize(this);
+
             _memoryBlock.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void Test_Read()
         {
             Marshal.WriteInt32(_memoryBlock.Pointer, 0x2020, 0x1234abcd);
 
-            Assert.AreEqual(_memoryBlock.Read<int>(0x2020), 0x1234abcd);
+            Assert.Equal(0x1234abcd, _memoryBlock.Read<int>(0x2020));
         }
 
-        [Test]
+        [Fact]
         public void Test_Write()
         {
             _memoryBlock.Write(0x2040, 0xbadc0de);
 
-            Assert.AreEqual(Marshal.ReadInt32(_memoryBlock.Pointer, 0x2040), 0xbadc0de);
+            Assert.Equal(0xbadc0de, Marshal.ReadInt32(_memoryBlock.Pointer, 0x2040));
         }
 
-        [Test]
-        // Memory aliasing tests fail on CI at the moment.
-        [Platform(Exclude = "MacOsX")]
+        [SkippableFact]
         public void Test_Alias()
         {
+            Skip.If(OperatingSystem.IsMacOS(), "Memory aliasing tests fail on CI at the moment.");
+
             ulong pageSize = MemoryBlock.GetPageSize();
             ulong blockSize = MemoryBlock.GetPageSize() * 16;
 
@@ -54,14 +54,14 @@ namespace Ryujinx.Tests.Memory
             toAlias.UnmapView(backing, pageSize * 3, pageSize);
 
             toAlias.Write(0, 0xbadc0de);
-            Assert.AreEqual(Marshal.ReadInt32(backing.Pointer, (int)pageSize), 0xbadc0de);
+            Assert.Equal(0xbadc0de, Marshal.ReadInt32(backing.Pointer, (int)pageSize));
         }
 
-        [Test]
-        // Memory aliasing tests fail on CI at the moment.
-        [Platform(Exclude = "MacOsX")]
+        [SkippableFact]
         public void Test_AliasRandom()
         {
+            Skip.If(OperatingSystem.IsMacOS(), "Memory aliasing tests fail on CI at the moment.");
+
             ulong pageSize = MemoryBlock.GetPageSize();
             int pageBits = (int)ulong.Log2(pageSize);
             ulong blockSize = MemoryBlock.GetPageSize() * 128;
@@ -84,7 +84,7 @@ namespace Ryujinx.Tests.Memory
                     int offset = rng.Next(0, (int)pageSize - sizeof(int));
 
                     toAlias.Write((ulong)((dstPage << pageBits) + offset), 0xbadc0de);
-                    Assert.AreEqual(Marshal.ReadInt32(backing.Pointer, (srcPage << pageBits) + offset), 0xbadc0de);
+                    Assert.Equal(0xbadc0de, Marshal.ReadInt32(backing.Pointer, (srcPage << pageBits) + offset));
                 }
                 else
                 {
@@ -93,11 +93,11 @@ namespace Ryujinx.Tests.Memory
             }
         }
 
-        [Test]
-        // Memory aliasing tests fail on CI at the moment.
-        [Platform(Exclude = "MacOsX")]
+        [SkippableFact]
         public void Test_AliasMapLeak()
         {
+            Skip.If(OperatingSystem.IsMacOS(), "Memory aliasing tests fail on CI at the moment.");
+
             ulong pageSize = MemoryBlock.GetPageSize();
             ulong size = 100000 * pageSize; // The mappings limit on Linux is usually around 65K, so let's make sure we are above that.
 
@@ -109,7 +109,7 @@ namespace Ryujinx.Tests.Memory
                 toAlias.MapView(backing, 0, offset, pageSize);
 
                 toAlias.Write(offset, 0xbadc0de);
-                Assert.AreEqual(0xbadc0de, backing.Read<int>(0));
+                Assert.Equal(0xbadc0de, backing.Read<int>(0));
 
                 toAlias.UnmapView(backing, offset, pageSize);
             }

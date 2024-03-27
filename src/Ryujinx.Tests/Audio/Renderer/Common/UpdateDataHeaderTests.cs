@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Common;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Common
 {
-    class UpdateDataHeaderTests
+    public class UpdateDataHeaderTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x40, Unsafe.SizeOf<UpdateDataHeader>());
+            Assert.Equal(0x40, Unsafe.SizeOf<UpdateDataHeader>());
         }
     }
 }

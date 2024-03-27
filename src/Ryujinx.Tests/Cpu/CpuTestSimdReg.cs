@@ -1,14 +1,20 @@
 #define SimdReg
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdReg")]
+    [Collection("SimdReg")]
     public sealed class CpuTestSimdReg : CpuTest
     {
+        public CpuTestSimdReg(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdReg
 
         #region "ValueSource (Types)"
@@ -133,7 +139,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
                 ulong rnd1 = GenNormalS();
                 ulong rnd2 = GenSubnormalS();
 
@@ -604,13 +610,14 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noInfs = false;
         private static readonly bool _noNaNs = false;
 
-        [Test, Pairwise, Description("ADD <V><d>, <V><n>, <V><m>")]
-        public void Add_S_D([Values(0u)] uint rd,
-                            [Values(1u, 0u)] uint rn,
-                            [Values(2u, 0u)] uint rm,
-                            [ValueSource(nameof(_1D_))] ulong z,
-                            [ValueSource(nameof(_1D_))] ulong a,
-                            [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "ADD <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Add_S_D([CombinatorialValues(0u)] uint rd,
+                            [CombinatorialValues(1u, 0u)] uint rn,
+                            [CombinatorialValues(2u, 0u)] uint rm,
+                            [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                            [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                            [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x5EE08400; // ADD D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -624,14 +631,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Add_V_8B_4H_2S([Values(0u)] uint rd,
-                                   [Values(1u, 0u)] uint rn,
-                                   [Values(2u, 0u)] uint rm,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                   [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "ADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Add_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                   [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E208400; // ADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -646,14 +654,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Add_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                       [Values(1u, 0u)] uint rn,
-                                       [Values(2u, 0u)] uint rm,
-                                       [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                       [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                       [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                       [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "ADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Add_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                       [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                       [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                       [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E208400; // ADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -668,14 +677,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Addhn_V_8H8B_4S4H_2D2S([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                           [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                           [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
+        [SkippableTheory(DisplayName = "ADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Addhn_V_8H8B_4S4H_2D2S([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
         {
             uint opcode = 0x0E204000; // ADDHN V0.8B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -690,14 +700,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Addhn_V_8H16B_4S8H_2D4S([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
+        [SkippableTheory(DisplayName = "ADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Addhn_V_8H16B_4S8H_2D4S([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
         {
             uint opcode = 0x4E204000; // ADDHN2 V0.16B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -712,14 +723,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ADDP <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Addp_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "ADDP <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Addp_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E20BC00; // ADDP V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -734,14 +746,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ADDP <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Addp_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "ADDP <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Addp_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E20BC00; // ADDP V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -756,13 +769,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("AND <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void And_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "AND <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void And_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x0E201C00; // AND V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -776,13 +790,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("AND <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void And_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "AND <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void And_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x4E201C00; // AND V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -796,13 +811,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BIC <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bic_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BIC <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bic_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x0E601C00; // BIC V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -816,13 +832,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BIC <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bic_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BIC <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bic_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x4E601C00; // BIC V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -836,13 +853,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BIF <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bif_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BIF <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bif_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x2EE01C00; // BIF V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -856,13 +874,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BIF <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bif_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BIF <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bif_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x6EE01C00; // BIF V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -876,13 +895,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BIT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bit_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BIT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bit_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x2EA01C00; // BIT V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -896,13 +916,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BIT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bit_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BIT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bit_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x6EA01C00; // BIT V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -916,13 +937,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BSL <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bsl_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BSL <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bsl_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x2E601C00; // BSL V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -936,13 +958,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("BSL <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Bsl_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "BSL <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Bsl_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x6E601C00; // BSL V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -956,13 +979,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMEQ <V><d>, <V><n>, <V><m>")]
-        public void Cmeq_S_D([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_1D_))] ulong z,
-                             [ValueSource(nameof(_1D_))] ulong a,
-                             [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "CMEQ <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Cmeq_S_D([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x7EE08C00; // CMEQ D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -976,14 +1000,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMEQ <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmeq_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "CMEQ <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmeq_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E208C00; // CMEQ V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -998,14 +1023,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMEQ <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmeq_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "CMEQ <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmeq_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x6E208C00; // CMEQ V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1020,13 +1046,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMGE <V><d>, <V><n>, <V><m>")]
-        public void Cmge_S_D([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_1D_))] ulong z,
-                             [ValueSource(nameof(_1D_))] ulong a,
-                             [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "CMGE <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Cmge_S_D([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x5EE03C00; // CMGE D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1040,14 +1067,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMGE <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmge_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "CMGE <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmge_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E203C00; // CMGE V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1062,14 +1090,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMGE <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmge_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "CMGE <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmge_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E203C00; // CMGE V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1084,13 +1113,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMGT <V><d>, <V><n>, <V><m>")]
-        public void Cmgt_S_D([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_1D_))] ulong z,
-                             [ValueSource(nameof(_1D_))] ulong a,
-                             [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "CMGT <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Cmgt_S_D([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x5EE03400; // CMGT D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1104,14 +1134,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMGT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmgt_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "CMGT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmgt_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E203400; // CMGT V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1126,14 +1157,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMGT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmgt_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "CMGT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmgt_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E203400; // CMGT V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1148,13 +1180,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMHI <V><d>, <V><n>, <V><m>")]
-        public void Cmhi_S_D([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_1D_))] ulong z,
-                             [ValueSource(nameof(_1D_))] ulong a,
-                             [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "CMHI <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Cmhi_S_D([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x7EE03400; // CMHI D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1168,14 +1201,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMHI <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmhi_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "CMHI <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmhi_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E203400; // CMHI V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1190,14 +1224,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMHI <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmhi_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "CMHI <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmhi_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x6E203400; // CMHI V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1212,13 +1247,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMHS <V><d>, <V><n>, <V><m>")]
-        public void Cmhs_S_D([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_1D_))] ulong z,
-                             [ValueSource(nameof(_1D_))] ulong a,
-                             [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "CMHS <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Cmhs_S_D([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                             [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x7EE03C00; // CMHS D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1232,14 +1268,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMHS <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmhs_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "CMHS <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmhs_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E203C00; // CMHS V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1254,14 +1291,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMHS <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmhs_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "CMHS <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmhs_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x6E203C00; // CMHS V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1276,13 +1314,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMTST <V><d>, <V><n>, <V><m>")]
-        public void Cmtst_S_D([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_1D_))] ulong z,
-                              [ValueSource(nameof(_1D_))] ulong a,
-                              [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "CMTST <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Cmtst_S_D([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                              [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                              [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x5EE08C00; // CMTST D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1296,14 +1335,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMTST <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmtst_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "CMTST <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmtst_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E208C00; // CMTST V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1318,14 +1358,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("CMTST <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Cmtst_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                         [Values(1u, 0u)] uint rn,
-                                         [Values(2u, 0u)] uint rm,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                         [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "CMTST <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Cmtst_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 0u)] uint rn,
+                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                         [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E208C00; // CMTST V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1340,13 +1381,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("EOR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Eor_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "EOR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Eor_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x2E201C00; // EOR V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1360,13 +1402,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("EOR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Eor_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "EOR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Eor_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x6E201C00; // EOR V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1380,18 +1423,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_S([ValueSource(nameof(_F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_S_))] uint opcodes,
-                                                        [ValueSource(nameof(_1S_F_))] ulong a,
-                                                        [ValueSource(nameof(_1S_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_S([CombinatorialMemberData(nameof(_F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_S_))] uint opcodes,
+                                                        [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                                        [CombinatorialMemberData(nameof(_1S_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1401,18 +1444,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Dzc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_D([ValueSource(nameof(_F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_D_))] uint opcodes,
-                                                        [ValueSource(nameof(_1D_F_))] ulong a,
-                                                        [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_D([CombinatorialMemberData(nameof(_F_Abd_Add_Div_Mul_Mulx_Nmul_Sub_S_D_))] uint opcodes,
+                                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1422,16 +1465,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Dzc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2S_4S([ValueSource(nameof(_F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2S_4S_))] uint opcodes,
-                                                         [Values(0u)] uint rd,
-                                                         [Values(1u, 0u)] uint rn,
-                                                         [Values(2u, 0u)] uint rm,
-                                                         [ValueSource(nameof(_2S_F_))] ulong z,
-                                                         [ValueSource(nameof(_2S_F_))] ulong a,
-                                                         [ValueSource(nameof(_2S_F_))] ulong b,
-                                                         [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2S_4S([CombinatorialMemberData(nameof(_F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2S_4S_))] uint opcodes,
+                                                         [CombinatorialValues(0u)] uint rd,
+                                                         [CombinatorialValues(1u, 0u)] uint rn,
+                                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                                         [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                                         [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                                         [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                                         [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((q & 1) << 30);
@@ -1440,7 +1483,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * q);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1450,15 +1493,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Dzc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2D([ValueSource(nameof(_F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2D_))] uint opcodes,
-                                                      [Values(0u)] uint rd,
-                                                      [Values(1u, 0u)] uint rn,
-                                                      [Values(2u, 0u)] uint rm,
-                                                      [ValueSource(nameof(_1D_F_))] ulong z,
-                                                      [ValueSource(nameof(_1D_F_))] ulong a,
-                                                      [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2D([CombinatorialMemberData(nameof(_F_Abd_Add_Div_Mul_Mulx_Sub_P_V_2D_))] uint opcodes,
+                                                      [CombinatorialValues(0u)] uint rd,
+                                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                                      [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                                      [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                                      [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -1466,7 +1509,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1476,18 +1519,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Dzc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_AcCm_EqGeGt_S_S([ValueSource(nameof(_F_AcCm_EqGeGt_S_S_))] uint opcodes,
-                                      [ValueSource(nameof(_1S_F_))] ulong a,
-                                      [ValueSource(nameof(_1S_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_AcCm_EqGeGt_S_S([CombinatorialMemberData(nameof(_F_AcCm_EqGeGt_S_S_))] uint opcodes,
+                                      [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_1S_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
 
@@ -1496,18 +1539,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_AcCm_EqGeGt_S_D([ValueSource(nameof(_F_AcCm_EqGeGt_S_D_))] uint opcodes,
-                                      [ValueSource(nameof(_1D_F_))] ulong a,
-                                      [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_AcCm_EqGeGt_S_D([CombinatorialMemberData(nameof(_F_AcCm_EqGeGt_S_D_))] uint opcodes,
+                                      [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
 
@@ -1516,16 +1559,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_AcCm_EqGeGt_V_2S_4S([ValueSource(nameof(_F_AcCm_EqGeGt_V_2S_4S_))] uint opcodes,
-                                          [Values(0u)] uint rd,
-                                          [Values(1u, 0u)] uint rn,
-                                          [Values(2u, 0u)] uint rm,
-                                          [ValueSource(nameof(_2S_F_))] ulong z,
-                                          [ValueSource(nameof(_2S_F_))] ulong a,
-                                          [ValueSource(nameof(_2S_F_))] ulong b,
-                                          [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_AcCm_EqGeGt_V_2S_4S([CombinatorialMemberData(nameof(_F_AcCm_EqGeGt_V_2S_4S_))] uint opcodes,
+                                          [CombinatorialValues(0u)] uint rd,
+                                          [CombinatorialValues(1u, 0u)] uint rn,
+                                          [CombinatorialValues(2u, 0u)] uint rm,
+                                          [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                          [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                          [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                          [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((q & 1) << 30);
@@ -1534,7 +1577,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * q);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
 
@@ -1543,15 +1586,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_AcCm_EqGeGt_V_2D([ValueSource(nameof(_F_AcCm_EqGeGt_V_2D_))] uint opcodes,
-                                       [Values(0u)] uint rd,
-                                       [Values(1u, 0u)] uint rn,
-                                       [Values(2u, 0u)] uint rm,
-                                       [ValueSource(nameof(_1D_F_))] ulong z,
-                                       [ValueSource(nameof(_1D_F_))] ulong a,
-                                       [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_AcCm_EqGeGt_V_2D([CombinatorialMemberData(nameof(_F_AcCm_EqGeGt_V_2D_))] uint opcodes,
+                                       [CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                       [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                       [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -1559,7 +1602,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
 
@@ -1568,38 +1611,38 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cmp_Cmpe_S_S([ValueSource(nameof(_F_Cmp_Cmpe_S_S_))] uint opcodes,
-                                   [ValueSource(nameof(_1S_F_))] ulong a,
-                                   [ValueSource(nameof(_1S_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cmp_Cmpe_S_S([CombinatorialMemberData(nameof(_F_Cmp_Cmpe_S_S_))] uint opcodes,
+                                   [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_1S_F_))] ulong b)
         {
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            bool v = TestContext.CurrentContext.Random.NextBool();
-            bool c = TestContext.CurrentContext.Random.NextBool();
-            bool z = TestContext.CurrentContext.Random.NextBool();
-            bool n = TestContext.CurrentContext.Random.NextBool();
+            bool v = Random.Shared.NextBool();
+            bool c = Random.Shared.NextBool();
+            bool z = Random.Shared.NextBool();
+            bool n = Random.Shared.NextBool();
 
             SingleOpcode(opcodes, v1: v1, v2: v2, overflow: v, carry: c, zero: z, negative: n);
 
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cmp_Cmpe_S_D([ValueSource(nameof(_F_Cmp_Cmpe_S_D_))] uint opcodes,
-                                   [ValueSource(nameof(_1D_F_))] ulong a,
-                                   [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cmp_Cmpe_S_D([CombinatorialMemberData(nameof(_F_Cmp_Cmpe_S_D_))] uint opcodes,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            bool v = TestContext.CurrentContext.Random.NextBool();
-            bool c = TestContext.CurrentContext.Random.NextBool();
-            bool z = TestContext.CurrentContext.Random.NextBool();
-            bool n = TestContext.CurrentContext.Random.NextBool();
+            bool v = Random.Shared.NextBool();
+            bool c = Random.Shared.NextBool();
+            bool z = Random.Shared.NextBool();
+            bool n = Random.Shared.NextBool();
 
             SingleOpcode(opcodes, v1: v1, v2: v2, overflow: v, carry: c, zero: z, negative: n);
 
@@ -1607,20 +1650,20 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Madd_Msub_Nmadd_Nmsub_S_S([ValueSource(nameof(_F_Madd_Msub_Nmadd_Nmsub_S_S_))] uint opcodes,
-                                                [ValueSource(nameof(_1S_F_))] ulong a,
-                                                [ValueSource(nameof(_1S_F_))] ulong b,
-                                                [ValueSource(nameof(_1S_F_))] ulong c)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Madd_Msub_Nmadd_Nmsub_S_S([CombinatorialMemberData(nameof(_F_Madd_Msub_Nmadd_Nmsub_S_S_))] uint opcodes,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong b,
+                                                [CombinatorialMemberData(nameof(_1S_F_))] ulong c)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
             V128 v3 = MakeVectorE0(c);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1631,20 +1674,20 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Madd_Msub_Nmadd_Nmsub_S_D([ValueSource(nameof(_F_Madd_Msub_Nmadd_Nmsub_S_D_))] uint opcodes,
-                                                [ValueSource(nameof(_1D_F_))] ulong a,
-                                                [ValueSource(nameof(_1D_F_))] ulong b,
-                                                [ValueSource(nameof(_1D_F_))] ulong c)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Madd_Msub_Nmadd_Nmsub_S_D([CombinatorialMemberData(nameof(_F_Madd_Msub_Nmadd_Nmsub_S_D_))] uint opcodes,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                                                [CombinatorialMemberData(nameof(_1D_F_))] ulong c)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
             V128 v3 = MakeVectorE0(c);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1654,18 +1697,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(Fpsr.Ioc | Fpsr.Idc, FpSkips.IfUnderflow, FpTolerances.UpToOneUlpsD);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Max_Min_Nm_S_S([ValueSource(nameof(_F_Max_Min_Nm_S_S_))] uint opcodes,
-                                     [ValueSource(nameof(_1S_F_))] ulong a,
-                                     [ValueSource(nameof(_1S_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Max_Min_Nm_S_S([CombinatorialMemberData(nameof(_F_Max_Min_Nm_S_S_))] uint opcodes,
+                                     [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_1S_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1675,18 +1718,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Max_Min_Nm_S_D([ValueSource(nameof(_F_Max_Min_Nm_S_D_))] uint opcodes,
-                                     [ValueSource(nameof(_1D_F_))] ulong a,
-                                     [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Max_Min_Nm_S_D([CombinatorialMemberData(nameof(_F_Max_Min_Nm_S_D_))] uint opcodes,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1696,16 +1739,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Max_Min_Nm_P_V_2S_4S([ValueSource(nameof(_F_Max_Min_Nm_P_V_2S_4S_))] uint opcodes,
-                                           [Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_2S_F_))] ulong z,
-                                           [ValueSource(nameof(_2S_F_))] ulong a,
-                                           [ValueSource(nameof(_2S_F_))] ulong b,
-                                           [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Max_Min_Nm_P_V_2S_4S([CombinatorialMemberData(nameof(_F_Max_Min_Nm_P_V_2S_4S_))] uint opcodes,
+                                           [CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                           [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((q & 1) << 30);
@@ -1714,7 +1757,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * q);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1724,15 +1767,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Max_Min_Nm_P_V_2D([ValueSource(nameof(_F_Max_Min_Nm_P_V_2D_))] uint opcodes,
-                                        [Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_1D_F_))] ulong z,
-                                        [ValueSource(nameof(_1D_F_))] ulong a,
-                                        [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Max_Min_Nm_P_V_2D([CombinatorialMemberData(nameof(_F_Max_Min_Nm_P_V_2D_))] uint opcodes,
+                                        [CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -1740,7 +1783,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1751,16 +1794,16 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mla_Mls_V_2S_4S([ValueSource(nameof(_F_Mla_Mls_V_2S_4S_))] uint opcodes,
-                                      [Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_2S_F_))] ulong z,
-                                      [ValueSource(nameof(_2S_F_))] ulong a,
-                                      [ValueSource(nameof(_2S_F_))] ulong b,
-                                      [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mla_Mls_V_2S_4S([CombinatorialMemberData(nameof(_F_Mla_Mls_V_2S_4S_))] uint opcodes,
+                                      [CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                      [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((q & 1) << 30);
@@ -1769,7 +1812,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * q);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1780,15 +1823,15 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mla_Mls_V_2D([ValueSource(nameof(_F_Mla_Mls_V_2D_))] uint opcodes,
-                                   [Values(0u)] uint rd,
-                                   [Values(1u, 0u)] uint rn,
-                                   [Values(2u, 0u)] uint rm,
-                                   [ValueSource(nameof(_1D_F_))] ulong z,
-                                   [ValueSource(nameof(_1D_F_))] ulong a,
-                                   [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mla_Mls_V_2D([CombinatorialMemberData(nameof(_F_Mla_Mls_V_2D_))] uint opcodes,
+                                   [CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -1796,7 +1839,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1807,18 +1850,18 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Recps_Rsqrts_S_S([ValueSource(nameof(_F_Recps_Rsqrts_S_S_))] uint opcodes,
-                                       [ValueSource(nameof(_1S_F_))] ulong a,
-                                       [ValueSource(nameof(_1S_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Recps_Rsqrts_S_S([CombinatorialMemberData(nameof(_F_Recps_Rsqrts_S_S_))] uint opcodes,
+                                       [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_1S_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1829,18 +1872,18 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Recps_Rsqrts_S_D([ValueSource(nameof(_F_Recps_Rsqrts_S_D_))] uint opcodes,
-                                       [ValueSource(nameof(_1D_F_))] ulong a,
-                                       [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Recps_Rsqrts_S_D([CombinatorialMemberData(nameof(_F_Recps_Rsqrts_S_D_))] uint opcodes,
+                                       [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0(b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1851,16 +1894,16 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Recps_Rsqrts_V_2S_4S([ValueSource(nameof(_F_Recps_Rsqrts_V_2S_4S_))] uint opcodes,
-                                           [Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_2S_F_))] ulong z,
-                                           [ValueSource(nameof(_2S_F_))] ulong a,
-                                           [ValueSource(nameof(_2S_F_))] ulong b,
-                                           [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Recps_Rsqrts_V_2S_4S([CombinatorialMemberData(nameof(_F_Recps_Rsqrts_V_2S_4S_))] uint opcodes,
+                                           [CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                           [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((q & 1) << 30);
@@ -1869,7 +1912,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * q);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1880,15 +1923,15 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Recps_Rsqrts_V_2D([ValueSource(nameof(_F_Recps_Rsqrts_V_2D_))] uint opcodes,
-                                        [Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_1D_F_))] ulong z,
-                                        [ValueSource(nameof(_1D_F_))] ulong a,
-                                        [ValueSource(nameof(_1D_F_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Recps_Rsqrts_V_2D([CombinatorialMemberData(nameof(_F_Recps_Rsqrts_V_2D_))] uint opcodes,
+                                        [CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_1D_F_))] ulong b)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -1896,7 +1939,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -1906,15 +1949,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(Fpsr.Ioc | Fpsr.Idc, FpSkips.IfUnderflow, FpTolerances.UpToOneUlpsD);
         }
 
-        [Test, Pairwise]
-        public void Mla_Mls_Mul_V_8B_4H_2S([ValueSource(nameof(_Mla_Mls_Mul_V_8B_4H_2S_))] uint opcodes,
-                                           [Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Mla_Mls_Mul_V_8B_4H_2S([CombinatorialMemberData(nameof(_Mla_Mls_Mul_V_8B_4H_2S_))] uint opcodes,
+                                           [CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -1928,15 +1972,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Mla_Mls_Mul_V_16B_8H_4S([ValueSource(nameof(_Mla_Mls_Mul_V_16B_8H_4S_))] uint opcodes,
-                                            [Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Mla_Mls_Mul_V_16B_8H_4S([CombinatorialMemberData(nameof(_Mla_Mls_Mul_V_16B_8H_4S_))] uint opcodes,
+                                            [CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -1950,13 +1995,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ORN <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Orn_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "ORN <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Orn_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x0EE01C00; // ORN V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1970,13 +2016,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ORN <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Orn_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "ORN <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Orn_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x4EE01C00; // ORN V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -1990,13 +2037,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ORR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Orr_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "ORR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Orr_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x0EA01C00; // ORR V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2010,13 +2058,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ORR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Orr_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b)
+        [SkippableTheory(DisplayName = "ORR <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Orr_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b)
         {
             uint opcode = 0x4EA01C00; // ORR V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2030,18 +2079,19 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("PMULL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Pmull_V([Values(0u)] uint rd,
-                            [Values(1u, 0u)] uint rn,
-                            [Values(2u, 0u)] uint rm,
-                            [ValueSource(nameof(_8B1D_))] ulong z0,
-                            [ValueSource(nameof(_8B1D_))] ulong z1,
-                            [ValueSource(nameof(_8B1D_))] ulong a0,
-                            [ValueSource(nameof(_8B1D_))] ulong a1,
-                            [ValueSource(nameof(_8B1D_))] ulong b0,
-                            [ValueSource(nameof(_8B1D_))] ulong b1,
-                            [Values(0b00u, 0b11u)] uint size, // Q0: <8B,  1D> => <8H, 1Q>
-                            [Values(0b0u, 0b1u)] uint q) // Q1: <16B, 2D> => <8H, 1Q>
+        [SkippableTheory(DisplayName = "PMULL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Pmull_V([CombinatorialValues(0u)] uint rd,
+                            [CombinatorialValues(1u, 0u)] uint rn,
+                            [CombinatorialValues(2u, 0u)] uint rm,
+                            [CombinatorialMemberData(nameof(_8B1D_))] ulong z0,
+                            [CombinatorialMemberData(nameof(_8B1D_))] ulong z1,
+                            [CombinatorialMemberData(nameof(_8B1D_))] ulong a0,
+                            [CombinatorialMemberData(nameof(_8B1D_))] ulong a1,
+                            [CombinatorialMemberData(nameof(_8B1D_))] ulong b0,
+                            [CombinatorialMemberData(nameof(_8B1D_))] ulong b1,
+                            [CombinatorialValues(0b00u, 0b11u)] uint size, // Q0: <8B,  1D> => <8H, 1Q>
+                            [CombinatorialValues(0b0u, 0b1u)] uint q) // Q1: <16B, 2D> => <8H, 1Q>
         {
             uint opcode = 0x0E20E000; // PMULL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2057,14 +2107,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("RADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Raddhn_V_8H8B_4S4H_2D2S([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
+        [SkippableTheory(DisplayName = "RADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Raddhn_V_8H8B_4S4H_2D2S([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
         {
             uint opcode = 0x2E204000; // RADDHN V0.8B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2079,14 +2130,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("RADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Raddhn_V_8H16B_4S8H_2D4S([Values(0u)] uint rd,
-                                             [Values(1u, 0u)] uint rn,
-                                             [Values(2u, 0u)] uint rm,
-                                             [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                             [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                             [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                             [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
+        [SkippableTheory(DisplayName = "RADDHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Raddhn_V_8H16B_4S8H_2D4S([CombinatorialValues(0u)] uint rd,
+                                             [CombinatorialValues(1u, 0u)] uint rn,
+                                             [CombinatorialValues(2u, 0u)] uint rm,
+                                             [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                             [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                             [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                             [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
         {
             uint opcode = 0x6E204000; // RADDHN2 V0.16B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2101,14 +2153,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("RSUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Rsubhn_V_8H8B_4S4H_2D2S([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
+        [SkippableTheory(DisplayName = "RSUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Rsubhn_V_8H8B_4S4H_2D2S([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
         {
             uint opcode = 0x2E206000; // RSUBHN V0.8B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2123,14 +2176,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("RSUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Rsubhn_V_8H16B_4S8H_2D4S([Values(0u)] uint rd,
-                                             [Values(1u, 0u)] uint rn,
-                                             [Values(2u, 0u)] uint rm,
-                                             [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                             [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                             [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                             [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
+        [SkippableTheory(DisplayName = "RSUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Rsubhn_V_8H16B_4S8H_2D4S([CombinatorialValues(0u)] uint rd,
+                                             [CombinatorialValues(1u, 0u)] uint rn,
+                                             [CombinatorialValues(2u, 0u)] uint rm,
+                                             [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                             [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                             [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                             [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
         {
             uint opcode = 0x6E206000; // RSUBHN2 V0.16B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2145,14 +2199,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Saba_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Saba_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E207C00; // SABA V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2167,14 +2222,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Saba_V_16B_8H_4S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "SABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Saba_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x4E207C00; // SABA V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2189,14 +2245,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Sabal_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "SABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Sabal_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x0E205000; // SABAL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2211,14 +2268,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Sabal_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "SABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Sabal_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x4E205000; // SABAL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2233,14 +2291,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sabd_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sabd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E207400; // SABD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2255,14 +2314,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sabd_V_16B_8H_4S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "SABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sabd_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x4E207400; // SABD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2277,14 +2337,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Sabdl_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "SABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Sabdl_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x0E207000; // SABDL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2299,14 +2360,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Sabdl_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "SABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Sabdl_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x4E207000; // SABDL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2321,14 +2383,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Saddl_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "SADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Saddl_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x0E200000; // SADDL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2343,14 +2406,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Saddl_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "SADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Saddl_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x4E200000; // SADDL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2365,14 +2429,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Saddw_V_8B8H8H_4H4S4S_2S2D2D([Values(0u)] uint rd,
-                                                 [Values(1u, 0u)] uint rn,
-                                                 [Values(2u, 0u)] uint rm,
-                                                 [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                 [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                 [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                 [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
+        [SkippableTheory(DisplayName = "SADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Saddw_V_8B8H8H_4H4S4S_2S2D2D([CombinatorialValues(0u)] uint rd,
+                                                 [CombinatorialValues(1u, 0u)] uint rn,
+                                                 [CombinatorialValues(2u, 0u)] uint rm,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                 [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                 [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
         {
             uint opcode = 0x0E201000; // SADDW V0.8H, V0.8H, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2387,14 +2452,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Saddw_V_16B8H8H_8H4S4S_4S2D2D([Values(0u)] uint rd,
-                                                  [Values(1u, 0u)] uint rn,
-                                                  [Values(2u, 0u)] uint rm,
-                                                  [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                  [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                  [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                  [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
+        [SkippableTheory(DisplayName = "SADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Saddw_V_16B8H8H_8H4S4S_4S2D2D([CombinatorialValues(0u)] uint rd,
+                                                  [CombinatorialValues(1u, 0u)] uint rn,
+                                                  [CombinatorialValues(2u, 0u)] uint rm,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                  [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                  [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
         {
             uint opcode = 0x4E201000; // SADDW2 V0.8H, V0.8H, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2409,14 +2475,40 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Sha1c_Sha1m_Sha1p_Sha1su0_V([ValueSource(nameof(_Sha1c_Sha1m_Sha1p_Sha1su0_V_))] uint opcodes,
-                                                [Values(0u)] uint rd,
-                                                [Values(1u, 0u)] uint rn,
-                                                [Values(2u, 0u)] uint rm,
-                                                [Random(RndCnt / 2)] ulong z0, [Random(RndCnt / 2)] ulong z1,
-                                                [Random(RndCnt / 2)] ulong a0, [Random(RndCnt / 2)] ulong a1,
-                                                [Random(RndCnt / 2)] ulong b0, [Random(RndCnt / 2)] ulong b1)
+        public static readonly ulong[] RandomZ0 =
+        {
+            Random.Shared.NextULong(),
+        };
+        public static readonly ulong[] RandomZ1 =
+        {
+            Random.Shared.NextULong(),
+        };
+        public static readonly ulong[] RandomA0 =
+        {
+            Random.Shared.NextULong(),
+        };
+        public static readonly ulong[] RandomA1 =
+        {
+            Random.Shared.NextULong(),
+        };
+        public static readonly ulong[] RandomB0 =
+        {
+            Random.Shared.NextULong(),
+        };
+        public static readonly ulong[] RandomB1 =
+        {
+            Random.Shared.NextULong(),
+        };
+
+        [SkippableTheory]
+        [PairwiseData]
+        public void Sha1c_Sha1m_Sha1p_Sha1su0_V([CombinatorialMemberData(nameof(_Sha1c_Sha1m_Sha1p_Sha1su0_V_))] uint opcodes,
+                                                [CombinatorialValues(0u)] uint rd,
+                                                [CombinatorialValues(1u, 0u)] uint rn,
+                                                [CombinatorialValues(2u, 0u)] uint rm,
+                                                [CombinatorialMemberData(nameof(RandomZ0))] ulong z0, [CombinatorialMemberData(nameof(RandomZ1))] ulong z1,
+                                                [CombinatorialMemberData(nameof(RandomA0))] ulong a0, [CombinatorialMemberData(nameof(RandomA1))] ulong a1,
+                                                [CombinatorialMemberData(nameof(RandomB0))] ulong b0, [CombinatorialMemberData(nameof(RandomB1))] ulong b1)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -2429,14 +2521,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Sha256h_Sha256h2_Sha256su1_V([ValueSource(nameof(_Sha256h_Sha256h2_Sha256su1_V_))] uint opcodes,
-                                                 [Values(0u)] uint rd,
-                                                 [Values(1u, 0u)] uint rn,
-                                                 [Values(2u, 0u)] uint rm,
-                                                 [Random(RndCnt / 2)] ulong z0, [Random(RndCnt / 2)] ulong z1,
-                                                 [Random(RndCnt / 2)] ulong a0, [Random(RndCnt / 2)] ulong a1,
-                                                 [Random(RndCnt / 2)] ulong b0, [Random(RndCnt / 2)] ulong b1)
+        [SkippableTheory]
+        [PairwiseData]
+        public void Sha256h_Sha256h2_Sha256su1_V([CombinatorialMemberData(nameof(_Sha256h_Sha256h2_Sha256su1_V_))] uint opcodes,
+                                                 [CombinatorialValues(0u)] uint rd,
+                                                 [CombinatorialValues(1u, 0u)] uint rn,
+                                                 [CombinatorialValues(2u, 0u)] uint rm,
+                                                 [CombinatorialMemberData(nameof(RandomZ0))] ulong z0, [CombinatorialMemberData(nameof(RandomZ1))] ulong z1,
+                                                 [CombinatorialMemberData(nameof(RandomA0))] ulong a0, [CombinatorialMemberData(nameof(RandomA1))] ulong a1,
+                                                 [CombinatorialMemberData(nameof(RandomB0))] ulong b0, [CombinatorialMemberData(nameof(RandomB1))] ulong b1)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -2449,14 +2542,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Shadd_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Shadd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E200400; // SHADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2471,14 +2565,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Shadd_V_16B_8H_4S([Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "SHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Shadd_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x4E200400; // SHADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2493,14 +2588,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Shsub_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Shsub_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E202400; // SHSUB V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2515,14 +2611,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Shsub_V_16B_8H_4S([Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "SHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Shsub_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x4E202400; // SHSUB V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2537,16 +2634,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void SU_Max_Min_P_V([ValueSource(nameof(_SU_Max_Min_P_V_))] uint opcodes,
-                                   [Values(0u)] uint rd,
-                                   [Values(1u, 0u)] uint rn,
-                                   [Values(2u, 0u)] uint rm,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                   [Values(0b00u, 0b01u, 0b10u)] uint size, // Q0: <8B,  4H, 2S>
-                                   [Values(0b0u, 0b1u)] uint q)             // Q1: <16B, 8H, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Max_Min_P_V([CombinatorialMemberData(nameof(_SU_Max_Min_P_V_))] uint opcodes,
+                                   [CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                   [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size, // Q0: <8B,  4H, 2S>
+                                   [CombinatorialValues(0b0u, 0b1u)] uint q)             // Q1: <16B, 8H, 4S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -2561,15 +2659,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void SU_Mlal_Mlsl_Mull_V_8B8H_4H4S_2S2D([ValueSource(nameof(_SU_Mlal_Mlsl_Mull_V_8B8H_4H4S_2S2D_))] uint opcodes,
-                                                       [Values(0u)] uint rd,
-                                                       [Values(1u, 0u)] uint rn,
-                                                       [Values(2u, 0u)] uint rm,
-                                                       [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                                       [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                                       [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                                       [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Mlal_Mlsl_Mull_V_8B8H_4H4S_2S2D([CombinatorialMemberData(nameof(_SU_Mlal_Mlsl_Mull_V_8B8H_4H4S_2S2D_))] uint opcodes,
+                                                       [CombinatorialValues(0u)] uint rd,
+                                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                                       [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -2583,15 +2682,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void SU_Mlal_Mlsl_Mull_V_16B8H_8H4S_4S2D([ValueSource(nameof(_SU_Mlal_Mlsl_Mull_V_16B8H_8H4S_4S2D_))] uint opcodes,
-                                                        [Values(0u)] uint rd,
-                                                        [Values(1u, 0u)] uint rn,
-                                                        [Values(2u, 0u)] uint rm,
-                                                        [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                                        [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                                        [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                                        [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Mlal_Mlsl_Mull_V_16B8H_8H4S_4S2D([CombinatorialMemberData(nameof(_SU_Mlal_Mlsl_Mull_V_16B8H_8H4S_4S2D_))] uint opcodes,
+                                                        [CombinatorialValues(0u)] uint rd,
+                                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                                        [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                                        [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                                        [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                                        [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -2605,14 +2705,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SQADD <V><d>, <V><n>, <V><m>")]
-        public void Sqadd_S_B_H_S_D([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong z,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong a,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
+        [SkippableTheory(DisplayName = "SQADD <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Sqadd_S_B_H_S_D([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
         {
             uint opcode = 0x5E200C00; // SQADD B0, B0, B0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2627,14 +2728,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqadd_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqadd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E200C00; // SQADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2649,14 +2751,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqadd_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                         [Values(1u, 0u)] uint rn,
-                                         [Values(2u, 0u)] uint rm,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                         [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "SQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqadd_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 0u)] uint rn,
+                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                         [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E200C00; // SQADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2671,14 +2774,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQDMULH <V><d>, <V><n>, <V><m>")]
-        public void Sqdmulh_S_H_S([Values(0u)] uint rd,
-                                  [Values(1u, 0u)] uint rn,
-                                  [Values(2u, 0u)] uint rm,
-                                  [ValueSource(nameof(_1H1S_))] ulong z,
-                                  [ValueSource(nameof(_1H1S_))] ulong a,
-                                  [ValueSource(nameof(_1H1S_))] ulong b,
-                                  [Values(0b01u, 0b10u)] uint size) // <H, S>
+        [SkippableTheory(DisplayName = "SQDMULH <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Sqdmulh_S_H_S([CombinatorialValues(0u)] uint rd,
+                                  [CombinatorialValues(1u, 0u)] uint rn,
+                                  [CombinatorialValues(2u, 0u)] uint rm,
+                                  [CombinatorialMemberData(nameof(_1H1S_))] ulong z,
+                                  [CombinatorialMemberData(nameof(_1H1S_))] ulong a,
+                                  [CombinatorialMemberData(nameof(_1H1S_))] ulong b,
+                                  [CombinatorialValues(0b01u, 0b10u)] uint size) // <H, S>
         {
             uint opcode = 0x5E20B400; // SQDMULH B0, B0, B0 (RESERVED)
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2693,14 +2797,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqdmulh_V_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_4H2S_))] ulong z,
-                                    [ValueSource(nameof(_4H2S_))] ulong a,
-                                    [ValueSource(nameof(_4H2S_))] ulong b,
-                                    [Values(0b01u, 0b10u)] uint size) // <4H, 2S>
+        [SkippableTheory(DisplayName = "SQDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqdmulh_V_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_4H2S_))] ulong b,
+                                    [CombinatorialValues(0b01u, 0b10u)] uint size) // <4H, 2S>
         {
             uint opcode = 0x0E20B400; // SQDMULH V0.8B, V0.8B, V0.8B (RESERVED)
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2715,14 +2820,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqdmulh_V_8H_4S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_4H2S_))] ulong z,
-                                    [ValueSource(nameof(_4H2S_))] ulong a,
-                                    [ValueSource(nameof(_4H2S_))] ulong b,
-                                    [Values(0b01u, 0b10u)] uint size) // <8H, 4S>
+        [SkippableTheory(DisplayName = "SQDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqdmulh_V_8H_4S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_4H2S_))] ulong b,
+                                    [CombinatorialValues(0b01u, 0b10u)] uint size) // <8H, 4S>
         {
             uint opcode = 0x4E20B400; // SQDMULH V0.16B, V0.16B, V0.16B (RESERVED)
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2737,14 +2843,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQRDMULH <V><d>, <V><n>, <V><m>")]
-        public void Sqrdmulh_S_H_S([Values(0u)] uint rd,
-                                   [Values(1u, 0u)] uint rn,
-                                   [Values(2u, 0u)] uint rm,
-                                   [ValueSource(nameof(_1H1S_))] ulong z,
-                                   [ValueSource(nameof(_1H1S_))] ulong a,
-                                   [ValueSource(nameof(_1H1S_))] ulong b,
-                                   [Values(0b01u, 0b10u)] uint size) // <H, S>
+        [SkippableTheory(DisplayName = "SQRDMULH <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Sqrdmulh_S_H_S([CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                   [CombinatorialMemberData(nameof(_1H1S_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_1H1S_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_1H1S_))] ulong b,
+                                   [CombinatorialValues(0b01u, 0b10u)] uint size) // <H, S>
         {
             uint opcode = 0x7E20B400; // SQRDMULH B0, B0, B0 (RESERVED)
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2759,14 +2866,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQRDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqrdmulh_V_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_4H2S_))] ulong z,
-                                     [ValueSource(nameof(_4H2S_))] ulong a,
-                                     [ValueSource(nameof(_4H2S_))] ulong b,
-                                     [Values(0b01u, 0b10u)] uint size) // <4H, 2S>
+        [SkippableTheory(DisplayName = "SQRDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqrdmulh_V_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_4H2S_))] ulong b,
+                                     [CombinatorialValues(0b01u, 0b10u)] uint size) // <4H, 2S>
         {
             uint opcode = 0x2E20B400; // SQRDMULH V0.8B, V0.8B, V0.8B (RESERVED)
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2781,14 +2889,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQRDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqrdmulh_V_8H_4S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_4H2S_))] ulong z,
-                                     [ValueSource(nameof(_4H2S_))] ulong a,
-                                     [ValueSource(nameof(_4H2S_))] ulong b,
-                                     [Values(0b01u, 0b10u)] uint size) // <8H, 4S>
+        [SkippableTheory(DisplayName = "SQRDMULH <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqrdmulh_V_8H_4S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_4H2S_))] ulong b,
+                                     [CombinatorialValues(0b01u, 0b10u)] uint size) // <8H, 4S>
         {
             uint opcode = 0x6E20B400; // SQRDMULH V0.16B, V0.16B, V0.16B (RESERVED)
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2803,14 +2912,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQSUB <V><d>, <V><n>, <V><m>")]
-        public void Sqsub_S_B_H_S_D([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong z,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong a,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
+        [SkippableTheory(DisplayName = "SQSUB <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Sqsub_S_B_H_S_D([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
         {
             uint opcode = 0x5E202C00; // SQSUB B0, B0, B0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2825,14 +2935,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqsub_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqsub_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E202C00; // SQSUB V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2847,14 +2958,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sqsub_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                         [Values(1u, 0u)] uint rn,
-                                         [Values(2u, 0u)] uint rm,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                         [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "SQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sqsub_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 0u)] uint rn,
+                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                         [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E202C00; // SQSUB V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2869,14 +2981,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SRHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Srhadd_V_8B_4H_2S([Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SRHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Srhadd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E201400; // SRHADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2891,14 +3004,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SRHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Srhadd_V_16B_8H_4S([Values(0u)] uint rd,
-                                       [Values(1u, 0u)] uint rn,
-                                       [Values(2u, 0u)] uint rm,
-                                       [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                       [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                       [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                       [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "SRHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Srhadd_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                       [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x4E201400; // SRHADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2913,14 +3027,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void ShlReg_S_D([ValueSource(nameof(_ShlReg_S_D_))] uint opcodes,
-                               [Values(0u)] uint rd,
-                               [Values(1u, 0u)] uint rn,
-                               [Values(2u, 0u)] uint rm,
-                               [ValueSource(nameof(_1D_))] ulong z,
-                               [ValueSource(nameof(_1D_))] ulong a,
-                               [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory]
+        [PairwiseData]
+        public void ShlReg_S_D([CombinatorialMemberData(nameof(_ShlReg_S_D_))] uint opcodes,
+                               [CombinatorialValues(0u)] uint rd,
+                               [CombinatorialValues(1u, 0u)] uint rn,
+                               [CombinatorialValues(2u, 0u)] uint rm,
+                               [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                               [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                               [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
 
@@ -2933,15 +3048,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise]
-        public void ShlReg_V_8B_4H_2S([ValueSource(nameof(_ShlReg_V_8B_4H_2S_))] uint opcodes,
-                                      [Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void ShlReg_V_8B_4H_2S([CombinatorialMemberData(nameof(_ShlReg_V_8B_4H_2S_))] uint opcodes,
+                                      [CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -2955,15 +3071,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise]
-        public void ShlReg_V_16B_8H_4S_2D([ValueSource(nameof(_ShlReg_V_16B_8H_4S_2D_))] uint opcodes,
-                                          [Values(0u)] uint rd,
-                                          [Values(1u, 0u)] uint rn,
-                                          [Values(2u, 0u)] uint rm,
-                                          [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                          [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                          [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                          [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory]
+        [PairwiseData]
+        public void ShlReg_V_16B_8H_4S_2D([CombinatorialMemberData(nameof(_ShlReg_V_16B_8H_4S_2D_))] uint opcodes,
+                                          [CombinatorialValues(0u)] uint rd,
+                                          [CombinatorialValues(1u, 0u)] uint rn,
+                                          [CombinatorialValues(2u, 0u)] uint rm,
+                                          [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                          [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                          [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                          [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             opcodes |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= ((size & 3) << 22);
@@ -2977,14 +3094,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("SSUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Ssubl_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "SSUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Ssubl_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x0E202000; // SSUBL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -2999,14 +3117,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SSUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Ssubl_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "SSUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Ssubl_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x4E202000; // SSUBL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3021,14 +3140,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SSUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Ssubw_V_8B8H8H_4H4S4S_2S2D2D([Values(0u)] uint rd,
-                                                 [Values(1u, 0u)] uint rn,
-                                                 [Values(2u, 0u)] uint rm,
-                                                 [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                 [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                 [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                 [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
+        [SkippableTheory(DisplayName = "SSUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Ssubw_V_8B8H8H_4H4S4S_2S2D2D([CombinatorialValues(0u)] uint rd,
+                                                 [CombinatorialValues(1u, 0u)] uint rn,
+                                                 [CombinatorialValues(2u, 0u)] uint rm,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                 [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                 [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
         {
             uint opcode = 0x0E203000; // SSUBW V0.8H, V0.8H, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3043,14 +3163,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SSUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Ssubw_V_16B8H8H_8H4S4S_4S2D2D([Values(0u)] uint rd,
-                                                  [Values(1u, 0u)] uint rn,
-                                                  [Values(2u, 0u)] uint rm,
-                                                  [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                  [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                  [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                  [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
+        [SkippableTheory(DisplayName = "SSUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Ssubw_V_16B8H8H_8H4S4S_4S2D2D([CombinatorialValues(0u)] uint rd,
+                                                  [CombinatorialValues(1u, 0u)] uint rn,
+                                                  [CombinatorialValues(2u, 0u)] uint rm,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                  [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                  [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
         {
             uint opcode = 0x4E203000; // SSUBW2 V0.8H, V0.8H, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3065,13 +3186,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SUB <V><d>, <V><n>, <V><m>")]
-        public void Sub_S_D([Values(0u)] uint rd,
-                            [Values(1u, 0u)] uint rn,
-                            [Values(2u, 0u)] uint rm,
-                            [ValueSource(nameof(_1D_))] ulong z,
-                            [ValueSource(nameof(_1D_))] ulong a,
-                            [ValueSource(nameof(_1D_))] ulong b)
+        [SkippableTheory(DisplayName = "SUB <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Sub_S_D([CombinatorialValues(0u)] uint rd,
+                            [CombinatorialValues(1u, 0u)] uint rn,
+                            [CombinatorialValues(2u, 0u)] uint rm,
+                            [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                            [CombinatorialMemberData(nameof(_1D_))] ulong a,
+                            [CombinatorialMemberData(nameof(_1D_))] ulong b)
         {
             uint opcode = 0x7EE08400; // SUB D0, D0, D0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3085,14 +3207,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sub_V_8B_4H_2S([Values(0u)] uint rd,
-                                   [Values(1u, 0u)] uint rn,
-                                   [Values(2u, 0u)] uint rm,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                   [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                   [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "SUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sub_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                   [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E208400; // SUB V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3107,14 +3230,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Sub_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                       [Values(1u, 0u)] uint rn,
-                                       [Values(2u, 0u)] uint rm,
-                                       [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                       [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                       [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                       [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "SUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Sub_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                       [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                       [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                       [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x6E208400; // SUB V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3129,14 +3253,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Subhn_V_8H8B_4S4H_2D2S([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                           [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                           [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
+        [SkippableTheory(DisplayName = "SUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Subhn_V_8H8B_4S4H_2D2S([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H8B, 4S4H, 2D2S>
         {
             uint opcode = 0x0E206000; // SUBHN V0.8B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3151,14 +3276,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
-        public void Subhn_V_8H16B_4S8H_2D4S([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong z,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong a,
-                                            [ValueSource(nameof(_4H2S1D_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
+        [SkippableTheory(DisplayName = "SUBHN{2} <Vd>.<Tb>, <Vn>.<Ta>, <Vm>.<Ta>")]
+        [PairwiseData]
+        public void Subhn_V_8H16B_4S8H_2D4S([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_4H2S1D_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8H16B, 4S8H, 2D4S>
         {
             uint opcode = 0x4E206000; // SUBHN2 V0.16B, V0.8H, V0.8H
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3173,14 +3299,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("TRN1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Trn1_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "TRN1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Trn1_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E002800; // TRN1 V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3195,14 +3322,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("TRN1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Trn1_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "TRN1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Trn1_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E002800; // TRN1 V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3217,14 +3345,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("TRN2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Trn2_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "TRN2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Trn2_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E006800; // TRN2 V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3239,14 +3368,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("TRN2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Trn2_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "TRN2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Trn2_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E006800; // TRN2 V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3261,14 +3391,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uaba_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uaba_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E207C00; // UABA V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3283,14 +3414,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uaba_V_16B_8H_4S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "UABA <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uaba_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x6E207C00; // UABA V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3305,14 +3437,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Uabal_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "UABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uabal_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x2E205000; // UABAL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3327,14 +3460,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Uabal_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "UABAL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uabal_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x6E205000; // UABAL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3349,14 +3483,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uabd_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uabd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E207400; // UABD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3371,14 +3506,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uabd_V_16B_8H_4S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "UABD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uabd_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x6E207400; // UABD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3393,14 +3529,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Uabdl_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "UABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uabdl_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x2E207000; // UABDL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3415,14 +3552,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Uabdl_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "UABDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uabdl_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x6E207000; // UABDL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3437,14 +3575,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Uaddl_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "UADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uaddl_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x2E200000; // UADDL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3459,14 +3598,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Uaddl_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "UADDL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uaddl_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x6E200000; // UADDL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3481,14 +3621,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Uaddw_V_8B8H8H_4H4S4S_2S2D2D([Values(0u)] uint rd,
-                                                 [Values(1u, 0u)] uint rn,
-                                                 [Values(2u, 0u)] uint rm,
-                                                 [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                 [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                 [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                 [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
+        [SkippableTheory(DisplayName = "UADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uaddw_V_8B8H8H_4H4S4S_2S2D2D([CombinatorialValues(0u)] uint rd,
+                                                 [CombinatorialValues(1u, 0u)] uint rn,
+                                                 [CombinatorialValues(2u, 0u)] uint rm,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                 [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                 [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
         {
             uint opcode = 0x2E201000; // UADDW V0.8H, V0.8H, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3503,14 +3644,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Uaddw_V_16B8H8H_8H4S4S_4S2D2D([Values(0u)] uint rd,
-                                                  [Values(1u, 0u)] uint rn,
-                                                  [Values(2u, 0u)] uint rm,
-                                                  [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                  [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                  [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                  [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
+        [SkippableTheory(DisplayName = "UADDW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Uaddw_V_16B8H8H_8H4S4S_4S2D2D([CombinatorialValues(0u)] uint rd,
+                                                  [CombinatorialValues(1u, 0u)] uint rn,
+                                                  [CombinatorialValues(2u, 0u)] uint rm,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                  [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                  [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
         {
             uint opcode = 0x6E201000; // UADDW2 V0.8H, V0.8H, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3525,14 +3667,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uhadd_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uhadd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E200400; // UHADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3547,14 +3690,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uhadd_V_16B_8H_4S([Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "UHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uhadd_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x6E200400; // UHADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3569,14 +3713,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uhsub_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uhsub_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E202400; // UHSUB V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3591,14 +3736,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uhsub_V_16B_8H_4S([Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "UHSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uhsub_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x6E202400; // UHSUB V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3613,14 +3759,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UQADD <V><d>, <V><n>, <V><m>")]
-        public void Uqadd_S_B_H_S_D([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong z,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong a,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
+        [SkippableTheory(DisplayName = "UQADD <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Uqadd_S_B_H_S_D([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
         {
             uint opcode = 0x7E200C00; // UQADD B0, B0, B0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3635,14 +3782,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("UQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uqadd_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uqadd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E200C00; // UQADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3657,14 +3805,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("UQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uqadd_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                         [Values(1u, 0u)] uint rn,
-                                         [Values(2u, 0u)] uint rm,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                         [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "UQADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uqadd_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 0u)] uint rn,
+                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                         [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x6E200C00; // UQADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3679,14 +3828,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("UQSUB <V><d>, <V><n>, <V><m>")]
-        public void Uqsub_S_B_H_S_D([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong z,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong a,
-                                    [ValueSource(nameof(_1B1H1S1D_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
+        [SkippableTheory(DisplayName = "UQSUB <V><d>, <V><n>, <V><m>")]
+        [PairwiseData]
+        public void Uqsub_S_B_H_S_D([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_1B1H1S1D_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <b, H, S, D>
         {
             uint opcode = 0x7E202C00; // UQSUB B0, B0, B0
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3701,14 +3851,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("UQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uqsub_V_8B_4H_2S([Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                     [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                     [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uqsub_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E202C00; // UQSUB V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3723,14 +3874,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("UQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uqsub_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                         [Values(1u, 0u)] uint rn,
-                                         [Values(2u, 0u)] uint rm,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                         [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                         [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "UQSUB <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uqsub_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 0u)] uint rn,
+                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                         [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                         [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x6E202C00; // UQSUB V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3745,14 +3897,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise, Description("URHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Urhadd_V_8B_4H_2S([Values(0u)] uint rd,
-                                      [Values(1u, 0u)] uint rn,
-                                      [Values(2u, 0u)] uint rm,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                      [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                      [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "URHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Urhadd_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                      [CombinatorialValues(1u, 0u)] uint rn,
+                                      [CombinatorialValues(2u, 0u)] uint rm,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                      [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                      [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x2E201400; // URHADD V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3767,14 +3920,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("URHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Urhadd_V_16B_8H_4S([Values(0u)] uint rd,
-                                       [Values(1u, 0u)] uint rn,
-                                       [Values(2u, 0u)] uint rm,
-                                       [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                       [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                       [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                       [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
+        [SkippableTheory(DisplayName = "URHADD <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Urhadd_V_16B_8H_4S([CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                       [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B, 8H, 4S>
         {
             uint opcode = 0x6E201400; // URHADD V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3789,14 +3943,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("USUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Usubl_V_8B8H_4H4S_2S2D([Values(0u)] uint rd,
-                                           [Values(1u, 0u)] uint rn,
-                                           [Values(2u, 0u)] uint rm,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                           [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                           [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
+        [SkippableTheory(DisplayName = "USUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Usubl_V_8B8H_4H4S_2S2D([CombinatorialValues(0u)] uint rd,
+                                           [CombinatorialValues(1u, 0u)] uint rn,
+                                           [CombinatorialValues(2u, 0u)] uint rm,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                           [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                           [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H, 4H4S, 2S2D>
         {
             uint opcode = 0x2E202000; // USUBL V0.8H, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3811,14 +3966,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("USUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
-        public void Usubl_V_16B8H_8H4S_4S2D([Values(0u)] uint rd,
-                                            [Values(1u, 0u)] uint rn,
-                                            [Values(2u, 0u)] uint rm,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                            [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                            [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
+        [SkippableTheory(DisplayName = "USUBL{2} <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Usubl_V_16B8H_8H4S_4S2D([CombinatorialValues(0u)] uint rd,
+                                            [CombinatorialValues(1u, 0u)] uint rn,
+                                            [CombinatorialValues(2u, 0u)] uint rm,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                            [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                            [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H, 8H4S, 4S2D>
         {
             uint opcode = 0x6E202000; // USUBL2 V0.8H, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3833,14 +3989,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("USUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Usubw_V_8B8H8H_4H4S4S_2S2D2D([Values(0u)] uint rd,
-                                                 [Values(1u, 0u)] uint rn,
-                                                 [Values(2u, 0u)] uint rm,
-                                                 [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                 [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                 [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                 [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
+        [SkippableTheory(DisplayName = "USUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Usubw_V_8B8H8H_4H4S4S_2S2D2D([CombinatorialValues(0u)] uint rd,
+                                                 [CombinatorialValues(1u, 0u)] uint rn,
+                                                 [CombinatorialValues(2u, 0u)] uint rm,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                 [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                 [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                 [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B8H8H, 4H4S4S, 2S2D2D>
         {
             uint opcode = 0x2E203000; // USUBW V0.8H, V0.8H, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3855,14 +4012,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("USUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
-        public void Usubw_V_16B8H8H_8H4S4S_4S2D2D([Values(0u)] uint rd,
-                                                  [Values(1u, 0u)] uint rn,
-                                                  [Values(2u, 0u)] uint rm,
-                                                  [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                                  [ValueSource(nameof(_4H2S1D_))][Random(RndCnt)] ulong a,
-                                                  [ValueSource(nameof(_8B4H2S_))][Random(RndCnt)] ulong b,
-                                                  [Values(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
+        [SkippableTheory(DisplayName = "USUBW{2} <Vd>.<Ta>, <Vn>.<Ta>, <Vm>.<Tb>")]
+        [PairwiseData]
+        public void Usubw_V_16B8H8H_8H4S4S_4S2D2D([CombinatorialValues(0u)] uint rd,
+                                                  [CombinatorialValues(1u, 0u)] uint rn,
+                                                  [CombinatorialValues(2u, 0u)] uint rm,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                                  [CombinatorialMemberData(nameof(_4H2S1D_))][CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                                  [CombinatorialMemberData(nameof(_8B4H2S_))][CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                                  [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <16B8H8H, 8H4S4S, 4S2D2D>
         {
             uint opcode = 0x6E203000; // USUBW2 V0.8H, V0.8H, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3877,14 +4035,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UZP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uzp1_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UZP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uzp1_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E001800; // UZP1 V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3899,14 +4058,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UZP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uzp1_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "UZP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uzp1_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E001800; // UZP1 V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3921,14 +4081,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UZP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uzp2_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "UZP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uzp2_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E005800; // UZP2 V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3943,14 +4104,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("UZP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Uzp2_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "UZP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Uzp2_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E005800; // UZP2 V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3965,14 +4127,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ZIP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Zip1_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "ZIP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Zip1_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E003800; // ZIP1 V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -3987,14 +4150,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ZIP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Zip1_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "ZIP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Zip1_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E003800; // ZIP1 V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -4009,14 +4173,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ZIP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Zip2_V_8B_4H_2S([Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong z,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong a,
-                                    [ValueSource(nameof(_8B4H2S_))] ulong b,
-                                    [Values(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
+        [SkippableTheory(DisplayName = "ZIP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Zip2_V_8B_4H_2S([CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                                    [CombinatorialValues(0b00u, 0b01u, 0b10u)] uint size) // <8B, 4H, 2S>
         {
             uint opcode = 0x0E007800; // ZIP2 V0.8B, V0.8B, V0.8B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);
@@ -4031,14 +4196,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("ZIP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
-        public void Zip2_V_16B_8H_4S_2D([Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong z,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong a,
-                                        [ValueSource(nameof(_8B4H2S1D_))] ulong b,
-                                        [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
+        [SkippableTheory(DisplayName = "ZIP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>")]
+        [PairwiseData]
+        public void Zip2_V_16B_8H_4S_2D([CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_8B4H2S1D_))] ulong b,
+                                        [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint size) // <16B, 8H, 4S, 2D>
         {
             uint opcode = 0x4E007800; // ZIP2 V0.16B, V0.16B, V0.16B
             opcode |= ((rm & 31) << 16) | ((rn & 31) << 5) | ((rd & 31) << 0);

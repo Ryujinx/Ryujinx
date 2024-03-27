@@ -1,15 +1,20 @@
 #define SimdCvt
 
 using ARMeilleure.State;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdCvt")]
+    [Collection("SimdCvt")]
     public sealed class CpuTestSimdCvt : CpuTest
     {
+        public CpuTestSimdCvt(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdCvt
 
         #region "ValueSource (Types)"
@@ -88,16 +93,16 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
 
                 ulong rnd1 = (uint)BitConverter.SingleToInt32Bits(
-                    (int)TestContext.CurrentContext.Random.NextUInt());
+                    (int)Random.Shared.NextUInt());
                 ulong rnd2 = (uint)BitConverter.SingleToInt32Bits(
-                    (long)TestContext.CurrentContext.Random.NextULong());
+                    (long)Random.Shared.NextULong());
                 ulong rnd3 = (uint)BitConverter.SingleToInt32Bits(
-                    TestContext.CurrentContext.Random.NextUInt());
+                    Random.Shared.NextUInt());
                 ulong rnd4 = (uint)BitConverter.SingleToInt32Bits(
-                    TestContext.CurrentContext.Random.NextULong());
+                    Random.Shared.NextULong());
 
                 ulong rnd5 = GenNormalS();
                 ulong rnd6 = GenSubnormalS();
@@ -172,13 +177,13 @@ namespace Ryujinx.Tests.Cpu
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
                 ulong rnd1 = (ulong)BitConverter.DoubleToInt64Bits(
-                    (int)TestContext.CurrentContext.Random.NextUInt());
+                    (int)Random.Shared.NextUInt());
                 ulong rnd2 = (ulong)BitConverter.DoubleToInt64Bits(
-                    (long)TestContext.CurrentContext.Random.NextULong());
+                    (long)Random.Shared.NextULong());
                 ulong rnd3 = (ulong)BitConverter.DoubleToInt64Bits(
-                    TestContext.CurrentContext.Random.NextUInt());
+                    Random.Shared.NextUInt());
                 ulong rnd4 = (ulong)BitConverter.DoubleToInt64Bits(
-                    TestContext.CurrentContext.Random.NextULong());
+                    Random.Shared.NextULong());
 
                 ulong rnd5 = GenNormalD();
                 ulong rnd6 = GenSubnormalD();
@@ -374,17 +379,17 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noInfs = false;
         private static readonly bool _noNaNs = false;
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_AMPZ_SU_Gp_SW([ValueSource(nameof(_F_Cvt_AMPZ_SU_Gp_SW_))] uint opcodes,
-                                        [Values(0u, 31u)] uint rd,
-                                        [Values(1u)] uint rn,
-                                        [ValueSource(nameof(_1S_F_WX_))] ulong a)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_AMPZ_SU_Gp_SW([CombinatorialMemberData(nameof(_F_Cvt_AMPZ_SU_Gp_SW_))] uint opcodes,
+                                        [CombinatorialValues(0u, 31u)] uint rd,
+                                        [CombinatorialValues(1u)] uint rn,
+                                        [CombinatorialMemberData(nameof(_1S_F_WX_))] ulong a)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            ulong x0 = (ulong)TestContext.CurrentContext.Random.NextUInt() << 32;
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            ulong x0 = (ulong)Random.Shared.NextUInt() << 32;
+            uint w31 = Random.Shared.NextUInt();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x0: x0, x31: w31, v1: v1);
@@ -392,16 +397,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_AMPZ_SU_Gp_SX([ValueSource(nameof(_F_Cvt_AMPZ_SU_Gp_SX_))] uint opcodes,
-                                        [Values(0u, 31u)] uint rd,
-                                        [Values(1u)] uint rn,
-                                        [ValueSource(nameof(_1S_F_WX_))] ulong a)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_AMPZ_SU_Gp_SX([CombinatorialMemberData(nameof(_F_Cvt_AMPZ_SU_Gp_SX_))] uint opcodes,
+                                        [CombinatorialValues(0u, 31u)] uint rd,
+                                        [CombinatorialValues(1u)] uint rn,
+                                        [CombinatorialMemberData(nameof(_1S_F_WX_))] ulong a)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x31: x31, v1: v1);
@@ -409,17 +414,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_AMPZ_SU_Gp_DW([ValueSource(nameof(_F_Cvt_AMPZ_SU_Gp_DW_))] uint opcodes,
-                                        [Values(0u, 31u)] uint rd,
-                                        [Values(1u)] uint rn,
-                                        [ValueSource(nameof(_1D_F_WX_))] ulong a)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_AMPZ_SU_Gp_DW([CombinatorialMemberData(nameof(_F_Cvt_AMPZ_SU_Gp_DW_))] uint opcodes,
+                                        [CombinatorialValues(0u, 31u)] uint rd,
+                                        [CombinatorialValues(1u)] uint rn,
+                                        [CombinatorialMemberData(nameof(_1D_F_WX_))] ulong a)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            ulong x0 = (ulong)TestContext.CurrentContext.Random.NextUInt() << 32;
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            ulong x0 = (ulong)Random.Shared.NextUInt() << 32;
+            uint w31 = Random.Shared.NextUInt();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x0: x0, x31: w31, v1: v1);
@@ -427,16 +432,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_AMPZ_SU_Gp_DX([ValueSource(nameof(_F_Cvt_AMPZ_SU_Gp_DX_))] uint opcodes,
-                                        [Values(0u, 31u)] uint rd,
-                                        [Values(1u)] uint rn,
-                                        [ValueSource(nameof(_1D_F_WX_))] ulong a)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_AMPZ_SU_Gp_DX([CombinatorialMemberData(nameof(_F_Cvt_AMPZ_SU_Gp_DX_))] uint opcodes,
+                                        [CombinatorialValues(0u, 31u)] uint rd,
+                                        [CombinatorialValues(1u)] uint rn,
+                                        [CombinatorialMemberData(nameof(_1D_F_WX_))] ulong a)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x31: x31, v1: v1);
@@ -444,21 +449,21 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_Z_SU_Gp_Fixed_SW([ValueSource(nameof(_F_Cvt_Z_SU_Gp_Fixed_SW_))] uint opcodes,
-                                           [Values(0u, 31u)] uint rd,
-                                           [Values(1u)] uint rn,
-                                           [ValueSource(nameof(_1S_F_WX_))] ulong a,
-                                           [Values(1u, 32u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_Z_SU_Gp_Fixed_SW([CombinatorialMemberData(nameof(_F_Cvt_Z_SU_Gp_Fixed_SW_))] uint opcodes,
+                                           [CombinatorialValues(0u, 31u)] uint rd,
+                                           [CombinatorialValues(1u)] uint rn,
+                                           [CombinatorialMemberData(nameof(_1S_F_WX_))] ulong a,
+                                           [CombinatorialValues(1u, 32u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            ulong x0 = (ulong)TestContext.CurrentContext.Random.NextUInt() << 32;
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            ulong x0 = (ulong)Random.Shared.NextUInt() << 32;
+            uint w31 = Random.Shared.NextUInt();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x0: x0, x31: w31, v1: v1);
@@ -466,20 +471,20 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_Z_SU_Gp_Fixed_SX([ValueSource(nameof(_F_Cvt_Z_SU_Gp_Fixed_SX_))] uint opcodes,
-                                           [Values(0u, 31u)] uint rd,
-                                           [Values(1u)] uint rn,
-                                           [ValueSource(nameof(_1S_F_WX_))] ulong a,
-                                           [Values(1u, 64u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_Z_SU_Gp_Fixed_SX([CombinatorialMemberData(nameof(_F_Cvt_Z_SU_Gp_Fixed_SX_))] uint opcodes,
+                                           [CombinatorialValues(0u, 31u)] uint rd,
+                                           [CombinatorialValues(1u)] uint rn,
+                                           [CombinatorialMemberData(nameof(_1S_F_WX_))] ulong a,
+                                           [CombinatorialValues(1u, 64u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x31: x31, v1: v1);
@@ -487,21 +492,21 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_Z_SU_Gp_Fixed_DW([ValueSource(nameof(_F_Cvt_Z_SU_Gp_Fixed_DW_))] uint opcodes,
-                                           [Values(0u, 31u)] uint rd,
-                                           [Values(1u)] uint rn,
-                                           [ValueSource(nameof(_1D_F_WX_))] ulong a,
-                                           [Values(1u, 32u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_Z_SU_Gp_Fixed_DW([CombinatorialMemberData(nameof(_F_Cvt_Z_SU_Gp_Fixed_DW_))] uint opcodes,
+                                           [CombinatorialValues(0u, 31u)] uint rd,
+                                           [CombinatorialValues(1u)] uint rn,
+                                           [CombinatorialMemberData(nameof(_1D_F_WX_))] ulong a,
+                                           [CombinatorialValues(1u, 32u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            ulong x0 = (ulong)TestContext.CurrentContext.Random.NextUInt() << 32;
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            ulong x0 = (ulong)Random.Shared.NextUInt() << 32;
+            uint w31 = Random.Shared.NextUInt();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x0: x0, x31: w31, v1: v1);
@@ -509,20 +514,20 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Cvt_Z_SU_Gp_Fixed_DX([ValueSource(nameof(_F_Cvt_Z_SU_Gp_Fixed_DX_))] uint opcodes,
-                                           [Values(0u, 31u)] uint rd,
-                                           [Values(1u)] uint rn,
-                                           [ValueSource(nameof(_1D_F_WX_))] ulong a,
-                                           [Values(1u, 64u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Cvt_Z_SU_Gp_Fixed_DX([CombinatorialMemberData(nameof(_F_Cvt_Z_SU_Gp_Fixed_DX_))] uint opcodes,
+                                           [CombinatorialValues(0u, 31u)] uint rd,
+                                           [CombinatorialValues(1u)] uint rn,
+                                           [CombinatorialMemberData(nameof(_1D_F_WX_))] ulong a,
+                                           [CombinatorialValues(1u, 64u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
             V128 v1 = MakeVectorE0(a);
 
             SingleOpcode(opcodes, x31: x31, v1: v1);
@@ -530,17 +535,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_WS([ValueSource(nameof(_SU_Cvt_F_Gp_WS_))] uint opcodes,
-                                   [Values(0u)] uint rd,
-                                   [Values(1u, 31u)] uint rn,
-                                   [ValueSource(nameof(_W_))] uint wn)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_WS([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_WS_))] uint opcodes,
+                                   [CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 31u)] uint rn,
+                                   [CombinatorialMemberData(nameof(_W_))] uint wn)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            uint w31 = Random.Shared.NextUInt();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
 
             SingleOpcode(opcodes, x1: wn, x31: w31, v0: v0);
@@ -548,17 +553,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_WD([ValueSource(nameof(_SU_Cvt_F_Gp_WD_))] uint opcodes,
-                                   [Values(0u)] uint rd,
-                                   [Values(1u, 31u)] uint rn,
-                                   [ValueSource(nameof(_W_))] uint wn)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_WD([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_WD_))] uint opcodes,
+                                   [CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 31u)] uint rn,
+                                   [CombinatorialMemberData(nameof(_W_))] uint wn)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            uint w31 = Random.Shared.NextUInt();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
 
             SingleOpcode(opcodes, x1: wn, x31: w31, v0: v0);
@@ -566,17 +571,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_XS([ValueSource(nameof(_SU_Cvt_F_Gp_XS_))] uint opcodes,
-                                   [Values(0u)] uint rd,
-                                   [Values(1u, 31u)] uint rn,
-                                   [ValueSource(nameof(_X_))] ulong xn)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_XS([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_XS_))] uint opcodes,
+                                   [CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 31u)] uint rn,
+                                   [CombinatorialMemberData(nameof(_X_))] ulong xn)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
 
             SingleOpcode(opcodes, x1: xn, x31: x31, v0: v0);
@@ -584,17 +589,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_XD([ValueSource(nameof(_SU_Cvt_F_Gp_XD_))] uint opcodes,
-                                   [Values(0u)] uint rd,
-                                   [Values(1u, 31u)] uint rn,
-                                   [ValueSource(nameof(_X_))] ulong xn)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_XD([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_XD_))] uint opcodes,
+                                   [CombinatorialValues(0u)] uint rd,
+                                   [CombinatorialValues(1u, 31u)] uint rn,
+                                   [CombinatorialMemberData(nameof(_X_))] ulong xn)
         {
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
 
             SingleOpcode(opcodes, x1: xn, x31: x31, v0: v0);
@@ -602,21 +607,21 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_Fixed_WS([ValueSource(nameof(_SU_Cvt_F_Gp_Fixed_WS_))] uint opcodes,
-                                         [Values(0u)] uint rd,
-                                         [Values(1u, 31u)] uint rn,
-                                         [ValueSource(nameof(_W_))] uint wn,
-                                         [Values(1u, 32u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_Fixed_WS([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_Fixed_WS_))] uint opcodes,
+                                         [CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 31u)] uint rn,
+                                         [CombinatorialMemberData(nameof(_W_))] uint wn,
+                                         [CombinatorialValues(1u, 32u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            uint w31 = Random.Shared.NextUInt();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
 
             SingleOpcode(opcodes, x1: wn, x31: w31, v0: v0);
@@ -624,21 +629,21 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_Fixed_WD([ValueSource(nameof(_SU_Cvt_F_Gp_Fixed_WD_))] uint opcodes,
-                                         [Values(0u)] uint rd,
-                                         [Values(1u, 31u)] uint rn,
-                                         [ValueSource(nameof(_W_))] uint wn,
-                                         [Values(1u, 32u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_Fixed_WD([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_Fixed_WD_))] uint opcodes,
+                                         [CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 31u)] uint rn,
+                                         [CombinatorialMemberData(nameof(_W_))] uint wn,
+                                         [CombinatorialValues(1u, 32u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            uint w31 = Random.Shared.NextUInt();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
 
             SingleOpcode(opcodes, x1: wn, x31: w31, v0: v0);
@@ -646,21 +651,21 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_Fixed_XS([ValueSource(nameof(_SU_Cvt_F_Gp_Fixed_XS_))] uint opcodes,
-                                         [Values(0u)] uint rd,
-                                         [Values(1u, 31u)] uint rn,
-                                         [ValueSource(nameof(_X_))] ulong xn,
-                                         [Values(1u, 64u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_Fixed_XS([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_Fixed_XS_))] uint opcodes,
+                                         [CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 31u)] uint rn,
+                                         [CombinatorialMemberData(nameof(_X_))] ulong xn,
+                                         [CombinatorialValues(1u, 64u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
 
             SingleOpcode(opcodes, x1: xn, x31: x31, v0: v0);
@@ -668,21 +673,21 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void SU_Cvt_F_Gp_Fixed_XD([ValueSource(nameof(_SU_Cvt_F_Gp_Fixed_XD_))] uint opcodes,
-                                         [Values(0u)] uint rd,
-                                         [Values(1u, 31u)] uint rn,
-                                         [ValueSource(nameof(_X_))] ulong xn,
-                                         [Values(1u, 64u)] uint fBits)
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Cvt_F_Gp_Fixed_XD([CombinatorialMemberData(nameof(_SU_Cvt_F_Gp_Fixed_XD_))] uint opcodes,
+                                         [CombinatorialValues(0u)] uint rd,
+                                         [CombinatorialValues(1u, 31u)] uint rn,
+                                         [CombinatorialMemberData(nameof(_X_))] ulong xn,
+                                         [CombinatorialValues(1u, 64u)] uint fBits)
         {
             uint scale = (64u - fBits) & 0x3Fu;
 
             opcodes |= ((rn & 31) << 5) | ((rd & 31) << 0);
             opcodes |= (scale << 10);
 
-            ulong x31 = TestContext.CurrentContext.Random.NextULong();
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong x31 = Random.Shared.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
 
             SingleOpcode(opcodes, x1: xn, x31: x31, v0: v0);

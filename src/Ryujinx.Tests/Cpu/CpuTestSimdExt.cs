@@ -1,13 +1,18 @@
 #define SimdExt
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdExt")]
+    [Collection("SimdExt")]
     public sealed class CpuTestSimdExt : CpuTest
     {
+        public CpuTestSimdExt(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdExt
 
         #region "ValueSource"
@@ -20,14 +25,15 @@ namespace Ryujinx.Tests.Cpu
         }
         #endregion
 
-        [Test, Pairwise, Description("EXT <Vd>.8B, <Vn>.8B, <Vm>.8B, #<index>")]
-        public void Ext_V_8B([Values(0u)] uint rd,
-                             [Values(1u, 0u)] uint rn,
-                             [Values(2u, 0u)] uint rm,
-                             [ValueSource(nameof(_8B_))] ulong z,
-                             [ValueSource(nameof(_8B_))] ulong a,
-                             [ValueSource(nameof(_8B_))] ulong b,
-                             [Values(0u, 7u)] uint index)
+        [SkippableTheory(DisplayName = "EXT <Vd>.8B, <Vn>.8B, <Vm>.8B, #<index>")]
+        [PairwiseData]
+        public void Ext_V_8B([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(1u, 0u)] uint rn,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                             [CombinatorialMemberData(nameof(_8B_))] ulong b,
+                             [CombinatorialValues(0u, 7u)] uint index)
         {
             uint imm4 = index & 0x7u;
 
@@ -44,14 +50,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("EXT <Vd>.16B, <Vn>.16B, <Vm>.16B, #<index>")]
-        public void Ext_V_16B([Values(0u)] uint rd,
-                              [Values(1u, 0u)] uint rn,
-                              [Values(2u, 0u)] uint rm,
-                              [ValueSource(nameof(_8B_))] ulong z,
-                              [ValueSource(nameof(_8B_))] ulong a,
-                              [ValueSource(nameof(_8B_))] ulong b,
-                              [Values(0u, 15u)] uint index)
+        [SkippableTheory(DisplayName = "EXT <Vd>.16B, <Vn>.16B, <Vm>.16B, #<index>")]
+        [PairwiseData]
+        public void Ext_V_16B([CombinatorialValues(0u)] uint rd,
+                              [CombinatorialValues(1u, 0u)] uint rn,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong a,
+                              [CombinatorialMemberData(nameof(_8B_))] ulong b,
+                              [CombinatorialValues(0u, 15u)] uint index)
         {
             uint imm4 = index & 0xFu;
 

@@ -1,16 +1,22 @@
-#define AluBinary32
+﻿#define AluBinary32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
 
-    [Category("AluBinary32")]
+    [Collection("AluBinary32")]
     public sealed class CpuTestAluBinary32 : CpuTest32
     {
+        public CpuTestAluBinary32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if AluBinary32
-        public struct CrcTest32
+        public struct CrcTest32 : IXunitSerializable
         {
             public uint Crc;
             public uint Value;
@@ -24,6 +30,22 @@ namespace Ryujinx.Tests.Cpu
                 Value = value;
                 C = c;
                 Results = results;
+            }
+
+            public void Deserialize(IXunitSerializationInfo info)
+            {
+                Crc = info.GetValue<uint>(nameof(Crc));
+                Value = info.GetValue<uint>(nameof(Value));
+                C = info.GetValue<bool>(nameof(C));
+                Results = info.GetValue<uint[]>(nameof(Results));
+            }
+
+            public void Serialize(IXunitSerializationInfo info)
+            {
+                info.AddValue(nameof(Crc), Crc, Crc.GetType());
+                info.AddValue(nameof(Value), Value, Value.GetType());
+                info.AddValue(nameof(C), C, C.GetType());
+                info.AddValue(nameof(Results), Results, Results.GetType());
             }
         }
 
@@ -65,12 +87,13 @@ namespace Ryujinx.Tests.Cpu
         }
         #endregion
 
-        [Test, Combinatorial]
-        public void Crc32_Crc32c_b_h_w([Values(0u)] uint rd,
-                                       [Values(1u)] uint rn,
-                                       [Values(2u)] uint rm,
-                                       [Range(0u, 2u)] uint size,
-                                       [ValueSource(nameof(_CRC32_Test_Values_))] CrcTest32 test)
+        [Theory]
+        [CombinatorialData]
+        public void Crc32_Crc32c_b_h_w([CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u)] uint rn,
+                                       [CombinatorialValues(2u)] uint rm,
+                                       [CombinatorialRange(0u, 2u, 1u)] uint size,
+                                       [CombinatorialMemberData(nameof(_CRC32_Test_Values_))] CrcTest32 test)
         {
             // Unicorn does not yet support 32bit crc instructions, so test against a known table of results/values.
 
@@ -82,13 +105,13 @@ namespace Ryujinx.Tests.Cpu
                 opcode |= 1 << 9;
             }
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: test.Crc, r2: test.Value, sp: sp, runUnicorn: false);
 
             ExecutionContext context = GetContext();
             ulong result = context.GetX((int)rd);
-            Assert.That(result == test.Results[size]);
+            Assert.Equal(test.Results[size], result);
         }
 #endif
     }

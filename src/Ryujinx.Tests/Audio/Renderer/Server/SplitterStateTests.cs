@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Server.Splitter;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Server
 {
-    class SplitterStateTests
+    public class SplitterStateTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x20, Unsafe.SizeOf<SplitterState>());
+            Assert.Equal(0x20, Unsafe.SizeOf<SplitterState>());
         }
     }
 }

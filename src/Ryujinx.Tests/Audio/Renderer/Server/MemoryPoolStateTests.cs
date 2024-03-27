@@ -1,18 +1,18 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Server.MemoryPool;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Server
 {
-    class MemoryPoolStateTests
+    public class MemoryPoolStateTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(Unsafe.SizeOf<MemoryPoolState>(), 0x20);
+            Assert.Equal(0x20, Unsafe.SizeOf<MemoryPoolState>());
         }
 
-        [Test]
+        [Fact]
         public void TestContains()
         {
             MemoryPoolState memoryPool = MemoryPoolState.Create(MemoryPoolState.LocationType.Cpu);
@@ -21,15 +21,15 @@ namespace Ryujinx.Tests.Audio.Renderer.Server
 
             memoryPool.DspAddress = 0x2000000;
 
-            Assert.IsTrue(memoryPool.Contains(0x1000000, 0x10));
-            Assert.IsTrue(memoryPool.Contains(0x1000FE0, 0x10));
-            Assert.IsTrue(memoryPool.Contains(0x1000FFF, 0x1));
-            Assert.IsFalse(memoryPool.Contains(0x1000FFF, 0x2));
-            Assert.IsFalse(memoryPool.Contains(0x1001000, 0x10));
-            Assert.IsFalse(memoryPool.Contains(0x2000000, 0x10));
+            Assert.True(memoryPool.Contains(0x1000000, 0x10));
+            Assert.True(memoryPool.Contains(0x1000FE0, 0x10));
+            Assert.True(memoryPool.Contains(0x1000FFF, 0x1));
+            Assert.False(memoryPool.Contains(0x1000FFF, 0x2));
+            Assert.False(memoryPool.Contains(0x1001000, 0x10));
+            Assert.False(memoryPool.Contains(0x2000000, 0x10));
         }
 
-        [Test]
+        [Fact]
         public void TestTranslate()
         {
             MemoryPoolState memoryPool = MemoryPoolState.Create(MemoryPoolState.LocationType.Cpu);
@@ -38,25 +38,25 @@ namespace Ryujinx.Tests.Audio.Renderer.Server
 
             memoryPool.DspAddress = 0x2000000;
 
-            Assert.AreEqual(0x2000FE0, memoryPool.Translate(0x1000FE0, 0x10));
-            Assert.AreEqual(0x2000FFF, memoryPool.Translate(0x1000FFF, 0x1));
-            Assert.AreEqual(0x0, memoryPool.Translate(0x1000FFF, 0x2));
-            Assert.AreEqual(0x0, memoryPool.Translate(0x1001000, 0x10));
-            Assert.AreEqual(0x0, memoryPool.Translate(0x2000000, 0x10));
+            Assert.Equal(0x2000FE0ul, memoryPool.Translate(0x1000FE0, 0x10));
+            Assert.Equal(0x2000FFFul, memoryPool.Translate(0x1000FFF, 0x1));
+            Assert.Equal(0x0ul, memoryPool.Translate(0x1000FFF, 0x2));
+            Assert.Equal(0x0ul, memoryPool.Translate(0x1001000, 0x10));
+            Assert.Equal(0x0ul, memoryPool.Translate(0x2000000, 0x10));
         }
 
-        [Test]
+        [Fact]
         public void TestIsMapped()
         {
             MemoryPoolState memoryPool = MemoryPoolState.Create(MemoryPoolState.LocationType.Cpu);
 
             memoryPool.SetCpuAddress(0x1000000, 0x1000);
 
-            Assert.IsFalse(memoryPool.IsMapped());
+            Assert.False(memoryPool.IsMapped());
 
             memoryPool.DspAddress = 0x2000000;
 
-            Assert.IsTrue(memoryPool.IsMapped());
+            Assert.True(memoryPool.IsMapped());
         }
     }
 }

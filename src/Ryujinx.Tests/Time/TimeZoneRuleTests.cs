@@ -1,18 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.HLE.HOS.Services.Time.TimeZone;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Time
 {
-    internal class TimeZoneRuleTests
+    public class TimeZoneRuleTests
     {
-        class EffectInfoParameterTests
+        [Fact]
+        public void EnsureTypeSize()
         {
-            [Test]
-            public void EnsureTypeSize()
-            {
-                Assert.AreEqual(0x4000, Unsafe.SizeOf<TimeZoneRule>());
-            }
+            Assert.Equal(0x4000, Unsafe.SizeOf<TimeZoneRule>());
         }
     }
 }

@@ -1,18 +1,20 @@
 using ARMeilleure;
 using ARMeilleure.State;
 using ARMeilleure.Translation;
-using NUnit.Framework;
 using Ryujinx.Cpu.Jit;
 using Ryujinx.Memory;
 using Ryujinx.Tests.Unicorn;
 using System;
+using Xunit;
+using Xunit.Abstractions;
 using MemoryPermission = Ryujinx.Tests.Unicorn.MemoryPermission;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [TestFixture]
-    public class CpuTest32
+    public class CpuTest32 : IDisposable
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
         protected static readonly uint Size = (uint)MemoryBlock.GetPageSize();
 #pragma warning disable CA2211 // Non-constant fields should not be visible
         protected static uint CodeBaseAddress = Size;
@@ -32,7 +34,12 @@ namespace Ryujinx.Tests.Cpu
 
         private bool _usingMemory;
 
-        [SetUp]
+        public CpuTest32(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            Setup();
+        }
+
         public void Setup()
         {
             int pageBits = (int)ulong.Log2(Size);
@@ -70,8 +77,7 @@ namespace Ryujinx.Tests.Cpu
             _unicornEmu.PC = CodeBaseAddress;
         }
 
-        [TearDown]
-        public void Teardown()
+        public void Dispose()
         {
             _unicornEmu.Dispose();
             _unicornEmu = null;
@@ -90,7 +96,7 @@ namespace Ryujinx.Tests.Cpu
 
         protected void Reset()
         {
-            Teardown();
+            Dispose();
             Setup();
         }
 
@@ -270,11 +276,11 @@ namespace Ryujinx.Tests.Cpu
 
             for (int i = 0; i < 15; i++)
             {
-                Assert.That(GetContext().GetX(i), Is.EqualTo(test.FinalRegs[i]));
+                Assert.Equal(test.FinalRegs[i], GetContext().GetX(i));
             }
 
             uint finalCpsr = test.FinalRegs[15];
-            Assert.That(GetContext().Pstate, Is.EqualTo(finalCpsr));
+            Assert.Equal(finalCpsr, GetContext().Pstate);
         }
 
         public void RunPrecomputedTestCase(PrecomputedMemoryThumbTestCase test)
@@ -304,7 +310,7 @@ namespace Ryujinx.Tests.Cpu
 
             byte[] mem = _memory.GetSpan(DataBaseAddress, (int)Size).ToArray();
 
-            Assert.That(mem, Is.EqualTo(testMem), "testmem");
+            Assert.Equal(testMem, mem);
         }
 
         protected void SetWorkingMemory(uint offset, byte[] data)
@@ -398,67 +404,67 @@ namespace Ryujinx.Tests.Cpu
                 ManageFpSkips(fpSkips);
             }
 
-            Assert.That(_context.GetX(0), Is.EqualTo(_unicornEmu.R[0]), "R0");
-            Assert.That(_context.GetX(1), Is.EqualTo(_unicornEmu.R[1]), "R1");
-            Assert.That(_context.GetX(2), Is.EqualTo(_unicornEmu.R[2]), "R2");
-            Assert.That(_context.GetX(3), Is.EqualTo(_unicornEmu.R[3]), "R3");
-            Assert.That(_context.GetX(4), Is.EqualTo(_unicornEmu.R[4]));
-            Assert.That(_context.GetX(5), Is.EqualTo(_unicornEmu.R[5]));
-            Assert.That(_context.GetX(6), Is.EqualTo(_unicornEmu.R[6]));
-            Assert.That(_context.GetX(7), Is.EqualTo(_unicornEmu.R[7]));
-            Assert.That(_context.GetX(8), Is.EqualTo(_unicornEmu.R[8]));
-            Assert.That(_context.GetX(9), Is.EqualTo(_unicornEmu.R[9]));
-            Assert.That(_context.GetX(10), Is.EqualTo(_unicornEmu.R[10]));
-            Assert.That(_context.GetX(11), Is.EqualTo(_unicornEmu.R[11]));
-            Assert.That(_context.GetX(12), Is.EqualTo(_unicornEmu.R[12]));
-            Assert.That(_context.GetX(13), Is.EqualTo(_unicornEmu.SP), "SP");
-            Assert.That(_context.GetX(14), Is.EqualTo(_unicornEmu.R[14]));
+            Assert.Equal(_unicornEmu.R[0], _context.GetX(0));
+            Assert.Equal(_unicornEmu.R[1], _context.GetX(1));
+            Assert.Equal(_unicornEmu.R[2], _context.GetX(2));
+            Assert.Equal(_unicornEmu.R[3], _context.GetX(3));
+            Assert.Equal(_unicornEmu.R[4], _context.GetX(4));
+            Assert.Equal(_unicornEmu.R[5], _context.GetX(5));
+            Assert.Equal(_unicornEmu.R[6], _context.GetX(6));
+            Assert.Equal(_unicornEmu.R[7], _context.GetX(7));
+            Assert.Equal(_unicornEmu.R[8], _context.GetX(8));
+            Assert.Equal(_unicornEmu.R[9], _context.GetX(9));
+            Assert.Equal(_unicornEmu.R[10], _context.GetX(10));
+            Assert.Equal(_unicornEmu.R[11], _context.GetX(11));
+            Assert.Equal(_unicornEmu.R[12], _context.GetX(12));
+            Assert.Equal(_unicornEmu.SP, _context.GetX(13));
+            Assert.Equal(_unicornEmu.R[14], _context.GetX(14));
 
             if (fpTolerances == FpTolerances.None)
             {
-                Assert.That(V128ToSimdValue(_context.GetV(0)), Is.EqualTo(_unicornEmu.Q[0]), "V0");
+                Assert.Equal(_unicornEmu.Q[0], V128ToSimdValue(_context.GetV(0)));
             }
             else
             {
                 ManageFpTolerances(fpTolerances);
             }
-            Assert.That(V128ToSimdValue(_context.GetV(1)), Is.EqualTo(_unicornEmu.Q[1]), "V1");
-            Assert.That(V128ToSimdValue(_context.GetV(2)), Is.EqualTo(_unicornEmu.Q[2]), "V2");
-            Assert.That(V128ToSimdValue(_context.GetV(3)), Is.EqualTo(_unicornEmu.Q[3]), "V3");
-            Assert.That(V128ToSimdValue(_context.GetV(4)), Is.EqualTo(_unicornEmu.Q[4]), "V4");
-            Assert.That(V128ToSimdValue(_context.GetV(5)), Is.EqualTo(_unicornEmu.Q[5]), "V5");
-            Assert.That(V128ToSimdValue(_context.GetV(6)), Is.EqualTo(_unicornEmu.Q[6]));
-            Assert.That(V128ToSimdValue(_context.GetV(7)), Is.EqualTo(_unicornEmu.Q[7]));
-            Assert.That(V128ToSimdValue(_context.GetV(8)), Is.EqualTo(_unicornEmu.Q[8]));
-            Assert.That(V128ToSimdValue(_context.GetV(9)), Is.EqualTo(_unicornEmu.Q[9]));
-            Assert.That(V128ToSimdValue(_context.GetV(10)), Is.EqualTo(_unicornEmu.Q[10]));
-            Assert.That(V128ToSimdValue(_context.GetV(11)), Is.EqualTo(_unicornEmu.Q[11]));
-            Assert.That(V128ToSimdValue(_context.GetV(12)), Is.EqualTo(_unicornEmu.Q[12]));
-            Assert.That(V128ToSimdValue(_context.GetV(13)), Is.EqualTo(_unicornEmu.Q[13]));
-            Assert.That(V128ToSimdValue(_context.GetV(14)), Is.EqualTo(_unicornEmu.Q[14]), "V14");
-            Assert.That(V128ToSimdValue(_context.GetV(15)), Is.EqualTo(_unicornEmu.Q[15]), "V15");
+            Assert.Equal(_unicornEmu.Q[1], V128ToSimdValue(_context.GetV(1)));
+            Assert.Equal(_unicornEmu.Q[2], V128ToSimdValue(_context.GetV(2)));
+            Assert.Equal(_unicornEmu.Q[3], V128ToSimdValue(_context.GetV(3)));
+            Assert.Equal(_unicornEmu.Q[4], V128ToSimdValue(_context.GetV(4)));
+            Assert.Equal(_unicornEmu.Q[5], V128ToSimdValue(_context.GetV(5)));
+            Assert.Equal(_unicornEmu.Q[6], V128ToSimdValue(_context.GetV(6)));
+            Assert.Equal(_unicornEmu.Q[7], V128ToSimdValue(_context.GetV(7)));
+            Assert.Equal(_unicornEmu.Q[8], V128ToSimdValue(_context.GetV(8)));
+            Assert.Equal(_unicornEmu.Q[9], V128ToSimdValue(_context.GetV(9)));
+            Assert.Equal(_unicornEmu.Q[10], V128ToSimdValue(_context.GetV(10)));
+            Assert.Equal(_unicornEmu.Q[11], V128ToSimdValue(_context.GetV(11)));
+            Assert.Equal(_unicornEmu.Q[12], V128ToSimdValue(_context.GetV(12)));
+            Assert.Equal(_unicornEmu.Q[13], V128ToSimdValue(_context.GetV(13)));
+            Assert.Equal(_unicornEmu.Q[14], V128ToSimdValue(_context.GetV(14)));
+            Assert.Equal(_unicornEmu.Q[15], V128ToSimdValue(_context.GetV(15)));
 
             Assert.Multiple(() =>
             {
-                Assert.That(_context.GetPstateFlag(PState.GE0Flag), Is.EqualTo((_unicornEmu.CPSR & (1u << 16)) != 0), "GE0Flag");
-                Assert.That(_context.GetPstateFlag(PState.GE1Flag), Is.EqualTo((_unicornEmu.CPSR & (1u << 17)) != 0), "GE1Flag");
-                Assert.That(_context.GetPstateFlag(PState.GE2Flag), Is.EqualTo((_unicornEmu.CPSR & (1u << 18)) != 0), "GE2Flag");
-                Assert.That(_context.GetPstateFlag(PState.GE3Flag), Is.EqualTo((_unicornEmu.CPSR & (1u << 19)) != 0), "GE3Flag");
-                Assert.That(_context.GetPstateFlag(PState.QFlag), Is.EqualTo(_unicornEmu.QFlag), "QFlag");
-                Assert.That(_context.GetPstateFlag(PState.VFlag), Is.EqualTo(_unicornEmu.OverflowFlag), "VFlag");
-                Assert.That(_context.GetPstateFlag(PState.CFlag), Is.EqualTo(_unicornEmu.CarryFlag), "CFlag");
-                Assert.That(_context.GetPstateFlag(PState.ZFlag), Is.EqualTo(_unicornEmu.ZeroFlag), "ZFlag");
-                Assert.That(_context.GetPstateFlag(PState.NFlag), Is.EqualTo(_unicornEmu.NegativeFlag), "NFlag");
+                Assert.Equal((_unicornEmu.CPSR & (1u << 16)) != 0, _context.GetPstateFlag(PState.GE0Flag));
+                Assert.Equal((_unicornEmu.CPSR & (1u << 17)) != 0, _context.GetPstateFlag(PState.GE1Flag));
+                Assert.Equal((_unicornEmu.CPSR & (1u << 18)) != 0, _context.GetPstateFlag(PState.GE2Flag));
+                Assert.Equal((_unicornEmu.CPSR & (1u << 19)) != 0, _context.GetPstateFlag(PState.GE3Flag));
+                Assert.Equal(_unicornEmu.QFlag, _context.GetPstateFlag(PState.QFlag));
+                Assert.Equal(_unicornEmu.OverflowFlag, _context.GetPstateFlag(PState.VFlag));
+                Assert.Equal(_unicornEmu.CarryFlag, _context.GetPstateFlag(PState.CFlag));
+                Assert.Equal(_unicornEmu.ZeroFlag, _context.GetPstateFlag(PState.ZFlag));
+                Assert.Equal(_unicornEmu.NegativeFlag, _context.GetPstateFlag(PState.NFlag));
             });
 
-            Assert.That((int)_context.Fpscr & (int)fpsrMask, Is.EqualTo(_unicornEmu.Fpscr & (int)fpsrMask), "Fpscr");
+            Assert.Equal(_unicornEmu.Fpscr & (int)fpsrMask, (int)_context.Fpscr & (int)fpsrMask);
 
             if (_usingMemory)
             {
                 byte[] mem = _memory.GetSpan(DataBaseAddress, (int)Size).ToArray();
                 byte[] unicornMem = _unicornEmu.MemoryRead(DataBaseAddress, Size);
 
-                Assert.That(mem, Is.EqualTo(unicornMem), "Data");
+                Assert.Equal(unicornMem, mem);
             }
         }
 
@@ -466,33 +472,21 @@ namespace Ryujinx.Tests.Cpu
         {
             if (fpSkips.HasFlag(FpSkips.IfNaNS))
             {
-                if (float.IsNaN(_unicornEmu.Q[0].AsFloat()))
-                {
-                    Assert.Ignore("NaN test.");
-                }
+                Skip.If(float.IsNaN(_unicornEmu.Q[0].AsFloat()), "NaN test.");
             }
             else if (fpSkips.HasFlag(FpSkips.IfNaND))
             {
-                if (double.IsNaN(_unicornEmu.Q[0].AsDouble()))
-                {
-                    Assert.Ignore("NaN test.");
-                }
+                Skip.If(double.IsNaN(_unicornEmu.Q[0].AsDouble()), "NaN test.");
             }
 
             if (fpSkips.HasFlag(FpSkips.IfUnderflow))
             {
-                if ((_unicornEmu.Fpscr & (int)Fpsr.Ufc) != 0)
-                {
-                    Assert.Ignore("Underflow test.");
-                }
+                Skip.If((_unicornEmu.Fpscr & (int)Fpsr.Ufc) != 0, "Underflow test.");
             }
 
             if (fpSkips.HasFlag(FpSkips.IfOverflow))
             {
-                if ((_unicornEmu.Fpscr & (int)Fpsr.Ofc) != 0)
-                {
-                    Assert.Ignore("Overflow test.");
-                }
+                Skip.If((_unicornEmu.Fpscr & (int)Fpsr.Ofc) != 0, "Overflow test.");
             }
         }
 
@@ -501,7 +495,7 @@ namespace Ryujinx.Tests.Cpu
             bool IsNormalOrSubnormalS(float f) => float.IsNormal(f) || float.IsSubnormal(f);
             bool IsNormalOrSubnormalD(double d) => double.IsNormal(d) || double.IsSubnormal(d);
 
-            if (!Is.EqualTo(_unicornEmu.Q[0]).ApplyTo(V128ToSimdValue(_context.GetV(0))).IsSuccess)
+            if (_unicornEmu.Q[0] != V128ToSimdValue(_context.GetV(0)))
             {
                 if (fpTolerances == FpTolerances.UpToOneUlpsS)
                 {
@@ -510,21 +504,17 @@ namespace Ryujinx.Tests.Cpu
                     {
                         Assert.Multiple(() =>
                         {
-                            Assert.That(_context.GetV(0).Extract<float>(0),
-                                Is.EqualTo(_unicornEmu.Q[0].GetFloat(0)).Within(1).Ulps, "V0[0]");
-                            Assert.That(_context.GetV(0).Extract<float>(1),
-                                Is.EqualTo(_unicornEmu.Q[0].GetFloat(1)).Within(1).Ulps, "V0[1]");
-                            Assert.That(_context.GetV(0).Extract<float>(2),
-                                Is.EqualTo(_unicornEmu.Q[0].GetFloat(2)).Within(1).Ulps, "V0[2]");
-                            Assert.That(_context.GetV(0).Extract<float>(3),
-                                Is.EqualTo(_unicornEmu.Q[0].GetFloat(3)).Within(1).Ulps, "V0[3]");
+                            Assert.Equal(_unicornEmu.Q[0].GetFloat(0), _context.GetV(0).Extract<float>(0), 1f);
+                            Assert.Equal(_unicornEmu.Q[0].GetFloat(1), _context.GetV(0).Extract<float>(1), 1f);
+                            Assert.Equal(_unicornEmu.Q[0].GetFloat(2), _context.GetV(0).Extract<float>(2), 1f);
+                            Assert.Equal(_unicornEmu.Q[0].GetFloat(3), _context.GetV(0).Extract<float>(3), 1f);
                         });
 
-                        Console.WriteLine(fpTolerances);
+                        _testOutputHelper.WriteLine(fpTolerances.ToString());
                     }
                     else
                     {
-                        Assert.That(V128ToSimdValue(_context.GetV(0)), Is.EqualTo(_unicornEmu.Q[0]));
+                        Assert.Equal(_unicornEmu.Q[0], V128ToSimdValue(_context.GetV(0)));
                     }
                 }
 
@@ -535,17 +525,15 @@ namespace Ryujinx.Tests.Cpu
                     {
                         Assert.Multiple(() =>
                         {
-                            Assert.That(_context.GetV(0).Extract<double>(0),
-                                Is.EqualTo(_unicornEmu.Q[0].GetDouble(0)).Within(1).Ulps, "V0[0]");
-                            Assert.That(_context.GetV(0).Extract<double>(1),
-                                Is.EqualTo(_unicornEmu.Q[0].GetDouble(1)).Within(1).Ulps, "V0[1]");
+                            Assert.Equal(_unicornEmu.Q[0].GetDouble(0), _context.GetV(0).Extract<double>(0), 1d);
+                            Assert.Equal(_unicornEmu.Q[0].GetDouble(1), _context.GetV(0).Extract<double>(1), 1d);
                         });
 
-                        Console.WriteLine(fpTolerances);
+                        _testOutputHelper.WriteLine(fpTolerances.ToString());
                     }
                     else
                     {
-                        Assert.That(V128ToSimdValue(_context.GetV(0)), Is.EqualTo(_unicornEmu.Q[0]));
+                        Assert.Equal(_unicornEmu.Q[0], V128ToSimdValue(_context.GetV(0)));
                     }
                 }
             }
@@ -577,7 +565,7 @@ namespace Ryujinx.Tests.Cpu
             uint rnd;
 
             do
-                rnd = TestContext.CurrentContext.Random.NextUShort();
+                rnd = Random.Shared.NextUShort();
             while ((rnd & 0x7C00u) == 0u ||
                    (~rnd & 0x7C00u) == 0u);
 
@@ -589,7 +577,7 @@ namespace Ryujinx.Tests.Cpu
             uint rnd;
 
             do
-                rnd = TestContext.CurrentContext.Random.NextUShort();
+                rnd = Random.Shared.NextUShort();
             while ((rnd & 0x03FFu) == 0u);
 
             return (ushort)(rnd & 0x83FFu);
@@ -600,7 +588,7 @@ namespace Ryujinx.Tests.Cpu
             uint rnd;
 
             do
-                rnd = TestContext.CurrentContext.Random.NextUInt();
+                rnd = Random.Shared.NextUInt();
             while ((rnd & 0x7F800000u) == 0u ||
                    (~rnd & 0x7F800000u) == 0u);
 
@@ -612,7 +600,7 @@ namespace Ryujinx.Tests.Cpu
             uint rnd;
 
             do
-                rnd = TestContext.CurrentContext.Random.NextUInt();
+                rnd = Random.Shared.NextUInt();
             while ((rnd & 0x007FFFFFu) == 0u);
 
             return rnd & 0x807FFFFFu;
@@ -623,7 +611,7 @@ namespace Ryujinx.Tests.Cpu
             ulong rnd;
 
             do
-                rnd = TestContext.CurrentContext.Random.NextULong();
+                rnd = Random.Shared.NextULong();
             while ((rnd & 0x7FF0000000000000ul) == 0ul ||
                    (~rnd & 0x7FF0000000000000ul) == 0ul);
 
@@ -635,7 +623,7 @@ namespace Ryujinx.Tests.Cpu
             ulong rnd;
 
             do
-                rnd = TestContext.CurrentContext.Random.NextULong();
+                rnd = Random.Shared.NextULong();
             while ((rnd & 0x000FFFFFFFFFFFFFul) == 0ul);
 
             return rnd & 0x800FFFFFFFFFFFFFul;

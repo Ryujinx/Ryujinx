@@ -1,15 +1,20 @@
 #define Misc
 
 using ARMeilleure.State;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("Misc")]
+    [Collection("Misc")]
     public sealed class CpuTestMisc : CpuTest
     {
+        public CpuTestMisc(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if Misc
 
         #region "ValueSource (Types)"
@@ -46,7 +51,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
                 ulong rnd1 = GenNormalS();
                 ulong rnd2 = GenSubnormalS();
 
@@ -63,12 +68,13 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noNaNs = false;
 
         #region "AluImm & Csel"
-        [Test, Pairwise]
-        public void Adds_Csinc_64bit([Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory]
+        [PairwiseData]
+        public void Adds_Csinc_64bit([CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                              0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                                     [Values(0u, 4095u)] uint imm,
-                                     [Values(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
-                                     [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                     [CombinatorialValues(0u, 4095u)] uint imm,
+                                     [CombinatorialValues(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
+                                     [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
                                              0b0100u, 0b0101u, 0b0110u, 0b0111u, //  MI, PL, VS, VC,
                                              0b1000u, 0b1001u, 0b1010u, 0b1011u, //  HI, LS, GE, LT,
                                              0b1100u, 0b1101u)] uint cond)       //  GT, LE>
@@ -88,12 +94,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Adds_Csinc_32bit([Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory]
+        [PairwiseData]
+        public void Adds_Csinc_32bit([CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                              0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                     [Values(0u, 4095u)] uint imm,
-                                     [Values(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
-                                     [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                     [CombinatorialValues(0u, 4095u)] uint imm,
+                                     [CombinatorialValues(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
+                                     [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
                                              0b0100u, 0b0101u, 0b0110u, 0b0111u, //  MI, PL, VS, VC,
                                              0b1000u, 0b1001u, 0b1010u, 0b1011u, //  HI, LS, GE, LT,
                                              0b1100u, 0b1101u)] uint cond)       //  GT, LE>
@@ -113,12 +120,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Subs_Csinc_64bit([Values(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
+        [SkippableTheory]
+        [PairwiseData]
+        public void Subs_Csinc_64bit([CombinatorialValues(0x0000000000000000ul, 0x7FFFFFFFFFFFFFFFul,
                                              0x8000000000000000ul, 0xFFFFFFFFFFFFFFFFul)] ulong xn,
-                                     [Values(0u, 4095u)] uint imm,
-                                     [Values(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
-                                     [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                     [CombinatorialValues(0u, 4095u)] uint imm,
+                                     [CombinatorialValues(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
+                                     [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
                                              0b0100u, 0b0101u, 0b0110u, 0b0111u, //  MI, PL, VS, VC,
                                              0b1000u, 0b1001u, 0b1010u, 0b1011u, //  HI, LS, GE, LT,
                                              0b1100u, 0b1101u)] uint cond)       //  GT, LE>
@@ -138,12 +146,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Subs_Csinc_32bit([Values(0x00000000u, 0x7FFFFFFFu,
+        [SkippableTheory]
+        [PairwiseData]
+        public void Subs_Csinc_32bit([CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                              0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                     [Values(0u, 4095u)] uint imm,
-                                     [Values(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
-                                     [Values(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
+                                     [CombinatorialValues(0u, 4095u)] uint imm,
+                                     [CombinatorialValues(0b00u, 0b01u)] uint shift,          // <LSL #0, LSL #12>
+                                     [CombinatorialValues(0b0000u, 0b0001u, 0b0010u, 0b0011u, // <EQ, NE, CS/HS, CC/LO,
                                              0b0100u, 0b0101u, 0b0110u, 0b0111u, //  MI, PL, VS, VC,
                                              0b1000u, 0b1001u, 0b1010u, 0b1011u, //  HI, LS, GE, LT,
                                              0b1100u, 0b1101u)] uint cond)       //  GT, LE>
@@ -165,9 +174,9 @@ namespace Ryujinx.Tests.Cpu
         #endregion
 
         // Roots.
-        [Explicit]
-        [TestCase(0xFFFFFFFDu)]
-        [TestCase(0x00000005u)]
+        [Theory]
+        [InlineData(0xFFFFFFFDu)]
+        [InlineData(0x00000005u)]
         public void Misc1(uint a)
         {
             // ((a + 3) * (a - 5)) / ((a + 5) * (a - 3)) = 0
@@ -194,29 +203,29 @@ namespace Ryujinx.Tests.Cpu
             Opcode(0xD65F03C0);
             ExecuteOpcodes();
 
-            Assert.That(GetContext().GetX(0), Is.Zero);
+            Assert.Equal(0ul, GetContext().GetX(0));
         }
 
         // 18 integer solutions.
-        [Explicit]
-        [TestCase(-20f, -5f)]
-        [TestCase(-12f, -6f)]
-        [TestCase(-12f, 3f)]
-        [TestCase(-8f, -8f)]
-        [TestCase(-6f, -12f)]
-        [TestCase(-5f, -20f)]
-        [TestCase(-4f, 2f)]
-        [TestCase(-3f, 12f)]
-        [TestCase(-2f, 4f)]
-        [TestCase(2f, -4f)]
-        [TestCase(3f, -12f)]
-        [TestCase(4f, -2f)]
-        [TestCase(5f, 20f)]
-        [TestCase(6f, 12f)]
-        [TestCase(8f, 8f)]
-        [TestCase(12f, -3f)]
-        [TestCase(12f, 6f)]
-        [TestCase(20f, 5f)]
+        [Theory]
+        [InlineData(-20f, -5f)]
+        [InlineData(-12f, -6f)]
+        [InlineData(-12f, 3f)]
+        [InlineData(-8f, -8f)]
+        [InlineData(-6f, -12f)]
+        [InlineData(-5f, -20f)]
+        [InlineData(-4f, 2f)]
+        [InlineData(-3f, 12f)]
+        [InlineData(-2f, 4f)]
+        [InlineData(2f, -4f)]
+        [InlineData(3f, -12f)]
+        [InlineData(4f, -2f)]
+        [InlineData(5f, 20f)]
+        [InlineData(6f, 12f)]
+        [InlineData(8f, 8f)]
+        [InlineData(12f, -3f)]
+        [InlineData(12f, 6f)]
+        [InlineData(20f, 5f)]
         public void Misc2(float a, float b)
         {
             // 1 / ((1 / a + 1 / b) ^ 2) = 16
@@ -241,29 +250,29 @@ namespace Ryujinx.Tests.Cpu
             Opcode(0xD65F03C0);
             ExecuteOpcodes();
 
-            Assert.That(GetContext().GetV(0).As<float>(), Is.EqualTo(16f));
+            Assert.Equal(16f, GetContext().GetV(0).As<float>());
         }
 
         // 18 integer solutions.
-        [Explicit]
-        [TestCase(-20d, -5d)]
-        [TestCase(-12d, -6d)]
-        [TestCase(-12d, 3d)]
-        [TestCase(-8d, -8d)]
-        [TestCase(-6d, -12d)]
-        [TestCase(-5d, -20d)]
-        [TestCase(-4d, 2d)]
-        [TestCase(-3d, 12d)]
-        [TestCase(-2d, 4d)]
-        [TestCase(2d, -4d)]
-        [TestCase(3d, -12d)]
-        [TestCase(4d, -2d)]
-        [TestCase(5d, 20d)]
-        [TestCase(6d, 12d)]
-        [TestCase(8d, 8d)]
-        [TestCase(12d, -3d)]
-        [TestCase(12d, 6d)]
-        [TestCase(20d, 5d)]
+        [Theory]
+        [InlineData(-20d, -5d)]
+        [InlineData(-12d, -6d)]
+        [InlineData(-12d, 3d)]
+        [InlineData(-8d, -8d)]
+        [InlineData(-6d, -12d)]
+        [InlineData(-5d, -20d)]
+        [InlineData(-4d, 2d)]
+        [InlineData(-3d, 12d)]
+        [InlineData(-2d, 4d)]
+        [InlineData(2d, -4d)]
+        [InlineData(3d, -12d)]
+        [InlineData(4d, -2d)]
+        [InlineData(5d, 20d)]
+        [InlineData(6d, 12d)]
+        [InlineData(8d, 8d)]
+        [InlineData(12d, -3d)]
+        [InlineData(12d, 6d)]
+        [InlineData(20d, 5d)]
         public void Misc3(double a, double b)
         {
             // 1 / ((1 / a + 1 / b) ^ 2) = 16
@@ -288,11 +297,12 @@ namespace Ryujinx.Tests.Cpu
             Opcode(0xD65F03C0);
             ExecuteOpcodes();
 
-            Assert.That(GetContext().GetV(0).As<double>(), Is.EqualTo(16d));
+            Assert.Equal(16d, GetContext().GetV(0).As<double>());
         }
 
-        [Test, Ignore("The Tester supports only one return point.")]
-        public void MiscF([Range(0u, 92u, 1u)] uint a)
+        [Theory(Skip = "The Tester supports only one return point.")]
+        [CombinatorialData]
+        public void MiscF([CombinatorialRange(0u, 92u, 1u)] uint a)
         {
             static ulong Fn(uint n)
             {
@@ -355,11 +365,11 @@ namespace Ryujinx.Tests.Cpu
             Opcode(0xD65F03C0);
             ExecuteOpcodes();
 
-            Assert.That(GetContext().GetX(0), Is.EqualTo(Fn(a)));
+            Assert.Equal(Fn(a), GetContext().GetX(0));
         }
 
-        [Explicit]
-        [Test]
+        // This test used to be skipped unless explicitly executed
+        [Fact]
         public void MiscR()
         {
             const ulong Result = 5;
@@ -377,7 +387,7 @@ namespace Ryujinx.Tests.Cpu
             Opcode(0xD65F03C0);
             ExecuteOpcodes();
 
-            Assert.That(GetContext().GetX(0), Is.EqualTo(Result));
+            Assert.Equal(Result, GetContext().GetX(0));
 
             Reset();
 
@@ -394,57 +404,55 @@ namespace Ryujinx.Tests.Cpu
             Opcode(0xD65F03C0);
             ExecuteOpcodes();
 
-            Assert.That(GetContext().GetX(0), Is.EqualTo(Result));
+            Assert.Equal(Result, GetContext().GetX(0));
         }
 
-        [Explicit]
-        [TestCase(0ul)]
-        [TestCase(1ul)]
-        [TestCase(2ul)]
-        [TestCase(42ul)]
+        // This test used to be skipped unless explicitly executed
+        [Theory]
+        [InlineData(0ul)]
+        [InlineData(1ul)]
+        [InlineData(2ul)]
+        [InlineData(42ul)]
         public void SanityCheck(ulong a)
         {
             uint opcode = 0xD503201F; // NOP
             ExecutionContext context = SingleOpcode(opcode, x0: a);
 
-            Assert.That(context.GetX(0), Is.EqualTo(a));
+            Assert.Equal(a, context.GetX(0));
         }
 
-        [Explicit]
-        [Test, Pairwise]
-        public void Misc4([ValueSource(nameof(_1S_F_))] ulong a,
-                          [ValueSource(nameof(_1S_F_))] ulong b,
-                          [ValueSource(nameof(_1S_F_))] ulong c,
-                          [Values(0ul, 1ul, 2ul, 3ul)] ulong displacement)
+        [Theory]
+        [PairwiseData]
+        public void Misc4([CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                          [CombinatorialMemberData(nameof(_1S_F_))] ulong b,
+                          [CombinatorialMemberData(nameof(_1S_F_))] ulong c,
+                          [CombinatorialValues(0ul, 1ul, 2ul, 3ul)] ulong displacement)
         {
-            if (!BitConverter.IsLittleEndian)
-            {
-                Assert.Ignore();
-            }
+            Skip.IfNot(BitConverter.IsLittleEndian);
 
             for (ulong gapOffset = 0; gapOffset < displacement; gapOffset++)
             {
-                SetWorkingMemory(gapOffset, TestContext.CurrentContext.Random.NextByte());
+                SetWorkingMemory(gapOffset, Random.Shared.NextByte());
             }
 
             SetWorkingMemory(0x0 + displacement, BitConverter.GetBytes((uint)b));
 
             SetWorkingMemory(0x4 + displacement, BitConverter.GetBytes((uint)c));
 
-            SetWorkingMemory(0x8 + displacement, TestContext.CurrentContext.Random.NextByte());
-            SetWorkingMemory(0x9 + displacement, TestContext.CurrentContext.Random.NextByte());
-            SetWorkingMemory(0xA + displacement, TestContext.CurrentContext.Random.NextByte());
-            SetWorkingMemory(0xB + displacement, TestContext.CurrentContext.Random.NextByte());
+            SetWorkingMemory(0x8 + displacement, Random.Shared.NextByte());
+            SetWorkingMemory(0x9 + displacement, Random.Shared.NextByte());
+            SetWorkingMemory(0xA + displacement, Random.Shared.NextByte());
+            SetWorkingMemory(0xB + displacement, Random.Shared.NextByte());
 
             SetContext(
                 x0: DataBaseAddress + displacement,
-                v0: MakeVectorE0E1(a, TestContext.CurrentContext.Random.NextULong()),
-                v1: MakeVectorE0E1(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong()),
-                v2: MakeVectorE0E1(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong()),
-                overflow: TestContext.CurrentContext.Random.NextBool(),
-                carry: TestContext.CurrentContext.Random.NextBool(),
-                zero: TestContext.CurrentContext.Random.NextBool(),
-                negative: TestContext.CurrentContext.Random.NextBool());
+                v0: MakeVectorE0E1(a, Random.Shared.NextULong()),
+                v1: MakeVectorE0E1(Random.Shared.NextULong(), Random.Shared.NextULong()),
+                v2: MakeVectorE0E1(Random.Shared.NextULong(), Random.Shared.NextULong()),
+                overflow: Random.Shared.NextBool(),
+                carry: Random.Shared.NextBool(),
+                zero: Random.Shared.NextBool(),
+                negative: Random.Shared.NextBool());
 
             Opcode(0xBD400001); // LDR   S1, [X0,#0]
             Opcode(0xBD400402); // LDR   S2, [X0,#4]
@@ -458,17 +466,18 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Explicit]
-        [Test]
-        public void Misc5([ValueSource(nameof(_1S_F_))] ulong a)
+        // This test used to be skipped unless explicitly executed
+        [Theory]
+        [CombinatorialData]
+        public void Misc5([CombinatorialMemberData(nameof(_1S_F_))] ulong a)
         {
             SetContext(
-                v0: MakeVectorE0E1(a, TestContext.CurrentContext.Random.NextULong()),
-                v1: MakeVectorE0E1(TestContext.CurrentContext.Random.NextULong(), TestContext.CurrentContext.Random.NextULong()),
-                overflow: TestContext.CurrentContext.Random.NextBool(),
-                carry: TestContext.CurrentContext.Random.NextBool(),
-                zero: TestContext.CurrentContext.Random.NextBool(),
-                negative: TestContext.CurrentContext.Random.NextBool());
+                v0: MakeVectorE0E1(a, Random.Shared.NextULong()),
+                v1: MakeVectorE0E1(Random.Shared.NextULong(), Random.Shared.NextULong()),
+                overflow: Random.Shared.NextBool(),
+                carry: Random.Shared.NextBool(),
+                zero: Random.Shared.NextBool(),
+                negative: Random.Shared.NextBool());
 
             Opcode(0x1E202008); // FCMP  S0, #0.0
             Opcode(0x1E2E1001); // FMOV  S1, #1.0

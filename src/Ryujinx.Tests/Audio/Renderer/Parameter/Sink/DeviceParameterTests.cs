@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter.Sink;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter.Sink
 {
-    class DeviceParameterTests
+    public class DeviceParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x11C, Unsafe.SizeOf<DeviceParameter>());
+            Assert.Equal(0x11C, Unsafe.SizeOf<DeviceParameter>());
         }
     }
 }

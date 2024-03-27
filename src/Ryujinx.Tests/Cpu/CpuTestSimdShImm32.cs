@@ -1,13 +1,19 @@
-#define SimdShImm32
+﻿#define SimdShImm32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdShImm32")]
+    [Collection("SimdShImm32")]
     public sealed class CpuTestSimdShImm32 : CpuTest32
     {
+        public CpuTestSimdShImm32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdShImm32
 
         #region "ValueSource (Types)"
@@ -111,60 +117,64 @@ namespace Ryujinx.Tests.Cpu
         private const int RndCnt = 2;
         private const int RndCntShiftImm = 2;
 
-        [Test, Pairwise]
-        public void Vshr_Imm_SU8([ValueSource(nameof(_Vshr_Imm_SU8_))] uint opcode,
-                                 [Range(0u, 3u)] uint rd,
-                                 [Range(0u, 3u)] uint rm,
-                                 [ValueSource(nameof(_8B_))] ulong z,
-                                 [ValueSource(nameof(_8B_))] ulong b,
-                                 [Values(1u, 8u)] uint shiftImm,
-                                 [Values] bool u,
-                                 [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vshr_Imm_SU8([CombinatorialMemberData(nameof(_Vshr_Imm_SU8_))] uint opcode,
+                                 [CombinatorialRange(0u, 3u, 1)] uint rd,
+                                 [CombinatorialRange(0u, 3u, 1)] uint rm,
+                                 [CombinatorialMemberData(nameof(_8B_))] ulong z,
+                                 [CombinatorialMemberData(nameof(_8B_))] ulong b,
+                                 [CombinatorialValues(1u, 8u)] uint shiftImm,
+                                 bool u,
+                                 bool q)
         {
             uint imm6 = 16 - shiftImm;
 
             Vshr_Imm_SU(opcode, rd, rm, z, b, imm6, u, q);
         }
 
-        [Test, Pairwise]
-        public void Vshr_Imm_SU16([ValueSource(nameof(_Vshr_Imm_SU16_))] uint opcode,
-                                  [Range(0u, 3u)] uint rd,
-                                  [Range(0u, 3u)] uint rm,
-                                  [ValueSource(nameof(_4H_))] ulong z,
-                                  [ValueSource(nameof(_4H_))] ulong b,
-                                  [Values(1u, 16u)] uint shiftImm,
-                                  [Values] bool u,
-                                  [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vshr_Imm_SU16([CombinatorialMemberData(nameof(_Vshr_Imm_SU16_))] uint opcode,
+                                  [CombinatorialRange(0u, 3u, 1)] uint rd,
+                                  [CombinatorialRange(0u, 3u, 1)] uint rm,
+                                  [CombinatorialMemberData(nameof(_4H_))] ulong z,
+                                  [CombinatorialMemberData(nameof(_4H_))] ulong b,
+                                  [CombinatorialValues(1u, 16u)] uint shiftImm,
+                                  bool u,
+                                  bool q)
         {
             uint imm6 = 32 - shiftImm;
 
             Vshr_Imm_SU(opcode, rd, rm, z, b, imm6, u, q);
         }
 
-        [Test, Pairwise]
-        public void Vshr_Imm_SU32([ValueSource(nameof(_Vshr_Imm_SU32_))] uint opcode,
-                                  [Range(0u, 3u)] uint rd,
-                                  [Range(0u, 3u)] uint rm,
-                                  [ValueSource(nameof(_2S_))] ulong z,
-                                  [ValueSource(nameof(_2S_))] ulong b,
-                                  [Values(1u, 32u)] uint shiftImm,
-                                  [Values] bool u,
-                                  [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vshr_Imm_SU32([CombinatorialMemberData(nameof(_Vshr_Imm_SU32_))] uint opcode,
+                                  [CombinatorialRange(0u, 3u, 1)] uint rd,
+                                  [CombinatorialRange(0u, 3u, 1)] uint rm,
+                                  [CombinatorialMemberData(nameof(_2S_))] ulong z,
+                                  [CombinatorialMemberData(nameof(_2S_))] ulong b,
+                                  [CombinatorialValues(1u, 32u)] uint shiftImm,
+                                  bool u,
+                                  bool q)
         {
             uint imm6 = 64 - shiftImm;
 
             Vshr_Imm_SU(opcode, rd, rm, z, b, imm6, u, q);
         }
 
-        [Test, Pairwise]
-        public void Vshr_Imm_SU64([ValueSource(nameof(_Vshr_Imm_SU64_))] uint opcode,
-                                  [Range(0u, 3u)] uint rd,
-                                  [Range(0u, 3u)] uint rm,
-                                  [ValueSource(nameof(_1D_))] ulong z,
-                                  [ValueSource(nameof(_1D_))] ulong b,
-                                  [Values(1u, 64u)] uint shiftImm,
-                                  [Values] bool u,
-                                  [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vshr_Imm_SU64([CombinatorialMemberData(nameof(_Vshr_Imm_SU64_))] uint opcode,
+                                  [CombinatorialRange(0u, 3u, 1)] uint rd,
+                                  [CombinatorialRange(0u, 3u, 1)] uint rm,
+                                  [CombinatorialMemberData(nameof(_1D_))] ulong z,
+                                  [CombinatorialMemberData(nameof(_1D_))] ulong b,
+                                  [CombinatorialValues(1u, 64u)] uint shiftImm,
+                                  bool u,
+                                  bool q)
         {
             uint imm6 = 64 - shiftImm;
 
@@ -201,15 +211,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VSHL.<size> {<Vd>}, <Vm>, #<imm>")]
-        public void Vshl_Imm([Values(0u)] uint rd,
-                             [Values(2u, 0u)] uint rm,
-                             [Values(0u, 1u, 2u, 3u)] uint size,
-                             [Random(RndCntShiftImm)] uint shiftImm,
-                             [Random(RndCnt)] ulong z,
-                             [Random(RndCnt)] ulong a,
-                             [Random(RndCnt)] ulong b,
-                             [Values] bool q)
+        [Theory(DisplayName = "VSHL.<size> {<Vd>}, <Vm>, #<imm>")]
+        [PairwiseData]
+        public void Vshl_Imm([CombinatorialValues(0u)] uint rd,
+                             [CombinatorialValues(2u, 0u)] uint rm,
+                             [CombinatorialValues(0u, 1u, 2u, 3u)] uint size,
+                             [CombinatorialRandomData(Count = RndCntShiftImm)] uint shiftImm,
+                             [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                             [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                             [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                             bool q)
         {
             uint opcode = 0xf2800510u; // VORR.I32 D0, #0 (immediate value changes it into SHL)
             if (q)
@@ -235,14 +246,15 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VSHRN.<size> <Vd>, <Vm>, #<imm>")]
-        public void Vshrn_Imm([Values(0u, 1u)] uint rd,
-                              [Values(2u, 0u)] uint rm,
-                              [Values(0u, 1u, 2u)] uint size,
-                              [Random(RndCntShiftImm)] uint shiftImm,
-                              [Random(RndCnt)] ulong z,
-                              [Random(RndCnt)] ulong a,
-                              [Random(RndCnt)] ulong b)
+        [Theory(DisplayName = "VSHRN.<size> <Vd>, <Vm>, #<imm>")]
+        [PairwiseData]
+        public void Vshrn_Imm([CombinatorialValues(0u, 1u)] uint rd,
+                              [CombinatorialValues(2u, 0u)] uint rm,
+                              [CombinatorialValues(0u, 1u, 2u)] uint size,
+                              [CombinatorialRandomData(Count = RndCntShiftImm)] uint shiftImm,
+                              [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                              [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                              [CombinatorialRandomData(Count = RndCnt)] ulong b)
         {
             uint opcode = 0xf2800810u; // VMOV.I16 D0, #0 (immediate value changes it into SHRN)
 
@@ -262,16 +274,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Vqshrn_Vqrshrn_Vrshrn_Imm([ValueSource(nameof(_Vqshrn_Vqrshrn_Vrshrn_Imm_))] uint opcode,
-                                              [Values(0u, 1u)] uint rd,
-                                              [Values(2u, 0u)] uint rm,
-                                              [Values(0u, 1u, 2u)] uint size,
-                                              [Random(RndCntShiftImm)] uint shiftImm,
-                                              [Random(RndCnt)] ulong z,
-                                              [Random(RndCnt)] ulong a,
-                                              [Random(RndCnt)] ulong b,
-                                              [Values] bool u)
+        [Theory]
+        [PairwiseData]
+        public void Vqshrn_Vqrshrn_Vrshrn_Imm([CombinatorialMemberData(nameof(_Vqshrn_Vqrshrn_Vrshrn_Imm_))] uint opcode,
+                                              [CombinatorialValues(0u, 1u)] uint rd,
+                                              [CombinatorialValues(2u, 0u)] uint rm,
+                                              [CombinatorialValues(0u, 1u, 2u)] uint size,
+                                              [CombinatorialRandomData(Count = RndCntShiftImm)] uint shiftImm,
+                                              [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                                              [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                              [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                                              bool u)
         {
             uint imm = 1u << ((int)size + 3);
             imm |= shiftImm & (imm - 1);
@@ -289,22 +302,23 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, z);
             V128 v2 = MakeVectorE0E1(b, z);
 
-            int fpscr = (int)TestContext.CurrentContext.Random.NextUInt() & (int)Fpsr.Qc;
+            int fpscr = (int)Random.Shared.NextUInt() & (int)Fpsr.Qc;
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, fpscr: fpscr);
 
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise]
-        public void Vqshrun_Vqrshrun_Imm([ValueSource(nameof(_Vqshrun_Vqrshrun_Imm_))] uint opcode,
-                                         [Values(0u, 1u)] uint rd,
-                                         [Values(2u, 0u)] uint rm,
-                                         [Values(0u, 1u, 2u)] uint size,
-                                         [Random(RndCntShiftImm)] uint shiftImm,
-                                         [Random(RndCnt)] ulong z,
-                                         [Random(RndCnt)] ulong a,
-                                         [Random(RndCnt)] ulong b)
+        [Theory]
+        [PairwiseData]
+        public void Vqshrun_Vqrshrun_Imm([CombinatorialMemberData(nameof(_Vqshrun_Vqrshrun_Imm_))] uint opcode,
+                                         [CombinatorialValues(0u, 1u)] uint rd,
+                                         [CombinatorialValues(2u, 0u)] uint rm,
+                                         [CombinatorialValues(0u, 1u, 2u)] uint size,
+                                         [CombinatorialRandomData(Count = RndCntShiftImm)] uint shiftImm,
+                                         [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                                         [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                                         [CombinatorialRandomData(Count = RndCnt)] ulong b)
         {
             uint imm = 1u << ((int)size + 3);
             imm |= shiftImm & (imm - 1);
@@ -317,7 +331,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, z);
             V128 v2 = MakeVectorE0E1(b, z);
 
-            int fpscr = (int)TestContext.CurrentContext.Random.NextUInt() & (int)Fpsr.Qc;
+            int fpscr = (int)Random.Shared.NextUInt() & (int)Fpsr.Qc;
 
             SingleOpcode(opcode, v0: v0, v1: v1, v2: v2, fpscr: fpscr);
 

@@ -1,13 +1,19 @@
-#define AluRs32
+#define AluImm32
 
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("AluImm32")]
+    [Collection("AluImm32")]
     public sealed class CpuTestAluImm32 : CpuTest32
     {
-#if AluRs32
+        public CpuTestAluImm32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
+#if AluImm32
 
         #region "ValueSource (Opcodes)"
         private static uint[] Opcodes()
@@ -34,17 +40,18 @@ namespace Ryujinx.Tests.Cpu
 
         private const int RndCnt = 2;
 
-        [Test, Pairwise]
-        public void TestCpuTestAluImm32([ValueSource(nameof(Opcodes))] uint opcode,
-                                        [Values(0u, 13u)] uint rd,
-                                        [Values(1u, 13u)] uint rn,
-                                        [Random(RndCnt)] uint imm,
-                                        [Random(RndCnt)] uint wn,
-                                        [Values(true, false)] bool carryIn)
+        [Theory]
+        [PairwiseData]
+        public void TestCpuTestAluImm32([CombinatorialMemberData(nameof(Opcodes))] uint opcode,
+                                        [CombinatorialValues(0u, 13u)] uint rd,
+                                        [CombinatorialValues(1u, 13u)] uint rn,
+                                        [CombinatorialRandomData(Count = RndCnt)] uint imm,
+                                        [CombinatorialRandomData(Count = RndCnt)] uint wn,
+                                        [CombinatorialValues(true, false)] bool carryIn)
         {
             opcode |= ((imm & 0xfff) << 0) | ((rn & 15) << 16) | ((rd & 15) << 12);
 
-            uint sp = TestContext.CurrentContext.Random.NextUInt();
+            uint sp = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r1: wn, sp: sp, carry: carryIn);
 

@@ -1,14 +1,20 @@
 #define Misc32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("Misc32")]
+    [Collection("Misc32")]
     public sealed class CpuTestMisc32 : CpuTest32
     {
+        public CpuTestMisc32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if Misc32
 
         #region "ValueSource (Types)"
@@ -45,7 +51,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
                 ulong rnd1 = GenNormalS();
                 ulong rnd2 = GenSubnormalS();
 
@@ -61,28 +67,29 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noInfs = false;
         private static readonly bool _noNaNs = false;
 
-        [Test, Pairwise]
-        public void Vmsr_Vcmp_Vmrs([ValueSource(nameof(_1S_F_))] ulong a,
-                                   [ValueSource(nameof(_1S_F_))] ulong b,
-                                   [Values] bool mode1,
-                                   [Values] bool mode2,
-                                   [Values] bool mode3)
+        [Theory]
+        [PairwiseData]
+        public void Vmsr_Vcmp_Vmrs([CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_1S_F_))] ulong b,
+                                   bool mode1,
+                                   bool mode2,
+                                   bool mode3)
         {
             V128 v4 = MakeVectorE0(a);
             V128 v5 = MakeVectorE0(b);
 
             uint r0 = mode1
-                ? TestContext.CurrentContext.Random.NextUInt(0xf) << 28
-                : TestContext.CurrentContext.Random.NextUInt();
+                ? Random.Shared.NextUInt(0xf) << 28
+                : Random.Shared.NextUInt();
 
-            bool v = mode3 && TestContext.CurrentContext.Random.NextBool();
-            bool c = mode3 && TestContext.CurrentContext.Random.NextBool();
-            bool z = mode3 && TestContext.CurrentContext.Random.NextBool();
-            bool n = mode3 && TestContext.CurrentContext.Random.NextBool();
+            bool v = mode3 && Random.Shared.NextBool();
+            bool c = mode3 && Random.Shared.NextBool();
+            bool z = mode3 && Random.Shared.NextBool();
+            bool n = mode3 && Random.Shared.NextBool();
 
             int fpscr = mode1
-                ? (int)TestContext.CurrentContext.Random.NextUInt()
-                : (int)TestContext.CurrentContext.Random.NextUInt(0xf) << 28;
+                ? (int)Random.Shared.NextUInt()
+                : (int)Random.Shared.NextUInt(0xf) << 28;
 
             SetContext(r0: r0, v4: v4, v5: v5, overflow: v, carry: c, zero: z, negative: n, fpscr: fpscr);
 

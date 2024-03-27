@@ -1,6 +1,5 @@
 using ARMeilleure.Signal;
 using ARMeilleure.Translation;
-using NUnit.Framework;
 using Ryujinx.Common.Memory.PartialUnmaps;
 using Ryujinx.Cpu;
 using Ryujinx.Cpu.Jit;
@@ -12,11 +11,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Xunit;
 
 namespace Ryujinx.Tests.Memory
 {
-    [TestFixture]
-    internal class PartialUnmaps
+    public class PartialUnmaps
     {
         private static Translator _translator;
 
@@ -56,11 +55,13 @@ namespace Ryujinx.Tests.Memory
             _translator ??= new Translator(new JitMemoryAllocator(), new MockMemoryManager(), true);
         }
 
-        [Test]
-        // Memory aliasing tests fail on CI at the moment.
-        [Platform(Exclude = "MacOsX")]
-        public void PartialUnmap([Values] bool readOnly)
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PartialUnmap(bool readOnly)
         {
+            Skip.If(OperatingSystem.IsMacOS(), "Memory aliasing tests fail on CI at the moment.");
+
             // Set up an address space to test partial unmapping.
             // Should register the signal handler to deal with this on Windows.
             ulong vaSize = 0x100000;
@@ -154,7 +155,7 @@ namespace Ryujinx.Tests.Memory
                 if (OperatingSystem.IsWindows())
                 {
                     // One thread should be present on the thread local map. Trimming should remove it.
-                    Assert.AreEqual(1, CountThreads(ref state));
+                    Assert.Equal(1, CountThreads(ref state));
                 }
 
                 shouldAccess = false;
@@ -177,7 +178,7 @@ namespace Ryujinx.Tests.Memory
                 {
                     state.TrimThreads();
 
-                    Assert.AreEqual(0, CountThreads(ref state));
+                    Assert.Equal(0, CountThreads(ref state));
                 }
 
                 /*
@@ -200,11 +201,10 @@ namespace Ryujinx.Tests.Memory
             }
         }
 
-        [Test]
-        // Memory aliasing tests fail on CI at the moment.
-        [Platform(Exclude = "MacOsX")]
+        [SkippableFact]
         public unsafe void PartialUnmapNative()
         {
+            Skip.If(OperatingSystem.IsMacOS(), "Memory aliasing tests fail on CI at the moment.");
 
             // Set up an address space to test partial unmapping.
             // Should register the signal handler to deal with this on Windows.
@@ -280,12 +280,12 @@ namespace Ryujinx.Tests.Memory
             }
         }
 
-        [Test]
-        // Only test in Windows, as this is only used on Windows and uses Windows APIs for trimming.
-        [Platform("Win")]
+        [SkippableFact]
         [SuppressMessage("Interoperability", "CA1416: Validate platform compatibility")]
         public void ThreadLocalMap()
         {
+            Skip.IfNot(OperatingSystem.IsWindows(), "This is only used on Windows and uses Windows APIs for trimming");
+
             PartialUnmapState.Reset();
             ref var state = ref PartialUnmapState.GetRef();
 
@@ -302,11 +302,11 @@ namespace Ryujinx.Tests.Memory
             testThread.Start();
             Thread.Sleep(200);
 
-            Assert.AreEqual(1, CountThreads(ref state));
+            Assert.Equal(1, CountThreads(ref state));
 
             // Trimming should not remove the thread as it's still active.
             state.TrimThreads();
-            Assert.AreEqual(1, CountThreads(ref state));
+            Assert.Equal(1, CountThreads(ref state));
 
             running = false;
 
@@ -314,14 +314,14 @@ namespace Ryujinx.Tests.Memory
 
             // Should trim now that it's inactive.
             state.TrimThreads();
-            Assert.AreEqual(0, CountThreads(ref state));
+            Assert.Equal(0, CountThreads(ref state));
         }
 
-        [Test]
-        // Only test in Windows, as this is only used on Windows and uses Windows APIs for trimming.
-        [Platform("Win")]
+        [SkippableFact]
         public unsafe void ThreadLocalMapNative()
         {
+            Skip.IfNot(OperatingSystem.IsWindows(), "This is only used on Windows and uses Windows APIs for trimming");
+
             EnsureTranslator();
 
             PartialUnmapState.Reset();
@@ -335,39 +335,39 @@ namespace Ryujinx.Tests.Memory
                 for (int i = 0; i < ThreadLocalMap<int>.MapSize; i++)
                 {
                     // Should obtain the index matching the call #.
-                    Assert.AreEqual(i, getOrReserve(i + 1, i));
+                    Assert.Equal(i, getOrReserve(i + 1, i));
 
                     // Check that this and all previously reserved thread IDs and struct contents are intact.
                     for (int j = 0; j <= i; j++)
                     {
-                        Assert.AreEqual(j + 1, state.LocalCounts.ThreadIds[j]);
-                        Assert.AreEqual(j, state.LocalCounts.Structs[j]);
+                        Assert.Equal(j + 1, state.LocalCounts.ThreadIds[j]);
+                        Assert.Equal(j, state.LocalCounts.Structs[j]);
                     }
                 }
 
                 // Trying to reserve again when the map is full should return -1.
-                Assert.AreEqual(-1, getOrReserve(200, 0));
+                Assert.Equal(-1, getOrReserve(200, 0));
 
                 for (int i = 0; i < ThreadLocalMap<int>.MapSize; i++)
                 {
                     // Should obtain the index matching the call #, as it already exists.
-                    Assert.AreEqual(i, getOrReserve(i + 1, -1));
+                    Assert.Equal(i, getOrReserve(i + 1, -1));
 
                     // The struct should not be reset to -1.
-                    Assert.AreEqual(i, state.LocalCounts.Structs[i]);
+                    Assert.Equal(i, state.LocalCounts.Structs[i]);
                 }
 
                 // Clear one of the ids as if it were freed.
                 state.LocalCounts.ThreadIds[13] = 0;
 
                 // GetOrReserve should now obtain and return 13.
-                Assert.AreEqual(13, getOrReserve(300, 301));
-                Assert.AreEqual(300, state.LocalCounts.ThreadIds[13]);
-                Assert.AreEqual(301, state.LocalCounts.Structs[13]);
+                Assert.Equal(13, getOrReserve(300, 301));
+                Assert.Equal(300, state.LocalCounts.ThreadIds[13]);
+                Assert.Equal(301, state.LocalCounts.Structs[13]);
             }
         }
 
-        [Test]
+        [Fact]
         public void NativeReaderWriterLock()
         {
             var rwLock = new NativeReaderWriterLock();

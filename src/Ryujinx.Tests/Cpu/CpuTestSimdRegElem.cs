@@ -1,13 +1,18 @@
 #define SimdRegElem
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdRegElem")]
+    [Collection("SimdRegElem")]
     public sealed class CpuTestSimdRegElem : CpuTest
     {
+        public CpuTestSimdRegElem(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdRegElem
 
         #region "ValueSource (Types)"
@@ -81,16 +86,17 @@ namespace Ryujinx.Tests.Cpu
         #endregion
 
 
-        [Test, Pairwise]
-        public void Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_4H_8H([ValueSource(nameof(_Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_4H_8H_))] uint opcodes,
-                                                          [Values(0u)] uint rd,
-                                                          [Values(1u, 0u)] uint rn,
-                                                          [Values(2u, 0u)] uint rm,
-                                                          [ValueSource(nameof(_4H_))] ulong z,
-                                                          [ValueSource(nameof(_4H_))] ulong a,
-                                                          [ValueSource(nameof(_4H_))] ulong b,
-                                                          [Values(0u, 7u)] uint index,
-                                                          [Values(0b0u, 0b1u)] uint q) // <4H, 8H>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_4H_8H([CombinatorialMemberData(nameof(_Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_4H_8H_))] uint opcodes,
+                                                          [CombinatorialValues(0u)] uint rd,
+                                                          [CombinatorialValues(1u, 0u)] uint rn,
+                                                          [CombinatorialValues(2u, 0u)] uint rm,
+                                                          [CombinatorialMemberData(nameof(_4H_))] ulong z,
+                                                          [CombinatorialMemberData(nameof(_4H_))] ulong a,
+                                                          [CombinatorialMemberData(nameof(_4H_))] ulong b,
+                                                          [CombinatorialValues(0u, 7u)] uint index,
+                                                          [CombinatorialValues(0b0u, 0b1u)] uint q) // <4H, 8H>
         {
             uint h = (index >> 2) & 1;
             uint l = (index >> 1) & 1;
@@ -109,16 +115,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise]
-        public void Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_2S_4S([ValueSource(nameof(_Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_2S_4S_))] uint opcodes,
-                                                          [Values(0u)] uint rd,
-                                                          [Values(1u, 0u)] uint rn,
-                                                          [Values(2u, 0u)] uint rm,
-                                                          [ValueSource(nameof(_2S_))] ulong z,
-                                                          [ValueSource(nameof(_2S_))] ulong a,
-                                                          [ValueSource(nameof(_2S_))] ulong b,
-                                                          [Values(0u, 1u, 2u, 3u)] uint index,
-                                                          [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_2S_4S([CombinatorialMemberData(nameof(_Mla_Mls_Mul_Sqdmulh_Sqrdmulh_Ve_2S_4S_))] uint opcodes,
+                                                          [CombinatorialValues(0u)] uint rd,
+                                                          [CombinatorialValues(1u, 0u)] uint rn,
+                                                          [CombinatorialValues(2u, 0u)] uint rm,
+                                                          [CombinatorialMemberData(nameof(_2S_))] ulong z,
+                                                          [CombinatorialMemberData(nameof(_2S_))] ulong a,
+                                                          [CombinatorialMemberData(nameof(_2S_))] ulong b,
+                                                          [CombinatorialValues(0u, 1u, 2u, 3u)] uint index,
+                                                          [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             uint h = (index >> 1) & 1;
             uint l = index & 1;
@@ -136,16 +143,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Qc);
         }
 
-        [Test, Pairwise]
-        public void SU_Mlal_Mlsl_Mull_Ve_4H4S_8H4S([ValueSource(nameof(_SU_Mlal_Mlsl_Mull_Ve_4H4S_8H4S_))] uint opcodes,
-                                                   [Values(0u)] uint rd,
-                                                   [Values(1u, 0u)] uint rn,
-                                                   [Values(2u, 0u)] uint rm,
-                                                   [ValueSource(nameof(_4H_))] ulong z,
-                                                   [ValueSource(nameof(_4H_))] ulong a,
-                                                   [ValueSource(nameof(_4H_))] ulong b,
-                                                   [Values(0u, 7u)] uint index,
-                                                   [Values(0b0u, 0b1u)] uint q) // <4H4S, 8H4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Mlal_Mlsl_Mull_Ve_4H4S_8H4S([CombinatorialMemberData(nameof(_SU_Mlal_Mlsl_Mull_Ve_4H4S_8H4S_))] uint opcodes,
+                                                   [CombinatorialValues(0u)] uint rd,
+                                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                                   [CombinatorialMemberData(nameof(_4H_))] ulong z,
+                                                   [CombinatorialMemberData(nameof(_4H_))] ulong a,
+                                                   [CombinatorialMemberData(nameof(_4H_))] ulong b,
+                                                   [CombinatorialValues(0u, 7u)] uint index,
+                                                   [CombinatorialValues(0b0u, 0b1u)] uint q) // <4H4S, 8H4S>
         {
             uint h = (index >> 2) & 1;
             uint l = (index >> 1) & 1;
@@ -164,16 +172,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void SU_Mlal_Mlsl_Mull_Ve_2S2D_4S2D([ValueSource(nameof(_SU_Mlal_Mlsl_Mull_Ve_2S2D_4S2D_))] uint opcodes,
-                                                   [Values(0u)] uint rd,
-                                                   [Values(1u, 0u)] uint rn,
-                                                   [Values(2u, 0u)] uint rm,
-                                                   [ValueSource(nameof(_2S_))] ulong z,
-                                                   [ValueSource(nameof(_2S_))] ulong a,
-                                                   [ValueSource(nameof(_2S_))] ulong b,
-                                                   [Values(0u, 1u, 2u, 3u)] uint index,
-                                                   [Values(0b0u, 0b1u)] uint q) // <2S2D, 4S2D>
+        [SkippableTheory]
+        [PairwiseData]
+        public void SU_Mlal_Mlsl_Mull_Ve_2S2D_4S2D([CombinatorialMemberData(nameof(_SU_Mlal_Mlsl_Mull_Ve_2S2D_4S2D_))] uint opcodes,
+                                                   [CombinatorialValues(0u)] uint rd,
+                                                   [CombinatorialValues(1u, 0u)] uint rn,
+                                                   [CombinatorialValues(2u, 0u)] uint rm,
+                                                   [CombinatorialMemberData(nameof(_2S_))] ulong z,
+                                                   [CombinatorialMemberData(nameof(_2S_))] ulong a,
+                                                   [CombinatorialMemberData(nameof(_2S_))] ulong b,
+                                                   [CombinatorialValues(0u, 1u, 2u, 3u)] uint index,
+                                                   [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S2D, 4S2D>
         {
             uint h = (index >> 1) & 1;
             uint l = index & 1;

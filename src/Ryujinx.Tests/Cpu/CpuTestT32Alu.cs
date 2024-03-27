@@ -1,22 +1,18 @@
-using NUnit.Framework;
+#define T32Alu
+
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("T32Alu")]
+    [Collection("T32Alu")]
     public sealed class CpuTestT32Alu : CpuTest32
     {
-        [Test]
-        public void TestT32AluRsImm([ValueSource(nameof(RsImmTestCases))] PrecomputedThumbTestCase test)
+        public CpuTestT32Alu(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
-            RunPrecomputedTestCase(test);
         }
 
-        [Test]
-        public void TestT32AluImm([ValueSource(nameof(ImmTestCases))] PrecomputedThumbTestCase test)
-        {
-            RunPrecomputedTestCase(test);
-        }
-
+#if T32Alu
         public static readonly PrecomputedThumbTestCase[] RsImmTestCases =
         {
             // TST (reg)
@@ -1010,5 +1006,23 @@ namespace Ryujinx.Tests.Cpu
                 FinalRegs = new uint[] { 0x2bb00694, 0x1c56a4c0, 0xc5cc4a3e, 0xc627c1ab, 0xe0cc0e5c, 0x1f3d71a4, 0x897d57b8, 0x0d4a7208, 0x433b7b88, 0xaaf24fd6, 0x2438f5f8, 0x9875e64a, 0xda475f22, 0x66d5e2e7, 0x00000001, 0x700001f0 },
             },
         };
+
+        public static readonly EnumerableTheoryData<PrecomputedThumbTestCase> TestData_RsImm = new(RsImmTestCases);
+        public static readonly EnumerableTheoryData<PrecomputedThumbTestCase> TestData_Imm = new(ImmTestCases);
+
+        [Theory]
+        [MemberData(nameof(TestData_RsImm))]
+        public void TestT32AluRsImm(PrecomputedThumbTestCase test)
+        {
+            RunPrecomputedTestCase(test);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestData_Imm))]
+        public void TestT32AluImm(PrecomputedThumbTestCase test)
+        {
+            RunPrecomputedTestCase(test);
+        }
+#endif
     }
 }

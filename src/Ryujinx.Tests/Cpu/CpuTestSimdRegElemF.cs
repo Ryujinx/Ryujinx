@@ -1,14 +1,20 @@
 #define SimdRegElemF
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
+using Xunit;
 using System.Collections.Generic;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdRegElemF")]
+    [Collection("SimdRegElemF")]
     public sealed class CpuTestSimdRegElemF : CpuTest
     {
+        public CpuTestSimdRegElemF(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdRegElemF
 
         #region "ValueSource (Types)"
@@ -45,7 +51,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCnt; cnt++)
             {
-                ulong grbg = TestContext.CurrentContext.Random.NextUInt();
+                ulong grbg = Random.Shared.NextUInt();
                 ulong rnd1 = GenNormalS();
                 ulong rnd2 = GenSubnormalS();
 
@@ -218,13 +224,13 @@ namespace Ryujinx.Tests.Cpu
         private static readonly bool _noNaNs = false;
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mla_Mls_Se_S([ValueSource(nameof(_F_Mla_Mls_Se_S_))] uint opcodes,
-                                   [ValueSource(nameof(_1S_F_))] ulong z,
-                                   [ValueSource(nameof(_1S_F_))] ulong a,
-                                   [ValueSource(nameof(_2S_F_))] ulong b,
-                                   [Values(0u, 1u, 2u, 3u)] uint index)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mla_Mls_Se_S([CombinatorialMemberData(nameof(_F_Mla_Mls_Se_S_))] uint opcodes,
+                                   [CombinatorialMemberData(nameof(_1S_F_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                   [CombinatorialValues(0u, 1u, 2u, 3u)] uint index)
         {
             uint h = (index >> 1) & 1;
             uint l = index & 1;
@@ -235,7 +241,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -246,13 +252,13 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mla_Mls_Se_D([ValueSource(nameof(_F_Mla_Mls_Se_D_))] uint opcodes,
-                                   [ValueSource(nameof(_1D_F_))] ulong z,
-                                   [ValueSource(nameof(_1D_F_))] ulong a,
-                                   [ValueSource(nameof(_1D_F_))] ulong b,
-                                   [Values(0u, 1u)] uint index)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mla_Mls_Se_D([CombinatorialMemberData(nameof(_F_Mla_Mls_Se_D_))] uint opcodes,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                   [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                                   [CombinatorialValues(0u, 1u)] uint index)
         {
             uint h = index & 1;
 
@@ -262,7 +268,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -273,17 +279,17 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mla_Mls_Ve_2S_4S([ValueSource(nameof(_F_Mla_Mls_Ve_2S_4S_))] uint opcodes,
-                                       [Values(0u)] uint rd,
-                                       [Values(1u, 0u)] uint rn,
-                                       [Values(2u, 0u)] uint rm,
-                                       [ValueSource(nameof(_2S_F_))] ulong z,
-                                       [ValueSource(nameof(_2S_F_))] ulong a,
-                                       [ValueSource(nameof(_2S_F_))] ulong b,
-                                       [Values(0u, 1u, 2u, 3u)] uint index,
-                                       [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mla_Mls_Ve_2S_4S([CombinatorialMemberData(nameof(_F_Mla_Mls_Ve_2S_4S_))] uint opcodes,
+                                       [CombinatorialValues(0u)] uint rd,
+                                       [CombinatorialValues(1u, 0u)] uint rn,
+                                       [CombinatorialValues(2u, 0u)] uint rm,
+                                       [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                       [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                       [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                       [CombinatorialValues(0u, 1u, 2u, 3u)] uint index,
+                                       [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             uint h = (index >> 1) & 1;
             uint l = index & 1;
@@ -296,7 +302,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -307,16 +313,16 @@ namespace Ryujinx.Tests.Cpu
         }
 
         // Fused.
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mla_Mls_Ve_2D([ValueSource(nameof(_F_Mla_Mls_Ve_2D_))] uint opcodes,
-                                    [Values(0u)] uint rd,
-                                    [Values(1u, 0u)] uint rn,
-                                    [Values(2u, 0u)] uint rm,
-                                    [ValueSource(nameof(_1D_F_))] ulong z,
-                                    [ValueSource(nameof(_1D_F_))] ulong a,
-                                    [ValueSource(nameof(_1D_F_))] ulong b,
-                                    [Values(0u, 1u)] uint index)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mla_Mls_Ve_2D([CombinatorialMemberData(nameof(_F_Mla_Mls_Ve_2D_))] uint opcodes,
+                                    [CombinatorialValues(0u)] uint rd,
+                                    [CombinatorialValues(1u, 0u)] uint rn,
+                                    [CombinatorialValues(2u, 0u)] uint rm,
+                                    [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                    [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                                    [CombinatorialValues(0u, 1u)] uint index)
         {
             uint h = index & 1;
 
@@ -327,7 +333,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -337,24 +343,24 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(Fpsr.Ioc | Fpsr.Idc, FpSkips.IfUnderflow, FpTolerances.UpToOneUlpsD);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mul_Mulx_Se_S([ValueSource(nameof(_F_Mul_Mulx_Se_S_))] uint opcodes,
-                                    [ValueSource(nameof(_1S_F_))] ulong a,
-                                    [ValueSource(nameof(_2S_F_))] ulong b,
-                                    [Values(0u, 1u, 2u, 3u)] uint index)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mul_Mulx_Se_S([CombinatorialMemberData(nameof(_F_Mul_Mulx_Se_S_))] uint opcodes,
+                                    [CombinatorialMemberData(nameof(_1S_F_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                    [CombinatorialValues(0u, 1u, 2u, 3u)] uint index)
         {
             uint h = (index >> 1) & 1;
             uint l = index & 1;
 
             opcodes |= (l << 21) | (h << 11);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE0E1(z, z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -364,23 +370,23 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mul_Mulx_Se_D([ValueSource(nameof(_F_Mul_Mulx_Se_D_))] uint opcodes,
-                                    [ValueSource(nameof(_1D_F_))] ulong a,
-                                    [ValueSource(nameof(_1D_F_))] ulong b,
-                                    [Values(0u, 1u)] uint index)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mul_Mulx_Se_D([CombinatorialMemberData(nameof(_F_Mul_Mulx_Se_D_))] uint opcodes,
+                                    [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                    [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                                    [CombinatorialValues(0u, 1u)] uint index)
         {
             uint h = index & 1;
 
             opcodes |= h << 11;
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
             V128 v1 = MakeVectorE0(a);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -390,17 +396,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mul_Mulx_Ve_2S_4S([ValueSource(nameof(_F_Mul_Mulx_Ve_2S_4S_))] uint opcodes,
-                                        [Values(0u)] uint rd,
-                                        [Values(1u, 0u)] uint rn,
-                                        [Values(2u, 0u)] uint rm,
-                                        [ValueSource(nameof(_2S_F_))] ulong z,
-                                        [ValueSource(nameof(_2S_F_))] ulong a,
-                                        [ValueSource(nameof(_2S_F_))] ulong b,
-                                        [Values(0u, 1u, 2u, 3u)] uint index,
-                                        [Values(0b0u, 0b1u)] uint q) // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mul_Mulx_Ve_2S_4S([CombinatorialMemberData(nameof(_F_Mul_Mulx_Ve_2S_4S_))] uint opcodes,
+                                        [CombinatorialValues(0u)] uint rd,
+                                        [CombinatorialValues(1u, 0u)] uint rn,
+                                        [CombinatorialValues(2u, 0u)] uint rm,
+                                        [CombinatorialMemberData(nameof(_2S_F_))] ulong z,
+                                        [CombinatorialMemberData(nameof(_2S_F_))] ulong a,
+                                        [CombinatorialMemberData(nameof(_2S_F_))] ulong b,
+                                        [CombinatorialValues(0u, 1u, 2u, 3u)] uint index,
+                                        [CombinatorialValues(0b0u, 0b1u)] uint q) // <2S, 4S>
         {
             uint h = (index >> 1) & 1;
             uint l = index & 1;
@@ -413,7 +419,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a * q);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);
@@ -423,16 +429,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn(fpsrMask: Fpsr.Ioc | Fpsr.Idc);
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mul_Mulx_Ve_2D([ValueSource(nameof(_F_Mul_Mulx_Ve_2D_))] uint opcodes,
-                                     [Values(0u)] uint rd,
-                                     [Values(1u, 0u)] uint rn,
-                                     [Values(2u, 0u)] uint rm,
-                                     [ValueSource(nameof(_1D_F_))] ulong z,
-                                     [ValueSource(nameof(_1D_F_))] ulong a,
-                                     [ValueSource(nameof(_1D_F_))] ulong b,
-                                     [Values(0u, 1u)] uint index)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mul_Mulx_Ve_2D([CombinatorialMemberData(nameof(_F_Mul_Mulx_Ve_2D_))] uint opcodes,
+                                     [CombinatorialValues(0u)] uint rd,
+                                     [CombinatorialValues(1u, 0u)] uint rn,
+                                     [CombinatorialValues(2u, 0u)] uint rm,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong a,
+                                     [CombinatorialMemberData(nameof(_1D_F_))] ulong b,
+                                     [CombinatorialValues(0u, 1u)] uint index)
         {
             uint h = index & 1;
 
@@ -443,7 +449,7 @@ namespace Ryujinx.Tests.Cpu
             V128 v1 = MakeVectorE0E1(a, a);
             V128 v2 = MakeVectorE0E1(b, b * h);
 
-            int rnd = (int)TestContext.CurrentContext.Random.NextUInt();
+            int rnd = (int)Random.Shared.NextUInt();
 
             int fpcr = rnd & (1 << (int)Fpcr.Fz);
             fpcr |= rnd & (1 << (int)Fpcr.Dn);

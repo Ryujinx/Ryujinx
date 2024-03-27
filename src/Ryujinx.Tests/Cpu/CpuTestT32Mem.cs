@@ -1,17 +1,19 @@
-using NUnit.Framework;
+#define T32Mem
+
 using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("T32Mem")]
+    [Collection("T32Mem")]
     public sealed class CpuTestT32Mem : CpuTest32
     {
-        [Test]
-        public void TestT32MemImm([ValueSource(nameof(ImmTestCases))] PrecomputedMemoryThumbTestCase test)
+        public CpuTestT32Mem(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
-            RunPrecomputedTestCase(test);
         }
 
+#if T32Mem
         public static readonly PrecomputedMemoryThumbTestCase[] ImmTestCases =
         {
             // STRB (imm8)
@@ -517,5 +519,15 @@ namespace Ryujinx.Tests.Cpu
                 MemoryDelta = Array.Empty<(ulong Address, ushort Value)>(),
             },
         };
+
+        public static readonly EnumerableTheoryData<PrecomputedMemoryThumbTestCase> TestData = new(ImmTestCases);
+
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void TestT32MemImm(PrecomputedMemoryThumbTestCase test)
+        {
+            RunPrecomputedTestCase(test);
+        }
+#endif
     }
 }

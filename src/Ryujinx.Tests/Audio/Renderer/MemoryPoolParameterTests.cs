@@ -1,16 +1,16 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer
 {
-    class MemoryPoolParameterTests
+    public class MemoryPoolParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x20, Unsafe.SizeOf<MemoryPoolInParameter>());
-            Assert.AreEqual(0x10, Unsafe.SizeOf<MemoryPoolOutStatus>());
+            Assert.Equal(0x20, Unsafe.SizeOf<MemoryPoolInParameter>());
+            Assert.Equal(0x10, Unsafe.SizeOf<MemoryPoolOutStatus>());
         }
     }
 }

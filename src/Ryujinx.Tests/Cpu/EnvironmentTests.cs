@@ -1,14 +1,14 @@
 using ARMeilleure.Translation;
-using NUnit.Framework;
 using Ryujinx.Cpu.Jit;
 using Ryujinx.Tests.Memory;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Cpu
 {
-    internal class EnvironmentTests
+    public class EnvironmentTests
     {
 #pragma warning disable IDE0052 // Remove unread private member
         private static Translator _translator;
@@ -36,14 +36,14 @@ namespace Ryujinx.Tests.Cpu
         /// This test ensures that managed methods do not reset floating point control flags.
         /// This is used to avoid changing control flags when running methods that don't require it, such as SVC calls, software memory...
         /// </summary>
-        [Test]
+        [Fact]
         public void FpFlagsPInvoke()
         {
             EnsureTranslator();
 
             // Subnormal results are not flushed to zero by default.
             // This operation should not be allowed to do constant propagation, hence the methods that explicitly disallow inlining.
-            Assert.AreNotEqual(GetDenormal() + GetZero(), 0f);
+            Assert.NotEqual(0f, GetDenormal() + GetZero());
 
             bool methodCalled = false;
             bool isFz = false;
@@ -56,7 +56,7 @@ namespace Ryujinx.Tests.Cpu
             int result = method(Marshal.GetFunctionPointerForDelegate(ManagedMethod));
 
             // Subnormal results are not flushed to zero by default, which we should have returned to exiting the method.
-            Assert.AreNotEqual(GetDenormal() + GetZero(), 0f);
+            Assert.NotEqual(0f, GetDenormal() + GetZero());
 
             Assert.True(result == 0);
             Assert.True(methodCalled);

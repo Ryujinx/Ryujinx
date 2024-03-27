@@ -1,20 +1,30 @@
+#define Thumb
+
 using ARMeilleure.State;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("Thumb")]
+    [Collection("Thumb")]
     public sealed class CpuTestThumb : CpuTest32
     {
+        public CpuTestThumb(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
+#if Thumb
+
         private const int RndCnt = 2;
 
-        public static uint RotateRight(uint value, int count)
+        private static uint RotateRight(uint value, int count)
         {
             return (value >> count) | (value << (32 - count));
         }
 
-        [Test, Pairwise]
-        public void ShiftImm([Range(0u, 2u)] uint shiftType, [Range(1u, 0x1fu)] uint shiftImm, [Random(RndCnt)] uint w1, [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void ShiftImm([CombinatorialRange(0u, 2u, 1u)] uint shiftType, [CombinatorialRange(1u, 0x1fu, 1u)] uint shiftImm, [CombinatorialRandomData(Count = RndCnt)] uint w1, [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             uint opcode = 0x0000; // MOVS <Rd>, <Rm>, <shift> #<amount>
 
@@ -27,19 +37,20 @@ namespace Ryujinx.Tests.Cpu
             switch (shiftType)
             {
                 case 0:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo((w2 << (int)shiftImm) & 0xffffffffu));
+                    Assert.Equal((w2 << (int)shiftImm) & 0xffffffffu, GetContext().GetX(1));
                     break;
                 case 1:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo((w2 >> (int)shiftImm) & 0xffffffffu));
+                    Assert.Equal((w2 >> (int)shiftImm) & 0xffffffffu, GetContext().GetX(1));
                     break;
                 case 2:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(((int)w2 >> (int)shiftImm) & 0xffffffffu));
+                    Assert.Equal((ulong)((int)w2 >> (int)shiftImm) & 0xffffffffu, GetContext().GetX(1));
                     break;
             }
         }
 
-        [Test, Pairwise]
-        public void AddSubReg([Range(0u, 1u)] uint op, [Random(RndCnt)] uint w1, [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void AddSubReg([CombinatorialRange(0u, 1u, 1u)] uint op, [CombinatorialRandomData(Count = RndCnt)] uint w1, [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             uint opcode = 0x1800; // ADDS <Rd>, <Rn>, <Rm>
 
@@ -53,16 +64,17 @@ namespace Ryujinx.Tests.Cpu
             switch (op)
             {
                 case 0:
-                    Assert.That(GetContext().GetX(0), Is.EqualTo((w1 + w2) & 0xffffffffu));
+                    Assert.Equal((w1 + w2) & 0xffffffffu, GetContext().GetX(0));
                     break;
                 case 1:
-                    Assert.That(GetContext().GetX(0), Is.EqualTo((w1 - w2) & 0xffffffffu));
+                    Assert.Equal((w1 - w2) & 0xffffffffu, GetContext().GetX(0));
                     break;
             }
         }
 
-        [Test, Pairwise]
-        public void AddSubImm3([Range(0u, 1u)] uint op, [Range(0u, 7u)] uint imm, [Random(RndCnt)] uint w1)
+        [Theory]
+        [PairwiseData]
+        public void AddSubImm3([CombinatorialRange(0u, 1u, 1u)] uint op, [CombinatorialRange(0u, 7u, 1u)] uint imm, [CombinatorialRandomData(Count = RndCnt)] uint w1)
         {
             uint opcode = 0x1c00; // ADDS <Rd>, <Rn>, #<imm3>
 
@@ -75,16 +87,17 @@ namespace Ryujinx.Tests.Cpu
             switch (op)
             {
                 case 0:
-                    Assert.That(GetContext().GetX(0), Is.EqualTo((w1 + imm) & 0xffffffffu));
+                    Assert.Equal((w1 + imm) & 0xffffffffu, GetContext().GetX(0));
                     break;
                 case 1:
-                    Assert.That(GetContext().GetX(0), Is.EqualTo((w1 - imm) & 0xffffffffu));
+                    Assert.Equal((w1 - imm) & 0xffffffffu, GetContext().GetX(0));
                     break;
             }
         }
 
-        [Test, Pairwise]
-        public void AluImm8([Range(0u, 3u)] uint op, [Random(RndCnt)] uint imm, [Random(RndCnt)] uint w1)
+        [Theory]
+        [PairwiseData]
+        public void AluImm8([CombinatorialRange(0u, 3u, 1u)] uint op, [CombinatorialRandomData(Count = RndCnt)] uint imm, [CombinatorialRandomData(Count = RndCnt)] uint w1)
         {
             imm &= 0xff;
 
@@ -98,31 +111,32 @@ namespace Ryujinx.Tests.Cpu
             switch (op)
             {
                 case 0:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(imm));
+                    Assert.Equal(imm, GetContext().GetX(1));
                     break;
                 case 1:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1));
+                    Assert.Equal(w1, GetContext().GetX(1));
                 cmpFlags:
                     {
                         uint result = w1 - imm;
                         uint overflow = (result ^ w1) & (w1 ^ imm);
-                        Assert.That(GetContext().GetPstateFlag(PState.NFlag), Is.EqualTo((result >> 31) != 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.ZFlag), Is.EqualTo(result == 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.CFlag), Is.EqualTo(w1 >= imm));
-                        Assert.That(GetContext().GetPstateFlag(PState.VFlag), Is.EqualTo((overflow >> 31) != 0));
+                        Assert.Equal((result >> 31) != 0, GetContext().GetPstateFlag(PState.NFlag));
+                        Assert.Equal(result == 0, GetContext().GetPstateFlag(PState.ZFlag));
+                        Assert.Equal(w1 >= imm, GetContext().GetPstateFlag(PState.CFlag));
+                        Assert.Equal((overflow >> 31) != 0, GetContext().GetPstateFlag(PState.VFlag));
                     }
                     break;
                 case 2:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo((w1 + imm) & 0xffffffffu));
+                    Assert.Equal((w1 + imm) & 0xffffffffu, GetContext().GetX(1));
                     break;
                 case 3:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo((w1 - imm) & 0xffffffffu));
+                    Assert.Equal((w1 - imm) & 0xffffffffu, GetContext().GetX(1));
                     goto cmpFlags;
             }
         }
 
-        [Test, Pairwise]
-        public void AluRegLow([Range(0u, 0xfu)] uint op, [Random(RndCnt)] uint w1, [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void AluRegLow([CombinatorialRange(0u, 0xfu, 1u)] uint op, [CombinatorialRandomData(Count = RndCnt)] uint w1, [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             uint opcode = 0x4000; // ANDS <Rdn>, <Rm>
 
@@ -136,79 +150,80 @@ namespace Ryujinx.Tests.Cpu
             switch (op)
             {
                 case 0:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 & w2));
+                    Assert.Equal(w1 & w2, GetContext().GetX(1));
                     break;
                 case 1:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 ^ w2));
+                    Assert.Equal(w1 ^ w2, GetContext().GetX(1));
                     break;
                 case 2:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(shift >= 32 ? 0 : w1 << (int)shift));
+                    Assert.Equal(shift >= 32 ? 0 : w1 << (int)shift, GetContext().GetX(1));
                     break;
                 case 3:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(shift >= 32 ? 0 : w1 >> (int)shift));
+                    Assert.Equal(shift >= 32 ? 0 : w1 >> (int)shift, GetContext().GetX(1));
                     break;
                 case 4:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(shift >= 32 ? (uint)((int)w1 >> 31) : (uint)((int)w1 >> (int)shift)));
+                    Assert.Equal(shift >= 32 ? (uint)((int)w1 >> 31) : (uint)((int)w1 >> (int)shift), GetContext().GetX(1));
                     break;
                 case 5:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 + w2));
+                    Assert.Equal(w1 + w2, GetContext().GetX(1));
                     break;
                 case 6:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 + ~w2));
+                    Assert.Equal(w1 + ~w2, GetContext().GetX(1));
                     break;
                 case 7:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(RotateRight(w1, (int)shift & 31)));
+                    Assert.Equal(RotateRight(w1, (int)shift & 31), GetContext().GetX(1));
                     break;
                 case 8:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1));
+                    Assert.Equal(w1, GetContext().GetX(1));
                     {
                         uint result = w1 & w2;
-                        Assert.That(GetContext().GetPstateFlag(PState.NFlag), Is.EqualTo((result >> 31) != 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.ZFlag), Is.EqualTo(result == 0));
+                        Assert.Equal((result >> 31) != 0, GetContext().GetPstateFlag(PState.NFlag));
+                        Assert.Equal(result == 0, GetContext().GetPstateFlag(PState.ZFlag));
                     }
                     break;
                 case 9:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo((uint)-w2));
+                    Assert.Equal((uint)-w2, GetContext().GetX(1));
                     break;
                 case 10:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1));
+                    Assert.Equal(w1, GetContext().GetX(1));
                     {
                         uint result = w1 - w2;
                         uint overflow = (result ^ w1) & (w1 ^ w2);
-                        Assert.That(GetContext().GetPstateFlag(PState.NFlag), Is.EqualTo((result >> 31) != 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.ZFlag), Is.EqualTo(result == 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.CFlag), Is.EqualTo(w1 >= w2));
-                        Assert.That(GetContext().GetPstateFlag(PState.VFlag), Is.EqualTo((overflow >> 31) != 0));
+                        Assert.Equal((result >> 31) != 0, GetContext().GetPstateFlag(PState.NFlag));
+                        Assert.Equal(result == 0, GetContext().GetPstateFlag(PState.ZFlag));
+                        Assert.Equal(w1 >= w2, GetContext().GetPstateFlag(PState.CFlag));
+                        Assert.Equal((overflow >> 31) != 0, GetContext().GetPstateFlag(PState.VFlag));
                     }
                     break;
                 case 11:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1));
+                    Assert.Equal(w1, GetContext().GetX(1));
                     {
                         uint result = w1 + w2;
                         uint overflow = (result ^ w1) & ~(w1 ^ w2);
-                        Assert.That(GetContext().GetPstateFlag(PState.NFlag), Is.EqualTo((result >> 31) != 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.ZFlag), Is.EqualTo(result == 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.CFlag), Is.EqualTo(result < w1));
-                        Assert.That(GetContext().GetPstateFlag(PState.VFlag), Is.EqualTo((overflow >> 31) != 0));
+                        Assert.Equal((result >> 31) != 0, GetContext().GetPstateFlag(PState.NFlag));
+                        Assert.Equal(result == 0, GetContext().GetPstateFlag(PState.ZFlag));
+                        Assert.Equal(result < w1, GetContext().GetPstateFlag(PState.CFlag));
+                        Assert.Equal((overflow >> 31) != 0, GetContext().GetPstateFlag(PState.VFlag));
                     }
                     break;
                 case 12:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 | w2));
+                    Assert.Equal(w1 | w2, GetContext().GetX(1));
                     break;
                 case 13:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 * w2));
+                    Assert.Equal(w1 * w2, GetContext().GetX(1));
                     break;
                 case 14:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(w1 & ~w2));
+                    Assert.Equal(w1 & ~w2, GetContext().GetX(1));
                     break;
                 case 15:
-                    Assert.That(GetContext().GetX(1), Is.EqualTo(~w2));
+                    Assert.Equal(~w2, GetContext().GetX(1));
                     break;
             }
         }
 
-        [Test, Pairwise]
-        public void AluRegHigh([Range(0u, 2u)] uint op, [Range(0u, 13u)] uint rd, [Range(0u, 13u)] uint rm, [Random(RndCnt)] uint w1, [Random(RndCnt)] uint w2)
+        [Theory]
+        [PairwiseData]
+        public void AluRegHigh([CombinatorialRange(0u, 2u, 1u)] uint op, [CombinatorialRange(0u, 13u, 1u)] uint rd, [CombinatorialRange(0u, 13u, 1u)] uint rm, [CombinatorialRandomData(Count = RndCnt)] uint w1, [CombinatorialRandomData(Count = RndCnt)] uint w2)
         {
             if (rd == rm)
             {
@@ -231,27 +246,27 @@ namespace Ryujinx.Tests.Cpu
             switch (op)
             {
                 case 0:
-                    Assert.That(GetContext().GetX((int)rd), Is.EqualTo(w1 + w2));
+                    Assert.Equal(w1 + w2, GetContext().GetX((int)rd));
                     break;
                 case 1:
-                    Assert.That(GetContext().GetX((int)rd), Is.EqualTo(w1));
-                    Assert.That(GetContext().GetX((int)rm), Is.EqualTo(w2));
+                    Assert.Equal(w1, GetContext().GetX((int)rd));
+                    Assert.Equal(w2, GetContext().GetX((int)rm));
                     {
                         uint result = w1 - w2;
                         uint overflow = (result ^ w1) & (w1 ^ w2);
-                        Assert.That(GetContext().GetPstateFlag(PState.NFlag), Is.EqualTo((result >> 31) != 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.ZFlag), Is.EqualTo(result == 0));
-                        Assert.That(GetContext().GetPstateFlag(PState.CFlag), Is.EqualTo(w1 >= w2));
-                        Assert.That(GetContext().GetPstateFlag(PState.VFlag), Is.EqualTo((overflow >> 31) != 0));
+                        Assert.Equal((result >> 31) != 0, GetContext().GetPstateFlag(PState.NFlag));
+                        Assert.Equal(result == 0, GetContext().GetPstateFlag(PState.ZFlag));
+                        Assert.Equal(w1 >= w2, GetContext().GetPstateFlag(PState.CFlag));
+                        Assert.Equal((overflow >> 31) != 0, GetContext().GetPstateFlag(PState.VFlag));
                     }
                     break;
                 case 2:
-                    Assert.That(GetContext().GetX((int)rd), Is.EqualTo(w2));
+                    Assert.Equal(w2, GetContext().GetX((int)rd));
                     break;
             }
         }
 
-        [Test]
+        [Fact]
         public void SubSpTest()
         {
             ThumbOpcode(0xb0fd); // SUB SP, #0x1f4
@@ -262,22 +277,10 @@ namespace Ryujinx.Tests.Cpu
 
             ExecuteOpcodes(runUnicorn: false);
 
-            Assert.That(GetContext().GetX(13), Is.EqualTo(0x40079ba4));
+            Assert.Equal(0x40079ba4ul, GetContext().GetX(13));
         }
 
-        [Test]
-        public void TestRandomTestCases([ValueSource(nameof(RandomTestCases))] PrecomputedThumbTestCase test)
-        {
-            if (Size != 0x1000)
-            {
-                // TODO: Change it to depend on DataBaseAddress instead.
-                Assert.Ignore("This test currently only support 4KiB page size");
-            }
-
-            RunPrecomputedTestCase(test);
-        }
-
-        public static readonly PrecomputedThumbTestCase[] RandomTestCases =
+        private static readonly PrecomputedThumbTestCase[] _randomTestCases =
         {
             new()
             {
@@ -880,5 +883,18 @@ namespace Ryujinx.Tests.Cpu
                 FinalRegs = new uint[] { 0x000019d4, 0x00000000, 0x00001828, 0x7d000000, 0x977f681b, 0x0000182e, 0x00007d12, 0x00000067, 0x77b1c835, 0x00004100, 0x000010c8, 0x0000000e, 0x79708dab, 0x977f655b, 0x00000000, 0x200001d0 },
             },
         };
+
+        public static readonly EnumerableTheoryData<PrecomputedThumbTestCase> TestData_Random = new(_randomTestCases);
+
+        [SkippableTheory]
+        [MemberData(nameof(TestData_Random))]
+        public void RandomTestCases(PrecomputedThumbTestCase test)
+        {
+            // TODO: Change it to depend on DataBaseAddress instead.
+            Skip.If(Size != 0x1000, "This test currently only support 4KiB page size");
+
+            RunPrecomputedTestCase(test);
+        }
+#endif
     }
 }

@@ -1,16 +1,16 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer
 {
-    class EffectInfoParameterTests
+    public class EffectInfoParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0xC0, Unsafe.SizeOf<EffectInParameterVersion1>());
-            Assert.AreEqual(0xC0, Unsafe.SizeOf<EffectInParameterVersion2>());
+            Assert.Equal(0xC0, Unsafe.SizeOf<EffectInParameterVersion1>());
+            Assert.Equal(0xC0, Unsafe.SizeOf<EffectInParameterVersion2>());
         }
     }
 }

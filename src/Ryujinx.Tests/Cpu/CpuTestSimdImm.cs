@@ -1,14 +1,20 @@
 #define SimdImm
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using System;
+using Xunit;
 using System.Collections.Generic;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdImm")]
+    [Collection("SimdImm")]
     public sealed class CpuTestSimdImm : CpuTest
     {
+        public CpuTestSimdImm(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdImm
 
         #region "Helper methods"
@@ -71,7 +77,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCntImm8; cnt++)
             {
-                byte imm8 = TestContext.CurrentContext.Random.NextByte();
+                byte imm8 = Random.Shared.NextByte();
 
                 yield return imm8;
             }
@@ -86,7 +92,7 @@ namespace Ryujinx.Tests.Cpu
 
             for (int cnt = 1; cnt <= RndCntImm64; cnt++)
             {
-                byte imm8 = TestContext.CurrentContext.Random.NextByte();
+                byte imm8 = Random.Shared.NextByte();
 
                 yield return ExpandImm8(imm8);
             }
@@ -191,12 +197,13 @@ namespace Ryujinx.Tests.Cpu
         private const int RndCntImm8 = 2;
         private const int RndCntImm64 = 2;
 
-        [Test, Pairwise]
-        public void Bic_Orr_Vi_16bit([ValueSource(nameof(_Bic_Orr_Vi_16bit_))] uint opcodes,
-                                     [ValueSource(nameof(_4H_))] ulong z,
-                                     [ValueSource(nameof(_8BIT_IMM_))] byte imm8,
-                                     [Values(0b0u, 0b1u)] uint amount, // <0, 8>
-                                     [Values(0b0u, 0b1u)] uint q)      // <4H, 8H>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Bic_Orr_Vi_16bit([CombinatorialMemberData(nameof(_Bic_Orr_Vi_16bit_))] uint opcodes,
+                                     [CombinatorialMemberData(nameof(_4H_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8BIT_IMM_))] byte imm8,
+                                     [CombinatorialValues(0b0u, 0b1u)] uint amount, // <0, 8>
+                                     [CombinatorialValues(0b0u, 0b1u)] uint q)      // <4H, 8H>
         {
             uint abc = (imm8 & 0xE0u) >> 5;
             uint defgh = (imm8 & 0x1Fu);
@@ -212,12 +219,13 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Bic_Orr_Vi_32bit([ValueSource(nameof(_Bic_Orr_Vi_32bit_))] uint opcodes,
-                                     [ValueSource(nameof(_2S_))] ulong z,
-                                     [ValueSource(nameof(_8BIT_IMM_))] byte imm8,
-                                     [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint amount, // <0, 8, 16, 24>
-                                     [Values(0b0u, 0b1u)] uint q)                      // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Bic_Orr_Vi_32bit([CombinatorialMemberData(nameof(_Bic_Orr_Vi_32bit_))] uint opcodes,
+                                     [CombinatorialMemberData(nameof(_2S_))] ulong z,
+                                     [CombinatorialMemberData(nameof(_8BIT_IMM_))] byte imm8,
+                                     [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint amount, // <0, 8, 16, 24>
+                                     [CombinatorialValues(0b0u, 0b1u)] uint q)                      // <2S, 4S>
         {
             uint abc = (imm8 & 0xE0u) >> 5;
             uint defgh = (imm8 & 0x1Fu);
@@ -233,17 +241,17 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mov_Vi_2S([ValueSource(nameof(_F_Mov_Vi_2S_))] uint opcodes,
-                                [Range(0u, 255u, 1u)] uint abcdefgh)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mov_Vi_2S([CombinatorialMemberData(nameof(_F_Mov_Vi_2S_))] uint opcodes,
+                                [CombinatorialRange(0u, 255u, 1u)] uint abcdefgh)
         {
             uint abc = (abcdefgh & 0xE0u) >> 5;
             uint defgh = (abcdefgh & 0x1Fu);
 
             opcodes |= (abc << 16) | (defgh << 5);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
 
             SingleOpcode(opcodes, v0: v0);
@@ -251,10 +259,10 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mov_Vi_4S([ValueSource(nameof(_F_Mov_Vi_4S_))] uint opcodes,
-                                [Range(0u, 255u, 1u)] uint abcdefgh)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mov_Vi_4S([CombinatorialMemberData(nameof(_F_Mov_Vi_4S_))] uint opcodes,
+                                [CombinatorialRange(0u, 255u, 1u)] uint abcdefgh)
         {
             uint abc = (abcdefgh & 0xE0u) >> 5;
             uint defgh = (abcdefgh & 0x1Fu);
@@ -266,10 +274,10 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        [Explicit]
-        public void F_Mov_Vi_2D([ValueSource(nameof(_F_Mov_Vi_2D_))] uint opcodes,
-                                [Range(0u, 255u, 1u)] uint abcdefgh)
+        [SkippableTheory]
+        [PairwiseData]
+        public void F_Mov_Vi_2D([CombinatorialMemberData(nameof(_F_Mov_Vi_2D_))] uint opcodes,
+                                [CombinatorialRange(0u, 255u, 1u)] uint abcdefgh)
         {
             uint abc = (abcdefgh & 0xE0u) >> 5;
             uint defgh = (abcdefgh & 0x1Fu);
@@ -281,10 +289,11 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Movi_V_8bit([ValueSource(nameof(_Movi_V_8bit_))] uint opcodes,
-                                [ValueSource(nameof(_8BIT_IMM_))] byte imm8,
-                                [Values(0b0u, 0b1u)] uint q) // <8B, 16B>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Movi_V_8bit([CombinatorialMemberData(nameof(_Movi_V_8bit_))] uint opcodes,
+                                [CombinatorialMemberData(nameof(_8BIT_IMM_))] byte imm8,
+                                [CombinatorialValues(0b0u, 0b1u)] uint q) // <8B, 16B>
         {
             uint abc = (imm8 & 0xE0u) >> 5;
             uint defgh = (imm8 & 0x1Fu);
@@ -292,7 +301,7 @@ namespace Ryujinx.Tests.Cpu
             opcodes |= (abc << 16) | (defgh << 5);
             opcodes |= ((q & 1) << 30);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(q == 0u ? z : 0ul);
 
             SingleOpcode(opcodes, v0: v0);
@@ -300,11 +309,12 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Movi_Mvni_V_16bit_shifted_imm([ValueSource(nameof(_Movi_Mvni_V_16bit_shifted_imm_))] uint opcodes,
-                                                  [ValueSource(nameof(_8BIT_IMM_))] byte imm8,
-                                                  [Values(0b0u, 0b1u)] uint amount, // <0, 8>
-                                                  [Values(0b0u, 0b1u)] uint q)      // <4H, 8H>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Movi_Mvni_V_16bit_shifted_imm([CombinatorialMemberData(nameof(_Movi_Mvni_V_16bit_shifted_imm_))] uint opcodes,
+                                                  [CombinatorialMemberData(nameof(_8BIT_IMM_))] byte imm8,
+                                                  [CombinatorialValues(0b0u, 0b1u)] uint amount, // <0, 8>
+                                                  [CombinatorialValues(0b0u, 0b1u)] uint q)      // <4H, 8H>
         {
             uint abc = (imm8 & 0xE0u) >> 5;
             uint defgh = (imm8 & 0x1Fu);
@@ -313,7 +323,7 @@ namespace Ryujinx.Tests.Cpu
             opcodes |= ((amount & 1) << 13);
             opcodes |= ((q & 1) << 30);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(q == 0u ? z : 0ul);
 
             SingleOpcode(opcodes, v0: v0);
@@ -321,11 +331,12 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Movi_Mvni_V_32bit_shifted_imm([ValueSource(nameof(_Movi_Mvni_V_32bit_shifted_imm_))] uint opcodes,
-                                                  [ValueSource(nameof(_8BIT_IMM_))] byte imm8,
-                                                  [Values(0b00u, 0b01u, 0b10u, 0b11u)] uint amount, // <0, 8, 16, 24>
-                                                  [Values(0b0u, 0b1u)] uint q)                      // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Movi_Mvni_V_32bit_shifted_imm([CombinatorialMemberData(nameof(_Movi_Mvni_V_32bit_shifted_imm_))] uint opcodes,
+                                                  [CombinatorialMemberData(nameof(_8BIT_IMM_))] byte imm8,
+                                                  [CombinatorialValues(0b00u, 0b01u, 0b10u, 0b11u)] uint amount, // <0, 8, 16, 24>
+                                                  [CombinatorialValues(0b0u, 0b1u)] uint q)                      // <2S, 4S>
         {
             uint abc = (imm8 & 0xE0u) >> 5;
             uint defgh = (imm8 & 0x1Fu);
@@ -334,7 +345,7 @@ namespace Ryujinx.Tests.Cpu
             opcodes |= ((amount & 3) << 13);
             opcodes |= ((q & 1) << 30);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(q == 0u ? z : 0ul);
 
             SingleOpcode(opcodes, v0: v0);
@@ -342,11 +353,12 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Movi_Mvni_V_32bit_shifting_ones([ValueSource(nameof(_Movi_Mvni_V_32bit_shifting_ones_))] uint opcodes,
-                                                    [ValueSource(nameof(_8BIT_IMM_))] byte imm8,
-                                                    [Values(0b0u, 0b1u)] uint amount, // <8, 16>
-                                                    [Values(0b0u, 0b1u)] uint q)      // <2S, 4S>
+        [SkippableTheory]
+        [PairwiseData]
+        public void Movi_Mvni_V_32bit_shifting_ones([CombinatorialMemberData(nameof(_Movi_Mvni_V_32bit_shifting_ones_))] uint opcodes,
+                                                    [CombinatorialMemberData(nameof(_8BIT_IMM_))] byte imm8,
+                                                    [CombinatorialValues(0b0u, 0b1u)] uint amount, // <8, 16>
+                                                    [CombinatorialValues(0b0u, 0b1u)] uint q)      // <2S, 4S>
         {
             uint abc = (imm8 & 0xE0u) >> 5;
             uint defgh = (imm8 & 0x1Fu);
@@ -355,7 +367,7 @@ namespace Ryujinx.Tests.Cpu
             opcodes |= ((amount & 1) << 12);
             opcodes |= ((q & 1) << 30);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(q == 0u ? z : 0ul);
 
             SingleOpcode(opcodes, v0: v0);
@@ -363,9 +375,10 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Movi_V_64bit_scalar([ValueSource(nameof(_Movi_V_64bit_scalar_))] uint opcodes,
-                                        [ValueSource(nameof(_64BIT_IMM_))] ulong imm)
+        [SkippableTheory]
+        [PairwiseData]
+        public void Movi_V_64bit_scalar([CombinatorialMemberData(nameof(_Movi_V_64bit_scalar_))] uint opcodes,
+                                        [CombinatorialMemberData(nameof(_64BIT_IMM_))] ulong imm)
         {
             byte imm8 = ShrinkImm64(imm);
 
@@ -374,7 +387,7 @@ namespace Ryujinx.Tests.Cpu
 
             opcodes |= (abc << 16) | (defgh << 5);
 
-            ulong z = TestContext.CurrentContext.Random.NextULong();
+            ulong z = Random.Shared.NextULong();
             V128 v0 = MakeVectorE1(z);
 
             SingleOpcode(opcodes, v0: v0);
@@ -382,9 +395,10 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Movi_V_64bit_vector([ValueSource(nameof(_Movi_V_64bit_vector_))] uint opcodes,
-                                        [ValueSource(nameof(_64BIT_IMM_))] ulong imm)
+        [SkippableTheory]
+        [PairwiseData]
+        public void Movi_V_64bit_vector([CombinatorialMemberData(nameof(_Movi_V_64bit_vector_))] uint opcodes,
+                                        [CombinatorialMemberData(nameof(_64BIT_IMM_))] ulong imm)
         {
             byte imm8 = ShrinkImm64(imm);
 

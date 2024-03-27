@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter.Effect;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter.Effect
 {
-    class CompressorParameterTests
+    public class CompressorParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x38, Unsafe.SizeOf<CompressorParameter>());
+            Assert.Equal(0x38, Unsafe.SizeOf<CompressorParameter>());
         }
     }
 }

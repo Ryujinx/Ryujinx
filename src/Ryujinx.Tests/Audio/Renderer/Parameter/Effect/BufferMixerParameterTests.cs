@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter.Effect;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter.Effect
 {
-    class BufferMixerParameterTests
+    public class BufferMixerParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x94, Unsafe.SizeOf<BufferMixParameter>());
+            Assert.Equal(0x94, Unsafe.SizeOf<BufferMixParameter>());
         }
     }
 }

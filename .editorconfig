@@ -173,6 +173,9 @@ csharp_space_between_square_brackets = false
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = false
 
+### .NET Diagnostic rules ####
+dotnet_diagnostic.xUnit1004.severity = silent
+
 #### Naming styles ####
 
 # Naming rules

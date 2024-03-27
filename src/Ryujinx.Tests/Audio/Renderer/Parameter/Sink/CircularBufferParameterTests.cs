@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter.Sink;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter.Sink
 {
-    class CircularBufferParameterTests
+    public class CircularBufferParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x24, Unsafe.SizeOf<CircularBufferParameter>());
+            Assert.Equal(0x24, Unsafe.SizeOf<CircularBufferParameter>());
         }
     }
 }

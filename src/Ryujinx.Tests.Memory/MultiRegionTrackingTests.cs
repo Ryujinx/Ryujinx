@@ -1,32 +1,32 @@
-using NUnit.Framework;
 using Ryujinx.Memory;
 using Ryujinx.Memory.Tracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 
 namespace Ryujinx.Tests.Memory
 {
-    public class MultiRegionTrackingTests
+    public class MultiRegionTrackingTests : IDisposable
     {
         private const ulong MemorySize = 0x8000;
         private const int PageSize = 4096;
 
-        private MemoryBlock _memoryBlock;
-        private MemoryTracking _tracking;
-        private MockVirtualMemoryManager _memoryManager;
+        private readonly MemoryBlock _memoryBlock;
+        private readonly MemoryTracking _tracking;
+        private readonly MockVirtualMemoryManager _memoryManager;
 
-        [SetUp]
-        public void Setup()
+        public MultiRegionTrackingTests()
         {
             _memoryBlock = new MemoryBlock(MemorySize);
             _memoryManager = new MockVirtualMemoryManager(MemorySize, PageSize);
             _tracking = new MemoryTracking(_memoryManager, PageSize);
         }
 
-        [TearDown]
-        public void Teardown()
+        public void Dispose()
         {
+            GC.SuppressFinalize(this);
+
             _memoryBlock.Dispose();
         }
 
@@ -56,8 +56,8 @@ namespace Ryujinx.Tests.Memory
 
             handle.QueryModified(startAddress, size, (address, range) =>
             {
-                Assert.IsTrue(addressPredicate(address)); // Written pages must be even.
-                Assert.GreaterOrEqual(address, lastAddress); // Must be signalled in ascending order, regardless of write order.
+                Assert.True(addressPredicate(address)); // Written pages must be even.
+                Assert.True(address >= lastAddress); // Must be signalled in ascending order, regardless of write order.
                 lastAddress = address;
                 regionCount++;
             });
@@ -72,8 +72,8 @@ namespace Ryujinx.Tests.Memory
 
             handle.QueryModified(startAddress, size, (address, range) =>
             {
-                Assert.IsTrue(addressPredicate(address)); // Written pages must be even.
-                Assert.GreaterOrEqual(address, lastAddress); // Must be signalled in ascending order, regardless of write order.
+                Assert.True(addressPredicate(address)); // Written pages must be even.
+                Assert.True(address >= lastAddress); // Must be signalled in ascending order, regardless of write order.
                 lastAddress = address;
                 regionCount++;
             }, sequenceNumber);
@@ -93,12 +93,14 @@ namespace Ryujinx.Tests.Memory
                 {
                     resultAddress = address;
                 });
-                Assert.AreEqual(resultAddress, (ulong)i * PageSize + address);
+                Assert.Equal(resultAddress, (ulong)i * PageSize + address);
             });
         }
 
-        [Test]
-        public void DirtyRegionOrdering([Values] bool smart)
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void DirtyRegionOrdering(bool smart)
         {
             const int PageCount = 32;
             IMultiRegionHandle handle = GetGranular(smart, 0, PageSize * PageCount, PageSize);
@@ -119,7 +121,7 @@ namespace Ryujinx.Tests.Memory
 
             int oddRegionCount = ExpectQueryInOrder(handle, 0, PageSize * PageCount, (address) => (address / PageSize) % 2 == 1);
 
-            Assert.AreEqual(oddRegionCount, PageCount / 2); // Must have written to all odd pages.
+            Assert.Equal(PageCount / 2, oddRegionCount); // Must have written to all odd pages.
 
             // Write to all the even pages.
             RandomOrder(random, even, (i) =>
@@ -129,11 +131,13 @@ namespace Ryujinx.Tests.Memory
 
             int evenRegionCount = ExpectQueryInOrder(handle, 0, PageSize * PageCount, (address) => (address / PageSize) % 2 == 0);
 
-            Assert.AreEqual(evenRegionCount, PageCount / 2);
+            Assert.Equal(PageCount / 2, evenRegionCount);
         }
 
-        [Test]
-        public void SequenceNumber([Values] bool smart)
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SequenceNumber(bool smart)
         {
             // The sequence number can be used to ignore dirty flags, and defer their consumption until later.
             // If a user consumes a dirty flag with sequence number 1, then there is a write to the protected region,
@@ -172,7 +176,7 @@ namespace Ryujinx.Tests.Memory
                 }, 1);
             }
 
-            Assert.AreEqual(oddRegionCount, PageCount / 2); // Must have written to all odd pages.
+            Assert.Equal(PageCount / 2, oddRegionCount); // Must have written to all odd pages.
 
             // Write to all pages.
 
@@ -182,22 +186,22 @@ namespace Ryujinx.Tests.Memory
 
             int evenRegionCount = ExpectQueryInOrder(handle, 0, PageSize * PageCount, (address) => (address / PageSize) % 2 == 0, 1);
 
-            Assert.AreEqual(evenRegionCount, PageCount / 2); // Must have written to all even pages.
+            Assert.Equal(PageCount / 2, evenRegionCount); // Must have written to all even pages.
 
             oddRegionCount = 0;
 
             handle.QueryModified(0, PageSize * PageCount, (address, range) => { oddRegionCount++; }, 1);
 
-            Assert.AreEqual(oddRegionCount, 0); // Sequence number has not changed, so found no dirty subregions.
+            Assert.Equal(0, oddRegionCount); // Sequence number has not changed, so found no dirty subregions.
 
             // With sequence number 2, all all pages should be reported as modified.
 
             oddRegionCount = ExpectQueryInOrder(handle, 0, PageSize * PageCount, (address) => (address / PageSize) % 2 == 1, 2);
 
-            Assert.AreEqual(oddRegionCount, PageCount / 2); // Must have written to all odd pages.
+            Assert.Equal(PageCount / 2, oddRegionCount); // Must have written to all odd pages.
         }
 
-        [Test]
+        [Fact]
         public void SmartRegionTracking()
         {
             // Smart multi region handles dynamically change their tracking granularity based on QueryMemory calls.
@@ -208,7 +212,7 @@ namespace Ryujinx.Tests.Memory
 
             // Query some large regions to prep the subdivision of the tracking region.
 
-            int[] regionSizes = new int[] { 6, 4, 3, 2, 6, 1 };
+            int[] regionSizes = { 6, 4, 3, 2, 6, 1 };
             ulong address = 0;
 
             for (int i = 0; i < regionSizes.Length; i++)
@@ -242,26 +246,28 @@ namespace Ryujinx.Tests.Memory
             {
                 int region = regionSizes[regionInd++];
 
-                Assert.AreEqual(address, expectedAddress);
-                Assert.AreEqual(size, (ulong)(PageSize * region));
+                Assert.Equal(expectedAddress, address);
+                Assert.Equal((ulong)(PageSize * region), size);
 
                 expectedAddress += (ulong)(PageSize * (region + 1));
             });
         }
 
-        [Test]
-        public void DisposeMultiHandles([Values] bool smart)
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void DisposeMultiHandles(bool smart)
         {
             // Create and initialize two overlapping Multi Region Handles, with PageSize granularity.
             const int PageCount = 32;
             const int OverlapStart = 16;
 
-            Assert.AreEqual(0, _tracking.GetRegionCount());
+            Assert.Equal(0, _tracking.GetRegionCount());
 
             IMultiRegionHandle handleLow = GetGranular(smart, 0, PageSize * PageCount, PageSize);
             PreparePages(handleLow, PageCount);
 
-            Assert.AreEqual(PageCount, _tracking.GetRegionCount());
+            Assert.Equal(PageCount, _tracking.GetRegionCount());
 
             IMultiRegionHandle handleHigh = GetGranular(smart, PageSize * OverlapStart, PageSize * PageCount, PageSize);
             PreparePages(handleHigh, PageCount, PageSize * OverlapStart);
@@ -269,18 +275,18 @@ namespace Ryujinx.Tests.Memory
             // Combined pages (and assuming overlapStart <= pageCount) should be pageCount after overlapStart.
             int totalPages = OverlapStart + PageCount;
 
-            Assert.AreEqual(totalPages, _tracking.GetRegionCount());
+            Assert.Equal(totalPages, _tracking.GetRegionCount());
 
             handleLow.Dispose(); // After disposing one, the pages for the other remain.
 
-            Assert.AreEqual(PageCount, _tracking.GetRegionCount());
+            Assert.Equal(PageCount, _tracking.GetRegionCount());
 
             handleHigh.Dispose(); // After disposing the other, there are no pages left.
 
-            Assert.AreEqual(0, _tracking.GetRegionCount());
+            Assert.Equal(0, _tracking.GetRegionCount());
         }
 
-        [Test]
+        [Fact]
         public void InheritHandles()
         {
             // Test merging the following into a granular region handle:
@@ -333,8 +339,7 @@ namespace Ryujinx.Tests.Memory
 
             // Finally, create a granular handle that inherits all these handles.
 
-            IEnumerable<IRegionHandle>[] handleGroups = new IEnumerable<IRegionHandle>[]
-            {
+            IEnumerable<IRegionHandle>[] handleGroups = {
                 granular.GetHandles(),
                 singlePages,
                 doublePages,
@@ -342,8 +347,7 @@ namespace Ryujinx.Tests.Memory
 
             MultiRegionHandle combined = _tracking.BeginGranularTracking(0, PageSize * 18, handleGroups.SelectMany((handles) => handles), PageSize, 0);
 
-            bool[] expectedDirty = new bool[]
-            {
+            bool[] expectedDirty = {
                 true, true, true, // Gap.
                 false, true, false, // Multi-region.
                 true, true, // Gap.
@@ -357,19 +361,19 @@ namespace Ryujinx.Tests.Memory
                 bool modified = false;
                 combined.QueryModified(PageSize * (ulong)i, PageSize, (_, _) => { modified = true; });
 
-                Assert.AreEqual(expectedDirty[i], modified);
+                Assert.Equal(expectedDirty[i], modified);
             }
 
-            Assert.AreEqual(new bool[3], actionsTriggered);
+            Assert.Equal(new bool[3], actionsTriggered);
 
             _tracking.VirtualMemoryEvent(PageSize * 5, PageSize, false);
-            Assert.IsTrue(actionsTriggered[0]);
+            Assert.True(actionsTriggered[0]);
 
             _tracking.VirtualMemoryEvent(PageSize * 10, PageSize, false);
-            Assert.IsTrue(actionsTriggered[1]);
+            Assert.True(actionsTriggered[1]);
 
             _tracking.VirtualMemoryEvent(PageSize * 15, PageSize, false);
-            Assert.IsTrue(actionsTriggered[2]);
+            Assert.True(actionsTriggered[2]);
 
             // The double page handles should be disposed, as they were split into granular handles.
             foreach (RegionHandle doublePage in doublePages)
@@ -386,21 +390,21 @@ namespace Ryujinx.Tests.Memory
                     throws = true;
                 }
 
-                Assert.IsTrue(throws);
+                Assert.True(throws);
             }
 
             IEnumerable<IRegionHandle> combinedHandles = combined.GetHandles();
 
-            Assert.AreEqual(handleGroups[0].ElementAt(0), combinedHandles.ElementAt(3));
-            Assert.AreEqual(handleGroups[0].ElementAt(1), combinedHandles.ElementAt(4));
-            Assert.AreEqual(handleGroups[0].ElementAt(2), combinedHandles.ElementAt(5));
+            Assert.Equal(handleGroups[0].ElementAt(0), combinedHandles.ElementAt(3));
+            Assert.Equal(handleGroups[0].ElementAt(1), combinedHandles.ElementAt(4));
+            Assert.Equal(handleGroups[0].ElementAt(2), combinedHandles.ElementAt(5));
 
-            Assert.AreEqual(singlePages[0], combinedHandles.ElementAt(8));
-            Assert.AreEqual(singlePages[1], combinedHandles.ElementAt(9));
-            Assert.AreEqual(singlePages[2], combinedHandles.ElementAt(10));
+            Assert.Equal(singlePages[0], combinedHandles.ElementAt(8));
+            Assert.Equal(singlePages[1], combinedHandles.ElementAt(9));
+            Assert.Equal(singlePages[2], combinedHandles.ElementAt(10));
         }
 
-        [Test]
+        [Fact]
         public void PreciseAction()
         {
             bool actionTriggered = false;
@@ -413,11 +417,11 @@ namespace Ryujinx.Tests.Memory
 
             // Precise write to first handle in the multiregion.
             _tracking.VirtualMemoryEvent(PageSize * 3, PageSize, true, precise: true);
-            Assert.IsFalse(actionTriggered); // Action not triggered.
+            Assert.False(actionTriggered); // Action not triggered.
 
             bool firstPageModified = false;
             granular.QueryModified(PageSize * 3, PageSize, (_, _) => { firstPageModified = true; });
-            Assert.IsTrue(firstPageModified); // First page is modified.
+            Assert.True(firstPageModified); // First page is modified.
 
             // Precise write to all handles in the multiregion.
             _tracking.VirtualMemoryEvent(PageSize * 3, PageSize * 3, true, precise: true);
@@ -430,10 +434,10 @@ namespace Ryujinx.Tests.Memory
                 granular.QueryModified(PageSize * (ulong)i, PageSize, (_, _) => { pagesModified[index] = true; });
             }
 
-            Assert.IsTrue(actionTriggered); // Action triggered.
+            Assert.True(actionTriggered); // Action triggered.
 
             // Precise writes are ignored on two later handles due to the action returning true.
-            Assert.AreEqual(pagesModified, new bool[] { true, false, false });
+            Assert.Equal(new[] { true, false, false }, pagesModified);
         }
     }
 }

@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer
 {
-    class VoiceOutStatusTests
+    public class VoiceOutStatusTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x10, Unsafe.SizeOf<VoiceOutStatus>());
+            Assert.Equal(0x10, Unsafe.SizeOf<VoiceOutStatus>());
         }
     }
 }

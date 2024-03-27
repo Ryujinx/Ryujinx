@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Common;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Common
 {
-    class WaveBufferTests
+    public class WaveBufferTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x30, Unsafe.SizeOf<WaveBuffer>());
+            Assert.Equal(0x30, Unsafe.SizeOf<WaveBuffer>());
         }
     }
 }

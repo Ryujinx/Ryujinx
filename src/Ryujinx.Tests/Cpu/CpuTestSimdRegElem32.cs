@@ -1,25 +1,31 @@
-#define SimdRegElem32
+﻿#define SimdRegElem32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdRegElem32")]
+    [Collection("SimdRegElem32")]
     public sealed class CpuTestSimdRegElem32 : CpuTest32
     {
+        public CpuTestSimdRegElem32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdRegElem32
         private const int RndCnt = 2;
 
-        [Test, Pairwise, Description("VMUL.<size> {<Vd>}, <Vn>, <Vm>[<index>]")]
-        public void Vmul_1I([Values(1u, 0u)] uint rd,
-                            [Values(1u, 0u)] uint rn,
-                            [Values(26u, 25u, 10u, 9u, 2u, 0u)] uint rm,
-                            [Values(1u, 2u)] uint size,
-                            [Random(RndCnt)] ulong z,
-                            [Random(RndCnt)] ulong a,
-                            [Random(RndCnt)] ulong b,
-                            [Values] bool q)
+        [Theory(DisplayName = "VMUL.<size> {<Vd>}, <Vn>, <Vm>[<index>]")]
+        [PairwiseData]
+        public void Vmul_1I([CombinatorialValues(1u, 0u)] uint rd,
+                            [CombinatorialValues(1u, 0u)] uint rn,
+                            [CombinatorialValues(26u, 25u, 10u, 9u, 2u, 0u)] uint rm,
+                            [CombinatorialValues(1u, 2u)] uint size,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                            bool q)
         {
             uint opcode = 0xf2900840u & ~(3u << 20); // VMUL.I16 D0, D0, D0[0]
             if (q)
@@ -44,15 +50,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VMULL.<size> <Vd>, <Vn>, <Vm>[<index>]")]
-        public void Vmull_1([Values(2u, 0u)] uint rd,
-                            [Values(1u, 0u)] uint rn,
-                            [Values(26u, 25u, 10u, 9u, 2u, 0u)] uint rm,
-                            [Values(1u, 2u)] uint size,
-                            [Random(RndCnt)] ulong z,
-                            [Random(RndCnt)] ulong a,
-                            [Random(RndCnt)] ulong b,
-                            [Values] bool u)
+        [Theory(DisplayName = "VMULL.<size> <Vd>, <Vn>, <Vm>[<index>]")]
+        [PairwiseData]
+        public void Vmull_1([CombinatorialValues(2u, 0u)] uint rd,
+                            [CombinatorialValues(1u, 0u)] uint rn,
+                            [CombinatorialValues(26u, 25u, 10u, 9u, 2u, 0u)] uint rm,
+                            [CombinatorialValues(1u, 2u)] uint size,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong z,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong a,
+                            [CombinatorialRandomData(Count = RndCnt)] ulong b,
+                            bool u)
         {
             uint opcode = 0xf2900a40u & ~(3u << 20); // VMULL.S16 Q0, D0, D0[0]
 

@@ -1,16 +1,16 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Common;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer
 {
-    class BehaviourParameterTests
+    public class BehaviourParameterTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x10, Unsafe.SizeOf<BehaviourParameter>());
-            Assert.AreEqual(0x10, Unsafe.SizeOf<BehaviourParameter.ErrorInfo>());
+            Assert.Equal(0x10, Unsafe.SizeOf<BehaviourParameter>());
+            Assert.Equal(0x10, Unsafe.SizeOf<BehaviourParameter.ErrorInfo>());
         }
     }
 }

@@ -1,13 +1,18 @@
-#define SimdLogical32
+﻿#define SimdLogical32
 
 using ARMeilleure.State;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("SimdLogical32")]
+    [Collection("SimdLogical32")]
     public sealed class CpuTestSimdLogical32 : CpuTest32
     {
+        public CpuTestSimdLogical32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if SimdLogical32
 
         #region "ValueSource (Types)"
@@ -50,15 +55,16 @@ namespace Ryujinx.Tests.Cpu
         }
         #endregion
 
-        [Test, Pairwise]
-        public void Vbic_Vbif_Vbit_Vbsl_Vand_Vorn_Vorr_Veor_I([ValueSource(nameof(_Vbic_Vbif_Vbit_Vbsl_Vand_Vorn_Vorr_Veor_I_))] uint opcode,
-                                                              [Range(0u, 5u)] uint rd,
-                                                              [Range(0u, 5u)] uint rn,
-                                                              [Range(0u, 5u)] uint rm,
-                                                              [Values(ulong.MinValue, ulong.MaxValue)] ulong z,
-                                                              [Values(ulong.MinValue, ulong.MaxValue)] ulong a,
-                                                              [Values(ulong.MinValue, ulong.MaxValue)] ulong b,
-                                                              [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vbic_Vbif_Vbit_Vbsl_Vand_Vorn_Vorr_Veor_I([CombinatorialMemberData(nameof(_Vbic_Vbif_Vbit_Vbsl_Vand_Vorn_Vorr_Veor_I_))] uint opcode,
+                                                              [CombinatorialRange(0u, 5u, 1)] uint rd,
+                                                              [CombinatorialRange(0u, 5u, 1)] uint rn,
+                                                              [CombinatorialRange(0u, 5u, 1)] uint rm,
+                                                              [CombinatorialValues(ulong.MinValue, ulong.MaxValue)] ulong z,
+                                                              [CombinatorialValues(ulong.MinValue, ulong.MaxValue)] ulong a,
+                                                              [CombinatorialValues(ulong.MinValue, ulong.MaxValue)] ulong b,
+                                                              bool q)
         {
             if (q)
             {
@@ -85,13 +91,14 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise]
-        public void Vbic_Vorr_II([ValueSource(nameof(_Vbic_Vorr_II_))] uint opcode,
-                                 [Values(0u, 1u)] uint rd,
-                                 [Values(ulong.MinValue, ulong.MaxValue)] ulong z,
-                                 [Values(byte.MinValue, byte.MaxValue)] byte imm,
-                                 [Values(0u, 1u, 2u, 3u)] uint cMode,
-                                 [Values] bool q)
+        [Theory]
+        [PairwiseData]
+        public void Vbic_Vorr_II([CombinatorialMemberData(nameof(_Vbic_Vorr_II_))] uint opcode,
+                                 [CombinatorialValues(0u, 1u)] uint rd,
+                                 [CombinatorialValues(ulong.MinValue, ulong.MaxValue)] ulong z,
+                                 [CombinatorialValues(byte.MinValue, byte.MaxValue)] byte imm,
+                                 [CombinatorialValues(0u, 1u, 2u, 3u)] uint cMode,
+                                 bool q)
         {
             if ((opcode & 0x800) != 0) // cmode<3> == '1' (A2)
             {
@@ -119,15 +126,16 @@ namespace Ryujinx.Tests.Cpu
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("VTST.<dt> <Vd>, <Vn>, <Vm>")]
-        public void Vtst([Range(0u, 5u)] uint rd,
-                         [Range(0u, 5u)] uint rn,
-                         [Range(0u, 5u)] uint rm,
-                         [ValueSource(nameof(_8B4H2S_))] ulong z,
-                         [ValueSource(nameof(_8B4H2S_))] ulong a,
-                         [ValueSource(nameof(_8B4H2S_))] ulong b,
-                         [Values(0u, 1u, 2u)] uint size,
-                         [Values] bool q)
+        [Theory(DisplayName = "VTST.<dt> <Vd>, <Vn>, <Vm>")]
+        [PairwiseData]
+        public void Vtst([CombinatorialRange(0u, 5u, 1)] uint rd,
+                         [CombinatorialRange(0u, 5u, 1)] uint rn,
+                         [CombinatorialRange(0u, 5u, 1)] uint rm,
+                         [CombinatorialMemberData(nameof(_8B4H2S_))] ulong z,
+                         [CombinatorialMemberData(nameof(_8B4H2S_))] ulong a,
+                         [CombinatorialMemberData(nameof(_8B4H2S_))] ulong b,
+                         [CombinatorialValues(0u, 1u, 2u)] uint size,
+                         bool q)
         {
             uint opcode = 0xf2000810u; // VTST.8 D0, D0, D0
 

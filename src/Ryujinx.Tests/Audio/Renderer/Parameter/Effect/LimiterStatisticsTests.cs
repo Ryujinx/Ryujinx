@@ -1,15 +1,15 @@
-using NUnit.Framework;
 using Ryujinx.Audio.Renderer.Parameter.Effect;
 using System.Runtime.CompilerServices;
+using Xunit;
 
 namespace Ryujinx.Tests.Audio.Renderer.Parameter.Effect
 {
-    class LimiterStatisticsTests
+    public class LimiterStatisticsTests
     {
-        [Test]
+        [Fact]
         public void EnsureTypeSize()
         {
-            Assert.AreEqual(0x30, Unsafe.SizeOf<LimiterStatistics>());
+            Assert.Equal(0x30, Unsafe.SizeOf<LimiterStatistics>());
         }
     }
 }

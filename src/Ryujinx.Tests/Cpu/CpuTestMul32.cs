@@ -1,12 +1,18 @@
-#define Mul32
+﻿#define Mul32
 
-using NUnit.Framework;
+using System;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Ryujinx.Tests.Cpu
 {
-    [Category("Mul32")]
+    [Collection("Mul32")]
     public sealed class CpuTestMul32 : CpuTest32
     {
+        public CpuTestMul32(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
 #if Mul32
 
         #region "ValueSource (Opcodes)"
@@ -51,82 +57,86 @@ namespace Ryujinx.Tests.Cpu
         }
         #endregion
 
-        [Test, Pairwise, Description("SMLA<x><y> <Rd>, <Rn>, <Rm>, <Ra>")]
-        public void Smla___32bit([ValueSource(nameof(_Smlabb_Smlabt_Smlatb_Smlatt_))] uint opcode,
-                                 [Values(0u, 0xdu)] uint rn,
-                                 [Values(1u, 0xdu)] uint rm,
-                                 [Values(2u, 0xdu)] uint ra,
-                                 [Values(3u, 0xdu)] uint rd,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory(DisplayName = "SMLA<x><y> <Rd>, <Rn>, <Rm>, <Ra>")]
+        [PairwiseData]
+        public void Smla___32bit([CombinatorialMemberData(nameof(_Smlabb_Smlabt_Smlatb_Smlatt_))] uint opcode,
+                                 [CombinatorialValues(0u, 0xdu)] uint rn,
+                                 [CombinatorialValues(1u, 0xdu)] uint rm,
+                                 [CombinatorialValues(2u, 0xdu)] uint ra,
+                                 [CombinatorialValues(3u, 0xdu)] uint rd,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wa)
         {
             opcode |= ((rn & 15) << 0) | ((rm & 15) << 8) | ((ra & 15) << 12) | ((rd & 15) << 16);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: wn, r1: wm, r2: wa, sp: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SMLAW<x> <Rd>, <Rn>, <Rm>, <Ra>")]
-        public void Smlaw__32bit([ValueSource(nameof(_Smlawb_Smlawt_))] uint opcode,
-                                 [Values(0u, 0xdu)] uint rn,
-                                 [Values(1u, 0xdu)] uint rm,
-                                 [Values(2u, 0xdu)] uint ra,
-                                 [Values(3u, 0xdu)] uint rd,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory(DisplayName = "SMLAW<x> <Rd>, <Rn>, <Rm>, <Ra>")]
+        [PairwiseData]
+        public void Smlaw__32bit([CombinatorialMemberData(nameof(_Smlawb_Smlawt_))] uint opcode,
+                                 [CombinatorialValues(0u, 0xdu)] uint rn,
+                                 [CombinatorialValues(1u, 0xdu)] uint rm,
+                                 [CombinatorialValues(2u, 0xdu)] uint ra,
+                                 [CombinatorialValues(3u, 0xdu)] uint rd,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wm,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wa)
         {
             opcode |= ((rn & 15) << 0) | ((rm & 15) << 8) | ((ra & 15) << 12) | ((rd & 15) << 16);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: wn, r1: wm, r2: wa, sp: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SMUL<x><y> <Rd>, <Rn>, <Rm>")]
-        public void Smul___32bit([ValueSource(nameof(_Smulbb_Smulbt_Smultb_Smultt_))] uint opcode,
-                                 [Values(0u, 0xdu)] uint rn,
-                                 [Values(1u, 0xdu)] uint rm,
-                                 [Values(2u, 0xdu)] uint rd,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory(DisplayName = "SMUL<x><y> <Rd>, <Rn>, <Rm>")]
+        [PairwiseData]
+        public void Smul___32bit([CombinatorialMemberData(nameof(_Smulbb_Smulbt_Smultb_Smultt_))] uint opcode,
+                                 [CombinatorialValues(0u, 0xdu)] uint rn,
+                                 [CombinatorialValues(1u, 0xdu)] uint rm,
+                                 [CombinatorialValues(2u, 0xdu)] uint rd,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wm)
         {
             opcode |= ((rn & 15) << 0) | ((rm & 15) << 8) | ((rd & 15) << 16);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: wn, r1: wm, sp: w31);
 
             CompareAgainstUnicorn();
         }
 
-        [Test, Pairwise, Description("SMULW<x> <Rd>, <Rn>, <Rm>")]
-        public void Smulw__32bit([ValueSource(nameof(_Smulwb_Smulwt_))] uint opcode,
-                                 [Values(0u, 0xdu)] uint rn,
-                                 [Values(1u, 0xdu)] uint rm,
-                                 [Values(2u, 0xdu)] uint rd,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+        [Theory(DisplayName = "SMULW<x> <Rd>, <Rn>, <Rm>")]
+        [PairwiseData]
+        public void Smulw__32bit([CombinatorialMemberData(nameof(_Smulwb_Smulwt_))] uint opcode,
+                                 [CombinatorialValues(0u, 0xdu)] uint rn,
+                                 [CombinatorialValues(1u, 0xdu)] uint rm,
+                                 [CombinatorialValues(2u, 0xdu)] uint rd,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wn,
-                                 [Values(0x00000000u, 0x7FFFFFFFu,
+                                 [CombinatorialValues(0x00000000u, 0x7FFFFFFFu,
                                          0x80000000u, 0xFFFFFFFFu)] uint wm)
         {
             opcode |= ((rn & 15) << 0) | ((rm & 15) << 8) | ((rd & 15) << 16);
 
-            uint w31 = TestContext.CurrentContext.Random.NextUInt();
+            uint w31 = Random.Shared.NextUInt();
 
             SingleOpcode(opcode, r0: wn, r1: wm, sp: w31);
 
