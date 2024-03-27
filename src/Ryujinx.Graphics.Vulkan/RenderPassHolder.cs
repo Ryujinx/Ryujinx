@@ -122,7 +122,6 @@ namespace Ryujinx.Graphics.Vulkan
 
                 gd.Api.CreateRenderPass(device, renderPassCreateInfo, null, out var renderPass).ThrowOnError();
 
-                _renderPass?.Dispose();
                 _renderPass = new Auto<DisposableRenderPass>(new DisposableRenderPass(gd.Api, device, renderPass));
             }
 
@@ -162,7 +161,7 @@ namespace Ryujinx.Graphics.Vulkan
 
         public void Dispose()
         {
-            // Dispose all framebuffers
+            // Dispose all framebuffers.
 
             foreach (var fb in _framebuffers.Values)
             {
@@ -175,6 +174,10 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 texture.RemoveRenderPass(_key);
             }
+
+            // Dispose render pass.
+
+            _renderPass.Dispose();
         }
     }
 }
