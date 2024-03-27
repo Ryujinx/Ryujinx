@@ -339,24 +339,17 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
 
         private static void DeclareSamplers(CodeGenContext context, IEnumerable<TextureDefinition> definitions)
         {
-            int arraySize = 0;
-
             foreach (var definition in definitions)
             {
-                string indexExpr = string.Empty;
+                string arrayDecl = string.Empty;
 
-                if (definition.Type.HasFlag(SamplerType.Indexed))
+                if (definition.ArrayLength > 1)
                 {
-                    if (arraySize == 0)
-                    {
-                        arraySize = ResourceManager.SamplerArraySize;
-                    }
-                    else if (--arraySize != 0)
-                    {
-                        continue;
-                    }
-
-                    indexExpr = $"[{NumberFormatter.FormatInt(arraySize)}]";
+                    arrayDecl = $"[{NumberFormatter.FormatInt(definition.ArrayLength)}]";
+                }
+                else if (definition.ArrayLength == 0)
+                {
+                    arrayDecl = "[]";
                 }
 
                 string samplerTypeName = definition.Type.ToGlslSamplerType();
@@ -368,30 +361,23 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
                     layout = $", set = {definition.Set}";
                 }
 
-                context.AppendLine($"layout (binding = {definition.Binding}{layout}) uniform {samplerTypeName} {definition.Name}{indexExpr};");
+                context.AppendLine($"layout (binding = {definition.Binding}{layout}) uniform {samplerTypeName} {definition.Name}{arrayDecl};");
             }
         }
 
         private static void DeclareImages(CodeGenContext context, IEnumerable<TextureDefinition> definitions)
         {
-            int arraySize = 0;
-
             foreach (var definition in definitions)
             {
-                string indexExpr = string.Empty;
+                string arrayDecl = string.Empty;
 
-                if (definition.Type.HasFlag(SamplerType.Indexed))
+                if (definition.ArrayLength > 1)
                 {
-                    if (arraySize == 0)
-                    {
-                        arraySize = ResourceManager.SamplerArraySize;
-                    }
-                    else if (--arraySize != 0)
-                    {
-                        continue;
-                    }
-
-                    indexExpr = $"[{NumberFormatter.FormatInt(arraySize)}]";
+                    arrayDecl = $"[{NumberFormatter.FormatInt(definition.ArrayLength)}]";
+                }
+                else if (definition.ArrayLength == 0)
+                {
+                    arrayDecl = "[]";
                 }
 
                 string imageTypeName = definition.Type.ToGlslImageType(definition.Format.GetComponentType());
@@ -413,7 +399,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
                     layout = $", set = {definition.Set}{layout}";
                 }
 
-                context.AppendLine($"layout (binding = {definition.Binding}{layout}) uniform {imageTypeName} {definition.Name}{indexExpr};");
+                context.AppendLine($"layout (binding = {definition.Binding}{layout}) uniform {imageTypeName} {definition.Name}{arrayDecl};");
             }
         }
 

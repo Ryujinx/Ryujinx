@@ -27,6 +27,8 @@ namespace Ryujinx.Graphics.Gpu.Memory
         private readonly VertexBuffer[] _vertexBuffers;
         private readonly BufferBounds[] _transformFeedbackBuffers;
         private readonly List<BufferTextureBinding> _bufferTextures;
+        private readonly List<BufferTextureArrayBinding<ITextureArray>> _bufferTextureArrays;
+        private readonly List<BufferTextureArrayBinding<IImageArray>> _bufferImageArrays;
         private readonly BufferAssignment[] _ranges;
 
         /// <summary>
@@ -140,10 +142,11 @@ namespace Ryujinx.Graphics.Gpu.Memory
             }
 
             _bufferTextures = new List<BufferTextureBinding>();
+            _bufferTextureArrays = new List<BufferTextureArrayBinding<ITextureArray>>();
+            _bufferImageArrays = new List<BufferTextureArrayBinding<IImageArray>>();
 
             _ranges = new BufferAssignment[Constants.TotalGpUniformBuffers * Constants.ShaderStages];
         }
-
 
         /// <summary>
         /// Sets the memory range with the index buffer data, to be used for subsequent draw calls.
@@ -419,6 +422,16 @@ namespace Ryujinx.Graphics.Gpu.Memory
         }
 
         /// <summary>
+        /// Gets the size of the compute uniform buffer currently bound at the given index.
+        /// </summary>
+        /// <param name="index">Index of the uniform buffer binding</param>
+        /// <returns>The uniform buffer size, or an undefined value if the buffer is not currently bound</returns>
+        public int GetComputeUniformBufferSize(int index)
+        {
+            return (int)_cpUniformBuffers.Buffers[index].Range.GetSubRange(0).Size;
+        }
+
+        /// <summary>
         /// Gets the address of the graphics uniform buffer currently bound at the given index.
         /// </summary>
         /// <param name="stage">Index of the shader stage</param>
@@ -427,6 +440,17 @@ namespace Ryujinx.Graphics.Gpu.Memory
         public ulong GetGraphicsUniformBufferAddress(int stage, int index)
         {
             return _gpUniformBuffers[stage].Buffers[index].Range.GetSubRange(0).Address;
+        }
+
+        /// <summary>
+        /// Gets the size of the graphics uniform buffer currently bound at the given index.
+        /// </summary>
+        /// <param name="stage">Index of the shader stage</param>
+        /// <param name="index">Index of the uniform buffer binding</param>
+        /// <returns>The uniform buffer size, or an undefined value if the buffer is not currently bound</returns>
+        public int GetGraphicsUniformBufferSize(int stage, int index)
+        {
+            return (int)_gpUniformBuffers[stage].Buffers[index].Range.GetSubRange(0).Size;
         }
 
         /// <summary>
@@ -459,7 +483,7 @@ namespace Ryujinx.Graphics.Gpu.Memory
             BindBuffers(bufferCache, _cpStorageBuffers, isStorage: true);
             BindBuffers(bufferCache, _cpUniformBuffers, isStorage: false);
 
-            CommitBufferTextureBindings();
+            CommitBufferTextureBindings(bufferCache);
 
             // Force rebind after doing compute work.
             Rebind();
@@ -470,14 +494,15 @@ namespace Ryujinx.Graphics.Gpu.Memory
         /// <summary>
         /// Commit any queued buffer texture bindings.
         /// </summary>
-        private void CommitBufferTextureBindings()
+        /// <param name="bufferCache">Buffer cache</param>
+        private void CommitBufferTextureBindings(BufferCache bufferCache)
         {
             if (_bufferTextures.Count > 0)
             {
                 foreach (var binding in _bufferTextures)
                 {
                     var isStore = binding.BindingInfo.Flags.HasFlag(TextureUsageFlags.ImageStore);
-                    var range = _channel.MemoryManager.Physical.BufferCache.GetBufferRange(binding.Range, isStore);
+                    var range = bufferCache.GetBufferRange(binding.Range, isStore);
                     binding.Texture.SetStorage(range);
 
                     // The texture must be rebound to use the new storage if it was updated.
@@ -493,6 +518,33 @@ namespace Ryujinx.Graphics.Gpu.Memory
                 }
 
                 _bufferTextures.Clear();
+            }
+
+            if (_bufferTextureArrays.Count > 0 || _bufferImageArrays.Count > 0)
+            {
+                ITexture[] textureArray = new ITexture[1];
+
+                foreach (var binding in _bufferTextureArrays)
+                {
+                    var range = bufferCache.GetBufferRange(binding.Range);
+                    binding.Texture.SetStorage(range);
+
+                    textureArray[0] = binding.Texture;
+                    binding.Array.SetTextures(binding.Index, textureArray);
+                }
+
+                foreach (var binding in _bufferImageArrays)
+                {
+                    var isStore = binding.BindingInfo.Flags.HasFlag(TextureUsageFlags.ImageStore);
+                    var range = bufferCache.GetBufferRange(binding.Range, isStore);
+                    binding.Texture.SetStorage(range);
+
+                    textureArray[0] = binding.Texture;
+                    binding.Array.SetImages(binding.Index, textureArray);
+                }
+
+                _bufferTextureArrays.Clear();
+                _bufferImageArrays.Clear();
             }
         }
 
@@ -676,7 +728,7 @@ namespace Ryujinx.Graphics.Gpu.Memory
                 UpdateBuffers(_gpUniformBuffers);
             }
 
-            CommitBufferTextureBindings();
+            CommitBufferTextureBindings(bufferCache);
 
             _rebind = false;
 
@@ -826,6 +878,50 @@ namespace Ryujinx.Graphics.Gpu.Memory
             _channel.MemoryManager.Physical.BufferCache.CreateBuffer(range);
 
             _bufferTextures.Add(new BufferTextureBinding(stage, texture, range, bindingInfo, format, isImage));
+        }
+
+        /// <summary>
+        /// Sets the buffer storage of a buffer texture array element. This will be bound when the buffer manager commits bindings.
+        /// </summary>
+        /// <param name="array">Texture array where the element will be inserted</param>
+        /// <param name="texture">Buffer texture</param>
+        /// <param name="range">Physical ranges of memory where the buffer texture data is located</param>
+        /// <param name="bindingInfo">Binding info for the buffer texture</param>
+        /// <param name="index">Index of the binding on the array</param>
+        /// <param name="format">Format of the buffer texture</param>
+        public void SetBufferTextureStorage(
+            ITextureArray array,
+            ITexture texture,
+            MultiRange range,
+            TextureBindingInfo bindingInfo,
+            int index,
+            Format format)
+        {
+            _channel.MemoryManager.Physical.BufferCache.CreateBuffer(range);
+
+            _bufferTextureArrays.Add(new BufferTextureArrayBinding<ITextureArray>(array, texture, range, bindingInfo, index, format));
+        }
+
+        /// <summary>
+        /// Sets the buffer storage of a buffer image array element. This will be bound when the buffer manager commits bindings.
+        /// </summary>
+        /// <param name="array">Image array where the element will be inserted</param>
+        /// <param name="texture">Buffer texture</param>
+        /// <param name="range">Physical ranges of memory where the buffer texture data is located</param>
+        /// <param name="bindingInfo">Binding info for the buffer texture</param>
+        /// <param name="index">Index of the binding on the array</param>
+        /// <param name="format">Format of the buffer texture</param>
+        public void SetBufferTextureStorage(
+            IImageArray array,
+            ITexture texture,
+            MultiRange range,
+            TextureBindingInfo bindingInfo,
+            int index,
+            Format format)
+        {
+            _channel.MemoryManager.Physical.BufferCache.CreateBuffer(range);
+
+            _bufferImageArrays.Add(new BufferTextureArrayBinding<IImageArray>(array, texture, range, bindingInfo, index, format));
         }
 
         /// <summary>

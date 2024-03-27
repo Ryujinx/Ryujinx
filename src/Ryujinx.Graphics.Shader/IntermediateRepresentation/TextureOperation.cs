@@ -26,9 +26,8 @@ namespace Ryujinx.Graphics.Shader.IntermediateRepresentation
             Binding = binding;
         }
 
-        public void TurnIntoIndexed(int binding)
+        public void TurnIntoArray(int binding)
         {
-            Type |= SamplerType.Indexed;
             Flags &= ~TextureFlags.Bindless;
             Binding = binding;
         }

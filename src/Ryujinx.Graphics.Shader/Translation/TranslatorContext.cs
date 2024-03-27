@@ -294,6 +294,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                         Definitions,
                         resourceManager,
                         GpuAccessor,
+                        Options.TargetApi,
                         Options.TargetLanguage,
                         Definitions.Stage,
                         ref usedFeatures);
@@ -412,7 +413,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                 if (Stage == ShaderStage.Vertex)
                 {
                     int ibBinding = resourceManager.Reservations.IndexBufferTextureBinding;
-                    TextureDefinition indexBuffer = new(2, ibBinding, "ib_data", SamplerType.TextureBuffer, TextureFormat.Unknown, TextureUsageFlags.None);
+                    TextureDefinition indexBuffer = new(2, ibBinding, 1, "ib_data", SamplerType.TextureBuffer, TextureFormat.Unknown, TextureUsageFlags.None);
                     resourceManager.Properties.AddOrUpdateTexture(indexBuffer);
 
                     int inputMap = _program.AttributeUsage.UsedInputAttributes;
@@ -421,7 +422,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                     {
                         int location = BitOperations.TrailingZeroCount(inputMap);
                         int binding = resourceManager.Reservations.GetVertexBufferTextureBinding(location);
-                        TextureDefinition vaBuffer = new(2, binding, $"vb_data{location}", SamplerType.TextureBuffer, TextureFormat.Unknown, TextureUsageFlags.None);
+                        TextureDefinition vaBuffer = new(2, binding, 1, $"vb_data{location}", SamplerType.TextureBuffer, TextureFormat.Unknown, TextureUsageFlags.None);
                         resourceManager.Properties.AddOrUpdateTexture(vaBuffer);
 
                         inputMap &= ~(1 << location);
@@ -430,7 +431,7 @@ namespace Ryujinx.Graphics.Shader.Translation
                 else if (Stage == ShaderStage.Geometry)
                 {
                     int trbBinding = resourceManager.Reservations.TopologyRemapBufferTextureBinding;
-                    TextureDefinition remapBuffer = new(2, trbBinding, "trb_data", SamplerType.TextureBuffer, TextureFormat.Unknown, TextureUsageFlags.None);
+                    TextureDefinition remapBuffer = new(2, trbBinding, 1, "trb_data", SamplerType.TextureBuffer, TextureFormat.Unknown, TextureUsageFlags.None);
                     resourceManager.Properties.AddOrUpdateTexture(remapBuffer);
 
                     int geometryVbOutputSbBinding = resourceManager.Reservations.GeometryVertexOutputStorageBufferBinding;

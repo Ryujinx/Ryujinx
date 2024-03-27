@@ -299,6 +299,15 @@ namespace Ryujinx.Graphics.GAL.Multithreading
             return handle;
         }
 
+        public IImageArray CreateImageArray(int size, bool isBuffer)
+        {
+            var imageArray = new ThreadedImageArray(this);
+            New<CreateImageArrayCommand>().Set(Ref(imageArray), size, isBuffer);
+            QueueCommand();
+
+            return imageArray;
+        }
+
         public IProgram CreateProgram(ShaderSource[] shaders, ShaderInfo info)
         {
             var program = new ThreadedProgram(this);
@@ -348,6 +357,14 @@ namespace Ryujinx.Graphics.GAL.Multithreading
 
                 return texture;
             }
+        }
+        public ITextureArray CreateTextureArray(int size, bool isBuffer)
+        {
+            var textureArray = new ThreadedTextureArray(this);
+            New<CreateTextureArrayCommand>().Set(Ref(textureArray), size, isBuffer);
+            QueueCommand();
+
+            return textureArray;
         }
 
         public void DeleteBuffer(BufferHandle buffer)

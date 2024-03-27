@@ -6,7 +6,7 @@ namespace Ryujinx.Graphics.Vulkan
 {
     class DescriptorSetManager : IDisposable
     {
-        public const uint MaxSets = 16;
+        public const uint MaxSets = 8;
 
         public class DescriptorPoolHolder : IDisposable
         {

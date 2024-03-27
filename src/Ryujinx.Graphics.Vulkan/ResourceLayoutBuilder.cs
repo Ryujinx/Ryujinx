@@ -35,7 +35,7 @@ namespace Ryujinx.Graphics.Vulkan
             };
 
             _resourceDescriptors[setIndex].Add(new ResourceDescriptor(binding, 1, type, stages));
-            _resourceUsages[setIndex].Add(new ResourceUsage(binding, type, stages));
+            _resourceUsages[setIndex].Add(new ResourceUsage(binding, 1, type, stages));
 
             return this;
         }

@@ -146,9 +146,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
                 }
                 else if (operation is AstTextureOperation texOp)
                 {
-                    if (texOp.Inst == Instruction.ImageLoad ||
-                        texOp.Inst == Instruction.ImageStore ||
-                        texOp.Inst == Instruction.ImageAtomic)
+                    if (texOp.Inst.IsImage())
                     {
                         return texOp.GetVectorType(texOp.Format.GetComponentType());
                     }

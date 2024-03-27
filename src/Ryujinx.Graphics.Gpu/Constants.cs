@@ -89,5 +89,10 @@ namespace Ryujinx.Graphics.Gpu
         /// Maximum size that an storage buffer is assumed to have when the correct size is unknown.
         /// </summary>
         public const ulong MaxUnknownStorageSize = 0x100000;
+
+        /// <summary>
+        /// Size of a bindless texture handle as exposed by guest graphics APIs.
+        /// </summary>
+        public const int TextureHandleSizeInBytes = sizeof(ulong);
     }
 }

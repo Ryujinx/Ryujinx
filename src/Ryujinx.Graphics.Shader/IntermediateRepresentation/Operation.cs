@@ -20,13 +20,13 @@ namespace Ryujinx.Graphics.Shader.IntermediateRepresentation
             }
             set
             {
-                if (value != null && value.Type == OperandType.LocalVariable)
-                {
-                    value.AsgOp = this;
-                }
-
                 if (value != null)
                 {
+                    if (value.Type == OperandType.LocalVariable)
+                    {
+                        value.AsgOp = this;
+                    }
+
                     _dests = new[] { value };
                 }
                 else

@@ -34,8 +34,8 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
         public Dictionary<int, Instruction> SharedMemories { get; } = new();
 
         public Dictionary<int, SamplerType> SamplersTypes { get; } = new();
-        public Dictionary<int, (Instruction, Instruction, Instruction)> Samplers { get; } = new();
-        public Dictionary<int, (Instruction, Instruction)> Images { get; } = new();
+        public Dictionary<int, SamplerDeclaration> Samplers { get; } = new();
+        public Dictionary<int, ImageDeclaration> Images { get; } = new();
 
         public Dictionary<IoDefinition, Instruction> Inputs { get; } = new();
         public Dictionary<IoDefinition, Instruction> Outputs { get; } = new();

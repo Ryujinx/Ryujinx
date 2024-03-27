@@ -8,14 +8,7 @@ namespace Ryujinx.Graphics.Vulkan
 {
     class PipelineLayoutCacheEntry
     {
-        // Those were adjusted based on current descriptor usage and the descriptor counts usually used on pipeline layouts.
-        // It might be a good idea to tweak them again if those change, or maybe find a way to calculate an optimal value dynamically.
-        private const uint DefaultUniformBufferPoolCapacity = 19 * DescriptorSetManager.MaxSets;
-        private const uint DefaultStorageBufferPoolCapacity = 16 * DescriptorSetManager.MaxSets;
-        private const uint DefaultTexturePoolCapacity = 128 * DescriptorSetManager.MaxSets;
-        private const uint DefaultImagePoolCapacity = 8 * DescriptorSetManager.MaxSets;
-
-        private const int MaxPoolSizesPerSet = 2;
+        private const int MaxPoolSizesPerSet = 8;
 
         private readonly VulkanRenderer _gd;
         private readonly Device _device;
@@ -24,6 +17,9 @@ namespace Ryujinx.Graphics.Vulkan
         public PipelineLayout PipelineLayout { get; }
 
         private readonly int[] _consumedDescriptorsPerSet;
+        private readonly DescriptorPoolSize[][] _poolSizes;
+
+        private readonly DescriptorSetManager _descriptorSetManager;
 
         private readonly List<Auto<DescriptorSetCollection>>[][] _dsCache;
         private List<Auto<DescriptorSetCollection>>[] _currentDsCache;
@@ -65,6 +61,9 @@ namespace Ryujinx.Graphics.Vulkan
             (DescriptorSetLayouts, PipelineLayout) = PipelineLayoutFactory.Create(gd, device, setDescriptors, usePushDescriptors);
 
             _consumedDescriptorsPerSet = new int[setDescriptors.Count];
+            _poolSizes = new DescriptorPoolSize[setDescriptors.Count][];
+
+            Span<DescriptorPoolSize> poolSizes = stackalloc DescriptorPoolSize[MaxPoolSizesPerSet];
 
             for (int setIndex = 0; setIndex < setDescriptors.Count; setIndex++)
             {
@@ -76,6 +75,7 @@ namespace Ryujinx.Graphics.Vulkan
                 }
 
                 _consumedDescriptorsPerSet[setIndex] = count;
+                _poolSizes[setIndex] = GetDescriptorPoolSizes(poolSizes, setDescriptors[setIndex], DescriptorSetManager.MaxSets).ToArray();
             }
 
             if (usePushDescriptors)
@@ -83,6 +83,8 @@ namespace Ryujinx.Graphics.Vulkan
                 _pdDescriptors = setDescriptors[0];
                 _pdTemplates = new();
             }
+
+            _descriptorSetManager = new DescriptorSetManager(_device, setDescriptors.Count);
         }
 
         public void UpdateCommandBufferIndex(int commandBufferIndex)
@@ -105,17 +107,12 @@ namespace Ryujinx.Graphics.Vulkan
             int index = _dsCacheCursor[setIndex]++;
             if (index == list.Count)
             {
-                Span<DescriptorPoolSize> poolSizes = stackalloc DescriptorPoolSize[MaxPoolSizesPerSet];
-                poolSizes = GetDescriptorPoolSizes(poolSizes, setIndex);
-
-                int consumedDescriptors = _consumedDescriptorsPerSet[setIndex];
-
-                var dsc = _gd.DescriptorSetManager.AllocateDescriptorSet(
+                var dsc = _descriptorSetManager.AllocateDescriptorSet(
                     _gd.Api,
                     DescriptorSetLayouts[setIndex],
-                    poolSizes,
+                    _poolSizes[setIndex],
                     setIndex,
-                    consumedDescriptors,
+                    _consumedDescriptorsPerSet[setIndex],
                     false);
 
                 list.Add(dsc);
@@ -127,28 +124,35 @@ namespace Ryujinx.Graphics.Vulkan
             return list[index];
         }
 
-        private static Span<DescriptorPoolSize> GetDescriptorPoolSizes(Span<DescriptorPoolSize> output, int setIndex)
+        private static Span<DescriptorPoolSize> GetDescriptorPoolSizes(Span<DescriptorPoolSize> output, ResourceDescriptorCollection setDescriptor, uint multiplier)
         {
-            int count = 1;
+            int count = 0;
 
-            switch (setIndex)
+            for (int index = 0; index < setDescriptor.Descriptors.Count; index++)
             {
-                case PipelineBase.UniformSetIndex:
-                    output[0] = new(DescriptorType.UniformBuffer, DefaultUniformBufferPoolCapacity);
-                    break;
-                case PipelineBase.StorageSetIndex:
-                    output[0] = new(DescriptorType.StorageBuffer, DefaultStorageBufferPoolCapacity);
-                    break;
-                case PipelineBase.TextureSetIndex:
-                    output[0] = new(DescriptorType.CombinedImageSampler, DefaultTexturePoolCapacity);
-                    output[1] = new(DescriptorType.UniformTexelBuffer, DefaultTexturePoolCapacity);
-                    count = 2;
-                    break;
-                case PipelineBase.ImageSetIndex:
-                    output[0] = new(DescriptorType.StorageImage, DefaultImagePoolCapacity);
-                    output[1] = new(DescriptorType.StorageTexelBuffer, DefaultImagePoolCapacity);
-                    count = 2;
-                    break;
+                ResourceDescriptor descriptor = setDescriptor.Descriptors[index];
+                DescriptorType descriptorType = descriptor.Type.Convert();
+
+                bool found = false;
+
+                for (int poolSizeIndex = 0; poolSizeIndex < count; poolSizeIndex++)
+                {
+                    if (output[poolSizeIndex].Type == descriptorType)
+                    {
+                        output[poolSizeIndex].DescriptorCount += (uint)descriptor.Count * multiplier;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    output[count++] = new DescriptorPoolSize()
+                    {
+                        Type = descriptorType,
+                        DescriptorCount = (uint)descriptor.Count,
+                    };
+                }
             }
 
             return output[..count];
@@ -206,6 +210,8 @@ namespace Ryujinx.Graphics.Vulkan
                 {
                     _gd.Api.DestroyDescriptorSetLayout(_device, DescriptorSetLayouts[i], null);
                 }
+
+                _descriptorSetManager.Dispose();
             }
         }
 

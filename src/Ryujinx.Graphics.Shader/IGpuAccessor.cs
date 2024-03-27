@@ -27,46 +27,41 @@ namespace Ryujinx.Graphics.Shader
         ReadOnlySpan<ulong> GetCode(ulong address, int minimumSize);
 
         /// <summary>
+        /// Gets the size in bytes of a bound constant buffer for the current shader stage.
+        /// </summary>
+        /// <param name="slot">The number of the constant buffer to get the size from</param>
+        /// <returns>Size in bytes</returns>
+        int QueryTextureArrayLengthFromBuffer(int slot);
+
+        /// <summary>
         /// Queries the binding number of a constant buffer.
         /// </summary>
         /// <param name="index">Constant buffer index</param>
         /// <returns>Binding number</returns>
-        int QueryBindingConstantBuffer(int index)
-        {
-            return index + 1;
-        }
+        int CreateConstantBufferBinding(int index);
+
+        /// <summary>
+        /// Queries the binding number of an image.
+        /// </summary>
+        /// <param name="count">For array of images, the number of elements of the array, otherwise it should be 1</param>
+        /// <param name="isBuffer">Indicates if the image is a buffer image</param>
+        /// <returns>Binding number</returns>
+        int CreateImageBinding(int count, bool isBuffer);
 
         /// <summary>
         /// Queries the binding number of a storage buffer.
         /// </summary>
         /// <param name="index">Storage buffer index</param>
         /// <returns>Binding number</returns>
-        int QueryBindingStorageBuffer(int index)
-        {
-            return index;
-        }
+        int CreateStorageBufferBinding(int index);
 
         /// <summary>
         /// Queries the binding number of a texture.
         /// </summary>
-        /// <param name="index">Texture index</param>
+        /// <param name="count">For array of textures, the number of elements of the array, otherwise it should be 1</param>
         /// <param name="isBuffer">Indicates if the texture is a buffer texture</param>
         /// <returns>Binding number</returns>
-        int QueryBindingTexture(int index, bool isBuffer)
-        {
-            return index;
-        }
-
-        /// <summary>
-        /// Queries the binding number of an image.
-        /// </summary>
-        /// <param name="index">Image index</param>
-        /// <param name="isBuffer">Indicates if the image is a buffer image</param>
-        /// <returns>Binding number</returns>
-        int QueryBindingImage(int index, bool isBuffer)
-        {
-            return index;
-        }
+        int CreateTextureBinding(int count, bool isBuffer);
 
         /// <summary>
         /// Queries Local Size X for compute shaders.

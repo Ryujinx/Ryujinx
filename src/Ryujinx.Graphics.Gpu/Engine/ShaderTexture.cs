@@ -16,7 +16,7 @@ namespace Ryujinx.Graphics.Gpu.Engine
         /// <returns>Texture target value</returns>
         public static Target GetTarget(SamplerType type)
         {
-            type &= ~(SamplerType.Indexed | SamplerType.Shadow);
+            type &= ~SamplerType.Shadow;
 
             switch (type)
             {
