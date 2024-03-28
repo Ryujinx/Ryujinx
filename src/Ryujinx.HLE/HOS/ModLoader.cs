@@ -218,7 +218,7 @@ namespace Ryujinx.HLE.HOS
 
                 if (types.Length > 0)
                 {
-                    Logger.Info?.Print(LogClass.ModLoader, $"Found mod '{mod.Name}' [{types}]");
+                    Logger.Info?.Print(LogClass.ModLoader, $"Found {(mod.Enabled ? "enabled" : "disabled")} mod '{mod.Name}' [{types}]");
                 }
             }
         }
