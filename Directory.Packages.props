@@ -8,8 +8,8 @@
     <PackageVersion Include="Avalonia.Desktop" Version="11.0.10" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.0.10" />
     <PackageVersion Include="Avalonia.Markup.Xaml.Loader" Version="11.0.10" />
-    <PackageVersion Include="Avalonia.Svg" Version="11.0.0.16" />
-    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.0.0.16" />
+    <PackageVersion Include="Avalonia.Svg" Version="11.0.0.17" />
+    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.0.0.17" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="Concentus" Version="1.1.7" />
     <PackageVersion Include="DiscordRichPresence" Version="1.2.1.24" />
