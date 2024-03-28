@@ -341,7 +341,7 @@
   "DialogThemeRestartMessage": "Tema kaydedildi. Temayı uygulamak için yeniden başlatma gerekiyor.",
   "DialogThemeRestartSubMessage": "Yeniden başlatmak ister misiniz",
   "DialogFirmwareInstallEmbeddedMessage": "Bu oyunun içine gömülü olan yazılımı yüklemek ister misiniz? (Firmware {0})",
-  "DialogFirmwareInstallEmbeddedSuccessMessage": "Yüklü firmware bulunamadı ancak Ryujinx sağlanan oyundan {0} firmware sürümünü yükledi.\nEmülatör şimdi başlatılacak.",
+  "DialogFirmwareInstallEmbeddedSuccessMessage": "No installed firmware was found but Ryujinx was able to install firmware {0} from the provided game.\nThe emulator will now start.",
   "DialogFirmwareNoFirmwareInstalledMessage": "Yazılım Yüklü Değil",
   "DialogFirmwareInstalledMessage": "Yazılım {0} yüklendi",
   "DialogInstallFileTypesSuccessMessage": "Dosya uzantıları başarıyla yüklendi!",
@@ -648,6 +648,9 @@
   "GraphicsAALabel": "Kenar Yumuşatma:",
   "GraphicsScalingFilterLabel": "Ölçekleme Filtresi:",
   "GraphicsScalingFilterTooltip": "Choose the scaling filter that will be applied when using resolution scale.\n\nBilinear works well for 3D games and is a safe default option.\n\nNearest is recommended for pixel art games.\n\nFSR 1.0 is merely a sharpening filter, not recommended for use with FXAA or SMAA.\n\nThis option can be changed while a game is running by clicking \"Apply\" below; you can simply move the settings window aside and experiment until you find your preferred look for a game.\n\nLeave on BILINEAR if unsure.",
+  "GraphicsScalingFilterBilinear": "Bilinear",
+  "GraphicsScalingFilterNearest": "Nearest",
+  "GraphicsScalingFilterFsr": "FSR",
   "GraphicsScalingFilterLevelLabel": "Seviye",
   "GraphicsScalingFilterLevelTooltip": "Set FSR 1.0 sharpening level. Higher is sharper.",
   "SmaaLow": "Düşük SMAA",
@@ -664,5 +667,7 @@
   "AboutChangelogButtonTooltipMessage": "Kullandığınız versiyon için olan değişiklikleri varsayılan tarayıcınızda görmek için tıklayın",
   "SettingsTabNetworkMultiplayer": "Çok Oyunculu",
   "MultiplayerMode": "Mod:",
-  "MultiplayerModeTooltip": "Change LDN multiplayer mode.\n\nLdnMitm will modify local wireless/local play functionality in games to function as if it were LAN, allowing for local, same-network connections with other Ryujinx instances and hacked Nintendo Switch consoles that have the ldn_mitm module installed.\n\nMultiplayer requires all players to be on the same game version (i.e. Super Smash Bros. Ultimate v13.0.1 can't connect to v13.0.0).\n\nLeave DISABLED if unsure."
+  "MultiplayerModeTooltip": "Change LDN multiplayer mode.\n\nLdnMitm will modify local wireless/local play functionality in games to function as if it were LAN, allowing for local, same-network connections with other Ryujinx instances and hacked Nintendo Switch consoles that have the ldn_mitm module installed.\n\nMultiplayer requires all players to be on the same game version (i.e. Super Smash Bros. Ultimate v13.0.1 can't connect to v13.0.0).\n\nLeave DISABLED if unsure.",
+  "MultiplayerModeDisabled": "Disabled",
+  "MultiplayerModeLdnMitm": "ldn_mitm"
 }

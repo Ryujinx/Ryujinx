@@ -648,6 +648,9 @@
   "GraphicsAALabel": "ลดการฉีกขาดของภาพ:",
   "GraphicsScalingFilterLabel": "ปรับขนาดตัวกรอง:",
   "GraphicsScalingFilterTooltip": "เลือกตัวกรองสเกลที่จะใช้เมื่อใช้สเกลความละเอียด\n\nBilinear ทำงานได้ดีกับเกม 3D และเป็นตัวเลือกเริ่มต้นที่ปลอดภัย\n\nแนะนำให้ใช้เกมภาพพิกเซลที่ใกล้เคียงที่สุด\n\nFSR 1.0 เป็นเพียงตัวกรองความคมชัด ไม่แนะนำให้ใช้กับ FXAA หรือ SMAA\n\nตัวเลือกนี้สามารถเปลี่ยนแปลงได้ในขณะที่เกมกำลังทำงานอยู่โดยคลิก \"นำไปใช้\" ด้านล่าง คุณสามารถย้ายหน้าต่างการตั้งค่าไปด้านข้างและทดลองจนกว่าคุณจะพบรูปลักษณ์ที่คุณต้องการสำหรับเกม",
+  "GraphicsScalingFilterBilinear": "Bilinear",
+  "GraphicsScalingFilterNearest": "Nearest",
+  "GraphicsScalingFilterFsr": "FSR",
   "GraphicsScalingFilterLevelLabel": "ระดับ",
   "GraphicsScalingFilterLevelTooltip": "ตั้งค่าระดับความคมชัด FSR 1.0 สูงกว่าจะคมชัดกว่า",
   "SmaaLow": "SMAA ต่ำ",
@@ -664,5 +667,7 @@
   "AboutChangelogButtonTooltipMessage": "คลิกเพื่อเปิดบันทึกการเปลี่ยนแปลงสำหรับเวอร์ชั่นนี้ บนเบราว์เซอร์เริ่มต้นของคุณ",
   "SettingsTabNetworkMultiplayer": "ผู้เล่นหลายคน",
   "MultiplayerMode": "โหมด:",
-  "MultiplayerModeTooltip": "เปลี่ยนโหมดผู้เล่นหลายคนของ LDN\n\nLdnMitm จะปรับเปลี่ยนฟังก์ชันการเล่นแบบไร้สาย/ภายใน จะให้เกมทำงานเหมือนกับว่าเป็น LAN ช่วยให้สามารถเชื่อมต่อภายในเครือข่ายเดียวกันกับอินสแตนซ์ Ryujinx อื่น ๆ และคอนโซล Nintendo Switch ที่ถูกแฮ็กซึ่งมีโมดูล ldn_mitm ติดตั้งอยู่\n\nผู้เล่นหลายคนต้องการให้ผู้เล่นทุกคนอยู่ในเกมเวอร์ชันเดียวกัน (เช่น Super Smash Bros. Ultimate v13.0.1 ไม่สามารถเชื่อมต่อกับ v13.0.0)\n\nปล่อยให้ปิดการใช้งานหากไม่แน่ใจ"
+  "MultiplayerModeTooltip": "เปลี่ยนโหมดผู้เล่นหลายคนของ LDN\n\nLdnMitm จะปรับเปลี่ยนฟังก์ชันการเล่นแบบไร้สาย/ภายใน จะให้เกมทำงานเหมือนกับว่าเป็น LAN ช่วยให้สามารถเชื่อมต่อภายในเครือข่ายเดียวกันกับอินสแตนซ์ Ryujinx อื่น ๆ และคอนโซล Nintendo Switch ที่ถูกแฮ็กซึ่งมีโมดูล ldn_mitm ติดตั้งอยู่\n\nผู้เล่นหลายคนต้องการให้ผู้เล่นทุกคนอยู่ในเกมเวอร์ชันเดียวกัน (เช่น Super Smash Bros. Ultimate v13.0.1 ไม่สามารถเชื่อมต่อกับ v13.0.0)\n\nปล่อยให้ปิดการใช้งานหากไม่แน่ใจ",
+  "MultiplayerModeDisabled": "Disabled",
+  "MultiplayerModeLdnMitm": "ldn_mitm"
 }

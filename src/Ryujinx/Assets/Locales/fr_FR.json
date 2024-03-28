@@ -648,6 +648,9 @@
   "GraphicsAALabel": "Anticrénelage :",
   "GraphicsScalingFilterLabel": "Filtre de mise à l'échelle :",
   "GraphicsScalingFilterTooltip": "Choisissez le filtre de mise à l'échelle qui sera appliqué lors de l'utilisation de la mise à l'échelle de la résolution.\n\nLe filtre bilinéaire fonctionne bien pour les jeux en 3D et constitue une option par défaut sûre.\n\nLe filtre le plus proche est recommandé pour les jeux de pixel art.\n\nFSR 1.0 est simplement un filtre de netteté, non recommandé pour une utilisation avec FXAA ou SMAA.\n\nCette option peut être modifiée pendant qu'un jeu est en cours d'exécution en cliquant sur \"Appliquer\" ci-dessous ; vous pouvez simplement déplacer la fenêtre des paramètres de côté et expérimenter jusqu'à ce que vous trouviez l'aspect souhaité pour un jeu.\n\nLaissez sur BILINEAR si vous n'êtes pas sûr.",
+  "GraphicsScalingFilterBilinear": "Bilinear",
+  "GraphicsScalingFilterNearest": "Nearest",
+  "GraphicsScalingFilterFsr": "FSR",
   "GraphicsScalingFilterLevelLabel": "Niveau ",
   "GraphicsScalingFilterLevelTooltip": "Définissez le niveau de netteté FSR 1.0. Plus élevé signifie plus net.",
   "SmaaLow": "SMAA Faible",
@@ -664,5 +667,7 @@
   "AboutChangelogButtonTooltipMessage": "Cliquez pour ouvrir le changelog de cette version dans votre navigateur par défaut.",
   "SettingsTabNetworkMultiplayer": "Multijoueur",
   "MultiplayerMode": "Mode :",
-  "MultiplayerModeTooltip": "Changer le mode multijoueur LDN.\n\nLdnMitm modifiera la fonctionnalité de jeu sans fil local/jeu local dans les jeux pour fonctionner comme s'il s'agissait d'un LAN, permettant des connexions locales sur le même réseau avec d'autres instances de Ryujinx et des consoles Nintendo Switch piratées ayant le module ldn_mitm installé.\n\nLe multijoueur nécessite que tous les joueurs soient sur la même version du jeu (par exemple, Super Smash Bros. Ultimate v13.0.1 ne peut pas se connecter à v13.0.0).\n\nLaissez DÉSACTIVÉ si vous n'êtes pas sûr."
+  "MultiplayerModeTooltip": "Changer le mode multijoueur LDN.\n\nLdnMitm modifiera la fonctionnalité de jeu sans fil local/jeu local dans les jeux pour fonctionner comme s'il s'agissait d'un LAN, permettant des connexions locales sur le même réseau avec d'autres instances de Ryujinx et des consoles Nintendo Switch piratées ayant le module ldn_mitm installé.\n\nLe multijoueur nécessite que tous les joueurs soient sur la même version du jeu (par exemple, Super Smash Bros. Ultimate v13.0.1 ne peut pas se connecter à v13.0.0).\n\nLaissez DÉSACTIVÉ si vous n'êtes pas sûr.",
+  "MultiplayerModeDisabled": "Disabled",
+  "MultiplayerModeLdnMitm": "ldn_mitm"
 }
