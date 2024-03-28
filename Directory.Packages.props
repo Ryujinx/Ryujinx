@@ -39,9 +39,9 @@
     <PackageVersion Include="securifybv.ShellLink" Version="0.1.0" />
     <PackageVersion Include="shaderc.net" Version="0.1.0" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
-    <PackageVersion Include="Silk.NET.Vulkan" Version="2.16.0" />
-    <PackageVersion Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.16.0" />
-    <PackageVersion Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.16.0" />
+    <PackageVersion Include="Silk.NET.Vulkan" Version="2.20.0" />
+    <PackageVersion Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.20.0" />
+    <PackageVersion Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.20.0" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.7" />
     <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="1.0.0" />
     <PackageVersion Include="SPB" Version="0.0.4-build32" />
