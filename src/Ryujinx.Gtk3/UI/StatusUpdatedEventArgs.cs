@@ -12,8 +12,18 @@ namespace Ryujinx.UI
         public string FifoStatus;
         public string GpuName;
         public string GpuBackend;
+        public uint ShaderCount;
 
-        public StatusUpdatedEventArgs(bool vSyncEnabled, float volume, string gpuBackend, string dockedMode, string aspectRatio, string gameStatus, string fifoStatus, string gpuName)
+        public StatusUpdatedEventArgs(
+            bool vSyncEnabled,
+            float volume,
+            string gpuBackend,
+            string dockedMode,
+            string aspectRatio,
+            string gameStatus,
+            string fifoStatus,
+            string gpuName,
+            uint shaderCount)
         {
             VSyncEnabled = vSyncEnabled;
             Volume = volume;
@@ -23,6 +33,7 @@ namespace Ryujinx.UI
             GameStatus = gameStatus;
             FifoStatus = fifoStatus;
             GpuName = gpuName;
+            ShaderCount = shaderCount;
         }
     }
 }

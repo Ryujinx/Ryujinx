@@ -60,6 +60,10 @@ namespace Ryujinx.UI
         private long _ticks = 0;
         private float _newVolume;
 
+        private uint _displayCount;
+        private uint _previousCount;
+        private DateTime _lastShaderReset;
+
         private readonly Stopwatch _chrono;
 
         private KeyboardHotkeyState _prevHotkeyState;
@@ -486,6 +490,24 @@ namespace Ryujinx.UI
                     {
                         string dockedMode = ConfigurationState.Instance.System.EnableDockedMode ? "Docked" : "Handheld";
                         float scale = GraphicsConfig.ResScale;
+                        uint totalCount = Device.Gpu.Renderer.ProgramCount;
+
+                        // If there is a mismatch between total program compile and previous count
+                        // this means new shaders have been compiled and should be displayed.
+                        if (totalCount != _previousCount)
+                        {
+                            _displayCount += totalCount - _previousCount;
+
+                            _lastShaderReset = DateTime.Now;
+                            _previousCount = totalCount;
+                        }
+                        // Check if 5s has passed since any new shaders were compiled.
+                        // If yes, reset the counter.
+                        else if (_lastShaderReset.AddSeconds(5) <= DateTime.Now)
+                        {
+                            _displayCount = 0;
+                        }
+
                         if (scale != 1)
                         {
                             dockedMode += $" ({scale}x)";
@@ -499,7 +521,8 @@ namespace Ryujinx.UI
                             ConfigurationState.Instance.Graphics.AspectRatio.Value.ToText(),
                             $"Game: {Device.Statistics.GetGameFrameRate():00.00} FPS ({Device.Statistics.GetGameFrameTime():00.00} ms)",
                             $"FIFO: {Device.Statistics.GetFifoPercent():0.00} %",
-                            $"GPU: {_gpuDriverName}"));
+                            $"GPU: {_gpuDriverName}",
+                            _displayCount));
 
                         _ticks = Math.Min(_ticks - _ticksPerFrame, _ticksPerFrame);
                     }

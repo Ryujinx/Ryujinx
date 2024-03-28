@@ -29,6 +29,8 @@ namespace Ryujinx.Graphics.OpenGL
 
         private readonly Sync _sync;
 
+        public uint ProgramCount { get; set; } = 0;
+
         public event EventHandler<ScreenCaptureImageInfo> ScreenCaptured;
 
         internal PersistentBuffers PersistentBuffers { get; }
@@ -92,6 +94,8 @@ namespace Ryujinx.Graphics.OpenGL
 
         public IProgram CreateProgram(ShaderSource[] shaders, ShaderInfo info)
         {
+            ProgramCount++;
+
             return new Program(shaders, info.FragmentOutputMap);
         }
 

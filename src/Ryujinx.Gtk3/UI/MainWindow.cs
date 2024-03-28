@@ -139,6 +139,7 @@ namespace Ryujinx.UI
         [GUI] Label _volumeStatus;
         [GUI] Box _listStatusBox;
         [GUI] Label _loadingStatusLabel;
+        [GUI] Label _shaderCount;
         [GUI] Gtk.ProgressBar _loadingStatusBar;
 
 #pragma warning restore CS0649, IDE0044, CS0169, IDE0051
@@ -1210,6 +1211,7 @@ namespace Ryujinx.UI
                 _aspectRatio.Text = args.AspectRatio;
                 _gpuBackend.Text = args.GpuBackend;
                 _volumeStatus.Text = GetVolumeLabelText(args.Volume);
+                _shaderCount.Text = args.ShaderCount > 0 ? $"Compiling Shaders: {args.ShaderCount}" : "";
 
                 if (args.VSyncEnabled)
                 {
