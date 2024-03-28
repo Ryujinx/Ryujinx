@@ -33,8 +33,3 @@ Project Docs
 =================
 
 To be added. Many project files will contain basic XML docs for key functions and classes in the meantime.
-
-Other Information
-=================
-
-- N/A
