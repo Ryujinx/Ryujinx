@@ -113,6 +113,7 @@
                 Click="Cancel_OnClick" />
             <Button
                 Name="Apply"
+                IsEnabled="False"
                 Content="{locale:Locale SettingsButtonApply}"
                 Command="{Binding ApplyButton}" />
         </ReversibleStackPanel>
