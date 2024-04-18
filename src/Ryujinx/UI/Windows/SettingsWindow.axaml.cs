@@ -10,17 +10,18 @@ namespace Ryujinx.Ava.UI.Windows
 {
     public partial class SettingsWindow : StyleableWindow
     {
-        internal SettingsViewModel ViewModel { get; set; }
+        private SettingsViewModel ViewModel { get; }
 
         public SettingsWindow(VirtualFileSystem virtualFileSystem, ContentManager contentManager)
         {
-            Title = $"Ryujinx {Program.Version} - {LocaleManager.Instance[LocaleKeys.Settings]}";
+            Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
 
             ViewModel = new SettingsViewModel(virtualFileSystem, contentManager);
             DataContext = ViewModel;
 
             ViewModel.CloseWindow += Close;
             ViewModel.SaveSettingsEvent += SaveSettings;
+            ViewModel.DirtyEvent += UpdateDirtyTitle;
 
             InitializeComponent();
             Load();
@@ -33,6 +34,19 @@ namespace Ryujinx.Ava.UI.Windows
 
             InitializeComponent();
             Load();
+        }
+
+        public void UpdateDirtyTitle(bool isDirty)
+        {
+            if (isDirty)
+            {
+                Title = $"{LocaleManager.Instance[LocaleKeys.Settings]} - {LocaleManager.Instance[LocaleKeys.SettingsDirty]}";
+            }
+            else
+            {
+                Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
+
+            }
         }
 
         public void SaveSettings()

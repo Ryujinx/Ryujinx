@@ -87,6 +87,7 @@
   "LinuxVmMaxMapCountWarningTextPrimary": "Max amount of memory mappings is lower than recommended.",
   "LinuxVmMaxMapCountWarningTextSecondary": "The current value of vm.max_map_count ({0}) is lower than {1}. Some games might try to create more memory mappings than currently allowed. Ryujinx will crash as soon as this limit gets exceeded.\n\nYou might want to either manually increase the limit or install pkexec, which allows Ryujinx to assist with that.",
   "Settings": "Settings",
+  "SettingsDirty": "Unsaved Changes",
   "SettingsTabGeneral": "User Interface",
   "SettingsTabGeneralGeneral": "General",
   "SettingsTabGeneralEnableDiscordRichPresence": "Enable Discord Rich Presence",

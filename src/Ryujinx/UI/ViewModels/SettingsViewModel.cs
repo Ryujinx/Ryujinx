@@ -49,11 +49,24 @@ namespace Ryujinx.Ava.UI.ViewModels
         private int _graphicsBackendIndex;
         private int _scalingFilter;
         private int _scalingFilterLevel;
+        private int _networkInterfaceIndex;
+        private int _multiplayerModeIndex;
+
+        private bool _isModified;
+
+        public bool IsModified
+        {
+            get => _isModified;
+            set
+            {
+                DirtyEvent?.Invoke(value);
+                _isModified = value;
+            }
+        }
 
         public event Action CloseWindow;
         public event Action SaveSettingsEvent;
-        private int _networkInterfaceIndex;
-        private int _multiplayerModeIndex;
+        public event Action<bool> DirtyEvent;
 
         public int ResolutionScale
         {
