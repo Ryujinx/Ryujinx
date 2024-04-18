@@ -124,6 +124,7 @@
                 Content="{locale:Locale SettingsButtonCancel}"
                 Command="{Binding CancelButton}" />
             <Button
+                Name="Apply"
                 Content="{locale:Locale SettingsButtonApply}"
                 Command="{Binding ApplyButton}" />
         </ReversibleStackPanel>

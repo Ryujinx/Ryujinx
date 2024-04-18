@@ -42,11 +42,12 @@ namespace Ryujinx.Ava.UI.Windows
             if (isDirty)
             {
                 Title = $"{LocaleManager.Instance[LocaleKeys.Settings]} - {LocaleManager.Instance[LocaleKeys.SettingsDirty]}";
+                Apply.IsEnabled = true;
             }
             else
             {
                 Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
-
+                Apply.IsEnabled = false;
             }
         }
 
