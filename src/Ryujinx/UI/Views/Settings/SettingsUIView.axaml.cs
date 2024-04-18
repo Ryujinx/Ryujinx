@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
-using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.ViewModels;
 using System.Collections.Generic;
 using System.IO;
@@ -14,8 +13,9 @@ namespace Ryujinx.Ava.UI.Views.Settings
     {
         public SettingsViewModel ViewModel;
 
-        public SettingsUiView()
+        public SettingsUiView(SettingsViewModel viewModel)
         {
+            ViewModel = viewModel;
             InitializeComponent();
         }
 

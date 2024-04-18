@@ -8,8 +8,9 @@ namespace Ryujinx.Ava.UI.Views.Settings
     {
         public SettingsViewModel ViewModel;
 
-        public SettingsSystemView()
+        public SettingsSystemView(SettingsViewModel viewModel)
         {
+            ViewModel = viewModel;
             InitializeComponent();
         }
 

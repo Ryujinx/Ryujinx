@@ -3,6 +3,7 @@ using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.Views.Settings;
 using Ryujinx.HLE.FileSystem;
 using System;
 
@@ -11,6 +12,16 @@ namespace Ryujinx.Ava.UI.Windows
     public partial class SettingsWindow : StyleableWindow
     {
         private SettingsViewModel ViewModel { get; }
+
+        public readonly SettingsUiView UiPage;
+        public readonly SettingsInputView InputPage;
+        public readonly SettingsHotkeysView HotkeysPage;
+        public readonly SettingsSystemView SystemPage;
+        public readonly SettingsCPUView CpuPage;
+        public readonly SettingsGraphicsView GraphicsPage;
+        public readonly SettingsAudioView AudioPage;
+        public readonly SettingsNetworkView NetworkPage;
+        public readonly  SettingsLoggingView LoggingPage;
 
         public SettingsWindow(VirtualFileSystem virtualFileSystem, ContentManager contentManager)
         {
@@ -23,6 +34,16 @@ namespace Ryujinx.Ava.UI.Windows
             ViewModel.SaveSettingsEvent += SaveSettings;
             ViewModel.DirtyEvent += UpdateDirtyTitle;
             ViewModel.ToggleButtons += ToggleButtons;
+
+            UiPage = new SettingsUiView(ViewModel);
+            InputPage = new SettingsInputView(ViewModel);
+            HotkeysPage = new SettingsHotkeysView();
+            SystemPage = new SettingsSystemView(ViewModel);
+            CpuPage = new SettingsCPUView();
+            GraphicsPage = new SettingsGraphicsView();
+            AudioPage = new SettingsAudioView();
+            NetworkPage = new SettingsNetworkView();
+            LoggingPage = new SettingsLoggingView();
 
             InitializeComponent();
             Load();
@@ -68,7 +89,6 @@ namespace Ryujinx.Ava.UI.Windows
 
         private void Load()
         {
-            Pages.Children.Clear();
             NavPanel.SelectionChanged += NavPanelOnSelectionChanged;
             NavPanel.SelectedItem = NavPanel.MenuItems.ElementAt(0);
         }
@@ -80,7 +100,6 @@ namespace Ryujinx.Ava.UI.Windows
                 switch (navItem.Tag.ToString())
                 {
                     case "UiPage":
-                        UiPage.ViewModel = ViewModel;
                         NavPanel.Content = UiPage;
                         break;
                     case "InputPage":
@@ -90,7 +109,6 @@ namespace Ryujinx.Ava.UI.Windows
                         NavPanel.Content = HotkeysPage;
                         break;
                     case "SystemPage":
-                        SystemPage.ViewModel = ViewModel;
                         NavPanel.Content = SystemPage;
                         break;
                     case "CpuPage":

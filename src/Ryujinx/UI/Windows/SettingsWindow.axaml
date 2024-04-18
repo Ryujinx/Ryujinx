@@ -8,7 +8,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:window="clr-namespace:Ryujinx.Ava.UI.Windows"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
-    xmlns:settings="clr-namespace:Ryujinx.Ava.UI.Views.Settings"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
     Width="1100"
     Height="768"
@@ -32,17 +31,6 @@
             Grid.Row="1"
             IsVisible="False"
             KeyboardNavigation.IsTabStop="False"/>
-        <Grid Name="Pages" IsVisible="False" Grid.Row="2">
-            <settings:SettingsUiView Name="UiPage" />
-            <settings:SettingsInputView Name="InputPage" />
-            <settings:SettingsHotkeysView Name="HotkeysPage" />
-            <settings:SettingsSystemView Name="SystemPage" />
-            <settings:SettingsCPUView Name="CpuPage" />
-            <settings:SettingsGraphicsView Name="GraphicsPage" />
-            <settings:SettingsAudioView Name="AudioPage" />
-            <settings:SettingsNetworkView Name="NetworkPage" />
-            <settings:SettingsLoggingView Name="LoggingPage" />
-        </Grid>
         <ui:NavigationView
             Grid.Row="1"
             IsSettingsVisible="False"
