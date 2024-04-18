@@ -21,7 +21,7 @@ namespace Ryujinx.Ava.UI.Windows
         public readonly SettingsGraphicsView GraphicsPage;
         public readonly SettingsAudioView AudioPage;
         public readonly SettingsNetworkView NetworkPage;
-        public readonly  SettingsLoggingView LoggingPage;
+        public readonly SettingsLoggingView LoggingPage;
 
         public SettingsWindow(VirtualFileSystem virtualFileSystem, ContentManager contentManager)
         {
@@ -60,6 +60,11 @@ namespace Ryujinx.Ava.UI.Windows
 
         public void UpdateDirtyTitle(bool isDirty)
         {
+            if (!IsInitialized)
+            {
+                return;
+            }
+
             if (isDirty)
             {
                 Title = $"{LocaleManager.Instance[LocaleKeys.Settings]} - {LocaleManager.Instance[LocaleKeys.SettingsDirty]}";

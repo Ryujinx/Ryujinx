@@ -4,7 +4,6 @@ using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Models;
 using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.Ava.UI.ViewModels.Input;
-using Ryujinx.Ava.UI.Views.Input;
 
 namespace Ryujinx.Ava.UI.Views.Settings
 {
@@ -19,7 +18,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
         {
             SettingsViewModel = viewModel;
 
-            DataContext = ViewModel = new InputViewModel(this);
+            DataContext = ViewModel = new InputViewModel(this, viewModel);
 
             InitializeComponent();
         }
@@ -31,7 +30,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
 
         private async void PlayerIndexBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ViewModel.IsModified && !_dialogOpen)
+            if (SettingsViewModel.IsModified && !_dialogOpen)
             {
                 _dialogOpen = true;
 
@@ -49,7 +48,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
 
                 _dialogOpen = false;
 
-                ViewModel.IsModified = false;
+                SettingsViewModel.IsModified = false;
 
                 if (e.AddedItems.Count > 0)
                 {
