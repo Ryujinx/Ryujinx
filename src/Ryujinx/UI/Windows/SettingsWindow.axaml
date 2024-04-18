@@ -114,12 +114,12 @@
             HorizontalAlignment="Right"
             ReverseOrder="{Binding IsMacOS}">
             <Button
-                HotKey="Enter"
+                IsDefault="True"
                 Classes="accent"
                 Content="{locale:Locale SettingsButtonOk}"
                 Command="{Binding OkButton}" />
             <Button
-                HotKey="Escape"
+                IsCancel="True"
                 Content="{locale:Locale SettingsButtonCancel}"
                 Command="{Binding CancelButton}" />
             <Button
