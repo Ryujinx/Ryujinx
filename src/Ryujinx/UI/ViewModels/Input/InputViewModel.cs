@@ -51,6 +51,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
         private object _configViewModel;
         private string _profileName;
         private bool _isLoaded;
+        private bool _enableDockedMode;
 
         private static readonly InputConfigJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
@@ -69,6 +70,17 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
         public bool IsKeyboard => !IsController;
         public bool IsRight { get; set; }
         public bool IsLeft { get; set; }
+
+        public bool EnableDockedMode
+        {
+            get => _enableDockedMode;
+            set
+            {
+                _enableDockedMode = value;
+            }
+        }
+        public bool EnableKeyboard { get; set; }
+        public bool EnableMouse { get; set; }
 
         public bool IsModified { get; set; }
         public event Action NotifyChangesEvent;
@@ -290,6 +302,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             {
                 ConfigViewModel = new ControllerInputViewModel(this, new GamepadInputConfig(controllerInputConfig));
             }
+
+            EnableDockedMode = ConfigurationState.Instance.System.EnableDockedMode;
+            EnableKeyboard = ConfigurationState.Instance.Hid.EnableKeyboard;
+            EnableMouse = ConfigurationState.Instance.Hid.EnableMouse;
         }
 
         public void LoadDevice()
@@ -854,6 +870,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             // Atomically replace and signal input change.
             // NOTE: Do not modify InputConfig.Value directly as other code depends on the on-change event.
             ConfigurationState.Instance.Hid.InputConfig.Value = newConfig;
+
+            ConfigurationState.Instance.System.EnableDockedMode.Value = EnableDockedMode;
+            ConfigurationState.Instance.Hid.EnableKeyboard.Value = EnableKeyboard;
+            ConfigurationState.Instance.Hid.EnableMouse.Value = EnableMouse;
 
             ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
         }

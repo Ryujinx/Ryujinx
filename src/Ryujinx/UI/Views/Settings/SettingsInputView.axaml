@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:views="clr-namespace:Ryujinx.Ava.UI.Views.Input"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     mc:Ignorable="d"
@@ -21,46 +20,7 @@
         <Border Classes="settings">
             <Panel
                 Margin="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <views:InputView
-                        Grid.Row="0"
-                        Name="InputView" />
-                    <StackPanel
-                        Orientation="Vertical"
-                        Grid.Row="2">
-                        <Separator
-                            Margin="0 10"
-                            Height="1" />
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="10">
-                            <CheckBox
-                                ToolTip.Tip="{locale:Locale DockModeToggleTooltip}"
-                                MinWidth="0"
-                                IsChecked="{Binding EnableDockedMode}">
-                                <TextBlock
-                                    Text="{locale:Locale SettingsTabInputEnableDockedMode}" />
-                            </CheckBox>
-                            <CheckBox
-                                ToolTip.Tip="{locale:Locale DirectKeyboardTooltip}"
-                                IsChecked="{Binding EnableKeyboard}">
-                                <TextBlock
-                                    Text="{locale:Locale SettingsTabInputDirectKeyboardAccess}" />
-                            </CheckBox>
-                            <CheckBox
-                                ToolTip.Tip="{locale:Locale DirectMouseTooltip}"
-                                IsChecked="{Binding EnableMouse}">
-                                <TextBlock
-                                    Text="{locale:Locale SettingsTabInputDirectMouseAccess}" />
-                            </CheckBox>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
+                <views:InputView Name="InputView" />
             </Panel>
         </Border>
     </ScrollViewer>
