@@ -67,6 +67,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public event Action CloseWindow;
         public event Action SaveSettingsEvent;
         public event Action<bool> DirtyEvent;
+        public event Action<bool> ToggleButtons;
 
         public int ResolutionScale
         {

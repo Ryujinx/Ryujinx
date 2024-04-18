@@ -22,6 +22,7 @@ namespace Ryujinx.Ava.UI.Windows
             ViewModel.CloseWindow += Close;
             ViewModel.SaveSettingsEvent += SaveSettings;
             ViewModel.DirtyEvent += UpdateDirtyTitle;
+            ViewModel.ToggleButtons += ToggleButtons;
 
             InitializeComponent();
             Load();
@@ -47,6 +48,11 @@ namespace Ryujinx.Ava.UI.Windows
                 Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
 
             }
+        }
+
+        public void ToggleButtons(bool enable)
+        {
+            Buttons.IsEnabled = enable;
         }
 
         public void SaveSettings()

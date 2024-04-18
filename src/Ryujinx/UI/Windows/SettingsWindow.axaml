@@ -108,6 +108,7 @@
         </ui:NavigationView>
         <ReversibleStackPanel
             Grid.Row="2"
+            Name="Buttons"
             Margin="10"
             Spacing="10"
             Orientation="Horizontal"
