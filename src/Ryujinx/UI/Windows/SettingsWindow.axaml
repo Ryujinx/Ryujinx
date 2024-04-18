@@ -110,7 +110,7 @@
             <Button
                 IsCancel="True"
                 Content="{locale:Locale SettingsButtonCancel}"
-                Command="{Binding CancelButton}" />
+                Click="Cancel_OnClick" />
             <Button
                 Name="Apply"
                 Content="{locale:Locale SettingsButtonApply}"

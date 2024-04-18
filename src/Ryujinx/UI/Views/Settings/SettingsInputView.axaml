@@ -65,7 +65,6 @@
                                             Name="PlayerIndexBox"
                                             HorizontalAlignment="Stretch"
                                             VerticalAlignment="Center"
-                                            SelectionChanged="PlayerIndexBox_OnSelectionChanged"
                                             ItemsSource="{Binding PlayerIndexes}"
                                             SelectedIndex="{Binding PlayerId}">
                                             <ComboBox.ItemTemplate>

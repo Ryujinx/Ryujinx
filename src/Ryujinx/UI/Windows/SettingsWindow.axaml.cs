@@ -1,7 +1,9 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
+using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.Ava.UI.Views.Settings;
 using Ryujinx.HLE.FileSystem;
@@ -135,6 +137,33 @@ namespace Ryujinx.Ava.UI.Windows
                         throw new NotImplementedException();
                 }
             }
+        }
+
+        private static void RevertIfNotSaved()
+        {
+            Program.ReloadConfig();
+        }
+
+        private async void Cancel_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.IsModified)
+            {
+                var result = await ContentDialogHelper.CreateConfirmationDialog(
+                    LocaleManager.Instance[LocaleKeys.DialogSettingsUnsavedChangesMessage],
+                    LocaleManager.Instance[LocaleKeys.DialogSettingsUnsavedChangesSubMessage],
+                    LocaleManager.Instance[LocaleKeys.InputDialogYes],
+                    LocaleManager.Instance[LocaleKeys.InputDialogNo],
+                    LocaleManager.Instance[LocaleKeys.RyujinxConfirm],
+                    parent: this);
+
+                if (result != UserResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            RevertIfNotSaved();
+            Close();
         }
 
         protected override void OnClosing(WindowClosingEventArgs e)
