@@ -18,6 +18,11 @@ namespace Ryujinx.Ava.UI.Views.Settings
         private ButtonKeyAssigner _currentAssigner;
         private readonly IGamepadDriver _avaloniaKeyboardDriver;
 
+        public SettingsHotkeysView()
+        {
+
+        }
+
         public SettingsHotkeysView(SettingsViewModel viewModel)
         {
             _viewModel = viewModel;

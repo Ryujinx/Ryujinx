@@ -42,7 +42,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private float _customResolutionScale;
         private int _resolutionScale;
         private int _graphicsBackendMultithreadingIndex;
-        private float _volume;
         private bool _isVulkanAvailable = true;
         private bool _directoryChanged;
         private readonly List<string> _gpuIds = new();
@@ -397,9 +396,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        public bool IsOpenAlEnabled { get; set; }
-        public bool IsSoundIoEnabled { get; set; }
-        public bool IsSDL2Enabled { get; set; }
         public bool IsCustomResolutionScaleActive => _resolutionScale == 4;
         public bool IsScalingFilterActive => _scalingFilter == (int)Ryujinx.Common.Configuration.ScalingFilter.Fsr;
 
@@ -412,7 +408,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public int Language { get; set; }
         public int Region { get; set; }
         public int FsGlobalAccessLogMode { get; set; }
-        public int AudioBackend { get; set; }
         public int MaxAnisotropy { get; set; }
         public int AspectRatio { get; set; }
         public int AntiAliasingEffect { get; set; }
@@ -453,18 +448,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         public int PreferredGpuIndex { get; set; }
 
-        public float Volume
-        {
-            get => _volume;
-            set
-            {
-                _volume = value;
-
-                ConfigurationState.Instance.System.AudioVolume.Value = _volume / 100;
-
-                OnPropertyChanged();
-            }
-        }
+        private readonly SettingsAudioViewModel _audioViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
         public TimeSpan CurrentTime { get; set; }
@@ -500,10 +484,17 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        public SettingsViewModel(VirtualFileSystem virtualFileSystem, ContentManager contentManager) : this()
+        public SettingsViewModel(
+            VirtualFileSystem virtualFileSystem,
+            ContentManager contentManager,
+            SettingsAudioViewModel audioViewModel) : this()
         {
             _virtualFileSystem = virtualFileSystem;
             _contentManager = contentManager;
+            _audioViewModel = audioViewModel;
+
+            _audioViewModel.DirtyEvent += CheckIfModified;
+
             if (Program.PreviewerDetached)
             {
                 Task.Run(LoadTimeZones);
@@ -518,7 +509,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _validTzRegions = new List<string>();
             _networkInterfaces = new Dictionary<string, string>();
 
-            Task.Run(CheckSoundBackends);
             Task.Run(PopulateNetworkInterfaces);
 
             if (Program.PreviewerDetached)
@@ -589,10 +579,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= config.Graphics.BackendThreading.Value != (BackendThreading)GraphicsBackendMultithreadingIndex;
             isDirty |= config.Graphics.ShadersDumpPath.Value != ShaderDumpPath;
 
-            // Audio
-            isDirty |= config.System.AudioBackend.Value != (AudioBackend)AudioBackend;
-            isDirty |= config.System.AudioVolume.Value != Volume / 100;
-
+            if (_audioViewModel != null)
+            {
+                isDirty |= _audioViewModel.CheckIfModified(config);
+            }
             // Network
             isDirty |= config.System.EnableInternetAccess.Value != EnableInternetAccess;
 
@@ -615,19 +605,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             IsModified = isDirty;
         }
 
-        public async Task CheckSoundBackends()
-        {
-            IsOpenAlEnabled = OpenALHardwareDeviceDriver.IsSupported;
-            IsSoundIoEnabled = SoundIoHardwareDeviceDriver.IsSupported;
-            IsSDL2Enabled = SDL2HardwareDeviceDriver.IsSupported;
 
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                OnPropertyChanged(nameof(IsOpenAlEnabled));
-                OnPropertyChanged(nameof(IsSoundIoEnabled));
-                OnPropertyChanged(nameof(IsSDL2Enabled));
-            });
-        }
 
         private async Task LoadAvailableGpus()
         {
@@ -766,10 +744,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             ScalingFilter = (int)config.Graphics.ScalingFilter.Value;
             ScalingFilterLevel = config.Graphics.ScalingFilterLevel.Value;
 
-            // Audio
-            AudioBackend = (int)config.System.AudioBackend.Value;
-            Volume = config.System.AudioVolume * 100;
-
             // Network
             EnableInternetAccess = config.System.EnableInternetAccess;
             // LAN interface index is loaded asynchronously in PopulateNetworkInterfaces()
@@ -854,16 +828,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             config.Graphics.BackendThreading.Value = (BackendThreading)GraphicsBackendMultithreadingIndex;
             config.Graphics.ShadersDumpPath.Value = ShaderDumpPath;
 
-            // Audio
-            AudioBackend audioBackend = (AudioBackend)AudioBackend;
-            if (audioBackend != config.System.AudioBackend.Value)
+            if (_audioViewModel != null)
             {
-                config.System.AudioBackend.Value = audioBackend;
-
-                Logger.Info?.Print(LogClass.Application, $"AudioBackend toggled to: {audioBackend}");
+                _audioViewModel.Save(config);
             }
-
-            config.System.AudioVolume.Value = Volume / 100;
 
             // Network
             config.System.EnableInternetAccess.Value = EnableInternetAccess;
