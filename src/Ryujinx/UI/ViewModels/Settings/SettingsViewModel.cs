@@ -5,6 +5,7 @@ using LibHac.Tools.FsSystem;
 using Ryujinx.Audio.Backends.OpenAL;
 using Ryujinx.Audio.Backends.SDL2;
 using Ryujinx.Audio.Backends.SoundIo;
+using Ryujinx.Ava;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Models.Input;
@@ -27,7 +28,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TimeZone = Ryujinx.Ava.UI.Models.TimeZone;
 
-namespace Ryujinx.Ava.UI.ViewModels
+namespace Ryujinx.Ava.UI.ViewModels.Settings
 {
     public class SettingsViewModel : BaseModel
     {
@@ -57,7 +58,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool IsModified
         {
             get => _isModified;
-            set
+            private set
             {
                 DirtyEvent?.Invoke(value);
                 _isModified = value;
@@ -142,30 +143,261 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public bool IsMacOS => OperatingSystem.IsMacOS();
 
-        public bool EnableDiscordIntegration { get; set; }
-        public bool CheckUpdatesOnStart { get; set; }
-        public bool ShowConfirmExit { get; set; }
-        public int HideCursor { get; set; }
-        public bool EnableVsync { get; set; }
-        public bool EnablePptc { get; set; }
-        public bool EnableInternetAccess { get; set; }
-        public bool EnableFsIntegrityChecks { get; set; }
-        public bool IgnoreMissingServices { get; set; }
-        public bool ExpandDramSize { get; set; }
-        public bool EnableShaderCache { get; set; }
-        public bool EnableTextureRecompression { get; set; }
-        public bool EnableMacroHLE { get; set; }
-        public bool EnableColorSpacePassthrough { get; set; }
+        private bool _enableDiscordIntegration;
+        public bool EnableDiscordIntegration
+        {
+            get => _enableDiscordIntegration;
+            set
+            {
+                _enableDiscordIntegration = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _checkUpdatesOnStart;
+        public bool CheckUpdatesOnStart
+        {
+            get => _checkUpdatesOnStart;
+            set
+            {
+                _checkUpdatesOnStart = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _showConfirmExit;
+        public bool ShowConfirmExit
+        {
+            get => _showConfirmExit;
+            set
+            {
+                _showConfirmExit = value;
+                CheckIfModified();
+            }
+        }
+
+        private int _hideCursor;
+        public int HideCursor
+        {
+            get => _hideCursor;
+            set
+            {
+                _hideCursor = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableVsync;
+        public bool EnableVsync
+        {
+            get => _enableVsync;
+            set
+            {
+                _enableVsync = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enablePptc;
+        public bool EnablePptc
+        {
+            get => _enablePptc;
+            set
+            {
+                _enablePptc = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableInternetAccess;
+        public bool EnableInternetAccess
+        {
+            get => _enableInternetAccess;
+            set
+            {
+                _enableInternetAccess = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableFsIntegrityChecks;
+        public bool EnableFsIntegrityChecks
+        {
+            get => _enableFsIntegrityChecks;
+            set
+            {
+                _enableFsIntegrityChecks = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _ignoreMissingServices;
+        public bool IgnoreMissingServices
+        {
+            get => _ignoreMissingServices;
+            set
+            {
+                _ignoreMissingServices = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _expandedDramSize;
+        public bool ExpandDramSize
+        {
+            get => _expandedDramSize;
+            set
+            {
+                _expandedDramSize = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableShaderCache;
+        public bool EnableShaderCache
+        {
+            get => _enableShaderCache;
+            set
+            {
+                _enableShaderCache = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableTextureRecompression;
+        public bool EnableTextureRecompression
+        {
+            get => _enableTextureRecompression;
+            set
+            {
+                _enableTextureRecompression = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableMacroHLE;
+        public bool EnableMacroHLE
+        {
+            get => _enableMacroHLE;
+            set
+            {
+                _enableMacroHLE = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableColorSpacePassthrough;
+        public bool EnableColorSpacePassthrough
+        {
+            get => _enableColorSpacePassthrough;
+            set
+            {
+                _enableColorSpacePassthrough = value;
+                CheckIfModified();
+            }
+        }
+
         public bool ColorSpacePassthroughAvailable => IsMacOS;
-        public bool EnableFileLog { get; set; }
-        public bool EnableStub { get; set; }
-        public bool EnableInfo { get; set; }
-        public bool EnableWarn { get; set; }
-        public bool EnableError { get; set; }
-        public bool EnableTrace { get; set; }
-        public bool EnableGuest { get; set; }
-        public bool EnableFsAccessLog { get; set; }
-        public bool EnableDebug { get; set; }
+
+        private bool _enableFileLog;
+        public bool EnableFileLog
+        {
+            get => _enableFileLog;
+            set
+            {
+                _enableFileLog = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableStub;
+        public bool EnableStub
+        {
+            get => _enableStub;
+            set
+            {
+                _enableStub = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableInfo;
+        public bool EnableInfo
+        {
+            get => _enableInfo;
+            set
+            {
+                _enableInfo = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableWarn;
+        public bool EnableWarn
+        {
+            get => _enableWarn;
+            set
+            {
+                _enableWarn = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableError;
+        public bool EnableError
+        {
+            get => _enableError;
+            set
+            {
+                _enableError = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableTrace;
+        public bool EnableTrace
+        {
+            get => _enableTrace;
+            set
+            {
+                _enableTrace = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableGuest;
+        public bool EnableGuest
+        {
+            get => _enableGuest;
+            set
+            {
+                _enableGuest = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableFsAccessLog;
+        public bool EnableFsAccessLog
+        {
+            get => _enableFsAccessLog;
+            set
+            {
+                _enableFsAccessLog = value;
+                CheckIfModified();
+            }
+        }
+
+        private bool _enableDebug;
+        public bool EnableDebug
+        {
+            get => _enableDebug;
+            set
+            {
+                _enableDebug = value;
+                CheckIfModified();
+            }
+        }
+
         public bool IsOpenAlEnabled { get; set; }
         public bool IsSoundIoEnabled { get; set; }
         public bool IsSDL2Enabled { get; set; }
@@ -295,6 +527,93 @@ namespace Ryujinx.Ava.UI.ViewModels
                 Task.Run(LoadAvailableGpus);
                 LoadCurrentConfiguration();
             }
+        }
+
+        public void CheckIfModified()
+        {
+            bool isDirty = false;
+
+            ConfigurationState config = ConfigurationState.Instance;
+
+            isDirty |= config.EnableDiscordIntegration.Value != EnableDiscordIntegration;
+            isDirty |= config.CheckUpdatesOnStart.Value != CheckUpdatesOnStart;
+            isDirty |= config.ShowConfirmExit.Value != ShowConfirmExit;
+            isDirty |= config.HideCursor.Value != (HideCursorMode)HideCursor;
+
+            // isDirty |= config.UI.GameDirs.Value != GameDirectories.ToList();
+
+            isDirty |= config.UI.BaseStyle.Value != (BaseStyleIndex == 0 ? "Light" : "Dark");
+
+            // Keyboard Hotkeys
+            // isDirty |= config.Hid.Hotkeys.Value != KeyboardHotkey.GetConfig();
+
+            // System
+            isDirty |= config.System.Region.Value != (Region)Region;
+            isDirty |= config.System.Language.Value != (Language)Language;
+
+            if (_validTzRegions.Contains(TimeZone))
+            {
+                isDirty |= config.System.TimeZone.Value != TimeZone;
+            }
+
+            // isDirty |= config.System.SystemTimeOffset.Value != Convert.ToInt64((CurrentDate.ToUnixTimeSeconds() + CurrentTime.TotalSeconds) - DateTimeOffset.Now.ToUnixTimeSeconds());
+            isDirty |= config.Graphics.EnableVsync.Value != EnableVsync;
+            isDirty |= config.System.EnableFsIntegrityChecks.Value != EnableFsIntegrityChecks;
+            isDirty |= config.System.ExpandRam.Value != ExpandDramSize;
+            isDirty |= config.System.IgnoreMissingServices.Value != IgnoreMissingServices;
+
+            // CPU
+            isDirty |= config.System.EnablePtc.Value != EnablePptc;
+            isDirty |= config.System.MemoryManagerMode.Value != (MemoryManagerMode)MemoryMode;
+            isDirty |= config.System.UseHypervisor.Value != UseHypervisor;
+
+            // Graphics
+            isDirty |= config.Graphics.GraphicsBackend.Value != (GraphicsBackend)GraphicsBackendIndex;
+            isDirty |= config.Graphics.PreferredGpu.Value != _gpuIds.ElementAtOrDefault(PreferredGpuIndex);
+            isDirty |= config.Graphics.EnableShaderCache.Value != EnableShaderCache;
+            isDirty |= config.Graphics.EnableTextureRecompression.Value != EnableTextureRecompression;
+            isDirty |= config.Graphics.EnableMacroHLE.Value != EnableMacroHLE;
+            isDirty |= config.Graphics.EnableColorSpacePassthrough.Value != EnableColorSpacePassthrough;
+            isDirty |= config.Graphics.ResScale.Value != (ResolutionScale == 4 ? -1 : ResolutionScale + 1);
+            isDirty |= config.Graphics.ResScaleCustom.Value != CustomResolutionScale;
+            isDirty |= config.Graphics.MaxAnisotropy.Value != (MaxAnisotropy == 0 ? -1 : MathF.Pow(2, MaxAnisotropy));
+            isDirty |= config.Graphics.AspectRatio.Value != (AspectRatio)AspectRatio;
+            isDirty |= config.Graphics.AntiAliasing.Value != (AntiAliasing)AntiAliasingEffect;
+            isDirty |= config.Graphics.ScalingFilter.Value != (ScalingFilter)ScalingFilter;
+            isDirty |= config.Graphics.ScalingFilterLevel.Value != ScalingFilterLevel;
+
+            if (ConfigurationState.Instance.Graphics.BackendThreading != (BackendThreading)GraphicsBackendMultithreadingIndex)
+            {
+                DriverUtilities.ToggleOGLThreading(GraphicsBackendMultithreadingIndex == (int)BackendThreading.Off);
+            }
+
+            isDirty |= config.Graphics.BackendThreading.Value != (BackendThreading)GraphicsBackendMultithreadingIndex;
+            isDirty |= config.Graphics.ShadersDumpPath.Value != ShaderDumpPath;
+
+            // Audio
+            isDirty |= config.System.AudioBackend.Value != (AudioBackend)AudioBackend;
+            isDirty |= config.System.AudioVolume.Value != Volume / 100;
+
+            // Network
+            isDirty |= config.System.EnableInternetAccess.Value != EnableInternetAccess;
+
+            // Logging
+            isDirty |= config.Logger.EnableFileLog.Value != EnableFileLog;
+            isDirty |= config.Logger.EnableStub.Value != EnableStub;
+            isDirty |= config.Logger.EnableInfo.Value != EnableInfo;
+            isDirty |= config.Logger.EnableWarn.Value != EnableWarn;
+            isDirty |= config.Logger.EnableError.Value != EnableError;
+            isDirty |= config.Logger.EnableTrace.Value != EnableTrace;
+            isDirty |= config.Logger.EnableGuest.Value != EnableGuest;
+            isDirty |= config.Logger.EnableDebug.Value != EnableDebug;
+            isDirty |= config.Logger.EnableFsAccessLog.Value != EnableFsAccessLog;
+            isDirty |= config.System.FsGlobalAccessLogMode.Value != FsGlobalAccessLogMode;
+            isDirty |= config.Logger.GraphicsDebugLevel.Value != (GraphicsDebugLevel)OpenglDebugLevel;
+
+            isDirty |= config.Multiplayer.LanInterfaceId.Value != _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
+            isDirty |= config.Multiplayer.Mode.Value != (MultiplayerMode)MultiplayerModeIndex;
+
+            IsModified = isDirty;
         }
 
         public async Task CheckSoundBackends()

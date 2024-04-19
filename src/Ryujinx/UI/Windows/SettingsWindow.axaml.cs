@@ -4,9 +4,9 @@ using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Helpers;
-using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.Ava.UI.Views.Settings;
 using Ryujinx.HLE.FileSystem;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using System;
 
 namespace Ryujinx.Ava.UI.Windows

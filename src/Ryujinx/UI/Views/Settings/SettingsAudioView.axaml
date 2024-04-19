@@ -7,7 +7,7 @@
     xmlns:controls="clr-namespace:Ryujinx.Ava.UI.Controls"
     xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
-    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     mc:Ignorable="d"
     x:DataType="viewModels:SettingsViewModel">
     <Design.DataContext>

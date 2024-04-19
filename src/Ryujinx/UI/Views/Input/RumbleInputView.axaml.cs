@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.ViewModels.Input;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using System.Threading.Tasks;
 
 namespace Ryujinx.Ava.UI.Views.Input

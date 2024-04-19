@@ -9,6 +9,7 @@ using Ryujinx.Ava.Input;
 using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Models;
 using Ryujinx.Ava.UI.Models.Input;
+using Ryujinx.Ava.UI.ViewModels.Input;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common;
 using Ryujinx.Common.Configuration;
@@ -30,9 +31,9 @@ using ConfigGamepadInputId = Ryujinx.Common.Configuration.Hid.Controller.Gamepad
 using ConfigStickInputId = Ryujinx.Common.Configuration.Hid.Controller.StickInputId;
 using Key = Ryujinx.Common.Configuration.Hid.Key;
 
-namespace Ryujinx.Ava.UI.ViewModels.Input
+namespace Ryujinx.Ava.UI.ViewModels.Settings
 {
-    public class InputViewModel : BaseModel, IDisposable
+    public class SettingsInputViewModel : BaseModel, IDisposable
     {
         private const string Disabled = "disabled";
         private const string ProControllerResource = "Ryujinx.UI.Common/Resources/Controller_ProCon.svg";
@@ -102,12 +103,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             get => _playerId;
             set
             {
-                if (SettingsViewModel.IsModified)
-                {
-                    return;
-                }
-
-                SettingsViewModel.IsModified = false;
                 _playerId = value;
 
                 if (!Enum.IsDefined(typeof(PlayerIndex), _playerId))
@@ -246,7 +241,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 
         public InputConfig Config { get; set; }
 
-        public InputViewModel(UserControl owner, SettingsViewModel settingsViewModel) : this()
+        public SettingsInputViewModel(UserControl owner, SettingsViewModel settingsViewModel) : this()
         {
             SettingsViewModel = settingsViewModel;
 
@@ -271,7 +266,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             }
         }
 
-        public InputViewModel()
+        public SettingsInputViewModel()
         {
             PlayerIndexes = new ObservableCollection<PlayerModel>();
             Controllers = new ObservableCollection<ControllerModel>();

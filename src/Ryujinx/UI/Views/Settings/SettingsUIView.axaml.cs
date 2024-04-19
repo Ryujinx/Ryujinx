@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
-using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

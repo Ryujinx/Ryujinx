@@ -5,9 +5,9 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Ryujinx.Ava.Input;
 using Ryujinx.Ava.UI.Helpers;
-using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.Input;
 using Ryujinx.Input.Assigner;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using Key = Ryujinx.Common.Configuration.Hid.Key;
 
 namespace Ryujinx.Ava.UI.Views.Settings

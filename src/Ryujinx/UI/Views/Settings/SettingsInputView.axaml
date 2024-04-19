@@ -7,12 +7,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:Ryujinx.Ava.UI.Views.Input"
-    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Input"
+    xmlns:inputViewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Input"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     xmlns:models="clr-namespace:Ryujinx.Ava.UI.Models"
     mc:Ignorable="d"
-    x:DataType="viewModels:InputViewModel">
+    x:DataType="viewModels:SettingsInputViewModel">
     <Design.DataContext>
-        <viewModels:InputViewModel />
+        <viewModels:SettingsInputViewModel />
     </Design.DataContext>
     <ScrollViewer
         Name="InputPage"
@@ -215,10 +216,10 @@
                             </StackPanel>
                             <ContentControl Content="{Binding ConfigViewModel}" IsVisible="{Binding ShowSettings}">
                                 <ContentControl.DataTemplates>
-                                    <DataTemplate DataType="viewModels:ControllerInputViewModel">
+                                    <DataTemplate DataType="inputViewModels:ControllerInputViewModel">
                                         <views:ControllerInputView />
                                     </DataTemplate>
-                                    <DataTemplate DataType="viewModels:KeyboardInputViewModel">
+                                    <DataTemplate DataType="inputViewModels:KeyboardInputViewModel">
                                         <views:KeyboardInputView />
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
