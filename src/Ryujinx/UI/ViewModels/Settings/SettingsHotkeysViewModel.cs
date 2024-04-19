@@ -22,17 +22,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         {
             bool isDirty = false;
 
-            var hotkeys = KeyboardHotkey.GetConfig();
-
-            isDirty |= config.Hid.Hotkeys.Value.ToggleVsync != hotkeys.ToggleVsync;
-            isDirty |= config.Hid.Hotkeys.Value.Screenshot != hotkeys.Screenshot;
-            isDirty |= config.Hid.Hotkeys.Value.ShowUI != hotkeys.ShowUI;
-            isDirty |= config.Hid.Hotkeys.Value.Pause != hotkeys.Pause;
-            isDirty |= config.Hid.Hotkeys.Value.ToggleMute != hotkeys.ToggleMute;
-            isDirty |= config.Hid.Hotkeys.Value.ResScaleUp != hotkeys.ResScaleUp;
-            isDirty |= config.Hid.Hotkeys.Value.ResScaleDown != hotkeys.ResScaleDown;
-            isDirty |= config.Hid.Hotkeys.Value.VolumeUp != hotkeys.VolumeUp;
-            isDirty |= config.Hid.Hotkeys.Value.VolumeDown != hotkeys.VolumeDown;
+            isDirty |= !config.Hid.Hotkeys.Value.Equals(KeyboardHotkey.GetConfig());
 
             return isDirty;
         }
