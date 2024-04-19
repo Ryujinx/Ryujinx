@@ -35,6 +35,7 @@ namespace Ryujinx.Ava.UI.Windows
             HotkeysPage = new SettingsHotkeysView();
             InputPage = new SettingsInputView();
             LoggingPage = new SettingsLoggingView();
+            NetworkPage = new SettingsNetworkView();
 
             ViewModel = new SettingsViewModel(
                 virtualFileSystem,
@@ -44,11 +45,11 @@ namespace Ryujinx.Ava.UI.Windows
                 GraphicsPage.ViewModel,
                 HotkeysPage.ViewModel,
                 InputPage.ViewModel,
-                LoggingPage.ViewModel);
+                LoggingPage.ViewModel,
+                NetworkPage.ViewModel);
 
             UiPage = new SettingsUiView(ViewModel);
             SystemPage = new SettingsSystemView(ViewModel);
-            NetworkPage = new SettingsNetworkView();
 
             DataContext = ViewModel;
 

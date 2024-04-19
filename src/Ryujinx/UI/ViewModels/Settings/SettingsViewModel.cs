@@ -25,13 +25,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private TimeZoneContentManager _timeZoneContentManager;
 
         private readonly List<string> _validTzRegions;
-
-        private readonly Dictionary<string, string> _networkInterfaces;
-
         private bool _directoryChanged;
 
-        private int _networkInterfaceIndex;
-        private int _multiplayerModeIndex;
 
         private bool _isModified;
 
@@ -117,17 +112,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        private bool _enableInternetAccess;
-        public bool EnableInternetAccess
-        {
-            get => _enableInternetAccess;
-            set
-            {
-                _enableInternetAccess = value;
-                CheckIfModified();
-            }
-        }
-
         private bool _enableFsIntegrityChecks;
         public bool EnableFsIntegrityChecks
         {
@@ -172,37 +156,13 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private readonly SettingsHotkeysViewModel _hotkeysViewModel;
         private readonly SettingsInputViewModel _inputViewModel;
         private readonly SettingsLoggingViewModel _loggingViewModel;
+        private readonly SettingsNetworkViewModel _networkViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
         public TimeSpan CurrentTime { get; set; }
 
         internal AvaloniaList<TimeZone> TimeZones { get; set; }
         public AvaloniaList<string> GameDirectories { get; set; }
-
-        public AvaloniaList<string> NetworkInterfaceList
-        {
-            get => new(_networkInterfaces.Keys);
-        }
-
-        public int NetworkInterfaceIndex
-        {
-            get => _networkInterfaceIndex;
-            set
-            {
-                _networkInterfaceIndex = value != -1 ? value : 0;
-                ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value = _networkInterfaces[NetworkInterfaceList[_networkInterfaceIndex]];
-            }
-        }
-
-        public int MultiplayerModeIndex
-        {
-            get => _multiplayerModeIndex;
-            set
-            {
-                _multiplayerModeIndex = value;
-                ConfigurationState.Instance.Multiplayer.Mode.Value = (MultiplayerMode)_multiplayerModeIndex;
-            }
-        }
 
         public SettingsViewModel(
             VirtualFileSystem virtualFileSystem,
@@ -212,7 +172,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             SettingsGraphicsViewModel graphicsViewModel,
             SettingsHotkeysViewModel hotkeysViewModel,
             SettingsInputViewModel inputViewModel,
-            SettingsLoggingViewModel loggingViewModel) : this()
+            SettingsLoggingViewModel loggingViewModel,
+            SettingsNetworkViewModel networkViewModel) : this()
         {
             _virtualFileSystem = virtualFileSystem;
             _contentManager = contentManager;
@@ -223,6 +184,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _hotkeysViewModel = hotkeysViewModel;
             _inputViewModel = inputViewModel;
             _loggingViewModel = loggingViewModel;
+            _networkViewModel = networkViewModel;
 
             _audioViewModel.DirtyEvent += CheckIfModified;
             _cpuViewModel.DirtyEvent += CheckIfModified;
@@ -230,6 +192,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _hotkeysViewModel.DirtyEvent += CheckIfModified;
             _inputViewModel.DirtyEvent += CheckIfModified;
             _loggingViewModel.DirtyEvent += CheckIfModified;
+            _networkViewModel.DirtyEvent += CheckIfModified;
 
             if (Program.PreviewerDetached)
             {
@@ -242,9 +205,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             GameDirectories = new AvaloniaList<string>();
             TimeZones = new AvaloniaList<TimeZone>();
             _validTzRegions = new List<string>();
-            _networkInterfaces = new Dictionary<string, string>();
-
-            Task.Run(PopulateNetworkInterfaces);
 
             if (Program.PreviewerDetached)
             {
@@ -291,14 +251,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= _hotkeysViewModel?.CheckIfModified(config) ?? false;
             // TODO: IMPLEMENT THIS!!
             // isDirty |= _inputViewModel?.CheckIfModified(config) ?? false;
-
-            // Network
-            isDirty |= config.System.EnableInternetAccess.Value != EnableInternetAccess;
-
             isDirty |= _loggingViewModel?.CheckIfModified(config) ?? false;
-
-            isDirty |= config.Multiplayer.LanInterfaceId.Value != _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
-            isDirty |= config.Multiplayer.Mode.Value != (MultiplayerMode)MultiplayerModeIndex;
+            isDirty |= _networkViewModel?.CheckIfModified(config) ?? false;
 
             IsModified = isDirty;
         }
@@ -325,25 +279,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
 
             Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(TimeZone)));
-        }
-
-        private async Task PopulateNetworkInterfaces()
-        {
-            _networkInterfaces.Clear();
-            _networkInterfaces.Add(LocaleManager.Instance[LocaleKeys.NetworkInterfaceDefault], "0");
-
-            foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    _networkInterfaces.Add(networkInterface.Name, networkInterface.Id);
-                });
-            }
-
-            // Network interface index  needs to be loaded during the async method or it will always return 0.
-            NetworkInterfaceIndex = _networkInterfaces.Values.ToList().IndexOf(ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value);
-
-            Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(NetworkInterfaceIndex)));
         }
 
         public void ValidateAndSetTimeZone(string location)
@@ -383,12 +318,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             EnableFsIntegrityChecks = config.System.EnableFsIntegrityChecks;
             ExpandDramSize = config.System.ExpandRam;
             IgnoreMissingServices = config.System.IgnoreMissingServices;
-
-            // Network
-            EnableInternetAccess = config.System.EnableInternetAccess;
-            // LAN interface index is loaded asynchronously in PopulateNetworkInterfaces()
-
-            MultiplayerModeIndex = (int)config.Multiplayer.Mode.Value;
         }
 
         public void SaveSettings()
@@ -430,14 +359,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _graphicsViewModel?.Save(config);
             _hotkeysViewModel?.Save(config);
             _inputViewModel?.Save(config);
-
-            // Network
-            config.System.EnableInternetAccess.Value = EnableInternetAccess;
-
             _loggingViewModel?.Save(config);
-
-            config.Multiplayer.LanInterfaceId.Value = _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
-            config.Multiplayer.Mode.Value = (MultiplayerMode)MultiplayerModeIndex;
+            _networkViewModel?.Save(config);
 
             config.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
