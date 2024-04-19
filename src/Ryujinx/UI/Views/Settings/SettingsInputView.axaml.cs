@@ -5,23 +5,23 @@ namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsInputView : UserControl
     {
-        private SettingsInputViewModel ViewModel { get; set; }
+        private readonly SettingsInputViewModel _viewModel;
 
         public SettingsInputView(SettingsViewModel viewModel)
         {
-            DataContext = ViewModel = new SettingsInputViewModel(this, viewModel);
+            DataContext = _viewModel = new SettingsInputViewModel(this, viewModel);
 
             InitializeComponent();
         }
 
         public void SaveCurrentProfile()
         {
-            ViewModel.Save();
+            _viewModel.Save();
         }
 
         public void Dispose()
         {
-            ViewModel.Dispose();
+            _viewModel.Dispose();
         }
     }
 }

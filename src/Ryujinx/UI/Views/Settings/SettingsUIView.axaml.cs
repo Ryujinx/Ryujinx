@@ -11,11 +11,11 @@ namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsUiView : UserControl
     {
-        public SettingsViewModel ViewModel;
+        private readonly SettingsViewModel _viewModel;
 
         public SettingsUiView(SettingsViewModel viewModel)
         {
-            ViewModel = viewModel;
+            _viewModel = viewModel;
             InitializeComponent();
         }
 
@@ -23,10 +23,10 @@ namespace Ryujinx.Ava.UI.Views.Settings
         {
             string path = PathBox.Text;
 
-            if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path) && !ViewModel.GameDirectories.Contains(path))
+            if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path) && !_viewModel.GameDirectories.Contains(path))
             {
-                ViewModel.GameDirectories.Add(path);
-                ViewModel.DirectoryChanged = true;
+                _viewModel.GameDirectories.Add(path);
+                _viewModel.DirectoryChanged = true;
             }
             else
             {
@@ -39,8 +39,8 @@ namespace Ryujinx.Ava.UI.Views.Settings
 
                     if (result.Count > 0)
                     {
-                        ViewModel.GameDirectories.Add(result[0].Path.LocalPath);
-                        ViewModel.DirectoryChanged = true;
+                        _viewModel.GameDirectories.Add(result[0].Path.LocalPath);
+                        _viewModel.DirectoryChanged = true;
                     }
                 }
             }
@@ -52,8 +52,8 @@ namespace Ryujinx.Ava.UI.Views.Settings
 
             foreach (string path in new List<string>(GameList.SelectedItems.Cast<string>()))
             {
-                ViewModel.GameDirectories.Remove(path);
-                ViewModel.DirectoryChanged = true;
+                _viewModel.GameDirectories.Remove(path);
+                _viewModel.DirectoryChanged = true;
             }
 
             if (GameList.ItemCount > 0)

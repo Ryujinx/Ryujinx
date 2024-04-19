@@ -39,7 +39,7 @@ namespace Ryujinx.Ava.UI.Windows
 
             UiPage = new SettingsUiView(ViewModel);
             InputPage = new SettingsInputView(ViewModel);
-            HotkeysPage = new SettingsHotkeysView();
+            HotkeysPage = new SettingsHotkeysView(ViewModel);
             SystemPage = new SettingsSystemView(ViewModel);
             CpuPage = new SettingsCPUView();
             GraphicsPage = new SettingsGraphicsView();

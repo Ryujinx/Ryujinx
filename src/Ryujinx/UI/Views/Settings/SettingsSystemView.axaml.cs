@@ -6,11 +6,11 @@ namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsSystemView : UserControl
     {
-        public SettingsViewModel ViewModel;
+        private readonly SettingsViewModel _viewModel;
 
         public SettingsSystemView(SettingsViewModel viewModel)
         {
-            ViewModel = viewModel;
+            _viewModel = viewModel;
             InitializeComponent();
         }
 
@@ -22,7 +22,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
                 {
                     e.Handled = true;
 
-                    ViewModel.ValidateAndSetTimeZone(timeZone.Location);
+                    _viewModel.ValidateAndSetTimeZone(timeZone.Location);
                 }
             }
         }
@@ -31,7 +31,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
         {
             if (sender is AutoCompleteBox box && box.SelectedItem is TimeZone timeZone)
             {
-                ViewModel.ValidateAndSetTimeZone(timeZone.Location);
+                _viewModel.ValidateAndSetTimeZone(timeZone.Location);
             }
         }
     }

@@ -5,20 +5,23 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Ryujinx.Ava.Input;
 using Ryujinx.Ava.UI.Helpers;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using Ryujinx.Input;
 using Ryujinx.Input.Assigner;
-using Ryujinx.Ava.UI.ViewModels.Settings;
 using Key = Ryujinx.Common.Configuration.Hid.Key;
 
 namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsHotkeysView : UserControl
     {
+        private readonly SettingsViewModel _viewModel;
         private ButtonKeyAssigner _currentAssigner;
         private readonly IGamepadDriver _avaloniaKeyboardDriver;
 
-        public SettingsHotkeysView()
+        public SettingsHotkeysView(SettingsViewModel viewModel)
         {
+            _viewModel = viewModel;
+
             InitializeComponent();
 
             foreach (ILogical visual in SettingButtons.GetLogicalDescendants())
@@ -77,37 +80,36 @@ namespace Ryujinx.Ava.UI.Views.Settings
                         {
                             if (e.ButtonValue.HasValue)
                             {
-                                var viewModel = (DataContext) as SettingsViewModel;
                                 var buttonValue = e.ButtonValue.Value;
 
                                 switch (button.Name)
                                 {
                                     case "ToggleVsync":
-                                        viewModel.KeyboardHotkey.ToggleVsync = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.ToggleVsync = buttonValue.AsHidType<Key>();
                                         break;
                                     case "Screenshot":
-                                        viewModel.KeyboardHotkey.Screenshot = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.Screenshot = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ShowUI":
-                                        viewModel.KeyboardHotkey.ShowUI = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.ShowUI = buttonValue.AsHidType<Key>();
                                         break;
                                     case "Pause":
-                                        viewModel.KeyboardHotkey.Pause = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.Pause = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ToggleMute":
-                                        viewModel.KeyboardHotkey.ToggleMute = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.ToggleMute = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ResScaleUp":
-                                        viewModel.KeyboardHotkey.ResScaleUp = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.ResScaleUp = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ResScaleDown":
-                                        viewModel.KeyboardHotkey.ResScaleDown = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.ResScaleDown = buttonValue.AsHidType<Key>();
                                         break;
                                     case "VolumeUp":
-                                        viewModel.KeyboardHotkey.VolumeUp = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.VolumeUp = buttonValue.AsHidType<Key>();
                                         break;
                                     case "VolumeDown":
-                                        viewModel.KeyboardHotkey.VolumeDown = buttonValue.AsHidType<Key>();
+                                        _viewModel.KeyboardHotkey.VolumeDown = buttonValue.AsHidType<Key>();
                                         break;
                                 }
                             }
