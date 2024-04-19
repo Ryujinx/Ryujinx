@@ -52,8 +52,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public event Action<bool> DirtyEvent;
         public event Action<bool> ToggleButtons;
 
-        public bool IsHypervisorAvailable => OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
-
         public bool DirectoryChanged
         {
             get => _directoryChanged;
@@ -122,17 +120,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        private bool _enablePptc;
-        public bool EnablePptc
-        {
-            get => _enablePptc;
-            set
-            {
-                _enablePptc = value;
-                CheckIfModified();
-            }
-        }
-
         private bool _enableInternetAccess;
         public bool EnableInternetAccess
         {
@@ -177,16 +164,14 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        public bool UseHypervisor { get; set; }
-
         public string TimeZone { get; set; }
         public int Language { get; set; }
         public int Region { get; set; }
-        public int MemoryMode { get; set; }
         public int BaseStyleIndex { get; set; }
 
-        private readonly SettingsGraphicsViewModel _graphicsViewModel;
         private readonly SettingsAudioViewModel _audioViewModel;
+        private readonly SettingsCpuViewModel _cpuViewModel;
+        private readonly SettingsGraphicsViewModel _graphicsViewModel;
         private readonly SettingsLoggingViewModel _loggingViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
@@ -226,6 +211,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             VirtualFileSystem virtualFileSystem,
             ContentManager contentManager,
             SettingsAudioViewModel audioViewModel,
+            SettingsCpuViewModel cpuViewModel,
             SettingsGraphicsViewModel graphicsViewModel,
             SettingsLoggingViewModel loggingViewModel) : this()
         {
@@ -233,10 +219,12 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _contentManager = contentManager;
 
             _audioViewModel = audioViewModel;
+            _cpuViewModel = cpuViewModel;
             _graphicsViewModel = graphicsViewModel;
             _loggingViewModel = loggingViewModel;
 
             _audioViewModel.DirtyEvent += CheckIfModified;
+            _cpuViewModel.DirtyEvent += CheckIfModified;
             _graphicsViewModel.DirtyEvent += CheckIfModified;
             _loggingViewModel.DirtyEvent += CheckIfModified;
 
@@ -294,10 +282,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= config.System.ExpandRam.Value != ExpandDramSize;
             isDirty |= config.System.IgnoreMissingServices.Value != IgnoreMissingServices;
 
-            // CPU
-            isDirty |= config.System.EnablePtc.Value != EnablePptc;
-            isDirty |= config.System.MemoryManagerMode.Value != (MemoryManagerMode)MemoryMode;
-            isDirty |= config.System.UseHypervisor.Value != UseHypervisor;
+            if (_cpuViewModel != null)
+            {
+                isDirty |= _cpuViewModel.CheckIfModified(config);
+            }
 
             if (_graphicsViewModel != null)
             {
@@ -406,11 +394,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             ExpandDramSize = config.System.ExpandRam;
             IgnoreMissingServices = config.System.IgnoreMissingServices;
 
-            // CPU
-            EnablePptc = config.System.EnablePtc;
-            MemoryMode = (int)config.System.MemoryManagerMode.Value;
-            UseHypervisor = config.System.UseHypervisor;
-
             // Network
             EnableInternetAccess = config.System.EnableInternetAccess;
             // LAN interface index is loaded asynchronously in PopulateNetworkInterfaces()
@@ -454,13 +437,9 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             config.System.ExpandRam.Value = ExpandDramSize;
             config.System.IgnoreMissingServices.Value = IgnoreMissingServices;
 
-            // CPU
-            config.System.EnablePtc.Value = EnablePptc;
-            config.System.MemoryManagerMode.Value = (MemoryManagerMode)MemoryMode;
-            config.System.UseHypervisor.Value = UseHypervisor;
-
-            _graphicsViewModel?.Save(config);
             _audioViewModel?.Save(config);
+            _cpuViewModel?.Save(config);
+            _graphicsViewModel?.Save(config);
 
             // Network
             config.System.EnableInternetAccess.Value = EnableInternetAccess;

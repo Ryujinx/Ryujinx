@@ -19,7 +19,7 @@ namespace Ryujinx.Ava.UI.Windows
         public readonly SettingsInputView InputPage;
         public readonly SettingsHotkeysView HotkeysPage;
         public readonly SettingsSystemView SystemPage;
-        public readonly SettingsCPUView CpuPage;
+        public readonly SettingsCpuView CpuPage;
         public readonly SettingsGraphicsView GraphicsPage;
         public readonly SettingsAudioView AudioPage;
         public readonly SettingsNetworkView NetworkPage;
@@ -30,6 +30,7 @@ namespace Ryujinx.Ava.UI.Windows
             Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
 
             AudioPage = new SettingsAudioView();
+            CpuPage = new SettingsCpuView();
             GraphicsPage = new SettingsGraphicsView();
             LoggingPage = new SettingsLoggingView();
 
@@ -37,6 +38,7 @@ namespace Ryujinx.Ava.UI.Windows
                 virtualFileSystem,
                 contentManager,
                 AudioPage.ViewModel,
+                CpuPage.ViewModel,
                 GraphicsPage.ViewModel,
                 LoggingPage.ViewModel);
 
@@ -44,7 +46,6 @@ namespace Ryujinx.Ava.UI.Windows
             InputPage = new SettingsInputView(ViewModel);
             HotkeysPage = new SettingsHotkeysView(ViewModel);
             SystemPage = new SettingsSystemView(ViewModel);
-            CpuPage = new SettingsCPUView();
             NetworkPage = new SettingsNetworkView();
 
             DataContext = ViewModel;
