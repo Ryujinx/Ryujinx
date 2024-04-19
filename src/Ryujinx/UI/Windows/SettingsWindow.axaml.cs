@@ -32,6 +32,7 @@ namespace Ryujinx.Ava.UI.Windows
             AudioPage = new SettingsAudioView();
             CpuPage = new SettingsCpuView();
             GraphicsPage = new SettingsGraphicsView();
+            HotkeysPage = new SettingsHotkeysView();
             LoggingPage = new SettingsLoggingView();
 
             ViewModel = new SettingsViewModel(
@@ -40,11 +41,11 @@ namespace Ryujinx.Ava.UI.Windows
                 AudioPage.ViewModel,
                 CpuPage.ViewModel,
                 GraphicsPage.ViewModel,
+                HotkeysPage.ViewModel,
                 LoggingPage.ViewModel);
 
             UiPage = new SettingsUiView(ViewModel);
             InputPage = new SettingsInputView(ViewModel);
-            HotkeysPage = new SettingsHotkeysView(ViewModel);
             SystemPage = new SettingsSystemView(ViewModel);
             NetworkPage = new SettingsNetworkView();
 

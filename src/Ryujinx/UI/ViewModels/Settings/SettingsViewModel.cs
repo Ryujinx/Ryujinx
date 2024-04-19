@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TimeZone = Ryujinx.Ava.UI.Models.TimeZone;
 
@@ -173,6 +172,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private readonly SettingsCpuViewModel _cpuViewModel;
         private readonly SettingsGraphicsViewModel _graphicsViewModel;
         private readonly SettingsLoggingViewModel _loggingViewModel;
+        private readonly SettingsHotkeysViewModel _hotkeysViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
         public TimeSpan CurrentTime { get; set; }
@@ -184,8 +184,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         {
             get => new(_networkInterfaces.Keys);
         }
-
-        public HotkeyConfig KeyboardHotkey { get; set; }
 
         public int NetworkInterfaceIndex
         {
@@ -213,6 +211,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             SettingsAudioViewModel audioViewModel,
             SettingsCpuViewModel cpuViewModel,
             SettingsGraphicsViewModel graphicsViewModel,
+            SettingsHotkeysViewModel hotkeysViewModel,
             SettingsLoggingViewModel loggingViewModel) : this()
         {
             _virtualFileSystem = virtualFileSystem;
@@ -221,11 +220,13 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _audioViewModel = audioViewModel;
             _cpuViewModel = cpuViewModel;
             _graphicsViewModel = graphicsViewModel;
+            _hotkeysViewModel = hotkeysViewModel;
             _loggingViewModel = loggingViewModel;
 
             _audioViewModel.DirtyEvent += CheckIfModified;
             _cpuViewModel.DirtyEvent += CheckIfModified;
             _graphicsViewModel.DirtyEvent += CheckIfModified;
+            _hotkeysViewModel.DirtyEvent += CheckIfModified;
             _loggingViewModel.DirtyEvent += CheckIfModified;
 
             if (Program.PreviewerDetached)
@@ -282,6 +283,11 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= config.System.ExpandRam.Value != ExpandDramSize;
             isDirty |= config.System.IgnoreMissingServices.Value != IgnoreMissingServices;
 
+            if (_audioViewModel != null)
+            {
+                isDirty |= _audioViewModel.CheckIfModified(config);
+            }
+
             if (_cpuViewModel != null)
             {
                 isDirty |= _cpuViewModel.CheckIfModified(config);
@@ -292,10 +298,11 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
                 isDirty |= _graphicsViewModel.CheckIfModified(config);
             }
 
-            if (_audioViewModel != null)
+            if (_hotkeysViewModel != null)
             {
-                isDirty |= _audioViewModel.CheckIfModified(config);
+                isDirty |= _hotkeysViewModel.CheckIfModified(config);
             }
+
             // Network
             isDirty |= config.System.EnableInternetAccess.Value != EnableInternetAccess;
 
@@ -376,9 +383,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
             BaseStyleIndex = config.UI.BaseStyle == "Light" ? 0 : 1;
 
-            // Keyboard Hotkeys
-            KeyboardHotkey = new HotkeyConfig(config.Hid.Hotkeys.Value);
-
             // System
             Region = (int)config.System.Region.Value;
             Language = (int)config.System.Language.Value;
@@ -419,8 +423,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
             config.UI.BaseStyle.Value = BaseStyleIndex == 0 ? "Light" : "Dark";
 
-            // Keyboard Hotkeys
-            config.Hid.Hotkeys.Value = KeyboardHotkey.GetConfig();
 
             // System
             config.System.Region.Value = (Region)Region;
@@ -440,6 +442,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _audioViewModel?.Save(config);
             _cpuViewModel?.Save(config);
             _graphicsViewModel?.Save(config);
+            _hotkeysViewModel?.Save(config);
 
             // Network
             config.System.EnableInternetAccess.Value = EnableInternetAccess;
