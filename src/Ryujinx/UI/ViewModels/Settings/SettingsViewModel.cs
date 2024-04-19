@@ -169,9 +169,9 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private readonly SettingsAudioViewModel _audioViewModel;
         private readonly SettingsCpuViewModel _cpuViewModel;
         private readonly SettingsGraphicsViewModel _graphicsViewModel;
-        private readonly SettingsLoggingViewModel _loggingViewModel;
-        private readonly SettingsInputViewModel _inputViewModel;
         private readonly SettingsHotkeysViewModel _hotkeysViewModel;
+        private readonly SettingsInputViewModel _inputViewModel;
+        private readonly SettingsLoggingViewModel _loggingViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
         public TimeSpan CurrentTime { get; set; }
@@ -285,39 +285,17 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= config.System.ExpandRam.Value != ExpandDramSize;
             isDirty |= config.System.IgnoreMissingServices.Value != IgnoreMissingServices;
 
-            if (_audioViewModel != null)
-            {
-                isDirty |= _audioViewModel.CheckIfModified(config);
-            }
-
-            if (_cpuViewModel != null)
-            {
-                isDirty |= _cpuViewModel.CheckIfModified(config);
-            }
-
-            if (_graphicsViewModel != null)
-            {
-                isDirty |= _graphicsViewModel.CheckIfModified(config);
-            }
-
-            if (_hotkeysViewModel != null)
-            {
-                isDirty |= _hotkeysViewModel.CheckIfModified(config);
-            }
-
-            if (_inputViewModel != null)
-            {
-                // TODO: IMPLEMENT THIS!!
-                // isDirty |= _inputViewModel.CheckIfModified(config);
-            }
+            isDirty |= _audioViewModel?.CheckIfModified(config) ?? false;
+            isDirty |= _cpuViewModel?.CheckIfModified(config) ?? false;
+            isDirty |= _graphicsViewModel?.CheckIfModified(config) ?? false;
+            isDirty |= _hotkeysViewModel?.CheckIfModified(config) ?? false;
+            // TODO: IMPLEMENT THIS!!
+            // isDirty |= _inputViewModel?.CheckIfModified(config) ?? false;
 
             // Network
             isDirty |= config.System.EnableInternetAccess.Value != EnableInternetAccess;
 
-            if (_loggingViewModel != null)
-            {
-                isDirty |= _loggingViewModel.CheckIfModified(config);
-            }
+            isDirty |= _loggingViewModel?.CheckIfModified(config) ?? false;
 
             isDirty |= config.Multiplayer.LanInterfaceId.Value != _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
             isDirty |= config.Multiplayer.Mode.Value != (MultiplayerMode)MultiplayerModeIndex;
