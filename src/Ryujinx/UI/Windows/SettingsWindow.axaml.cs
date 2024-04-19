@@ -37,6 +37,7 @@ namespace Ryujinx.Ava.UI.Windows
             LoggingPage = new SettingsLoggingView();
             NetworkPage = new SettingsNetworkView();
             SystemPage = new SettingsSystemView(virtualFileSystem, contentManager);
+            UiPage = new SettingsUiView();
 
             ViewModel = new SettingsViewModel(
                 AudioPage.ViewModel,
@@ -46,9 +47,8 @@ namespace Ryujinx.Ava.UI.Windows
                 InputPage.ViewModel,
                 LoggingPage.ViewModel,
                 NetworkPage.ViewModel,
-                SystemPage.ViewModel);
-
-            UiPage = new SettingsUiView(ViewModel);
+                SystemPage.ViewModel,
+                UiPage.ViewModel);
 
             DataContext = ViewModel;
 
@@ -167,7 +167,7 @@ namespace Ryujinx.Ava.UI.Windows
 
         protected override void OnClosing(WindowClosingEventArgs e)
         {
-            if (Owner is MainWindow window && ViewModel.DirectoryChanged)
+            if (Owner is MainWindow window && UiPage.ViewModel.DirsChanged)
             {
                 window.LoadApplications();
             }
