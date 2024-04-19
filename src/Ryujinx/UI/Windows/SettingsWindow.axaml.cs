@@ -60,16 +60,7 @@ namespace Ryujinx.Ava.UI.Windows
             Load();
         }
 
-        public SettingsWindow()
-        {
-            ViewModel = new SettingsViewModel();
-            DataContext = ViewModel;
-
-            InitializeComponent();
-            Load();
-        }
-
-        public void UpdateDirtyTitle(bool isDirty)
+        private void UpdateDirtyTitle(bool isDirty)
         {
             if (!IsInitialized)
             {
@@ -88,7 +79,7 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
-        public void ToggleButtons(bool enable)
+        private void ToggleButtons(bool enable)
         {
             Buttons.IsEnabled = enable;
         }

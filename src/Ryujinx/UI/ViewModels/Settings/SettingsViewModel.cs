@@ -43,7 +43,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             SettingsLoggingViewModel loggingViewModel,
             SettingsNetworkViewModel networkViewModel,
             SettingsSystemViewModel systemViewModel,
-            SettingsUIViewModel uiViewModel) : this()
+            SettingsUIViewModel uiViewModel)
         {
             _audioViewModel = audioViewModel;
             _cpuViewModel = cpuViewModel;
@@ -64,14 +64,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _networkViewModel.DirtyEvent += CheckIfModified;
             _systemViewModel.DirtyEvent += CheckIfModified;
             _uiViewModel.DirtyEvent += CheckIfModified;
-        }
-
-        public SettingsViewModel()
-        {
-            if (Program.PreviewerDetached)
-            {
-
-            }
         }
 
         public void CheckIfModified()
