@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Ryujinx.Ava.UI.ViewModels.Settings
 {
-    public class SettingsGraphicsViewModel: BaseModel
+    public class SettingsGraphicsViewModel : BaseModel
     {
         public event Action DirtyEvent;
 

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Ryujinx.Ava.UI.ViewModels.Settings
 {
-    public class SettingsCpuViewModel: BaseModel
+    public class SettingsCpuViewModel : BaseModel
     {
         public event Action DirtyEvent;
 
