@@ -54,7 +54,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private object _configViewModel;
         private string _profileName;
         private bool _isLoaded;
-        private bool _enableDockedMode;
 
         private static readonly InputConfigJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
@@ -74,16 +73,38 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public bool IsRight { get; set; }
         public bool IsLeft { get; set; }
 
+        private bool _enableDockedMode;
         public bool EnableDockedMode
         {
             get => _enableDockedMode;
             set
             {
                 _enableDockedMode = value;
+                DirtyEvent?.Invoke();
             }
         }
-        public bool EnableKeyboard { get; set; }
-        public bool EnableMouse { get; set; }
+
+        private bool _enableKeyboard;
+        public bool EnableKeyboard
+        {
+            get => _enableKeyboard;
+            set
+            {
+                _enableKeyboard = value;
+                DirtyEvent?.Invoke();
+            }
+        }
+
+        private bool _enableMouse;
+        public bool EnableMouse
+        {
+            get => _enableMouse;
+            set
+            {
+                _enableMouse = value;
+                DirtyEvent?.Invoke();
+            }
+        }
 
         public event Action NotifyChangesEvent;
 
@@ -813,7 +834,33 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
+        public bool CheckIfModified(ConfigurationState config)
+        {
+            bool isDirty = false;
+
+            isDirty |= config.System.EnableDockedMode.Value != EnableDockedMode;
+            isDirty |= config.Hid.EnableKeyboard.Value != EnableKeyboard;
+            isDirty |= config.Hid.EnableMouse.Value != EnableMouse;
+
+            return isDirty;
+        }
+
         public void Save(ConfigurationState config)
+        {
+            var newInputConfig = ConstructInputConfigList();
+
+            _mainWindow.ViewModel.AppHost?.NpadManager.ReloadConfiguration(newInputConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
+
+            // Atomically replace and signal input change.
+            // NOTE: Do not modify InputConfig.Value directly as other code depends on the on-change event.
+            config.Hid.InputConfig.Value = newInputConfig;
+
+            config.System.EnableDockedMode.Value = EnableDockedMode;
+            config.Hid.EnableKeyboard.Value = EnableKeyboard;
+            config.Hid.EnableMouse.Value = EnableMouse;
+        }
+
+        public List<InputConfig> ConstructInputConfigList()
         {
             List<InputConfig> newInputConfig = new();
 
@@ -857,15 +904,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
                 }
             }
 
-            _mainWindow.ViewModel.AppHost?.NpadManager.ReloadConfiguration(newInputConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
-
-            // Atomically replace and signal input change.
-            // NOTE: Do not modify InputConfig.Value directly as other code depends on the on-change event.
-            config.Hid.InputConfig.Value = newInputConfig;
-
-            config.System.EnableDockedMode.Value = EnableDockedMode;
-            config.Hid.EnableKeyboard.Value = EnableKeyboard;
-            config.Hid.EnableMouse.Value = EnableMouse;
+            return newInputConfig;
         }
 
         public void NotifyChanges()
@@ -877,6 +916,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             OnPropertyChanged(nameof(IsRight));
             OnPropertyChanged(nameof(IsLeft));
             NotifyChangesEvent?.Invoke();
+            DirtyEvent?.Invoke();
         }
 
         public void Dispose()

@@ -76,8 +76,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= _cpuViewModel?.CheckIfModified(config) ?? false;
             isDirty |= _graphicsViewModel?.CheckIfModified(config) ?? false;
             isDirty |= _hotkeysViewModel?.CheckIfModified(config) ?? false;
-            // TODO: IMPLEMENT THIS!!
-            // isDirty |= _inputViewModel?.CheckIfModified(config) ?? false;
+            isDirty |= _inputViewModel?.CheckIfModified(config) ?? false;
             isDirty |= _loggingViewModel?.CheckIfModified(config) ?? false;
             isDirty |= _networkViewModel?.CheckIfModified(config) ?? false;
             isDirty |= _systemViewModel?.CheckIfModified(config) ?? false;
