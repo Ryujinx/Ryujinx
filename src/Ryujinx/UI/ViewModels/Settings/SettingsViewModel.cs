@@ -1,22 +1,17 @@
 using Avalonia.Collections;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using LibHac.Tools.FsSystem;
 using Ryujinx.Ava.Common.Locale;
-using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Models.Input;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Multiplayer;
-using Ryujinx.Common.GraphicsDriver;
-using Ryujinx.Graphics.Vulkan;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Time.TimeZone;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Configuration.System;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -35,15 +30,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         private readonly Dictionary<string, string> _networkInterfaces;
 
-        private float _customResolutionScale;
-        private int _resolutionScale;
-        private int _graphicsBackendMultithreadingIndex;
-        private bool _isVulkanAvailable = true;
         private bool _directoryChanged;
-        private readonly List<string> _gpuIds = new();
-        private int _graphicsBackendIndex;
-        private int _scalingFilter;
-        private int _scalingFilterLevel;
+
         private int _networkInterfaceIndex;
         private int _multiplayerModeIndex;
 
@@ -63,64 +51,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public event Action SaveSettingsEvent;
         public event Action<bool> DirtyEvent;
         public event Action<bool> ToggleButtons;
-
-        public int ResolutionScale
-        {
-            get => _resolutionScale;
-            set
-            {
-                _resolutionScale = value;
-
-                OnPropertyChanged(nameof(CustomResolutionScale));
-                OnPropertyChanged(nameof(IsCustomResolutionScaleActive));
-            }
-        }
-
-        public int GraphicsBackendMultithreadingIndex
-        {
-            get => _graphicsBackendMultithreadingIndex;
-            set
-            {
-                _graphicsBackendMultithreadingIndex = value;
-
-                if (_graphicsBackendMultithreadingIndex != (int)ConfigurationState.Instance.Graphics.BackendThreading.Value)
-                {
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                         ContentDialogHelper.CreateInfoDialog(LocaleManager.Instance[LocaleKeys.DialogSettingsBackendThreadingWarningMessage],
-                            "",
-                            "",
-                            LocaleManager.Instance[LocaleKeys.InputDialogOk],
-                            LocaleManager.Instance[LocaleKeys.DialogSettingsBackendThreadingWarningTitle])
-                    );
-                }
-
-                OnPropertyChanged();
-            }
-        }
-
-        public float CustomResolutionScale
-        {
-            get => _customResolutionScale;
-            set
-            {
-                _customResolutionScale = MathF.Round(value, 1);
-
-                OnPropertyChanged();
-            }
-        }
-
-        public bool IsVulkanAvailable
-        {
-            get => _isVulkanAvailable;
-            set
-            {
-                _isVulkanAvailable = value;
-
-                OnPropertyChanged();
-            }
-        }
-
-        public bool IsOpenGLAvailable => !OperatingSystem.IsMacOS();
 
         public bool IsHypervisorAvailable => OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
@@ -247,102 +177,15 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        private bool _enableShaderCache;
-        public bool EnableShaderCache
-        {
-            get => _enableShaderCache;
-            set
-            {
-                _enableShaderCache = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableTextureRecompression;
-        public bool EnableTextureRecompression
-        {
-            get => _enableTextureRecompression;
-            set
-            {
-                _enableTextureRecompression = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableMacroHLE;
-        public bool EnableMacroHLE
-        {
-            get => _enableMacroHLE;
-            set
-            {
-                _enableMacroHLE = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableColorSpacePassthrough;
-        public bool EnableColorSpacePassthrough
-        {
-            get => _enableColorSpacePassthrough;
-            set
-            {
-                _enableColorSpacePassthrough = value;
-                CheckIfModified();
-            }
-        }
-
-        public bool ColorSpacePassthroughAvailable => IsMacOS;
-
-        public bool IsCustomResolutionScaleActive => _resolutionScale == 4;
-        public bool IsScalingFilterActive => _scalingFilter == (int)Ryujinx.Common.Configuration.ScalingFilter.Fsr;
-
-        public bool IsVulkanSelected => GraphicsBackendIndex == 0;
         public bool UseHypervisor { get; set; }
 
         public string TimeZone { get; set; }
-        public string ShaderDumpPath { get; set; }
-
         public int Language { get; set; }
         public int Region { get; set; }
-        public int MaxAnisotropy { get; set; }
-        public int AspectRatio { get; set; }
-        public int AntiAliasingEffect { get; set; }
-        public string ScalingFilterLevelText => ScalingFilterLevel.ToString("0");
-        public int ScalingFilterLevel
-        {
-            get => _scalingFilterLevel;
-            set
-            {
-                _scalingFilterLevel = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ScalingFilterLevelText));
-            }
-        }
         public int MemoryMode { get; set; }
         public int BaseStyleIndex { get; set; }
-        public int GraphicsBackendIndex
-        {
-            get => _graphicsBackendIndex;
-            set
-            {
-                _graphicsBackendIndex = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsVulkanSelected));
-            }
-        }
-        public int ScalingFilter
-        {
-            get => _scalingFilter;
-            set
-            {
-                _scalingFilter = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsScalingFilterActive));
-            }
-        }
 
-        public int PreferredGpuIndex { get; set; }
-
+        private readonly SettingsGraphicsViewModel _graphicsViewModel;
         private readonly SettingsAudioViewModel _audioViewModel;
         private readonly SettingsLoggingViewModel _loggingViewModel;
 
@@ -351,7 +194,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         internal AvaloniaList<TimeZone> TimeZones { get; set; }
         public AvaloniaList<string> GameDirectories { get; set; }
-        public ObservableCollection<ComboBoxItem> AvailableGpus { get; set; }
 
         public AvaloniaList<string> NetworkInterfaceList
         {
@@ -384,15 +226,18 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             VirtualFileSystem virtualFileSystem,
             ContentManager contentManager,
             SettingsAudioViewModel audioViewModel,
+            SettingsGraphicsViewModel graphicsViewModel,
             SettingsLoggingViewModel loggingViewModel) : this()
         {
             _virtualFileSystem = virtualFileSystem;
             _contentManager = contentManager;
 
             _audioViewModel = audioViewModel;
+            _graphicsViewModel = graphicsViewModel;
             _loggingViewModel = loggingViewModel;
 
             _audioViewModel.DirtyEvent += CheckIfModified;
+            _graphicsViewModel.DirtyEvent += CheckIfModified;
             _loggingViewModel.DirtyEvent += CheckIfModified;
 
             if (Program.PreviewerDetached)
@@ -405,7 +250,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         {
             GameDirectories = new AvaloniaList<string>();
             TimeZones = new AvaloniaList<TimeZone>();
-            AvailableGpus = new ObservableCollection<ComboBoxItem>();
             _validTzRegions = new List<string>();
             _networkInterfaces = new Dictionary<string, string>();
 
@@ -413,7 +257,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
             if (Program.PreviewerDetached)
             {
-                Task.Run(LoadAvailableGpus);
                 LoadCurrentConfiguration();
             }
         }
@@ -456,28 +299,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= config.System.MemoryManagerMode.Value != (MemoryManagerMode)MemoryMode;
             isDirty |= config.System.UseHypervisor.Value != UseHypervisor;
 
-            // Graphics
-            isDirty |= config.Graphics.GraphicsBackend.Value != (GraphicsBackend)GraphicsBackendIndex;
-            isDirty |= config.Graphics.PreferredGpu.Value != _gpuIds.ElementAtOrDefault(PreferredGpuIndex);
-            isDirty |= config.Graphics.EnableShaderCache.Value != EnableShaderCache;
-            isDirty |= config.Graphics.EnableTextureRecompression.Value != EnableTextureRecompression;
-            isDirty |= config.Graphics.EnableMacroHLE.Value != EnableMacroHLE;
-            isDirty |= config.Graphics.EnableColorSpacePassthrough.Value != EnableColorSpacePassthrough;
-            isDirty |= config.Graphics.ResScale.Value != (ResolutionScale == 4 ? -1 : ResolutionScale + 1);
-            isDirty |= config.Graphics.ResScaleCustom.Value != CustomResolutionScale;
-            isDirty |= config.Graphics.MaxAnisotropy.Value != (MaxAnisotropy == 0 ? -1 : MathF.Pow(2, MaxAnisotropy));
-            isDirty |= config.Graphics.AspectRatio.Value != (AspectRatio)AspectRatio;
-            isDirty |= config.Graphics.AntiAliasing.Value != (AntiAliasing)AntiAliasingEffect;
-            isDirty |= config.Graphics.ScalingFilter.Value != (ScalingFilter)ScalingFilter;
-            isDirty |= config.Graphics.ScalingFilterLevel.Value != ScalingFilterLevel;
-
-            if (ConfigurationState.Instance.Graphics.BackendThreading != (BackendThreading)GraphicsBackendMultithreadingIndex)
+            if (_graphicsViewModel != null)
             {
-                DriverUtilities.ToggleOGLThreading(GraphicsBackendMultithreadingIndex == (int)BackendThreading.Off);
+                isDirty |= _graphicsViewModel.CheckIfModified(config);
             }
-
-            isDirty |= config.Graphics.BackendThreading.Value != (BackendThreading)GraphicsBackendMultithreadingIndex;
-            isDirty |= config.Graphics.ShadersDumpPath.Value != ShaderDumpPath;
 
             if (_audioViewModel != null)
             {
@@ -495,39 +320,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             isDirty |= config.Multiplayer.Mode.Value != (MultiplayerMode)MultiplayerModeIndex;
 
             IsModified = isDirty;
-        }
-
-
-
-        private async Task LoadAvailableGpus()
-        {
-            AvailableGpus.Clear();
-
-            var devices = VulkanRenderer.GetPhysicalDevices();
-
-            if (devices.Length == 0)
-            {
-                IsVulkanAvailable = false;
-                GraphicsBackendIndex = 1;
-            }
-            else
-            {
-                foreach (var device in devices)
-                {
-                    await Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        _gpuIds.Add(device.Id);
-
-                        AvailableGpus.Add(new ComboBoxItem { Content = $"{device.Name} {(device.IsDiscrete ? "(dGPU)" : "")}" });
-                    });
-                }
-            }
-
-            // GPU configuration needs to be loaded during the async method or it will always return 0.
-            PreferredGpuIndex = _gpuIds.Contains(ConfigurationState.Instance.Graphics.PreferredGpu) ?
-                                _gpuIds.IndexOf(ConfigurationState.Instance.Graphics.PreferredGpu) : 0;
-
-            Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(PreferredGpuIndex)));
         }
 
         public async Task LoadTimeZones()
@@ -619,23 +411,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             MemoryMode = (int)config.System.MemoryManagerMode.Value;
             UseHypervisor = config.System.UseHypervisor;
 
-            // Graphics
-            GraphicsBackendIndex = (int)config.Graphics.GraphicsBackend.Value;
-            // Physical devices are queried asynchronously hence the prefered index config value is loaded in LoadAvailableGpus().
-            EnableShaderCache = config.Graphics.EnableShaderCache;
-            EnableTextureRecompression = config.Graphics.EnableTextureRecompression;
-            EnableMacroHLE = config.Graphics.EnableMacroHLE;
-            EnableColorSpacePassthrough = config.Graphics.EnableColorSpacePassthrough;
-            ResolutionScale = config.Graphics.ResScale == -1 ? 4 : config.Graphics.ResScale - 1;
-            CustomResolutionScale = config.Graphics.ResScaleCustom;
-            MaxAnisotropy = config.Graphics.MaxAnisotropy == -1 ? 0 : (int)(MathF.Log2(config.Graphics.MaxAnisotropy));
-            AspectRatio = (int)config.Graphics.AspectRatio.Value;
-            GraphicsBackendMultithreadingIndex = (int)config.Graphics.BackendThreading.Value;
-            ShaderDumpPath = config.Graphics.ShadersDumpPath;
-            AntiAliasingEffect = (int)config.Graphics.AntiAliasing.Value;
-            ScalingFilter = (int)config.Graphics.ScalingFilter.Value;
-            ScalingFilterLevel = config.Graphics.ScalingFilterLevel.Value;
-
             // Network
             EnableInternetAccess = config.System.EnableInternetAccess;
             // LAN interface index is loaded asynchronously in PopulateNetworkInterfaces()
@@ -684,29 +459,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             config.System.MemoryManagerMode.Value = (MemoryManagerMode)MemoryMode;
             config.System.UseHypervisor.Value = UseHypervisor;
 
-            // Graphics
-            config.Graphics.GraphicsBackend.Value = (GraphicsBackend)GraphicsBackendIndex;
-            config.Graphics.PreferredGpu.Value = _gpuIds.ElementAtOrDefault(PreferredGpuIndex);
-            config.Graphics.EnableShaderCache.Value = EnableShaderCache;
-            config.Graphics.EnableTextureRecompression.Value = EnableTextureRecompression;
-            config.Graphics.EnableMacroHLE.Value = EnableMacroHLE;
-            config.Graphics.EnableColorSpacePassthrough.Value = EnableColorSpacePassthrough;
-            config.Graphics.ResScale.Value = ResolutionScale == 4 ? -1 : ResolutionScale + 1;
-            config.Graphics.ResScaleCustom.Value = CustomResolutionScale;
-            config.Graphics.MaxAnisotropy.Value = MaxAnisotropy == 0 ? -1 : MathF.Pow(2, MaxAnisotropy);
-            config.Graphics.AspectRatio.Value = (AspectRatio)AspectRatio;
-            config.Graphics.AntiAliasing.Value = (AntiAliasing)AntiAliasingEffect;
-            config.Graphics.ScalingFilter.Value = (ScalingFilter)ScalingFilter;
-            config.Graphics.ScalingFilterLevel.Value = ScalingFilterLevel;
-
-            if (ConfigurationState.Instance.Graphics.BackendThreading != (BackendThreading)GraphicsBackendMultithreadingIndex)
-            {
-                DriverUtilities.ToggleOGLThreading(GraphicsBackendMultithreadingIndex == (int)BackendThreading.Off);
-            }
-
-            config.Graphics.BackendThreading.Value = (BackendThreading)GraphicsBackendMultithreadingIndex;
-            config.Graphics.ShadersDumpPath.Value = ShaderDumpPath;
-
+            _graphicsViewModel?.Save(config);
             _audioViewModel?.Save(config);
 
             // Network
@@ -725,7 +478,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
             _directoryChanged = false;
         }
-
 
         public void ApplyButton()
         {
