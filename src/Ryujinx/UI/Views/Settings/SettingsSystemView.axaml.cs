@@ -1,16 +1,17 @@
 using Avalonia.Controls;
 using Ryujinx.Ava.UI.ViewModels.Settings;
+using Ryujinx.HLE.FileSystem;
 using TimeZone = Ryujinx.Ava.UI.Models.TimeZone;
 
 namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsSystemView : UserControl
     {
-        private readonly SettingsViewModel _viewModel;
+        public SettingsSystemViewModel ViewModel;
 
-        public SettingsSystemView(SettingsViewModel viewModel)
+        public SettingsSystemView(VirtualFileSystem virtualFileSystem, ContentManager contentManager)
         {
-            _viewModel = viewModel;
+            DataContext = ViewModel = new SettingsSystemViewModel(virtualFileSystem, contentManager);
             InitializeComponent();
         }
 
@@ -22,7 +23,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
                 {
                     e.Handled = true;
 
-                    _viewModel.ValidateAndSetTimeZone(timeZone.Location);
+                    ViewModel.ValidateAndSetTimeZone(timeZone.Location);
                 }
             }
         }
@@ -31,7 +32,7 @@ namespace Ryujinx.Ava.UI.Views.Settings
         {
             if (sender is AutoCompleteBox box && box.SelectedItem is TimeZone timeZone)
             {
-                _viewModel.ValidateAndSetTimeZone(timeZone.Location);
+                ViewModel.ValidateAndSetTimeZone(timeZone.Location);
             }
         }
     }

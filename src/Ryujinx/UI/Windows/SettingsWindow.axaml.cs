@@ -36,20 +36,19 @@ namespace Ryujinx.Ava.UI.Windows
             InputPage = new SettingsInputView();
             LoggingPage = new SettingsLoggingView();
             NetworkPage = new SettingsNetworkView();
+            SystemPage = new SettingsSystemView(virtualFileSystem, contentManager);
 
             ViewModel = new SettingsViewModel(
-                virtualFileSystem,
-                contentManager,
                 AudioPage.ViewModel,
                 CpuPage.ViewModel,
                 GraphicsPage.ViewModel,
                 HotkeysPage.ViewModel,
                 InputPage.ViewModel,
                 LoggingPage.ViewModel,
-                NetworkPage.ViewModel);
+                NetworkPage.ViewModel,
+                SystemPage.ViewModel);
 
             UiPage = new SettingsUiView(ViewModel);
-            SystemPage = new SettingsSystemView(ViewModel);
 
             DataContext = ViewModel;
 

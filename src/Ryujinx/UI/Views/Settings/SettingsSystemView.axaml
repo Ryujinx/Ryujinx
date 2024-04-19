@@ -8,12 +8,12 @@
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
     mc:Ignorable="d"
-    x:DataType="viewModels:SettingsViewModel">
+    x:DataType="viewModels:SettingsSystemViewModel">
     <UserControl.Resources>
         <helpers:TimeZoneConverter x:Key="TimeZone" />
     </UserControl.Resources>
     <Design.DataContext>
-        <viewModels:SettingsViewModel />
+        <viewModels:SettingsSystemViewModel />
     </Design.DataContext>
     <ScrollViewer
         Name="SystemPage"
