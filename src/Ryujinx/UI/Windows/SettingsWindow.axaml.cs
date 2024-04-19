@@ -129,11 +129,6 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
-        private static void RevertIfNotSaved()
-        {
-            Program.ReloadConfig();
-        }
-
         private async void Cancel_OnClick(object sender, RoutedEventArgs e)
         {
             if (ViewModel.IsModified)
@@ -152,7 +147,6 @@ namespace Ryujinx.Ava.UI.Windows
                 }
             }
 
-            RevertIfNotSaved();
             Close();
         }
 
