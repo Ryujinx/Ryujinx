@@ -35,6 +35,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 {
     public class SettingsInputViewModel : BaseModel, IDisposable
     {
+        public event Action DirtyEvent;
+
         private const string Disabled = "disabled";
         private const string ProControllerResource = "Ryujinx.UI.Common/Resources/Controller_ProCon.svg";
         private const string JoyConPairResource = "Ryujinx.UI.Common/Resources/Controller_JoyConPair.svg";
@@ -84,8 +86,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public bool EnableMouse { get; set; }
 
         public event Action NotifyChangesEvent;
-
-        private readonly SettingsViewModel _settingsViewModel;
 
         public object ConfigViewModel
         {
@@ -241,10 +241,8 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         public InputConfig Config { get; set; }
 
-        public SettingsInputViewModel(UserControl owner, SettingsViewModel settingsViewModel) : this()
+        public SettingsInputViewModel(UserControl owner) : this()
         {
-            _settingsViewModel = settingsViewModel;
-
             if (Program.PreviewerDetached)
             {
                 _mainWindow =
@@ -756,37 +754,35 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
                 return;
             }
+
+            bool validFileName = ProfileName.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
+
+            if (validFileName)
+            {
+                string path = Path.Combine(GetProfileBasePath(), ProfileName + ".json");
+
+                InputConfig config = null;
+
+                if (IsKeyboard)
+                {
+                    config = (ConfigViewModel as KeyboardInputViewModel).Config.GetConfig();
+                }
+                else if (IsController)
+                {
+                    config = (ConfigViewModel as ControllerInputViewModel).Config.GetConfig();
+                }
+
+                config.ControllerType = Controllers[_controller].Type;
+
+                string jsonString = JsonHelper.Serialize(config, _serializerContext.InputConfig);
+
+                await File.WriteAllTextAsync(path, jsonString);
+
+                LoadProfiles();
+            }
             else
             {
-                bool validFileName = ProfileName.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
-
-                if (validFileName)
-                {
-                    string path = Path.Combine(GetProfileBasePath(), ProfileName + ".json");
-
-                    InputConfig config = null;
-
-                    if (IsKeyboard)
-                    {
-                        config = (ConfigViewModel as KeyboardInputViewModel).Config.GetConfig();
-                    }
-                    else if (IsController)
-                    {
-                        config = (ConfigViewModel as ControllerInputViewModel).Config.GetConfig();
-                    }
-
-                    config.ControllerType = Controllers[_controller].Type;
-
-                    string jsonString = JsonHelper.Serialize(config, _serializerContext.InputConfig);
-
-                    await File.WriteAllTextAsync(path, jsonString);
-
-                    LoadProfiles();
-                }
-                else
-                {
-                    await ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogProfileInvalidProfileNameErrorMessage]);
-                }
+                await ContentDialogHelper.CreateErrorDialog(LocaleManager.Instance[LocaleKeys.DialogProfileInvalidProfileNameErrorMessage]);
             }
         }
 
@@ -817,17 +813,17 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             }
         }
 
-        public void Save()
+        public void Save(ConfigurationState config)
         {
-            List<InputConfig> newConfig = new();
+            List<InputConfig> newInputConfig = new();
 
-            newConfig.AddRange(ConfigurationState.Instance.Hid.InputConfig.Value);
+            newInputConfig.AddRange(ConfigurationState.Instance.Hid.InputConfig.Value);
 
-            newConfig.Remove(newConfig.Find(x => x == null));
+            newInputConfig.Remove(newInputConfig.Find(x => x == null));
 
             if (Device == 0)
             {
-                newConfig.Remove(newConfig.Find(x => x.PlayerIndex == this.PlayerId));
+                newInputConfig.Remove(newInputConfig.Find(x => x.PlayerIndex == this.PlayerId));
             }
             else
             {
@@ -835,48 +831,41 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
                 if (device.Type == DeviceType.Keyboard)
                 {
-                    var inputConfig = (ConfigViewModel as KeyboardInputViewModel).Config;
-                    inputConfig.Id = device.Id;
+                    var keyboardConfig = (ConfigViewModel as KeyboardInputViewModel).Config;
+                    keyboardConfig.Id = device.Id;
                 }
                 else
                 {
-                    var inputConfig = (ConfigViewModel as ControllerInputViewModel).Config;
-                    inputConfig.Id = device.Id.Split(" ")[0];
+                    var controllerConfig = (ConfigViewModel as ControllerInputViewModel).Config;
+                    controllerConfig.Id = device.Id.Split(" ")[0];
                 }
 
-                var config = !IsController
+                var inputConfig = !IsController
                     ? (ConfigViewModel as KeyboardInputViewModel).Config.GetConfig()
                     : (ConfigViewModel as ControllerInputViewModel).Config.GetConfig();
-                config.ControllerType = Controllers[_controller].Type;
-                config.PlayerIndex = _playerId;
+                inputConfig.ControllerType = Controllers[_controller].Type;
+                inputConfig.PlayerIndex = _playerId;
 
-                int i = newConfig.FindIndex(x => x.PlayerIndex == PlayerId);
+                int i = newInputConfig.FindIndex(x => x.PlayerIndex == PlayerId);
                 if (i == -1)
                 {
-                    newConfig.Add(config);
+                    newInputConfig.Add(inputConfig);
                 }
                 else
                 {
-                    newConfig[i] = config;
+                    newInputConfig[i] = inputConfig;
                 }
             }
 
-            _mainWindow.ViewModel.AppHost?.NpadManager.ReloadConfiguration(newConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
+            _mainWindow.ViewModel.AppHost?.NpadManager.ReloadConfiguration(newInputConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
 
             // Atomically replace and signal input change.
             // NOTE: Do not modify InputConfig.Value directly as other code depends on the on-change event.
-            ConfigurationState.Instance.Hid.InputConfig.Value = newConfig;
+            config.Hid.InputConfig.Value = newInputConfig;
 
-            ConfigurationState.Instance.System.EnableDockedMode.Value = EnableDockedMode;
-            ConfigurationState.Instance.Hid.EnableKeyboard.Value = EnableKeyboard;
-            ConfigurationState.Instance.Hid.EnableMouse.Value = EnableMouse;
-
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
-        }
-
-        public void NotifyChange(string property)
-        {
-            OnPropertyChanged(property);
+            config.System.EnableDockedMode.Value = EnableDockedMode;
+            config.Hid.EnableKeyboard.Value = EnableKeyboard;
+            config.Hid.EnableMouse.Value = EnableMouse;
         }
 
         public void NotifyChanges()

@@ -33,6 +33,7 @@ namespace Ryujinx.Ava.UI.Windows
             CpuPage = new SettingsCpuView();
             GraphicsPage = new SettingsGraphicsView();
             HotkeysPage = new SettingsHotkeysView();
+            InputPage = new SettingsInputView();
             LoggingPage = new SettingsLoggingView();
 
             ViewModel = new SettingsViewModel(
@@ -42,17 +43,16 @@ namespace Ryujinx.Ava.UI.Windows
                 CpuPage.ViewModel,
                 GraphicsPage.ViewModel,
                 HotkeysPage.ViewModel,
+                InputPage.ViewModel,
                 LoggingPage.ViewModel);
 
             UiPage = new SettingsUiView(ViewModel);
-            InputPage = new SettingsInputView(ViewModel);
             SystemPage = new SettingsSystemView(ViewModel);
             NetworkPage = new SettingsNetworkView();
 
             DataContext = ViewModel;
 
             ViewModel.CloseWindow += Close;
-            ViewModel.SaveSettingsEvent += SaveSettings;
             ViewModel.DirtyEvent += UpdateDirtyTitle;
             ViewModel.ToggleButtons += ToggleButtons;
 
@@ -91,16 +91,6 @@ namespace Ryujinx.Ava.UI.Windows
         public void ToggleButtons(bool enable)
         {
             Buttons.IsEnabled = enable;
-        }
-
-        public void SaveSettings()
-        {
-            InputPage.SaveCurrentProfile();
-
-            if (Owner is MainWindow window && ViewModel.DirectoryChanged)
-            {
-                window.LoadApplications();
-            }
         }
 
         private void Load()
@@ -177,6 +167,11 @@ namespace Ryujinx.Ava.UI.Windows
 
         protected override void OnClosing(WindowClosingEventArgs e)
         {
+            if (Owner is MainWindow window && ViewModel.DirectoryChanged)
+            {
+                window.LoadApplications();
+            }
+
             HotkeysPage.Dispose();
             InputPage.Dispose();
             base.OnClosing(e);

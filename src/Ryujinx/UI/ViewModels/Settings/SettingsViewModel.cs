@@ -2,7 +2,6 @@ using Avalonia.Collections;
 using Avalonia.Threading;
 using LibHac.Tools.FsSystem;
 using Ryujinx.Ava.Common.Locale;
-using Ryujinx.Ava.UI.Models.Input;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Multiplayer;
@@ -47,7 +46,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         }
 
         public event Action CloseWindow;
-        public event Action SaveSettingsEvent;
         public event Action<bool> DirtyEvent;
         public event Action<bool> ToggleButtons;
 
@@ -172,6 +170,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         private readonly SettingsCpuViewModel _cpuViewModel;
         private readonly SettingsGraphicsViewModel _graphicsViewModel;
         private readonly SettingsLoggingViewModel _loggingViewModel;
+        private readonly SettingsInputViewModel _inputViewModel;
         private readonly SettingsHotkeysViewModel _hotkeysViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
@@ -212,6 +211,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             SettingsCpuViewModel cpuViewModel,
             SettingsGraphicsViewModel graphicsViewModel,
             SettingsHotkeysViewModel hotkeysViewModel,
+            SettingsInputViewModel inputViewModel,
             SettingsLoggingViewModel loggingViewModel) : this()
         {
             _virtualFileSystem = virtualFileSystem;
@@ -221,12 +221,14 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _cpuViewModel = cpuViewModel;
             _graphicsViewModel = graphicsViewModel;
             _hotkeysViewModel = hotkeysViewModel;
+            _inputViewModel = inputViewModel;
             _loggingViewModel = loggingViewModel;
 
             _audioViewModel.DirtyEvent += CheckIfModified;
             _cpuViewModel.DirtyEvent += CheckIfModified;
             _graphicsViewModel.DirtyEvent += CheckIfModified;
             _hotkeysViewModel.DirtyEvent += CheckIfModified;
+            _inputViewModel.DirtyEvent += CheckIfModified;
             _loggingViewModel.DirtyEvent += CheckIfModified;
 
             if (Program.PreviewerDetached)
@@ -301,6 +303,12 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             if (_hotkeysViewModel != null)
             {
                 isDirty |= _hotkeysViewModel.CheckIfModified(config);
+            }
+
+            if (_inputViewModel != null)
+            {
+                // TODO: IMPLEMENT THIS!!
+                // isDirty |= _inputViewModel.CheckIfModified(config);
             }
 
             // Network
@@ -443,6 +451,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             _cpuViewModel?.Save(config);
             _graphicsViewModel?.Save(config);
             _hotkeysViewModel?.Save(config);
+            _inputViewModel?.Save(config);
 
             // Network
             config.System.EnableInternetAccess.Value = EnableInternetAccess;
@@ -455,8 +464,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             config.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
             MainWindow.UpdateGraphicsConfig();
-
-            SaveSettingsEvent?.Invoke();
 
             _directoryChanged = false;
         }
