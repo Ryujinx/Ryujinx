@@ -8,9 +8,9 @@
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     mc:Ignorable="d"
-    x:DataType="viewModels:SettingsViewModel">
+    x:DataType="viewModels:SettingsLoggingViewModel">
     <Design.DataContext>
-        <viewModels:SettingsViewModel />
+        <viewModels:SettingsLoggingViewModel />
     </Design.DataContext>
     <ScrollViewer
         Name="LoggingPage"

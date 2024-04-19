@@ -30,11 +30,13 @@ namespace Ryujinx.Ava.UI.Windows
             Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
 
             AudioPage = new SettingsAudioView();
+            LoggingPage = new SettingsLoggingView();
 
             ViewModel = new SettingsViewModel(
                 virtualFileSystem,
                 contentManager,
-                AudioPage.ViewModel);
+                AudioPage.ViewModel,
+                LoggingPage.ViewModel);
 
             UiPage = new SettingsUiView(ViewModel);
             InputPage = new SettingsInputView(ViewModel);
@@ -43,7 +45,6 @@ namespace Ryujinx.Ava.UI.Windows
             CpuPage = new SettingsCPUView();
             GraphicsPage = new SettingsGraphicsView();
             NetworkPage = new SettingsNetworkView();
-            LoggingPage = new SettingsLoggingView();
 
             DataContext = ViewModel;
 

@@ -2,9 +2,6 @@ using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using LibHac.Tools.FsSystem;
-using Ryujinx.Audio.Backends.OpenAL;
-using Ryujinx.Audio.Backends.SDL2;
-using Ryujinx.Audio.Backends.SoundIo;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Models.Input;
@@ -12,7 +9,6 @@ using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.Common.GraphicsDriver;
-using Ryujinx.Common.Logging;
 using Ryujinx.Graphics.Vulkan;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Time.TimeZone;
@@ -297,105 +293,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         public bool ColorSpacePassthroughAvailable => IsMacOS;
 
-        private bool _enableFileLog;
-        public bool EnableFileLog
-        {
-            get => _enableFileLog;
-            set
-            {
-                _enableFileLog = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableStub;
-        public bool EnableStub
-        {
-            get => _enableStub;
-            set
-            {
-                _enableStub = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableInfo;
-        public bool EnableInfo
-        {
-            get => _enableInfo;
-            set
-            {
-                _enableInfo = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableWarn;
-        public bool EnableWarn
-        {
-            get => _enableWarn;
-            set
-            {
-                _enableWarn = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableError;
-        public bool EnableError
-        {
-            get => _enableError;
-            set
-            {
-                _enableError = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableTrace;
-        public bool EnableTrace
-        {
-            get => _enableTrace;
-            set
-            {
-                _enableTrace = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableGuest;
-        public bool EnableGuest
-        {
-            get => _enableGuest;
-            set
-            {
-                _enableGuest = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableFsAccessLog;
-        public bool EnableFsAccessLog
-        {
-            get => _enableFsAccessLog;
-            set
-            {
-                _enableFsAccessLog = value;
-                CheckIfModified();
-            }
-        }
-
-        private bool _enableDebug;
-        public bool EnableDebug
-        {
-            get => _enableDebug;
-            set
-            {
-                _enableDebug = value;
-                CheckIfModified();
-            }
-        }
-
         public bool IsCustomResolutionScaleActive => _resolutionScale == 4;
         public bool IsScalingFilterActive => _scalingFilter == (int)Ryujinx.Common.Configuration.ScalingFilter.Fsr;
 
@@ -407,7 +304,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         public int Language { get; set; }
         public int Region { get; set; }
-        public int FsGlobalAccessLogMode { get; set; }
         public int MaxAnisotropy { get; set; }
         public int AspectRatio { get; set; }
         public int AntiAliasingEffect { get; set; }
@@ -422,7 +318,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
                 OnPropertyChanged(nameof(ScalingFilterLevelText));
             }
         }
-        public int OpenglDebugLevel { get; set; }
         public int MemoryMode { get; set; }
         public int BaseStyleIndex { get; set; }
         public int GraphicsBackendIndex
@@ -449,6 +344,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public int PreferredGpuIndex { get; set; }
 
         private readonly SettingsAudioViewModel _audioViewModel;
+        private readonly SettingsLoggingViewModel _loggingViewModel;
 
         public DateTimeOffset CurrentDate { get; set; }
         public TimeSpan CurrentTime { get; set; }
@@ -487,13 +383,17 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         public SettingsViewModel(
             VirtualFileSystem virtualFileSystem,
             ContentManager contentManager,
-            SettingsAudioViewModel audioViewModel) : this()
+            SettingsAudioViewModel audioViewModel,
+            SettingsLoggingViewModel loggingViewModel) : this()
         {
             _virtualFileSystem = virtualFileSystem;
             _contentManager = contentManager;
+
             _audioViewModel = audioViewModel;
+            _loggingViewModel = loggingViewModel;
 
             _audioViewModel.DirtyEvent += CheckIfModified;
+            _loggingViewModel.DirtyEvent += CheckIfModified;
 
             if (Program.PreviewerDetached)
             {
@@ -586,18 +486,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             // Network
             isDirty |= config.System.EnableInternetAccess.Value != EnableInternetAccess;
 
-            // Logging
-            isDirty |= config.Logger.EnableFileLog.Value != EnableFileLog;
-            isDirty |= config.Logger.EnableStub.Value != EnableStub;
-            isDirty |= config.Logger.EnableInfo.Value != EnableInfo;
-            isDirty |= config.Logger.EnableWarn.Value != EnableWarn;
-            isDirty |= config.Logger.EnableError.Value != EnableError;
-            isDirty |= config.Logger.EnableTrace.Value != EnableTrace;
-            isDirty |= config.Logger.EnableGuest.Value != EnableGuest;
-            isDirty |= config.Logger.EnableDebug.Value != EnableDebug;
-            isDirty |= config.Logger.EnableFsAccessLog.Value != EnableFsAccessLog;
-            isDirty |= config.System.FsGlobalAccessLogMode.Value != FsGlobalAccessLogMode;
-            isDirty |= config.Logger.GraphicsDebugLevel.Value != (GraphicsDebugLevel)OpenglDebugLevel;
+            if (_loggingViewModel != null)
+            {
+                isDirty |= _loggingViewModel.CheckIfModified(config);
+            }
 
             isDirty |= config.Multiplayer.LanInterfaceId.Value != _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
             isDirty |= config.Multiplayer.Mode.Value != (MultiplayerMode)MultiplayerModeIndex;
@@ -748,19 +640,6 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             EnableInternetAccess = config.System.EnableInternetAccess;
             // LAN interface index is loaded asynchronously in PopulateNetworkInterfaces()
 
-            // Logging
-            EnableFileLog = config.Logger.EnableFileLog;
-            EnableStub = config.Logger.EnableStub;
-            EnableInfo = config.Logger.EnableInfo;
-            EnableWarn = config.Logger.EnableWarn;
-            EnableError = config.Logger.EnableError;
-            EnableTrace = config.Logger.EnableTrace;
-            EnableGuest = config.Logger.EnableGuest;
-            EnableDebug = config.Logger.EnableDebug;
-            EnableFsAccessLog = config.Logger.EnableFsAccessLog;
-            FsGlobalAccessLogMode = config.System.FsGlobalAccessLogMode;
-            OpenglDebugLevel = (int)config.Logger.GraphicsDebugLevel.Value;
-
             MultiplayerModeIndex = (int)config.Multiplayer.Mode.Value;
         }
 
@@ -828,26 +707,12 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
             config.Graphics.BackendThreading.Value = (BackendThreading)GraphicsBackendMultithreadingIndex;
             config.Graphics.ShadersDumpPath.Value = ShaderDumpPath;
 
-            if (_audioViewModel != null)
-            {
-                _audioViewModel.Save(config);
-            }
+            _audioViewModel?.Save(config);
 
             // Network
             config.System.EnableInternetAccess.Value = EnableInternetAccess;
 
-            // Logging
-            config.Logger.EnableFileLog.Value = EnableFileLog;
-            config.Logger.EnableStub.Value = EnableStub;
-            config.Logger.EnableInfo.Value = EnableInfo;
-            config.Logger.EnableWarn.Value = EnableWarn;
-            config.Logger.EnableError.Value = EnableError;
-            config.Logger.EnableTrace.Value = EnableTrace;
-            config.Logger.EnableGuest.Value = EnableGuest;
-            config.Logger.EnableDebug.Value = EnableDebug;
-            config.Logger.EnableFsAccessLog.Value = EnableFsAccessLog;
-            config.System.FsGlobalAccessLogMode.Value = FsGlobalAccessLogMode;
-            config.Logger.GraphicsDebugLevel.Value = (GraphicsDebugLevel)OpenglDebugLevel;
+            _loggingViewModel?.Save(config);
 
             config.Multiplayer.LanInterfaceId.Value = _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
             config.Multiplayer.Mode.Value = (MultiplayerMode)MultiplayerModeIndex;
