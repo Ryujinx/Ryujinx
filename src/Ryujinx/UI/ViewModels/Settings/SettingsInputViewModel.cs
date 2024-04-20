@@ -57,6 +57,17 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
 
         private static readonly InputConfigJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
+        private bool _isModified;
+        public bool IsModified
+        {
+            get => _isModified;
+            set
+            {
+                _isModified = value;
+                DirtyEvent?.Invoke();
+            }
+        }
+
         public IGamepadDriver AvaloniaKeyboardDriver { get; }
         public IGamepad SelectedGamepad { get; private set; }
 
@@ -838,6 +849,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Settings
         {
             bool isDirty = false;
 
+            isDirty |= IsModified;
             isDirty |= config.System.EnableDockedMode.Value != EnableDockedMode;
             isDirty |= config.Hid.EnableKeyboard.Value != EnableKeyboard;
             isDirty |= config.Hid.EnableMouse.Value != EnableMouse;

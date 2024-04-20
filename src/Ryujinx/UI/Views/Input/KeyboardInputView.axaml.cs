@@ -68,7 +68,7 @@ namespace Ryujinx.Ava.UI.Views.Input
                             if (e.ButtonValue.HasValue)
                             {
                                 var buttonValue = e.ButtonValue.Value;
-                                // viewModel.ParentModel.SettingsViewModel.CheckIfModified();
+                                viewModel.ParentModel.IsModified = true;
 
                                 switch (button.Name)
                                 {
