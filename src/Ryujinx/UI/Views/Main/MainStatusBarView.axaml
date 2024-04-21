@@ -270,8 +270,21 @@
                 VerticalAlignment="Center"
                 IsVisible="{Binding !ShowLoadProgress}"
                 Text="{Binding GpuNameText}"
-                TextAlignment="Start" />
-        </StackPanel>
+                TextAlignment="Left" />
+            <Border
+                Width="2"
+                Height="12"
+                Margin="0"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                IsVisible="{Binding !ShowLoadProgress}" />
+            <TextBlock
+                Name="ShaderCount"
+                Margin="5,0,5,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Text="{Binding ShaderCountText}" />
+        </StackPanel>     
         <StackPanel
             Grid.Column="3"
             Margin="0,0,5,0"
