@@ -8,6 +8,7 @@ using Ryujinx.HLE.HOS.Services.Apm;
 using Ryujinx.HLE.HOS.Services.Hid;
 using Ryujinx.HLE.Loaders.Processes;
 using Ryujinx.HLE.UI;
+using Ryujinx.Horizon.Sdk.Hid;
 using Ryujinx.Memory;
 using System;
 

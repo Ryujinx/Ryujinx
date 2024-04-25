@@ -1,5 +1,6 @@
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 
 namespace Ryujinx.HLE.HOS.Services.Hid
 {

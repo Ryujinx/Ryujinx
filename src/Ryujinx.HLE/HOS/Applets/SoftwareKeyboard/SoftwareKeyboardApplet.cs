@@ -3,7 +3,6 @@ using Ryujinx.Common.Configuration.Hid;
 using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.Applets.SoftwareKeyboard;
 using Ryujinx.HLE.HOS.Services.Am.AppletAE;
-using Ryujinx.HLE.HOS.Services.Hid.Types.SharedMemory.Npad;
 using Ryujinx.HLE.UI;
 using Ryujinx.HLE.UI.Input;
 using Ryujinx.Memory;

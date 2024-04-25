@@ -3,9 +3,12 @@ using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.Ipc;
 using Ryujinx.HLE.HOS.Kernel.Threading;
 using Ryujinx.HLE.HOS.Services.Hid.HidServer;
-using Ryujinx.HLE.HOS.Services.Hid.Types;
-using Ryujinx.HLE.HOS.Services.Hid.Types.SharedMemory.Npad;
 using Ryujinx.Horizon.Common;
+using Ryujinx.Horizon.Sdk.Hid;
+using Ryujinx.Horizon.Sdk.Hid.HidDevices;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
+using Ryujinx.Horizon.Sdk.Hid.SixAxis;
+using Ryujinx.Horizon.Sdk.Hid.Vibration;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -80,7 +83,7 @@ namespace Ryujinx.HLE.HOS.Services.Hid
 
             // Initialize entries to avoid issues with some games.
 
-            for (int entry = 0; entry < Hid.SharedMemEntryCount; entry++)
+            for (int entry = 0; entry < Ryujinx.Horizon.Sdk.Hid.Hid.SharedMemEntryCount; entry++)
             {
                 context.Device.Hid.DebugPad.Update();
             }
@@ -100,7 +103,7 @@ namespace Ryujinx.HLE.HOS.Services.Hid
 
             // Initialize entries to avoid issues with some games.
 
-            for (int entry = 0; entry < Hid.SharedMemEntryCount; entry++)
+            for (int entry = 0; entry < Ryujinx.Horizon.Sdk.Hid.Hid.SharedMemEntryCount; entry++)
             {
                 context.Device.Hid.Touchscreen.Update();
             }
@@ -120,7 +123,7 @@ namespace Ryujinx.HLE.HOS.Services.Hid
 
             // Initialize entries to avoid issues with some games.
 
-            for (int entry = 0; entry < Hid.SharedMemEntryCount; entry++)
+            for (int entry = 0; entry < Ryujinx.Horizon.Sdk.Hid.Hid.SharedMemEntryCount; entry++)
             {
                 context.Device.Hid.Mouse.Update(0, 0);
             }
@@ -145,7 +148,7 @@ namespace Ryujinx.HLE.HOS.Services.Hid
                 Keys = new ulong[4],
             };
 
-            for (int entry = 0; entry < Hid.SharedMemEntryCount; entry++)
+            for (int entry = 0; entry < Ryujinx.Horizon.Sdk.Hid.Hid.SharedMemEntryCount; entry++)
             {
                 context.Device.Hid.Keyboard.Update(emptyInput);
             }
@@ -856,7 +859,7 @@ namespace Ryujinx.HLE.HOS.Services.Hid
                 emptySixAxisInputs.Add(sixaxisInput);
             }
 
-            for (int entry = 0; entry < Hid.SharedMemEntryCount; entry++)
+            for (int entry = 0; entry < Ryujinx.Horizon.Sdk.Hid.Hid.SharedMemEntryCount; entry++)
             {
                 context.Device.Hid.Npads.Update(emptyGamepadInputs);
                 context.Device.Hid.Npads.UpdateSixAxis(emptySixAxisInputs);

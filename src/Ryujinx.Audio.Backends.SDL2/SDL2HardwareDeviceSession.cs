@@ -60,7 +60,7 @@ namespace Ryujinx.Audio.Backends.SDL2
                 {
                     if (_outputStream != 0)
                     {
-                        SDL_CloseAudioDevice(_outputStream);
+                        SDL_CloseAdioDevice(_outputStream);
                     }
 
                     _outputStream = newOutputStream;

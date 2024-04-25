@@ -7,6 +7,7 @@ using Ryujinx.HLE.HOS.Services.Hid;
 using Ryujinx.HLE.HOS.Services.Hid.HidServer;
 using Ryujinx.HLE.HOS.Services.Nfc.Nfp.NfpManager;
 using Ryujinx.Horizon.Common;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 using System;
 using System.Buffers.Binary;
 using System.Globalization;

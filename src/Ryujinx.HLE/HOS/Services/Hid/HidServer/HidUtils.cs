@@ -1,3 +1,4 @@
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 using System;
 
 namespace Ryujinx.HLE.HOS.Services.Hid.HidServer
