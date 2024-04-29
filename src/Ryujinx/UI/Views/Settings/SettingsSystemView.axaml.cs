@@ -1,15 +1,17 @@
 using Avalonia.Controls;
-using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.ViewModels.Settings;
+using Ryujinx.HLE.FileSystem;
 using TimeZone = Ryujinx.Ava.UI.Models.TimeZone;
 
 namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsSystemView : UserControl
     {
-        public SettingsViewModel ViewModel;
+        public SettingsSystemViewModel ViewModel;
 
-        public SettingsSystemView()
+        public SettingsSystemView(VirtualFileSystem virtualFileSystem, ContentManager contentManager)
         {
+            DataContext = ViewModel = new SettingsSystemViewModel(virtualFileSystem, contentManager);
             InitializeComponent();
         }
 

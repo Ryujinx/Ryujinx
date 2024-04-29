@@ -5,7 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Ryujinx.Ava.Input;
 using Ryujinx.Ava.UI.Helpers;
-using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using Ryujinx.Input;
 using Ryujinx.Input.Assigner;
 using Key = Ryujinx.Common.Configuration.Hid.Key;
@@ -14,11 +14,15 @@ namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsHotkeysView : UserControl
     {
+        public SettingsHotkeysViewModel ViewModel;
+
         private ButtonKeyAssigner _currentAssigner;
         private readonly IGamepadDriver _avaloniaKeyboardDriver;
 
         public SettingsHotkeysView()
         {
+            DataContext = ViewModel = new SettingsHotkeysViewModel();
+
             InitializeComponent();
 
             foreach (ILogical visual in SettingButtons.GetLogicalDescendants())
@@ -77,37 +81,36 @@ namespace Ryujinx.Ava.UI.Views.Settings
                         {
                             if (e.ButtonValue.HasValue)
                             {
-                                var viewModel = (DataContext) as SettingsViewModel;
                                 var buttonValue = e.ButtonValue.Value;
 
                                 switch (button.Name)
                                 {
                                     case "ToggleVsync":
-                                        viewModel.KeyboardHotkey.ToggleVsync = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.ToggleVsync = buttonValue.AsHidType<Key>();
                                         break;
                                     case "Screenshot":
-                                        viewModel.KeyboardHotkey.Screenshot = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.Screenshot = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ShowUI":
-                                        viewModel.KeyboardHotkey.ShowUI = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.ShowUI = buttonValue.AsHidType<Key>();
                                         break;
                                     case "Pause":
-                                        viewModel.KeyboardHotkey.Pause = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.Pause = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ToggleMute":
-                                        viewModel.KeyboardHotkey.ToggleMute = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.ToggleMute = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ResScaleUp":
-                                        viewModel.KeyboardHotkey.ResScaleUp = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.ResScaleUp = buttonValue.AsHidType<Key>();
                                         break;
                                     case "ResScaleDown":
-                                        viewModel.KeyboardHotkey.ResScaleDown = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.ResScaleDown = buttonValue.AsHidType<Key>();
                                         break;
                                     case "VolumeUp":
-                                        viewModel.KeyboardHotkey.VolumeUp = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.VolumeUp = buttonValue.AsHidType<Key>();
                                         break;
                                     case "VolumeDown":
-                                        viewModel.KeyboardHotkey.VolumeDown = buttonValue.AsHidType<Key>();
+                                        ViewModel.KeyboardHotkey.VolumeDown = buttonValue.AsHidType<Key>();
                                         break;
                                 }
                             }

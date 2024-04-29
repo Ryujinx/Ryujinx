@@ -1,5 +1,6 @@
 using Avalonia.Svg.Skia;
 using Ryujinx.Ava.UI.Models.Input;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using Ryujinx.Ava.UI.Views.Input;
 
 namespace Ryujinx.Ava.UI.ViewModels.Input
@@ -54,9 +55,9 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             }
         }
 
-        public readonly InputViewModel ParentModel;
+        public readonly SettingsInputViewModel ParentModel;
 
-        public ControllerInputViewModel(InputViewModel model, GamepadInputConfig config)
+        public ControllerInputViewModel(SettingsInputViewModel model, GamepadInputConfig config)
         {
             ParentModel = model;
             model.NotifyChangesEvent += OnParentModelChanged;

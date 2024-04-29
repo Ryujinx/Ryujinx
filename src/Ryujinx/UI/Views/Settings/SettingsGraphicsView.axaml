@@ -7,12 +7,12 @@
     xmlns:controls="clr-namespace:Ryujinx.Ava.UI.Controls"
     xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
-    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     Design.Width="1000"
     mc:Ignorable="d"
-    x:DataType="viewModels:SettingsViewModel">
+    x:DataType="viewModels:SettingsGraphicsViewModel">
     <Design.DataContext>
-        <viewModels:SettingsViewModel />
+        <viewModels:SettingsGraphicsViewModel />
     </Design.DataContext>
     <ScrollViewer
         Name="GraphicsPage"
@@ -265,6 +265,7 @@
                         <ComboBox Width="350"
                                   HorizontalContentAlignment="Left"
                                   ToolTip.Tip="{locale:Locale GalThreadingTooltip}"
+                                  SelectionChanged="GraphicsBackendMultithreadingIndex_OnSelectionChanged"
                                   SelectedIndex="{Binding GraphicsBackendMultithreadingIndex}">
                             <ComboBoxItem>
                                 <TextBlock Text="{locale:Locale CommonAuto}" />

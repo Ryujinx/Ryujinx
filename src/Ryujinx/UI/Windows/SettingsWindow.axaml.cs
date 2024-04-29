@@ -1,8 +1,11 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
-using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.Helpers;
+using Ryujinx.Ava.UI.ViewModels.Settings;
+using Ryujinx.Ava.UI.Views.Settings;
 using Ryujinx.HLE.FileSystem;
 using System;
 
@@ -10,44 +13,79 @@ namespace Ryujinx.Ava.UI.Windows
 {
     public partial class SettingsWindow : StyleableWindow
     {
-        internal SettingsViewModel ViewModel { get; set; }
+        private SettingsViewModel ViewModel { get; }
+
+        public readonly SettingsUiView UiPage;
+        public readonly SettingsInputView InputPage;
+        public readonly SettingsHotkeysView HotkeysPage;
+        public readonly SettingsSystemView SystemPage;
+        public readonly SettingsCpuView CpuPage;
+        public readonly SettingsGraphicsView GraphicsPage;
+        public readonly SettingsAudioView AudioPage;
+        public readonly SettingsNetworkView NetworkPage;
+        public readonly SettingsLoggingView LoggingPage;
 
         public SettingsWindow(VirtualFileSystem virtualFileSystem, ContentManager contentManager)
         {
-            Title = $"Ryujinx {Program.Version} - {LocaleManager.Instance[LocaleKeys.Settings]}";
+            Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
 
-            ViewModel = new SettingsViewModel(virtualFileSystem, contentManager);
+            AudioPage = new SettingsAudioView();
+            CpuPage = new SettingsCpuView();
+            GraphicsPage = new SettingsGraphicsView();
+            HotkeysPage = new SettingsHotkeysView();
+            InputPage = new SettingsInputView();
+            LoggingPage = new SettingsLoggingView();
+            NetworkPage = new SettingsNetworkView();
+            SystemPage = new SettingsSystemView(virtualFileSystem, contentManager);
+            UiPage = new SettingsUiView();
+
+            ViewModel = new SettingsViewModel(
+                AudioPage.ViewModel,
+                CpuPage.ViewModel,
+                GraphicsPage.ViewModel,
+                HotkeysPage.ViewModel,
+                InputPage.ViewModel,
+                LoggingPage.ViewModel,
+                NetworkPage.ViewModel,
+                SystemPage.ViewModel,
+                UiPage.ViewModel);
+
             DataContext = ViewModel;
 
             ViewModel.CloseWindow += Close;
-            ViewModel.SaveSettingsEvent += SaveSettings;
+            ViewModel.DirtyEvent += UpdateDirtyTitle;
+            ViewModel.ToggleButtons += ToggleButtons;
 
             InitializeComponent();
             Load();
         }
 
-        public SettingsWindow()
+        private void UpdateDirtyTitle(bool isDirty)
         {
-            ViewModel = new SettingsViewModel();
-            DataContext = ViewModel;
-
-            InitializeComponent();
-            Load();
-        }
-
-        public void SaveSettings()
-        {
-            InputPage.InputView?.SaveCurrentProfile();
-
-            if (Owner is MainWindow window && ViewModel.DirectoryChanged)
+            if (!IsInitialized)
             {
-                window.LoadApplications();
+                return;
             }
+
+            if (isDirty)
+            {
+                Title = $"{LocaleManager.Instance[LocaleKeys.Settings]} - {LocaleManager.Instance[LocaleKeys.SettingsDirty]}";
+                Apply.IsEnabled = true;
+            }
+            else
+            {
+                Title = $"{LocaleManager.Instance[LocaleKeys.Settings]}";
+                Apply.IsEnabled = false;
+            }
+        }
+
+        private void ToggleButtons(bool enable)
+        {
+            Buttons.IsEnabled = enable;
         }
 
         private void Load()
         {
-            Pages.Children.Clear();
             NavPanel.SelectionChanged += NavPanelOnSelectionChanged;
             NavPanel.SelectedItem = NavPanel.MenuItems.ElementAt(0);
         }
@@ -59,7 +97,6 @@ namespace Ryujinx.Ava.UI.Windows
                 switch (navItem.Tag.ToString())
                 {
                     case "UiPage":
-                        UiPage.ViewModel = ViewModel;
                         NavPanel.Content = UiPage;
                         break;
                     case "InputPage":
@@ -69,7 +106,6 @@ namespace Ryujinx.Ava.UI.Windows
                         NavPanel.Content = HotkeysPage;
                         break;
                     case "SystemPage":
-                        SystemPage.ViewModel = ViewModel;
                         NavPanel.Content = SystemPage;
                         break;
                     case "CpuPage":
@@ -93,8 +129,34 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
+        private async void Cancel_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.IsModified)
+            {
+                var result = await ContentDialogHelper.CreateConfirmationDialog(
+                    LocaleManager.Instance[LocaleKeys.DialogSettingsUnsavedChangesMessage],
+                    LocaleManager.Instance[LocaleKeys.DialogSettingsUnsavedChangesSubMessage],
+                    LocaleManager.Instance[LocaleKeys.InputDialogYes],
+                    LocaleManager.Instance[LocaleKeys.InputDialogNo],
+                    LocaleManager.Instance[LocaleKeys.RyujinxConfirm],
+                    parent: this);
+
+                if (result != UserResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            Close();
+        }
+
         protected override void OnClosing(WindowClosingEventArgs e)
         {
+            if (Owner is MainWindow window && UiPage.ViewModel.DirsChanged)
+            {
+                window.LoadApplications();
+            }
+
             HotkeysPage.Dispose();
             InputPage.Dispose();
             base.OnClosing(e);
