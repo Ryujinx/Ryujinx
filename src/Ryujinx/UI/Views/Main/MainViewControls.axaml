@@ -104,7 +104,7 @@
                                 Content="{locale:Locale GameListHeaderApplication}"
                                 GroupName="Sort"
                                 IsChecked="{Binding IsSortedByTitle, Mode=OneTime}"
-                                Tag="Application" />
+                                Tag="Title" />
                             <RadioButton
                                 Checked="Sort_Checked"
                                 Content="{locale:Locale GameListHeaderDeveloper}"
