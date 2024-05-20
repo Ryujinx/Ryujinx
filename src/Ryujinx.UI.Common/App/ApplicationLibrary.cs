@@ -290,19 +290,21 @@ namespace Ryujinx.UI.App.Common
                         }
                     case ".nsp":
                     case ".pfs0":
-                        var pfs = new PartitionFileSystem();
-                        pfs.Initialize(file.AsStorage()).ThrowIfFailure();
-
-                        ApplicationData result = GetApplicationFromNsp(pfs, applicationPath);
-
-                        if (result == null)
                         {
-                            return false;
+                            var pfs = new PartitionFileSystem();
+                            pfs.Initialize(file.AsStorage()).ThrowIfFailure();
+
+                            ApplicationData result = GetApplicationFromNsp(pfs, applicationPath);
+
+                            if (result == null)
+                            {
+                                return false;
+                            }
+
+                            applications.Add(result);
+
+                            break;
                         }
-
-                        applications.Add(result);
-
-                        break;
                     case ".nro":
                         {
                             BinaryReader reader = new(file);
