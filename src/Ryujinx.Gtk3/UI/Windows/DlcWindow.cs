@@ -36,16 +36,16 @@ namespace Ryujinx.UI.Windows
         [GUI] TreeSelection _dlcTreeSelection;
 #pragma warning restore CS0649, IDE0044
 
-        public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, ApplicationData title) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, title) { }
+        public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, ApplicationData applicationData) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, applicationData) { }
 
-        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string applicationId, ApplicationData title) : base(builder.GetRawOwnedObject("_dlcWindow"))
+        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string applicationId, ApplicationData applicationData) : base(builder.GetRawOwnedObject("_dlcWindow"))
         {
             builder.Autoconnect(this);
 
             _applicationId = applicationId;
             _virtualFileSystem = virtualFileSystem;
             _dlcJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _applicationId, "dlc.json");
-            _baseTitleInfoLabel.Text = $"DLC Available for {title.Name} [{applicationId.ToUpper()}]";
+            _baseTitleInfoLabel.Text = $"DLC Available for {applicationData.Name} [{applicationId.ToUpper()}]";
 
             try
             {
@@ -118,7 +118,7 @@ namespace Ryujinx.UI.Windows
             }
 
             // NOTE: Try to load downloadable contents from PFS last to preserve enabled state.
-            AddDlc(title.Path, true);
+            AddDlc(applicationData.Path, true);
         }
 
         private Nca TryCreateNca(IStorage ncaStorage, string containerPath)

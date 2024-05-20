@@ -789,7 +789,7 @@ namespace Ryujinx.UI
             }
         }
 
-        private bool LoadApplication(string path, ulong titleId, bool isFirmwareTitle)
+        private bool LoadApplication(string path, ulong applicationId, bool isFirmwareTitle)
         {
             SystemVersion firmwareVersion = _contentManager.GetCurrentFirmwareVersion();
 
@@ -863,7 +863,7 @@ namespace Ryujinx.UI
                     case ".xci":
                         Logger.Info?.Print(LogClass.Application, "Loading as XCI.");
 
-                        return _emulationContext.LoadXci(path, titleId);
+                        return _emulationContext.LoadXci(path, applicationId);
                     case ".nca":
                         Logger.Info?.Print(LogClass.Application, "Loading as NCA.");
 
@@ -872,7 +872,7 @@ namespace Ryujinx.UI
                     case ".pfs0":
                         Logger.Info?.Print(LogClass.Application, "Loading as NSP.");
 
-                        return _emulationContext.LoadNsp(path, titleId);
+                        return _emulationContext.LoadNsp(path, applicationId);
                     default:
                         Logger.Info?.Print(LogClass.Application, "Loading as Homebrew.");
                         try

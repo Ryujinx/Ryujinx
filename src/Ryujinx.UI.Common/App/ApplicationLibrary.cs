@@ -631,11 +631,11 @@ namespace Ryujinx.UI.App.Common
             return appMetadata;
         }
 
-        public byte[] GetApplicationIcon(string applicationPath, Language desiredTitleLanguage, ulong titleId)
+        public byte[] GetApplicationIcon(string applicationPath, Language desiredTitleLanguage, ulong applicationId)
         {
             byte[] applicationIcon = null;
 
-            if (titleId == 0)
+            if (applicationId == 0)
             {
                 if (Directory.Exists(applicationPath))
                 {
@@ -702,7 +702,7 @@ namespace Ryujinx.UI.App.Common
                                 Dictionary<ulong, ContentMetaData> programs = pfs.GetContentData(ContentMetaType.Application, _virtualFileSystem, _checkLevel);
                                 IFileSystem controlFs = null;
 
-                                if (programs.TryGetValue(titleId, out ContentMetaData value))
+                                if (programs.TryGetValue(applicationId, out ContentMetaData value))
                                 {
                                     if (value.GetNcaByType(_virtualFileSystem.KeySet, ContentType.Control) is { } controlNca)
                                     {

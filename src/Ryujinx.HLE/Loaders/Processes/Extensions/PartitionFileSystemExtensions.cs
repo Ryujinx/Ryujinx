@@ -52,7 +52,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             return programs;
         }
 
-        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, string path, ulong titleId, out string errorMessage)
+        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, string path, ulong applicationId, out string errorMessage)
             where TMetaData : PartitionFileSystemMetaCore<TFormat, THeader, TEntry>, new()
             where TFormat : IPartitionFileSystemFormat
             where THeader : unmanaged, IPartitionFileSystemHeader
@@ -69,7 +69,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             {
                 Dictionary<ulong, ContentMetaData> applications = partitionFileSystem.GetContentData(ContentMetaType.Application, device.FileSystem, device.System.FsIntegrityCheckLevel);
 
-                if (titleId == 0)
+                if (applicationId == 0)
                 {
                     foreach ((ulong _, ContentMetaData content) in applications)
                     {
@@ -78,7 +78,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                         break;
                     }
                 }
-                else if (applications.TryGetValue(titleId, out ContentMetaData content))
+                else if (applications.TryGetValue(applicationId, out ContentMetaData content))
                 {
                     mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program, device.Configuration.UserChannelPersistence.Index);
                     controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control, device.Configuration.UserChannelPersistence.Index);
@@ -145,7 +145,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                 return (true, mainNca.Load(device, patchNca, controlNca));
             }
 
-            errorMessage = $"Unable to load: Could not find Main NCA for title \"{titleId:X16}\"";
+            errorMessage = $"Unable to load: Could not find Main NCA for title \"{applicationId:X16}\"";
 
             return (false, ProcessResult.Failed);
         }

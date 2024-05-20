@@ -24,7 +24,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 {
     public static class NcaExtensions
     {
-        private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
+        private static readonly TitleUpdateMetadataJsonSerializerContext _applicationSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
         public static ProcessResult Load(this Nca nca, Switch device, Nca patchNca, Nca controlNca)
         {
@@ -142,7 +142,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
             string titleUpdateMetadataPath = Path.Combine(AppDataManager.GamesDirPath, mainNca.Header.TitleId.ToString("x16"), "updates.json");
             if (File.Exists(titleUpdateMetadataPath))
             {
-                updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
+                updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _applicationSerializerContext.TitleUpdateMetadata).Selected;
                 if (File.Exists(updatePath))
                 {
                     IFileSystem updatePartitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(updatePath, fileSystem);
