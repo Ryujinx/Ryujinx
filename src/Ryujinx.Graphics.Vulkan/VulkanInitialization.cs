@@ -23,6 +23,7 @@ namespace Ryujinx.Graphics.Vulkan
         private static readonly string[] _desirableExtensions = {
             ExtConditionalRendering.ExtensionName,
             ExtExtendedDynamicState.ExtensionName,
+            ExtExtendedDynamicState2.ExtensionName,
             ExtTransformFeedback.ExtensionName,
             KhrDrawIndirectCount.ExtensionName,
             KhrPushDescriptor.ExtensionName,
@@ -262,7 +263,7 @@ namespace Ryujinx.Graphics.Vulkan
             return InvalidIndex;
         }
 
-        internal static Device CreateDevice(Vk api, VulkanPhysicalDevice physicalDevice, uint queueFamilyIndex, uint queueCount)
+        internal static Device CreateDevice(Vk api, VulkanPhysicalDevice physicalDevice, uint queueFamilyIndex, uint queueCount, out PhysicalDeviceExtendedDynamicState2FeaturesEXT extendedDynamicState2Features)
         {
             if (queueCount > QueuesCount)
             {
@@ -308,6 +309,17 @@ namespace Ryujinx.Graphics.Vulkan
             if (physicalDevice.IsDeviceExtensionPresent("VK_EXT_custom_border_color"))
             {
                 features2.PNext = &supportedFeaturesCustomBorderColor;
+            }
+
+            PhysicalDeviceExtendedDynamicState2FeaturesEXT supportedFeaturesExtExtendedDynamicState2 = new()
+            {
+                SType = StructureType.PhysicalDeviceExtendedDynamicState2FeaturesExt,
+                PNext = features2.PNext,
+            };
+
+            if (physicalDevice.IsDeviceExtensionPresent(ExtExtendedDynamicState2.ExtensionName))
+            {
+                features2.PNext = &supportedFeaturesExtExtendedDynamicState2;
             }
 
             PhysicalDevicePrimitiveTopologyListRestartFeaturesEXT supportedFeaturesPrimitiveTopologyListRestart = new()
@@ -382,6 +394,7 @@ namespace Ryujinx.Graphics.Vulkan
                 TessellationShader = supportedFeatures.TessellationShader,
                 VertexPipelineStoresAndAtomics = supportedFeatures.VertexPipelineStoresAndAtomics,
                 RobustBufferAccess = useRobustBufferAccess,
+                WideLines = supportedFeatures.WideLines,
             };
 
             void* pExtendedFeatures = null;
@@ -437,6 +450,26 @@ namespace Ryujinx.Graphics.Vulkan
             };
 
             pExtendedFeatures = &featuresExtendedDynamicState;
+
+            if (physicalDevice.IsDeviceExtensionPresent(ExtExtendedDynamicState2.ExtensionName))
+            {
+                var featuresExtendedDynamicState2 = new PhysicalDeviceExtendedDynamicState2FeaturesEXT()
+                {
+                    SType = StructureType.PhysicalDeviceExtendedDynamicState2FeaturesExt,
+                    PNext = pExtendedFeatures,
+                    ExtendedDynamicState2 =
+                        physicalDevice.IsDeviceExtensionPresent(ExtExtendedDynamicState2.ExtensionName),
+                    ExtendedDynamicState2LogicOp =
+                        supportedFeaturesExtExtendedDynamicState2.ExtendedDynamicState2LogicOp,
+                    ExtendedDynamicState2PatchControlPoints = supportedFeaturesExtExtendedDynamicState2
+                        .ExtendedDynamicState2PatchControlPoints,
+                };
+
+                pExtendedFeatures = &featuresExtendedDynamicState2;
+            }
+
+            extendedDynamicState2Features = supportedFeaturesExtExtendedDynamicState2;
+
 
             var featuresVk11 = new PhysicalDeviceVulkan11Features
             {

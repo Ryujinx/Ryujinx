@@ -29,8 +29,6 @@ namespace Ryujinx.Graphics.Vulkan
 
         public Array32<VertexInputAttributeDescription> VertexAttributeDescriptions;
         public Array33<VertexInputBindingDescription> VertexBindingDescriptions;
-        public Array16<Viewport> Viewports;
-        public Array16<Rect2D> Scissors;
         public Array8<PipelineColorBlendAttachmentState> ColorBlendAttachmentState;
         public Array9<Format> AttachmentFormats;
         public uint AttachmentIntegerFormatMask;
