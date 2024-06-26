@@ -3,7 +3,6 @@ using Ryujinx.Common.Memory;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.HOS.Services.SurfaceFlinger.Types;
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,7 +12,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 {
     sealed class Parcel : IDisposable
     {
-        private readonly IMemoryOwner<byte> _rawDataOwner;
+        private readonly MemoryOwner<byte> _rawDataOwner;
 
         private Span<byte> Raw => _rawDataOwner.Memory.Span;
 
@@ -30,7 +29,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
 
         public Parcel(ReadOnlySpan<byte> data)
         {
-            _rawDataOwner = ByteMemoryPool.RentCopy(data);
+            _rawDataOwner = MemoryOwner<byte>.RentCopy(data);
 
             _payloadPosition = 0;
             _objectPosition = 0;
@@ -40,7 +39,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
         {
             uint headerSize = (uint)Unsafe.SizeOf<ParcelHeader>();
 
-            _rawDataOwner = ByteMemoryPool.RentCleared(BitUtils.AlignUp<uint>(headerSize + payloadSize + objectsSize, 4));
+            _rawDataOwner = MemoryOwner<byte>.RentCleared(checked((int)BitUtils.AlignUp<uint>(headerSize + payloadSize + objectsSize, 4)));
 
             Header.PayloadSize = payloadSize;
             Header.ObjectsSize = objectsSize;

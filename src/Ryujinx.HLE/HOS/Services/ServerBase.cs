@@ -474,9 +474,9 @@ namespace Ryujinx.HLE.HOS.Services
         {
             const int MessageSize = 0x100;
 
-            using IMemoryOwner<byte> reqDataOwner = ByteMemoryPool.Rent(MessageSize);
+            using SpanOwner<byte> reqDataOwner = SpanOwner<byte>.Rent(MessageSize);
 
-            Span<byte> reqDataSpan = reqDataOwner.Memory.Span;
+            Span<byte> reqDataSpan = reqDataOwner.Span;
 
             _selfProcess.CpuMemory.Read(_selfThread.TlsAddress, reqDataSpan);
 
