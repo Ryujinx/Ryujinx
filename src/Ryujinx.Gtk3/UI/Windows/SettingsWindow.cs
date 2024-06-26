@@ -53,9 +53,9 @@ namespace Ryujinx.UI.Windows
         [GUI] CheckButton _discordToggle;
         [GUI] CheckButton _checkUpdatesToggle;
         [GUI] CheckButton _showConfirmExitToggle;
-        [GUI] RadioButton _hideCursorNever;
-        [GUI] RadioButton _hideCursorOnIdle;
-        [GUI] RadioButton _hideCursorAlways;
+        [GUI] ComboBoxText _hideCursorSelect;
+        [GUI] Box _hideCursorIdleTimeBox;
+        [GUI] Entry _hideCursorIdleTimeSpin;
         [GUI] CheckButton _vSyncToggle;
         [GUI] CheckButton _shaderCacheToggle;
         [GUI] CheckButton _textureRecompressionToggle;
@@ -147,6 +147,7 @@ namespace Ryujinx.UI.Windows
             _configureControllerH.Pressed += (sender, args) => ConfigureController_Pressed(sender, PlayerIndex.Handheld);
             _systemTimeZoneEntry.FocusOutEvent += TimeZoneEntry_FocusOut;
 
+            _hideCursorSelect.Changed += (sender, args) => _hideCursorIdleTimeBox.Visible = _hideCursorSelect.ActiveId == HideCursorMode.OnIdle.ToString();
             _resScaleCombo.Changed += (sender, args) => _resScaleText.Visible = _resScaleCombo.ActiveId == "-1";
             _scalingFilter.Changed += (sender, args) => _scalingFilterSlider.Visible = _scalingFilter.ActiveId == "2";
             _galThreading.Changed += (sender, args) =>
@@ -228,19 +229,6 @@ namespace Ryujinx.UI.Windows
             if (ConfigurationState.Instance.ShowConfirmExit)
             {
                 _showConfirmExitToggle.Click();
-            }
-
-            switch (ConfigurationState.Instance.HideCursor.Value)
-            {
-                case HideCursorMode.Never:
-                    _hideCursorNever.Click();
-                    break;
-                case HideCursorMode.OnIdle:
-                    _hideCursorOnIdle.Click();
-                    break;
-                case HideCursorMode.Always:
-                    _hideCursorAlways.Click();
-                    break;
             }
 
             if (ConfigurationState.Instance.Graphics.EnableVsync)
@@ -349,6 +337,7 @@ namespace Ryujinx.UI.Windows
 
             _systemTimeZoneCompletion.MatchFunc = TimeZoneMatchFunc;
 
+            _hideCursorSelect.SetActiveId(ConfigurationState.Instance.HideCursor.Value.ToString());
             _systemLanguageSelect.SetActiveId(ConfigurationState.Instance.System.Language.Value.ToString());
             _systemRegionSelect.SetActiveId(ConfigurationState.Instance.System.Region.Value.ToString());
             _galThreading.SetActiveId(ConfigurationState.Instance.Graphics.BackendThreading.Value.ToString());
@@ -366,6 +355,8 @@ namespace Ryujinx.UI.Windows
             _multiLanSelect.SetActiveId(ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value);
             _multiModeSelect.SetActiveId(ConfigurationState.Instance.Multiplayer.Mode.Value.ToString());
 
+            _hideCursorIdleTimeBox.Visible = _hideCursorSelect.ActiveId == HideCursorMode.OnIdle.ToString();
+            _hideCursorIdleTimeSpin.Buffer.Text = ConfigurationState.Instance.HideCursorIdleTime.Value.ToString();
             _custThemePath.Buffer.Text = ConfigurationState.Instance.UI.CustomThemePath;
             _resScaleText.Buffer.Text = ConfigurationState.Instance.Graphics.ResScaleCustom.Value.ToString();
             _scalingFilterLevel.Value = ConfigurationState.Instance.Graphics.ScalingFilterLevel.Value;
@@ -573,18 +564,6 @@ namespace Ryujinx.UI.Windows
                 _directoryChanged = false;
             }
 
-            HideCursorMode hideCursor = HideCursorMode.Never;
-
-            if (_hideCursorOnIdle.Active)
-            {
-                hideCursor = HideCursorMode.OnIdle;
-            }
-
-            if (_hideCursorAlways.Active)
-            {
-                hideCursor = HideCursorMode.Always;
-            }
-
             if (!float.TryParse(_resScaleText.Buffer.Text, out float resScaleCustom) || resScaleCustom <= 0.0f)
             {
                 resScaleCustom = 1.0f;
@@ -627,7 +606,8 @@ namespace Ryujinx.UI.Windows
             ConfigurationState.Instance.EnableDiscordIntegration.Value = _discordToggle.Active;
             ConfigurationState.Instance.CheckUpdatesOnStart.Value = _checkUpdatesToggle.Active;
             ConfigurationState.Instance.ShowConfirmExit.Value = _showConfirmExitToggle.Active;
-            ConfigurationState.Instance.HideCursor.Value = hideCursor;
+            ConfigurationState.Instance.HideCursor.Value = Enum.Parse<HideCursorMode>(_hideCursorSelect.ActiveId);
+            ConfigurationState.Instance.HideCursorIdleTime.Value = int.Parse(_hideCursorIdleTimeSpin.Buffer.Text);
             ConfigurationState.Instance.Graphics.EnableVsync.Value = _vSyncToggle.Active;
             ConfigurationState.Instance.Graphics.EnableShaderCache.Value = _shaderCacheToggle.Active;
             ConfigurationState.Instance.Graphics.EnableTextureRecompression.Value = _textureRecompressionToggle.Active;

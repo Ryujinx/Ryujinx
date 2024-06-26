@@ -2,6 +2,12 @@
 <!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAdjustment" id="_hideCursorIdleTimeSpinAdjustment">
+    <property name="lower">1</property>
+    <property name="upper">10</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
   <object class="GtkAdjustment" id="_fsLogSpinAdjustment">
     <property name="upper">3</property>
     <property name="step-increment">1</property>
@@ -104,147 +110,147 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox" id="General">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="margin-left">10</property>
-                                <property name="margin-right">10</property>
-                                <property name="orientation">vertical</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="_discordToggle">
-                                    <property name="label" translatable="yes">Enable Discord Rich Presence</property>
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">False</property>
-                                    <property name="tooltip-text" translatable="yes">Choose whether or not to display Ryujinx on your "currently playing" Discord activity</property>
-                                    <property name="halign">start</property>
-                                    <property name="draw-indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="padding">5</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="_checkUpdatesToggle">
-                                    <property name="label" translatable="yes">Check for Updates on Launch</property>
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="draw-indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="padding">5</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="_showConfirmExitToggle">
-                                    <property name="label" translatable="yes">Show "Confirm Exit" Dialog</property>
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="draw-indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="padding">5</property>
-                                    <property name="position">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkBox" id="_hideCursorBox">
+                                <object class="GtkBox" id="General">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
+                                    <property name="margin-left">10</property>
+                                    <property name="margin-right">10</property>
+                                    <property name="orientation">vertical</property>
                                     <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="halign">end</property>
-                                        <property name="label" translatable="yes">Hide Cursor:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="padding">5</property>
-                                        <property name="position">2</property>
-                                      </packing>
+                                        <object class="GtkCheckButton" id="_discordToggle">
+                                            <property name="label" translatable="yes">Enable Discord Rich Presence</property>
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">True</property>
+                                            <property name="receives-default">False</property>
+                                            <property name="tooltip-text" translatable="yes">Choose whether or not to display Ryujinx on your "currently playing" Discord activity</property>
+                                            <property name="halign">start</property>
+                                            <property name="draw-indicator">True</property>
+                                        </object>
+                                        <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="padding">5</property>
+                                            <property name="position">0</property>
+                                        </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkRadioButton" id="_hideCursorNever">
-                                        <property name="label" translatable="yes">Never</property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">False</property>
-                                        <property name="halign">start</property>
-                                        <property name="margin-top">5</property>
-                                        <property name="margin-bottom">5</property>
-                                        <property name="active">True</property>
-                                        <property name="draw-indicator">True</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">3</property>
-                                      </packing>
+                                        <object class="GtkCheckButton" id="_checkUpdatesToggle">
+                                            <property name="label" translatable="yes">Check for Updates on Launch</property>
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">True</property>
+                                            <property name="receives-default">False</property>
+                                            <property name="halign">start</property>
+                                            <property name="draw-indicator">True</property>
+                                        </object>
+                                        <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="padding">5</property>
+                                            <property name="position">1</property>
+                                        </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkRadioButton" id="_hideCursorOnIdle">
-                                        <property name="label" translatable="yes">On Idle</property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">False</property>
-                                        <property name="halign">start</property>
-                                        <property name="margin-top">5</property>
-                                        <property name="margin-bottom">5</property>
-                                        <property name="draw-indicator">True</property>
-                                        <property name="group">_hideCursorNever</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">4</property>
-                                      </packing>
+                                        <object class="GtkCheckButton" id="_showConfirmExitToggle">
+                                            <property name="label" translatable="yes">Show "Confirm Exit" Dialog</property>
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">True</property>
+                                            <property name="receives-default">False</property>
+                                            <property name="halign">start</property>
+                                            <property name="draw-indicator">True</property>
+                                        </object>
+                                        <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="padding">5</property>
+                                            <property name="position">2</property>
+                                        </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkRadioButton" id="_hideCursorAlways">
-                                        <property name="label" translatable="yes">Always</property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">False</property>
-                                        <property name="halign">start</property>
-                                        <property name="margin-top">5</property>
-                                        <property name="margin-bottom">5</property>
-                                        <property name="draw-indicator">True</property>
-                                        <property name="group">_hideCursorNever</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">5</property>
-                                      </packing>
+                                        <object class="GtkBox" id="_hideCursorBox">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <child>
+                                                <object class="GtkLabel">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="halign">end</property>
+                                                    <property name="tooltip-text" translatable="yes">Whether to hide cursor on idle, always or never</property>
+                                                    <property name="label" translatable="yes">Hide Cursor:</property>
+                                                </object>
+                                                <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="padding">5</property>
+                                                    <property name="position">2</property>
+                                                </packing>
+                                            </child>
+                                            <child>
+                                                <object class="GtkComboBoxText" id="_hideCursorSelect">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">True</property>
+                                                    <property name="width-request">100</property>
+                                                    <property name="tooltip-text" translatable="yes">Whether to hide cursor on idle, always or never</property>
+                                                    <items>
+                                                        <item id="Never" translatable="yes">Never</item>
+                                                        <item id="OnIdle" translatable="yes">On Idle</item>
+                                                        <item id="Always" translatable="yes">Always</item>  
+                                                    </items>
+                                                </object>
+                                                <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">3</property>
+                                                </packing>
+                                            </child>
+                                            <child>
+                                                <object class="GtkBox" id="_hideCursorIdleTimeBox">
+                                                    <property name="visible">False</property>
+                                                    <property name="can-focus">False</property>
+                                                    <child>
+                                                        <object class="GtkLabel">
+                                                            <property name="visible">True</property>
+                                                            <property name="can-focus">False</property>
+                                                            <property name="margin-left">10</property>
+                                                            <property name="margin-right">5</property>
+                                                            <property name="tooltip-text" translatable="yes">How many seconds to wait before hiding the cursor</property>
+                                                            <property name="label" translatable="yes">Seconds:</property>
+                                                        </object>
+                                                        <packing>
+                                                            <property name="expand">False</property>
+                                                            <property name="fill">True</property>
+                                                            <property name="position">4</property>
+                                                        </packing>
+                                                    </child>
+                                                    <child>
+                                                        <object class="GtkSpinButton" id="_hideCursorIdleTimeSpin">
+                                                            <property name="visible">True</property>
+                                                            <property name="can-focus">True</property>
+                                                            <property name="tooltip-text" translatable="yes">How many seconds to wait before hiding the cursor</property>
+                                                            <property name="text" translatable="yes">0</property>
+                                                            <property name="adjustment">_hideCursorIdleTimeSpinAdjustment</property>
+                                                        </object>
+                                                        <packing>
+                                                            <property name="expand">False</property>
+                                                            <property name="fill">False</property>
+                                                            <property name="position">5</property>
+                                                        </packing>
+                                                    </child>
+                                                </object>
+                                            </child>
+                                        </object>
+                                        <packing>
+                                            <property name="expand">True</property>
+                                            <property name="fill">True</property>
+                                            <property name="padding">5</property>
+                                            <property name="position">4</property>
+                                        </packing>
                                     </child>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="padding">5</property>
-                                    <property name="position">4</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
+                                </object>
+                                <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">1</property>
-                              </packing>
+                                </packing>
                             </child>
                           </object>
                           <packing>
