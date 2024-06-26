@@ -125,7 +125,7 @@ namespace Ryujinx.Ava
 
             if (CommandLineState.LaunchPathArg != null)
             {
-                MainWindow.DeferLoadApplication(CommandLineState.LaunchPathArg, CommandLineState.StartFullscreenArg);
+                MainWindow.DeferLoadApplication(CommandLineState.LaunchPathArg, CommandLineState.LaunchApplicationId, CommandLineState.StartFullscreenArg);
             }
         }
 

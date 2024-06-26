@@ -37,7 +37,9 @@ using Ryujinx.UI.Windows;
 using Silk.NET.Vulkan;
 using SPB.Graphics.Vulkan;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -60,7 +62,6 @@ namespace Ryujinx.UI
 
         private WindowsMultimediaTimerResolution _windowsMultimediaTimerResolution;
 
-        private readonly ApplicationLibrary _applicationLibrary;
         private readonly GtkHostUIHandler _uiHandler;
         private readonly AutoResetEvent _deviceExitStatus;
         private readonly ListStore _tableStore;
@@ -69,11 +70,12 @@ namespace Ryujinx.UI
         private bool _gameLoaded;
         private bool _ending;
 
-        private string _currentEmulatedGamePath = null;
+        private ApplicationData _currentApplicationData = null;
 
         private string _lastScannedAmiiboId = "";
         private bool _lastScannedAmiiboShowAll = false;
 
+        public readonly ApplicationLibrary ApplicationLibrary;
         public RendererWidgetBase RendererWidget;
         public InputManager InputManager;
 
@@ -180,8 +182,12 @@ namespace Ryujinx.UI
             _accountManager = new AccountManager(_libHacHorizonManager.RyujinxClient, CommandLineState.Profile);
             _userChannelPersistence = new UserChannelPersistence();
 
+            IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                ? IntegrityCheckLevel.ErrorOnInvalid
+                : IntegrityCheckLevel.None;
+
             // Instantiate GUI objects.
-            _applicationLibrary = new ApplicationLibrary(_virtualFileSystem);
+            ApplicationLibrary = new ApplicationLibrary(_virtualFileSystem, checkLevel);
             _uiHandler = new GtkHostUIHandler(this);
             _deviceExitStatus = new AutoResetEvent(false);
 
@@ -190,8 +196,8 @@ namespace Ryujinx.UI
             FocusInEvent += MainWindow_FocusInEvent;
             FocusOutEvent += MainWindow_FocusOutEvent;
 
-            _applicationLibrary.ApplicationAdded += Application_Added;
-            _applicationLibrary.ApplicationCountUpdated += ApplicationCount_Updated;
+            ApplicationLibrary.ApplicationAdded += Application_Added;
+            ApplicationLibrary.ApplicationCountUpdated += ApplicationCount_Updated;
 
             _fileMenu.StateChanged += FileMenu_StateChanged;
             _actionMenu.StateChanged += ActionMenu_StateChanged;
@@ -732,7 +738,7 @@ namespace Ryujinx.UI
 
             Thread applicationLibraryThread = new(() =>
             {
-                _applicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
+                ApplicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
 
                 _updatingGameTable = false;
             })
@@ -783,7 +789,7 @@ namespace Ryujinx.UI
             }
         }
 
-        private bool LoadApplication(string path, bool isFirmwareTitle)
+        private bool LoadApplication(string path, ulong applicationId, bool isFirmwareTitle)
         {
             SystemVersion firmwareVersion = _contentManager.GetCurrentFirmwareVersion();
 
@@ -857,7 +863,7 @@ namespace Ryujinx.UI
                     case ".xci":
                         Logger.Info?.Print(LogClass.Application, "Loading as XCI.");
 
-                        return _emulationContext.LoadXci(path);
+                        return _emulationContext.LoadXci(path, applicationId);
                     case ".nca":
                         Logger.Info?.Print(LogClass.Application, "Loading as NCA.");
 
@@ -866,7 +872,7 @@ namespace Ryujinx.UI
                     case ".pfs0":
                         Logger.Info?.Print(LogClass.Application, "Loading as NSP.");
 
-                        return _emulationContext.LoadNsp(path);
+                        return _emulationContext.LoadNsp(path, applicationId);
                     default:
                         Logger.Info?.Print(LogClass.Application, "Loading as Homebrew.");
                         try
@@ -887,7 +893,7 @@ namespace Ryujinx.UI
             return false;
         }
 
-        public void RunApplication(string path, bool startFullscreen = false)
+        public void RunApplication(ApplicationData application, bool startFullscreen = false)
         {
             if (_gameLoaded)
             {
@@ -909,14 +915,14 @@ namespace Ryujinx.UI
 
                 bool isFirmwareTitle = false;
 
-                if (path.StartsWith("@SystemContent"))
+                if (application.Path.StartsWith("@SystemContent"))
                 {
-                    path = VirtualFileSystem.SwitchPathToSystemPath(path);
+                    application.Path = VirtualFileSystem.SwitchPathToSystemPath(application.Path);
 
                     isFirmwareTitle = true;
                 }
 
-                if (!LoadApplication(path, isFirmwareTitle))
+                if (!LoadApplication(application.Path, application.Id, isFirmwareTitle))
                 {
                     _emulationContext.Dispose();
                     SwitchToGameTable();
@@ -926,7 +932,7 @@ namespace Ryujinx.UI
 
                 SetupProgressUIHandlers();
 
-                _currentEmulatedGamePath = path;
+                _currentApplicationData = application;
 
                 _deviceExitStatus.Reset();
 
@@ -1165,7 +1171,7 @@ namespace Ryujinx.UI
                 _tableStore.AppendValues(
                     args.AppData.Favorite,
                     new Gdk.Pixbuf(args.AppData.Icon, 75, 75),
-                    $"{args.AppData.TitleName}\n{args.AppData.TitleId.ToUpper()}",
+                    $"{args.AppData.Name}\n{args.AppData.IdString.ToUpper()}",
                     args.AppData.Developer,
                     args.AppData.Version,
                     args.AppData.TimePlayedString,
@@ -1253,9 +1259,22 @@ namespace Ryujinx.UI
         {
             _gameTableSelection.GetSelected(out TreeIter treeIter);
 
-            string path = (string)_tableStore.GetValue(treeIter, 9);
+            ApplicationData application = new()
+            {
+                Favorite = (bool)_tableStore.GetValue(treeIter, 0),
+                Name = ((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[0],
+                Id = ulong.Parse(((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[1], NumberStyles.HexNumber),
+                Developer = (string)_tableStore.GetValue(treeIter, 3),
+                Version = (string)_tableStore.GetValue(treeIter, 4),
+                TimePlayed = ValueFormatUtils.ParseTimeSpan((string)_tableStore.GetValue(treeIter, 5)),
+                LastPlayed = ValueFormatUtils.ParseDateTime((string)_tableStore.GetValue(treeIter, 6)),
+                FileExtension = (string)_tableStore.GetValue(treeIter, 7),
+                FileSize = ValueFormatUtils.ParseFileSize((string)_tableStore.GetValue(treeIter, 8)),
+                Path = (string)_tableStore.GetValue(treeIter, 9),
+                ControlHolder = (BlitStruct<ApplicationControlProperty>)_tableStore.GetValue(treeIter, 10),
+            };
 
-            RunApplication(path);
+            RunApplication(application);
         }
 
         private void VSyncStatus_Clicked(object sender, ButtonReleaseEventArgs args)
@@ -1313,13 +1332,22 @@ namespace Ryujinx.UI
                 return;
             }
 
-            string titleFilePath = _tableStore.GetValue(treeIter, 9).ToString();
-            string titleName = _tableStore.GetValue(treeIter, 2).ToString().Split("\n")[0];
-            string titleId = _tableStore.GetValue(treeIter, 2).ToString().Split("\n")[1].ToLower();
+            ApplicationData application = new()
+            {
+                Favorite = (bool)_tableStore.GetValue(treeIter, 0),
+                Name = ((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[0],
+                Id = ulong.Parse(((string)_tableStore.GetValue(treeIter, 2)).Split('\n')[1], NumberStyles.HexNumber),
+                Developer = (string)_tableStore.GetValue(treeIter, 3),
+                Version = (string)_tableStore.GetValue(treeIter, 4),
+                TimePlayed = ValueFormatUtils.ParseTimeSpan((string)_tableStore.GetValue(treeIter, 5)),
+                LastPlayed = ValueFormatUtils.ParseDateTime((string)_tableStore.GetValue(treeIter, 6)),
+                FileExtension = (string)_tableStore.GetValue(treeIter, 7),
+                FileSize = ValueFormatUtils.ParseFileSize((string)_tableStore.GetValue(treeIter, 8)),
+                Path = (string)_tableStore.GetValue(treeIter, 9),
+                ControlHolder = (BlitStruct<ApplicationControlProperty>)_tableStore.GetValue(treeIter, 10),
+            };
 
-            BlitStruct<ApplicationControlProperty> controlData = (BlitStruct<ApplicationControlProperty>)_tableStore.GetValue(treeIter, 10);
-
-            _ = new GameTableContextMenu(this, _virtualFileSystem, _accountManager, _libHacHorizonManager.RyujinxClient, titleFilePath, titleName, titleId, controlData);
+            _ = new GameTableContextMenu(this, _virtualFileSystem, _accountManager, _libHacHorizonManager.RyujinxClient, application);
         }
 
         private void Load_Application_File(object sender, EventArgs args)
@@ -1341,7 +1369,15 @@ namespace Ryujinx.UI
 
             if (fileChooser.Run() == (int)ResponseType.Accept)
             {
-                RunApplication(fileChooser.Filename);
+                if (ApplicationLibrary.TryGetApplicationsFromFile(fileChooser.Filename,
+                        out List<ApplicationData> applications))
+                {
+                    RunApplication(applications[0]);
+                }
+                else
+                {
+                    GtkDialog.CreateErrorDialog("No applications found in selected file.");
+                }
             }
         }
 
@@ -1351,7 +1387,13 @@ namespace Ryujinx.UI
 
             if (fileChooser.Run() == (int)ResponseType.Accept)
             {
-                RunApplication(fileChooser.Filename);
+                ApplicationData applicationData = new()
+                {
+                    Name = System.IO.Path.GetFileNameWithoutExtension(fileChooser.Filename),
+                    Path = fileChooser.Filename,
+                };
+
+                RunApplication(applicationData);
             }
         }
 
@@ -1366,7 +1408,14 @@ namespace Ryujinx.UI
         {
             string contentPath = _contentManager.GetInstalledContentPath(0x0100000000001009, StorageId.BuiltInSystem, NcaContentType.Program);
 
-            RunApplication(contentPath);
+            ApplicationData applicationData = new()
+            {
+                Name = "miiEdit",
+                Id = 0x0100000000001009ul,
+                Path = contentPath,
+            };
+
+            RunApplication(applicationData);
         }
 
         private void Open_Ryu_Folder(object sender, EventArgs args)
@@ -1646,13 +1695,13 @@ namespace Ryujinx.UI
             {
                 _userChannelPersistence.ShouldRestart = false;
 
-                RunApplication(_currentEmulatedGamePath);
+                RunApplication(_currentApplicationData);
             }
             else
             {
                 // otherwise, clear state.
                 _userChannelPersistence = new UserChannelPersistence();
-                _currentEmulatedGamePath = null;
+                _currentApplicationData = null;
                 _actionMenu.Sensitive = false;
                 _firmwareInstallFile.Sensitive = true;
                 _firmwareInstallDirectory.Sensitive = true;
@@ -1714,7 +1763,7 @@ namespace Ryujinx.UI
                 _emulationContext.Processes.ActiveApplication.ProgramId,
                 _emulationContext.Processes.ActiveApplication.ApplicationControlProperties
                     .Title[(int)_emulationContext.System.State.DesiredTitleLanguage].NameString.ToString(),
-                _currentEmulatedGamePath);
+                _currentApplicationData.Path);
 
             window.Destroyed += CheatWindow_Destroyed;
             window.Show();

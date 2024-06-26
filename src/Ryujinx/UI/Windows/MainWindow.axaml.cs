@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
+using LibHac.Tools.FsSystem;
 using Ryujinx.Ava.Common;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.Input;
@@ -24,7 +25,7 @@ using Ryujinx.UI.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +41,7 @@ namespace Ryujinx.Ava.UI.Windows
         private UserChannelPersistence _userChannelPersistence;
         private static bool _deferLoad;
         private static string _launchPath;
+        private static string _launchApplicationId;
         private static bool _startFullscreen;
         internal readonly AvaHostUIHandler UiHandler;
 
@@ -168,18 +170,17 @@ namespace Ryujinx.Ava.UI.Windows
             {
                 ViewModel.SelectedIcon = args.Application.Icon;
 
-                string path = new FileInfo(args.Application.Path).FullName;
-
-                ViewModel.LoadApplication(path).Wait();
+                ViewModel.LoadApplication(args.Application).Wait();
             }
 
             args.Handled = true;
         }
 
-        internal static void DeferLoadApplication(string launchPathArg, bool startFullscreenArg)
+        internal static void DeferLoadApplication(string launchPathArg, string launchApplicationId, bool startFullscreenArg)
         {
             _deferLoad = true;
             _launchPath = launchPathArg;
+            _launchApplicationId = launchApplicationId;
             _startFullscreen = startFullscreenArg;
         }
 
@@ -219,7 +220,11 @@ namespace Ryujinx.Ava.UI.Windows
             LibHacHorizonManager.InitializeBcatServer();
             LibHacHorizonManager.InitializeSystemClients();
 
-            ApplicationLibrary = new ApplicationLibrary(VirtualFileSystem);
+            IntegrityCheckLevel checkLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks
+                ? IntegrityCheckLevel.ErrorOnInvalid
+                : IntegrityCheckLevel.None;
+
+            ApplicationLibrary = new ApplicationLibrary(VirtualFileSystem, checkLevel);
 
             // Save data created before we supported extra data in directory save data will not work properly if
             // given empty extra data. Luckily some of that extra data can be created using the data from the
@@ -314,7 +319,35 @@ namespace Ryujinx.Ava.UI.Windows
                 {
                     _deferLoad = false;
 
-                    await ViewModel.LoadApplication(_launchPath, _startFullscreen);
+                    if (ApplicationLibrary.TryGetApplicationsFromFile(_launchPath, out List<ApplicationData> applications))
+                    {
+                        ApplicationData applicationData;
+
+                        if (_launchApplicationId != null)
+                        {
+                            applicationData = applications.Find(application => application.IdString == _launchApplicationId);
+
+                            if (applicationData != null)
+                            {
+                                await ViewModel.LoadApplication(applicationData, _startFullscreen);
+                            }
+                            else
+                            {
+                                Logger.Error?.Print(LogClass.Application, $"Couldn't find requested application id '{_launchApplicationId}' in '{_launchPath}'.");
+                                await Dispatcher.UIThread.InvokeAsync(async () => await UserErrorDialog.ShowUserErrorDialog(UserError.ApplicationNotFound));
+                            }
+                        }
+                        else
+                        {
+                            applicationData = applications[0];
+                            await ViewModel.LoadApplication(applicationData, _startFullscreen);
+                        }
+                    }
+                    else
+                    {
+                        Logger.Error?.Print(LogClass.Application, $"Couldn't find any application in '{_launchPath}'.");
+                        await Dispatcher.UIThread.InvokeAsync(async () => await UserErrorDialog.ShowUserErrorDialog(UserError.ApplicationNotFound));
+                    }
                 }
             }
             else

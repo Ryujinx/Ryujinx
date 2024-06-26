@@ -14,6 +14,7 @@ namespace Ryujinx.UI.Common.Helper
         public static string BaseDirPathArg { get; private set; }
         public static string Profile { get; private set; }
         public static string LaunchPathArg { get; private set; }
+        public static string LaunchApplicationId { get; private set; }
         public static bool StartFullscreenArg { get; private set; }
 
         public static void ParseArguments(string[] args)
@@ -71,6 +72,10 @@ namespace Ryujinx.UI.Common.Helper
                         }
 
                         OverrideGraphicsBackend = args[++i];
+                        break;
+                    case "-i":
+                    case "--application-id":
+                        LaunchApplicationId = args[++i];
                         break;
                     case "--docked-mode":
                         OverrideDockedMode = true;

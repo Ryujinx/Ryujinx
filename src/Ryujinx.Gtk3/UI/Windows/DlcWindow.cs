@@ -2,17 +2,21 @@ using Gtk;
 using LibHac.Common;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
-using LibHac.FsSystem;
 using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.FileSystem;
+using Ryujinx.HLE.Loaders.Processes.Extensions;
+using Ryujinx.HLE.Utilities;
+using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Widgets;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using GUI = Gtk.Builder.ObjectAttribute;
 
 namespace Ryujinx.UI.Windows
@@ -20,7 +24,7 @@ namespace Ryujinx.UI.Windows
     public class DlcWindow : Window
     {
         private readonly VirtualFileSystem _virtualFileSystem;
-        private readonly string _titleId;
+        private readonly string _applicationId;
         private readonly string _dlcJsonPath;
         private readonly List<DownloadableContentContainer> _dlcContainerList;
 
@@ -32,16 +36,16 @@ namespace Ryujinx.UI.Windows
         [GUI] TreeSelection _dlcTreeSelection;
 #pragma warning restore CS0649, IDE0044
 
-        public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, string titleName) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, titleName) { }
+        public DlcWindow(VirtualFileSystem virtualFileSystem, string titleId, ApplicationData applicationData) : this(new Builder("Ryujinx.Gtk3.UI.Windows.DlcWindow.glade"), virtualFileSystem, titleId, applicationData) { }
 
-        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string titleId, string titleName) : base(builder.GetRawOwnedObject("_dlcWindow"))
+        private DlcWindow(Builder builder, VirtualFileSystem virtualFileSystem, string applicationId, ApplicationData applicationData) : base(builder.GetRawOwnedObject("_dlcWindow"))
         {
             builder.Autoconnect(this);
 
-            _titleId = titleId;
+            _applicationId = applicationId;
             _virtualFileSystem = virtualFileSystem;
-            _dlcJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _titleId, "dlc.json");
-            _baseTitleInfoLabel.Text = $"DLC Available for {titleName} [{titleId.ToUpper()}]";
+            _dlcJsonPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, _applicationId, "dlc.json");
+            _baseTitleInfoLabel.Text = $"DLC Available for {applicationData.Name} [{applicationId.ToUpper()}]";
 
             try
             {
@@ -72,7 +76,7 @@ namespace Ryujinx.UI.Windows
             };
 
             _dlcTreeView.AppendColumn("Enabled", enableToggle, "active", 0);
-            _dlcTreeView.AppendColumn("TitleId", new CellRendererText(), "text", 1);
+            _dlcTreeView.AppendColumn("ApplicationId", new CellRendererText(), "text", 1);
             _dlcTreeView.AppendColumn("Path", new CellRendererText(), "text", 2);
 
             foreach (DownloadableContentContainer dlcContainer in _dlcContainerList)
@@ -86,18 +90,18 @@ namespace Ryujinx.UI.Windows
                     bool areAllContentPacksEnabled = dlcContainer.DownloadableContentNcaList.TrueForAll((nca) => nca.Enabled);
                     TreeIter parentIter = ((TreeStore)_dlcTreeView.Model).AppendValues(areAllContentPacksEnabled, "", dlcContainer.ContainerPath);
 
-                    using FileStream containerFile = File.OpenRead(dlcContainer.ContainerPath);
+                    using IFileSystem partitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(dlcContainer.ContainerPath, _virtualFileSystem, false);
 
-                    PartitionFileSystem pfs = new();
-                    pfs.Initialize(containerFile.AsStorage()).ThrowIfFailure();
-
-                    _virtualFileSystem.ImportTickets(pfs);
+                    if (partitionFileSystem == null)
+                    {
+                        continue;
+                    }
 
                     foreach (DownloadableContentNca dlcNca in dlcContainer.DownloadableContentNcaList)
                     {
                         using var ncaFile = new UniqueRef<IFile>();
 
-                        pfs.OpenFile(ref ncaFile.Ref, dlcNca.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                        partitionFileSystem.OpenFile(ref ncaFile.Ref, dlcNca.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
                         Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), dlcContainer.ContainerPath);
 
                         if (nca != null)
@@ -112,6 +116,9 @@ namespace Ryujinx.UI.Windows
                     TreeIter parentIter = ((TreeStore)_dlcTreeView.Model).AppendValues(false, "", $"(MISSING) {dlcContainer.ContainerPath}");
                 }
             }
+
+            // NOTE: Try to load downloadable contents from PFS last to preserve enabled state.
+            AddDlc(applicationData.Path, true);
         }
 
         private Nca TryCreateNca(IStorage ncaStorage, string containerPath)
@@ -126,6 +133,52 @@ namespace Ryujinx.UI.Windows
             }
 
             return null;
+        }
+
+        private void AddDlc(string path, bool ignoreNotFound = false)
+        {
+            if (!File.Exists(path) || _dlcContainerList.Any(x => x.ContainerPath == path))
+            {
+                return;
+            }
+
+            using IFileSystem partitionFileSystem = PartitionFileSystemUtils.OpenApplicationFileSystem(path, _virtualFileSystem);
+
+            bool containsDlc = false;
+
+            TreeIter? parentIter = null;
+
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+            {
+                using var ncaFile = new UniqueRef<IFile>();
+
+                partitionFileSystem.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+                Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), path);
+
+                if (nca == null)
+                {
+                    continue;
+                }
+
+                if (nca.Header.ContentType == NcaContentType.PublicData)
+                {
+                    if (nca.GetProgramIdBase() != (ulong.Parse(_applicationId, NumberStyles.HexNumber) & ~0x1FFFUL))
+                    {
+                        continue;
+                    }
+
+                    parentIter ??= ((TreeStore)_dlcTreeView.Model).AppendValues(true, "", path);
+
+                    ((TreeStore)_dlcTreeView.Model).AppendValues(parentIter.Value, true, nca.Header.TitleId.ToString("X16"), fileEntry.FullPath);
+                    containsDlc = true;
+                }
+            }
+
+            if (!containsDlc && !ignoreNotFound)
+            {
+                GtkDialog.CreateErrorDialog("The specified file does not contain DLC for the selected title!");
+            }
         }
 
         private void AddButton_Clicked(object sender, EventArgs args)
@@ -147,52 +200,7 @@ namespace Ryujinx.UI.Windows
             {
                 foreach (string containerPath in fileChooser.Filenames)
                 {
-                    if (!File.Exists(containerPath))
-                    {
-                        return;
-                    }
-
-                    using FileStream containerFile = File.OpenRead(containerPath);
-
-                    PartitionFileSystem pfs = new();
-                    pfs.Initialize(containerFile.AsStorage()).ThrowIfFailure();
-                    bool containsDlc = false;
-
-                    _virtualFileSystem.ImportTickets(pfs);
-
-                    TreeIter? parentIter = null;
-
-                    foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*.nca"))
-                    {
-                        using var ncaFile = new UniqueRef<IFile>();
-
-                        pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
-
-                        Nca nca = TryCreateNca(ncaFile.Get.AsStorage(), containerPath);
-
-                        if (nca == null)
-                        {
-                            continue;
-                        }
-
-                        if (nca.Header.ContentType == NcaContentType.PublicData)
-                        {
-                            if ((nca.Header.TitleId & 0xFFFFFFFFFFFFE000).ToString("x16") != _titleId)
-                            {
-                                break;
-                            }
-
-                            parentIter ??= ((TreeStore)_dlcTreeView.Model).AppendValues(true, "", containerPath);
-
-                            ((TreeStore)_dlcTreeView.Model).AppendValues(parentIter.Value, true, nca.Header.TitleId.ToString("X16"), fileEntry.FullPath);
-                            containsDlc = true;
-                        }
-                    }
-
-                    if (!containsDlc)
-                    {
-                        GtkDialog.CreateErrorDialog("The specified file does not contain DLC for the selected title!");
-                    }
+                    AddDlc(containerPath);
                 }
             }
 

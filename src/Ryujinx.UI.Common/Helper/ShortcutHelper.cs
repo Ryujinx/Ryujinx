@@ -15,7 +15,7 @@ namespace Ryujinx.UI.Common.Helper
     public static class ShortcutHelper
     {
         [SupportedOSPlatform("windows")]
-        private static void CreateShortcutWindows(string applicationFilePath, byte[] iconData, string iconPath, string cleanedAppName, string desktopPath)
+        private static void CreateShortcutWindows(string applicationFilePath, string applicationId, byte[] iconData, string iconPath, string cleanedAppName, string desktopPath)
         {
             string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName + ".exe");
             iconPath += ".ico";
@@ -25,13 +25,13 @@ namespace Ryujinx.UI.Common.Helper
             image.Mutate(x => x.Resize(128, 128));
             SaveBitmapAsIcon(image, iconPath);
 
-            var shortcut = Shortcut.CreateShortcut(basePath, GetArgsString(applicationFilePath), iconPath, 0);
+            var shortcut = Shortcut.CreateShortcut(basePath, GetArgsString(applicationFilePath, applicationId), iconPath, 0);
             shortcut.StringData.NameString = cleanedAppName;
             shortcut.WriteToFile(Path.Combine(desktopPath, cleanedAppName + ".lnk"));
         }
 
         [SupportedOSPlatform("linux")]
-        private static void CreateShortcutLinux(string applicationFilePath, byte[] iconData, string iconPath, string desktopPath, string cleanedAppName)
+        private static void CreateShortcutLinux(string applicationFilePath, string applicationId, byte[] iconData, string iconPath, string desktopPath, string cleanedAppName)
         {
             string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Ryujinx.sh");
             var desktopFile = EmbeddedResources.ReadAllText("Ryujinx.UI.Common/shortcut-template.desktop");
@@ -41,11 +41,11 @@ namespace Ryujinx.UI.Common.Helper
             image.SaveAsPng(iconPath);
 
             using StreamWriter outputFile = new(Path.Combine(desktopPath, cleanedAppName + ".desktop"));
-            outputFile.Write(desktopFile, cleanedAppName, iconPath, $"{basePath} {GetArgsString(applicationFilePath)}");
+            outputFile.Write(desktopFile, cleanedAppName, iconPath, $"{basePath} {GetArgsString(applicationFilePath, applicationId)}");
         }
 
         [SupportedOSPlatform("macos")]
-        private static void CreateShortcutMacos(string appFilePath, byte[] iconData, string desktopPath, string cleanedAppName)
+        private static void CreateShortcutMacos(string appFilePath, string applicationId, byte[] iconData, string desktopPath, string cleanedAppName)
         {
             string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Ryujinx");
             var plistFile = EmbeddedResources.ReadAllText("Ryujinx.UI.Common/shortcut-template.plist");
@@ -64,7 +64,7 @@ namespace Ryujinx.UI.Common.Helper
             string scriptPath = Path.Combine(scriptFolderPath, ScriptName);
             using StreamWriter scriptFile = new(scriptPath);
 
-            scriptFile.Write(shortcutScript, basePath, GetArgsString(appFilePath));
+            scriptFile.Write(shortcutScript, basePath, GetArgsString(appFilePath, applicationId));
 
             // Set execute permission
             FileInfo fileInfo = new(scriptPath);
@@ -95,7 +95,7 @@ namespace Ryujinx.UI.Common.Helper
             {
                 string iconPath = Path.Combine(AppDataManager.BaseDirPath, "games", applicationId, "app");
 
-                CreateShortcutWindows(applicationFilePath, iconData, iconPath, cleanedAppName, desktopPath);
+                CreateShortcutWindows(applicationFilePath, applicationId, iconData, iconPath, cleanedAppName, desktopPath);
 
                 return;
             }
@@ -105,14 +105,14 @@ namespace Ryujinx.UI.Common.Helper
                 string iconPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "icons", "Ryujinx");
 
                 Directory.CreateDirectory(iconPath);
-                CreateShortcutLinux(applicationFilePath, iconData, Path.Combine(iconPath, applicationId), desktopPath, cleanedAppName);
+                CreateShortcutLinux(applicationFilePath, applicationId, iconData, Path.Combine(iconPath, applicationId), desktopPath, cleanedAppName);
 
                 return;
             }
 
             if (OperatingSystem.IsMacOS())
             {
-                CreateShortcutMacos(applicationFilePath, iconData, desktopPath, cleanedAppName);
+                CreateShortcutMacos(applicationFilePath, applicationId, iconData, desktopPath, cleanedAppName);
 
                 return;
             }
@@ -120,7 +120,7 @@ namespace Ryujinx.UI.Common.Helper
             throw new NotImplementedException("Shortcut support has not been implemented yet for this OS.");
         }
 
-        private static string GetArgsString(string appFilePath)
+        private static string GetArgsString(string appFilePath, string applicationId)
         {
             // args are first defined as a list, for easier adjustments in the future
             var argsList = new List<string>();
@@ -129,6 +129,12 @@ namespace Ryujinx.UI.Common.Helper
             {
                 argsList.Add("--root-data-dir");
                 argsList.Add($"\"{CommandLineState.BaseDirPathArg}\"");
+            }
+
+            if (appFilePath.ToLower().EndsWith(".xci"))
+            {
+                argsList.Add("--application-id");
+                argsList.Add($"\"{applicationId}\"");
             }
 
             argsList.Add($"\"{appFilePath}\"");

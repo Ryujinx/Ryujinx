@@ -14,6 +14,7 @@ using Ryujinx.Common.Utilities;
 using Ryujinx.HLE.Exceptions;
 using Ryujinx.HLE.HOS.Services.Ssl;
 using Ryujinx.HLE.HOS.Services.Time;
+using Ryujinx.HLE.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -184,41 +185,6 @@ namespace Ryujinx.HLE.FileSystem
             }
         }
 
-        // fs must contain AOC nca files in its root
-        public void AddAocData(IFileSystem fs, string containerPath, ulong aocBaseId, IntegrityCheckLevel integrityCheckLevel)
-        {
-            _virtualFileSystem.ImportTickets(fs);
-
-            foreach (var ncaPath in fs.EnumerateEntries("*.cnmt.nca", SearchOptions.Default))
-            {
-                using var ncaFile = new UniqueRef<IFile>();
-
-                fs.OpenFile(ref ncaFile.Ref, ncaPath.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
-                var nca = new Nca(_virtualFileSystem.KeySet, ncaFile.Get.AsStorage());
-                if (nca.Header.ContentType != NcaContentType.Meta)
-                {
-                    Logger.Warning?.Print(LogClass.Application, $"{ncaPath} is not a valid metadata file");
-
-                    continue;
-                }
-
-                using var pfs0 = nca.OpenFileSystem(0, integrityCheckLevel);
-                using var cnmtFile = new UniqueRef<IFile>();
-
-                pfs0.OpenFile(ref cnmtFile.Ref, pfs0.EnumerateEntries().Single().FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
-
-                var cnmt = new Cnmt(cnmtFile.Get.AsStream());
-                if (cnmt.Type != ContentMetaType.AddOnContent || (cnmt.TitleId & 0xFFFFFFFFFFFFE000) != aocBaseId)
-                {
-                    continue;
-                }
-
-                string ncaId = Convert.ToHexString(cnmt.ContentEntries[0].NcaId).ToLower();
-
-                AddAocItem(cnmt.TitleId, containerPath, $"/{ncaId}.nca", true);
-            }
-        }
-
         public void AddAocItem(ulong titleId, string containerPath, string ncaPath, bool mergedToContainer = false)
         {
             // TODO: Check Aoc version.
@@ -232,11 +198,7 @@ namespace Ryujinx.HLE.FileSystem
 
                 if (!mergedToContainer)
                 {
-                    using FileStream fileStream = File.OpenRead(containerPath);
-                    using PartitionFileSystem partitionFileSystem = new();
-                    partitionFileSystem.Initialize(fileStream.AsStorage()).ThrowIfFailure();
-
-                    _virtualFileSystem.ImportTickets(partitionFileSystem);
+                    using var pfs = PartitionFileSystemUtils.OpenApplicationFileSystem(containerPath, _virtualFileSystem);
                 }
             }
         }

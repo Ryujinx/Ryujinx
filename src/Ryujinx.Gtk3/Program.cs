@@ -7,6 +7,7 @@ using Ryujinx.Common.SystemInterop;
 using Ryujinx.Modules;
 using Ryujinx.SDL2.Common;
 using Ryujinx.UI;
+using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
@@ -322,7 +323,35 @@ namespace Ryujinx
 
             if (CommandLineState.LaunchPathArg != null)
             {
-                mainWindow.RunApplication(CommandLineState.LaunchPathArg, CommandLineState.StartFullscreenArg);
+                if (mainWindow.ApplicationLibrary.TryGetApplicationsFromFile(CommandLineState.LaunchPathArg, out List<ApplicationData> applications))
+                {
+                    ApplicationData applicationData;
+
+                    if (CommandLineState.LaunchApplicationId != null)
+                    {
+                        applicationData = applications.Find(application => application.IdString == CommandLineState.LaunchApplicationId);
+
+                        if (applicationData != null)
+                        {
+                            mainWindow.RunApplication(applicationData, CommandLineState.StartFullscreenArg);
+                        }
+                        else
+                        {
+                            Logger.Error?.Print(LogClass.Application, $"Couldn't find requested application id '{CommandLineState.LaunchApplicationId}' in '{CommandLineState.LaunchPathArg}'.");
+                            UserErrorDialog.CreateUserErrorDialog(UserError.ApplicationNotFound);
+                        }
+                    }
+                    else
+                    {
+                        applicationData = applications[0];
+                        mainWindow.RunApplication(applicationData, CommandLineState.StartFullscreenArg);
+                    }
+                }
+                else
+                {
+                    Logger.Error?.Print(LogClass.Application, $"Couldn't find any application in '{CommandLineState.LaunchPathArg}'.");
+                    UserErrorDialog.CreateUserErrorDialog(UserError.ApplicationNotFound);
+                }
             }
 
             if (ConfigurationState.Instance.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))

@@ -46,14 +46,14 @@ namespace Ryujinx.Ava.UI.Models
             TitleId = info.ProgramId;
             UserId = info.UserId;
 
-            var appData = MainWindow.MainWindowViewModel.Applications.FirstOrDefault(x => x.TitleId.ToUpper() == TitleIdString);
+            var appData = MainWindow.MainWindowViewModel.Applications.FirstOrDefault(x => x.IdString.ToUpper() == TitleIdString);
 
             InGameList = appData != null;
 
             if (InGameList)
             {
                 Icon = appData.Icon;
-                Title = appData.TitleName;
+                Title = appData.Name;
             }
             else
             {
