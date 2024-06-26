@@ -44,6 +44,7 @@
     <PackageReference Include="Avalonia.Svg.Skia" />
     <PackageReference Include="DynamicData" />
     <PackageReference Include="FluentAvaloniaUI" />
+    <PackageReference Include="HtmlAgilityPack" />
 
     <PackageReference Include="OpenTK.Core" />
     <PackageReference Include="Ryujinx.Audio.OpenAL.Dependencies" Condition="'$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'linux-arm64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64'" />
