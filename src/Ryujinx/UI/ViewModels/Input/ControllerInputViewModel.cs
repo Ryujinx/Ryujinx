@@ -13,6 +13,19 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             set
             {
                 _config = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        private StickVisualizer _visualizer;
+        public StickVisualizer Visualizer
+        {
+            get => _visualizer;
+            set
+            {
+                _visualizer = value;
+
                 OnPropertyChanged();
             }
         }
@@ -56,9 +69,10 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 
         public readonly InputViewModel ParentModel;
 
-        public ControllerInputViewModel(InputViewModel model, GamepadInputConfig config)
+        public ControllerInputViewModel(InputViewModel model, GamepadInputConfig config, StickVisualizer visualizer)
         {
             ParentModel = model;
+            Visualizer = visualizer;
             model.NotifyChangesEvent += OnParentModelChanged;
             OnParentModelChanged();
             Config = config;

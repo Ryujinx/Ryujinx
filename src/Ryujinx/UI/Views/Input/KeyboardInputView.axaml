@@ -312,12 +312,79 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
                 <!-- Controller Picture -->
-                <Image
+                <Border
+                    BorderBrush="{DynamicResource ThemeControlBorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="5"
                     Margin="0,10"
-                    MaxHeight="300"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Source="{Binding Image}" />
+                    MinHeight="90">
+                    <StackPanel
+                        Margin="10"
+                        Orientation="Horizontal"
+                        Spacing="20"
+                        HorizontalAlignment="Center">
+                        <Border
+                            BorderBrush="{DynamicResource ThemeControlBorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="5"
+                            Height="{Binding Visualizer.UiStickBorderSize}"
+                            Width="{Binding Visualizer.UiStickBorderSize}"
+                            IsVisible="{Binding IsLeft}">
+                            <Canvas
+                                Background="{DynamicResource ThemeBackgroundColor}"
+                                Height="{Binding Visualizer.UiCanvasSize}"
+                                Width="{Binding Visualizer.UiCanvasSize}">
+                                <Grid
+                                    Height="{Binding Visualizer.UiCanvasSize}"
+                                    Width="{Binding Visualizer.UiCanvasSize}"
+                                    Background="{DynamicResource ThemeBackgroundColor}">
+                                    <Ellipse
+                                        HorizontalAlignment="Center"
+                                        Stroke="Black"
+                                        StrokeThickness="1"
+                                        Width="{Binding Visualizer.UiCanvasSize}"
+                                        Height="{Binding Visualizer.UiCanvasSize}"/>
+                                </Grid>
+                                <Ellipse
+                                        Fill="Red" 
+                                        Width="{Binding Visualizer.UiStickCircumference}" 
+                                        Height="{Binding Visualizer.UiStickCircumference}" 
+                                        Canvas.Bottom="{Binding Visualizer.UiStickLeftY}" 
+                                        Canvas.Left="{Binding Visualizer.UiStickLeftX}" />
+                            </Canvas>
+                        </Border>        
+                        <Border
+                            BorderBrush="{DynamicResource ThemeControlBorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="5"
+                            Height="{Binding Visualizer.UiStickBorderSize}"
+                            Width="{Binding Visualizer.UiStickBorderSize}"
+                            IsVisible="{Binding IsRight}">
+                            <Canvas
+                                Background="{DynamicResource ThemeBackgroundColor}"
+                                Height="{Binding Visualizer.UiCanvasSize}"
+                                Width="{Binding Visualizer.UiCanvasSize}">
+                                <Grid
+                                    Height="{Binding Visualizer.UiCanvasSize}"
+                                    Width="{Binding Visualizer.UiCanvasSize}"
+                                    Background="{DynamicResource ThemeBackgroundColor}">
+                                    <Ellipse
+                                        HorizontalAlignment="Center"
+                                        Stroke="Black"
+                                        StrokeThickness="1"
+                                        Width="{Binding Visualizer.UiCanvasSize}"
+                                        Height="{Binding Visualizer.UiCanvasSize}"/>
+                                </Grid>
+                                <Ellipse
+                                        Fill="Red" 
+                                        Width="{Binding Visualizer.UiStickCircumference}" 
+                                        Height="{Binding Visualizer.UiStickCircumference}" 
+                                        Canvas.Bottom="{Binding Visualizer.UiStickRightY}" 
+                                        Canvas.Left="{Binding Visualizer.UiStickRightX}" />
+                            </Canvas>
+                        </Border>        
+                    </StackPanel>
+                </Border>
                 <Border
                     BorderBrush="{DynamicResource ThemeControlBorderColor}"
                     BorderThickness="1"
