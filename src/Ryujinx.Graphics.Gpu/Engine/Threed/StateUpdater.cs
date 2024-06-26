@@ -322,6 +322,9 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
                 _context.Renderer.Pipeline.BeginTransformFeedback(_drawState.Topology);
                 _prevTfEnable = true;
             }
+
+            // Unset fragment enable bits for shader, as they need to be reset each draw.
+            _state.State.ShaderState[(int)ShaderStage.Fragment].Control &= ~(uint)1;
         }
 
         /// <summary>
@@ -1420,7 +1423,7 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
 
             for (int index = 0; index < 6; index++)
             {
-                var shader = _state.State.ShaderState[index];
+                ref var shader = ref _state.State.ShaderState[index];
                 if (!shader.UnpackEnable() && index != 1)
                 {
                     continue;
