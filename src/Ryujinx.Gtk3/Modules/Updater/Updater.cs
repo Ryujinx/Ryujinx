@@ -345,7 +345,7 @@ namespace Ryujinx.Modules
 
             using HttpResponseMessage response = client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead).Result;
             using Stream remoteFileStream = response.Content.ReadAsStreamAsync().Result;
-            using Stream updateFileStream = File.Open(updateFile, FileMode.Create);
+            using FileStream updateFileStream = File.Open(updateFile, FileMode.Create);
 
             long totalBytes = response.Content.Headers.ContentLength.Value;
             long byteWritten = 0;

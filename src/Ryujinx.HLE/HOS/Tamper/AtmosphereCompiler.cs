@@ -54,7 +54,7 @@ namespace Ryujinx.HLE.HOS.Tamper
             return null;
         }
 
-        private ITamperProgram CompileImpl(string name, IEnumerable<string> rawInstructions)
+        private AtmosphereProgram CompileImpl(string name, IEnumerable<string> rawInstructions)
         {
             CompilationContext context = new(_exeAddress, _heapAddress, _aliasAddress, _aslrAddress, _process);
             context.BlockStack.Push(new OperationBlock(null));

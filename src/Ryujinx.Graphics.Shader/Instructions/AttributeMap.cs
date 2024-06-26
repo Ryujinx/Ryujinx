@@ -46,7 +46,7 @@ namespace Ryujinx.Graphics.Shader.Instructions
             }
         }
 
-        private static readonly IReadOnlyDictionary<int, AttributeEntry> _attributes;
+        private static readonly Dictionary<int, AttributeEntry> _attributes;
         private static readonly IReadOnlyDictionary<int, AttributeEntry> _attributesPerPatch;
 
         static AttributeMap()
@@ -55,7 +55,7 @@ namespace Ryujinx.Graphics.Shader.Instructions
             _attributesPerPatch = CreatePerPatchMap();
         }
 
-        private static IReadOnlyDictionary<int, AttributeEntry> CreateMap()
+        private static Dictionary<int, AttributeEntry> CreateMap()
         {
             var map = new Dictionary<int, AttributeEntry>();
 
@@ -82,7 +82,7 @@ namespace Ryujinx.Graphics.Shader.Instructions
             return map;
         }
 
-        private static IReadOnlyDictionary<int, AttributeEntry> CreatePerPatchMap()
+        private static Dictionary<int, AttributeEntry> CreatePerPatchMap()
         {
             var map = new Dictionary<int, AttributeEntry>();
 

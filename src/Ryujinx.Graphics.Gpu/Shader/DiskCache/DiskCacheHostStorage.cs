@@ -737,7 +737,7 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
         /// <param name="magic">Magic value to be written</param>
         /// <param name="codegenVersion">Shader codegen version, only valid for the host file</param>
         /// <param name="timestamp">File creation timestamp</param>
-        private static void CreateToc(Stream tocFileStream, ref TocHeader header, uint magic, uint codegenVersion, ulong timestamp)
+        private static void CreateToc(FileStream tocFileStream, ref TocHeader header, uint magic, uint codegenVersion, ulong timestamp)
         {
             BinarySerializer writer = new(tocFileStream);
 

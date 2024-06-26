@@ -5,7 +5,7 @@ namespace Ryujinx.Common.Logging.Targets
 {
     public class ConsoleLogTarget : ILogTarget
     {
-        private readonly ILogFormatter _formatter;
+        private readonly DefaultLogFormatter _formatter;
 
         private readonly string _name;
 

@@ -95,7 +95,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd
                 }
             }
 
-            ISocket newBsdSocket = new ManagedSocket(netDomain, (SocketType)type, protocol)
+            ManagedSocket newBsdSocket = new(netDomain, (SocketType)type, protocol)
             {
                 Blocking = !creationFlags.HasFlag(BsdSocketCreationFlags.NonBlocking),
             };

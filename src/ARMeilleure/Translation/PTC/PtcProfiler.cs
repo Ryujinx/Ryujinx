@@ -1,4 +1,5 @@
 using ARMeilleure.State;
+using Microsoft.IO;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Memory;
@@ -189,7 +190,7 @@ namespace ARMeilleure.Translation.PTC
                     return false;
                 }
 
-                using MemoryStream stream = MemoryStreamManager.Shared.GetStream();
+                using RecyclableMemoryStream stream = MemoryStreamManager.Shared.GetStream();
                 Debug.Assert(stream.Seek(0L, SeekOrigin.Begin) == 0L && stream.Length == 0L);
 
                 try

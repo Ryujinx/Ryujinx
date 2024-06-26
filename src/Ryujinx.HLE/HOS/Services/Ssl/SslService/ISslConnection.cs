@@ -21,7 +21,7 @@ namespace Ryujinx.HLE.HOS.Services.Ssl.SslService
         private SessionCacheMode _sessionCacheMode;
         private string _hostName;
 
-        private ISslConnectionBase _connection;
+        private SslManagedSocketConnection _connection;
         private BsdContext _bsdContext;
         private readonly ulong _processId;
 
