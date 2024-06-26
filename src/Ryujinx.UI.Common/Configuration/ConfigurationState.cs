@@ -820,7 +820,7 @@ namespace Ryujinx.UI.Common.Configuration
             System.MemoryManagerMode.Value = MemoryManagerMode.HostMappedUnsafe;
             System.ExpandRam.Value = false;
             System.IgnoreMissingServices.Value = false;
-            System.UseHypervisor.Value = true;
+            System.UseHypervisor.Value = false;
             Multiplayer.LanInterfaceId.Value = "0";
             Multiplayer.Mode.Value = MultiplayerMode.Disabled;
             UI.GuiColumns.FavColumn.Value = true;
@@ -1382,7 +1382,7 @@ namespace Ryujinx.UI.Common.Configuration
             {
                 Ryujinx.Common.Logging.Logger.Warning?.Print(LogClass.Application, $"Outdated configuration version {configurationFileFormat.Version}, migrating to version 43.");
 
-                configurationFileFormat.UseHypervisor = true;
+                configurationFileFormat.UseHypervisor = false;
             }
 
             if (configurationFileFormat.Version < 44)
