@@ -16,5 +16,13 @@ namespace Ryujinx.Horizon.Bcat.Ipc
 
             return Result.Success;
         }
+
+        [CmifCommand(10101)]
+        public Result RequestSyncDeliveryCacheWithDirectoryName(out IDeliveryCacheProgressService deliveryCacheProgressService, DirectoryName directoryName)
+        {
+            deliveryCacheProgressService = new DeliveryCacheProgressService();
+
+            return BcatResult.Success;
+        }
     }
 }

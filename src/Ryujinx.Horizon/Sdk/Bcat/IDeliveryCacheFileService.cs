@@ -9,7 +9,7 @@ namespace Ryujinx.Horizon.Sdk.Bcat
     {
         Result GetDigest(out Digest digest);
         Result GetSize(out long size);
-        Result Open(DirectoryName directoryName, FileName fileName);
+        Result Open(LibHac.Bcat.DirectoryName directoryName, FileName fileName);
         Result Read(long offset, out long bytesRead, Span<byte> data);
     }
 }

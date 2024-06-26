@@ -9,6 +9,6 @@ namespace Ryujinx.Horizon.Sdk.Bcat
     {
         Result CreateDirectoryService(out IDeliveryCacheDirectoryService service);
         Result CreateFileService(out IDeliveryCacheFileService service);
-        Result EnumerateDeliveryCacheDirectory(out int count, Span<DirectoryName> directoryNames);
+        Result EnumerateDeliveryCacheDirectory(out int count, Span<LibHac.Bcat.DirectoryName> directoryNames);
     }
 }
