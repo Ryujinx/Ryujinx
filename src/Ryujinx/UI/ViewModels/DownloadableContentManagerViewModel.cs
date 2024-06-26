@@ -230,7 +230,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                 return;
             }
 
-            using FileStream containerFile = File.OpenRead(path);
+            await using FileStream containerFile = File.OpenRead(path);
 
             PartitionFileSystem partitionFileSystem = new();
             partitionFileSystem.Initialize(containerFile.AsStorage()).ThrowIfFailure();

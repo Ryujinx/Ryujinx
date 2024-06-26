@@ -82,7 +82,7 @@ namespace Ryujinx.Ava.UI.Views.User
 
             if (result.Count > 0)
             {
-                _profile.Image = ProcessProfileImage(File.ReadAllBytes(result[0].Path.LocalPath));
+                _profile.Image = ProcessProfileImage(await File.ReadAllBytesAsync(result[0].Path.LocalPath));
                 _parent.GoBack();
             }
         }

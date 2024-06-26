@@ -250,8 +250,8 @@ namespace Ryujinx.UI.Windows
 
                     try
                     {
-                        using FileStream dlcJsonStream = File.Create(_amiiboJsonPath, 4096, FileOptions.WriteThrough);
-                        dlcJsonStream.Write(Encoding.UTF8.GetBytes(amiiboJsonString));
+                        await using FileStream dlcJsonStream = File.Create(_amiiboJsonPath, 4096, FileOptions.WriteThrough);
+                        await dlcJsonStream.WriteAsync(Encoding.UTF8.GetBytes(amiiboJsonString));
                     }
                     catch (Exception exception)
                     {
