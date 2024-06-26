@@ -1,3 +1,4 @@
+using ARMeilleure.Common;
 using ARMeilleure.Memory;
 using ARMeilleure.State;
 using ARMeilleure.Translation;
@@ -12,7 +13,7 @@ namespace Ryujinx.Tests.Cpu
 
         public CpuContext(IMemoryManager memory, bool for64Bit)
         {
-            _translator = new Translator(new JitMemoryAllocator(), memory, for64Bit);
+            _translator = new Translator(new JitMemoryAllocator(), memory, AddressTable<ulong>.CreateForArm(for64Bit, memory.Type));
             memory.UnmapEvent += UnmapHandler;
         }
 
