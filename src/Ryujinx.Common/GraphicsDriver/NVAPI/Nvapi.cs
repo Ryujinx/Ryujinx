@@ -1,11 +1,23 @@
 namespace Ryujinx.Common.GraphicsDriver.NVAPI
 {
-    enum Nvapi : uint
+    public enum NvapiSettingId : uint
     {
         OglThreadControlId = 0x20C1221E,
+        OglCplPreferDxPresentId = 0x20D690F8,
+    }
 
-        OglThreadControlDefault = 0,
-        OglThreadControlEnable = 1,
-        OglThreadControlDisable = 2,
+    enum OglThreadControl : uint
+    {
+        Default = 0,
+        Enabled = 1,
+        Disabled = 2,
+    }
+
+    // Only present in driver versions >= 526.47
+    enum OglCplDxPresent : uint
+    {
+        Disabled = 0,
+        Enabled = 1,
+        Default = 2,
     }
 }

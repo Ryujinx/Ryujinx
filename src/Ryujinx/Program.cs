@@ -5,6 +5,7 @@ using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.GraphicsDriver;
+using Ryujinx.Common.GraphicsDriver.NVAPI;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.SystemInterop;
 using Ryujinx.Modules;
@@ -112,7 +113,10 @@ namespace Ryujinx.Ava
             PrintSystemInfo();
 
             // Enable OGL multithreading on the driver, when available.
-            DriverUtilities.ToggleOGLThreading(ConfigurationState.Instance.Graphics.BackendThreading == BackendThreading.Off);
+            DriverUtilities.ToggleOglThreading(ConfigurationState.Instance.Graphics.BackendThreading == BackendThreading.Off);
+
+            // Enable Dxgi present on the driver, when available.
+            DriverUtilities.ToggleNvDriverSetting(NvapiSettingId.OglCplPreferDxPresentId, true);
 
             // Check if keys exists.
             if (!File.Exists(Path.Combine(AppDataManager.KeysDirPath, "prod.keys")))
