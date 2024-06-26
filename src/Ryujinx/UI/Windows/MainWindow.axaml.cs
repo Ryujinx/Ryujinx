@@ -324,7 +324,7 @@ namespace Ryujinx.Ava.UI.Windows
                 await Dispatcher.UIThread.InvokeAsync(async () => await UserErrorDialog.ShowUserErrorDialog(UserError.NoKeys));
             }
 
-            if (ConfigurationState.Instance.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))
+            if (ConfigurationState.Shared.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))
             {
                 await Updater.BeginParse(this, false).ContinueWith(task =>
                 {
@@ -348,7 +348,7 @@ namespace Ryujinx.Ava.UI.Windows
 
         private void SetWindowSizePosition()
         {
-            if (!ConfigurationState.Instance.RememberWindowState)
+            if (!ConfigurationState.Shared.RememberWindowState)
             {
                 ViewModel.WindowHeight = (720 + StatusBarHeight + MenuBarHeight) * Program.WindowScaleFactor;
                 ViewModel.WindowWidth = 1280 * Program.WindowScaleFactor;
@@ -359,13 +359,13 @@ namespace Ryujinx.Ava.UI.Windows
                 return;
             }
 
-            PixelPoint savedPoint = new(ConfigurationState.Instance.UI.WindowStartup.WindowPositionX,
-                                        ConfigurationState.Instance.UI.WindowStartup.WindowPositionY);
+            PixelPoint savedPoint = new(ConfigurationState.Shared.UI.WindowStartup.WindowPositionX,
+                                        ConfigurationState.Shared.UI.WindowStartup.WindowPositionY);
 
-            ViewModel.WindowHeight = ConfigurationState.Instance.UI.WindowStartup.WindowSizeHeight * Program.WindowScaleFactor;
-            ViewModel.WindowWidth = ConfigurationState.Instance.UI.WindowStartup.WindowSizeWidth * Program.WindowScaleFactor;
+            ViewModel.WindowHeight = ConfigurationState.Shared.UI.WindowStartup.WindowSizeHeight * Program.WindowScaleFactor;
+            ViewModel.WindowWidth = ConfigurationState.Shared.UI.WindowStartup.WindowSizeWidth * Program.WindowScaleFactor;
 
-            ViewModel.WindowState = ConfigurationState.Instance.UI.WindowStartup.WindowMaximized.Value ? WindowState.Maximized : WindowState.Normal;
+            ViewModel.WindowState = ConfigurationState.Shared.UI.WindowStartup.WindowMaximized.Value ? WindowState.Maximized : WindowState.Normal;
 
             if (CheckScreenBounds(savedPoint))
             {
@@ -393,16 +393,16 @@ namespace Ryujinx.Ava.UI.Windows
 
         private void SaveWindowSizePosition()
         {
-            ConfigurationState.Instance.UI.WindowStartup.WindowMaximized.Value = WindowState == WindowState.Maximized;
+            ConfigurationState.Shared.UI.WindowStartup.WindowMaximized.Value = WindowState == WindowState.Maximized;
 
             // Only save rectangle properties if the window is not in a maximized state.
             if (WindowState != WindowState.Maximized)
             {
-                ConfigurationState.Instance.UI.WindowStartup.WindowSizeHeight.Value = (int)Height;
-                ConfigurationState.Instance.UI.WindowStartup.WindowSizeWidth.Value = (int)Width;
+                ConfigurationState.Shared.UI.WindowStartup.WindowSizeHeight.Value = (int)Height;
+                ConfigurationState.Shared.UI.WindowStartup.WindowSizeWidth.Value = (int)Width;
 
-                ConfigurationState.Instance.UI.WindowStartup.WindowPositionX.Value = Position.X;
-                ConfigurationState.Instance.UI.WindowStartup.WindowPositionY.Value = Position.Y;
+                ConfigurationState.Shared.UI.WindowStartup.WindowPositionX.Value = Position.X;
+                ConfigurationState.Shared.UI.WindowStartup.WindowPositionY.Value = Position.Y;
             }
 
             MainWindowViewModel.SaveConfig();
@@ -458,13 +458,17 @@ namespace Ryujinx.Ava.UI.Windows
 
         public static void UpdateGraphicsConfig()
         {
+            bool useTitleConfig =
+                ConfigurationState.HasConfigurationForTitle(MainWindowViewModel.SelectedApplication?.TitleId);
+            ConfigurationState config = ConfigurationState.Instance(useTitleConfig);
+
 #pragma warning disable IDE0055 // Disable formatting
-            GraphicsConfig.ResScale                   = ConfigurationState.Instance.Graphics.ResScale == -1 ? ConfigurationState.Instance.Graphics.ResScaleCustom : ConfigurationState.Instance.Graphics.ResScale;
-            GraphicsConfig.MaxAnisotropy              = ConfigurationState.Instance.Graphics.MaxAnisotropy;
-            GraphicsConfig.ShadersDumpPath            = ConfigurationState.Instance.Graphics.ShadersDumpPath;
-            GraphicsConfig.EnableShaderCache          = ConfigurationState.Instance.Graphics.EnableShaderCache;
-            GraphicsConfig.EnableTextureRecompression = ConfigurationState.Instance.Graphics.EnableTextureRecompression;
-            GraphicsConfig.EnableMacroHLE             = ConfigurationState.Instance.Graphics.EnableMacroHLE;
+            GraphicsConfig.ResScale                   = config.Graphics.ResScale == -1 ? ConfigurationState.Instance(useTitleConfig).Graphics.ResScaleCustom : ConfigurationState.Instance(useTitleConfig).Graphics.ResScale;
+            GraphicsConfig.MaxAnisotropy              = config.Graphics.MaxAnisotropy;
+            GraphicsConfig.ShadersDumpPath            = config.Graphics.ShadersDumpPath;
+            GraphicsConfig.EnableShaderCache          = config.Graphics.EnableShaderCache;
+            GraphicsConfig.EnableTextureRecompression = config.Graphics.EnableTextureRecompression;
+            GraphicsConfig.EnableMacroHLE             = config.Graphics.EnableMacroHLE;
 #pragma warning restore IDE0055
         }
 
@@ -489,7 +493,7 @@ namespace Ryujinx.Ava.UI.Windows
 
         protected override void OnClosing(WindowClosingEventArgs e)
         {
-            if (!ViewModel.IsClosing && ViewModel.AppHost != null && ConfigurationState.Instance.ShowConfirmExit)
+            if (!ViewModel.IsClosing && ViewModel.AppHost != null && ConfigurationState.Shared.ShowConfirmExit)
             {
                 e.Cancel = true;
 
@@ -521,7 +525,7 @@ namespace Ryujinx.Ava.UI.Windows
                 return;
             }
 
-            if (ConfigurationState.Instance.RememberWindowState)
+            if (ConfigurationState.Shared.RememberWindowState)
             {
                 SaveWindowSizePosition();
             }
@@ -564,17 +568,17 @@ namespace Ryujinx.Ava.UI.Windows
             _ = fileType switch
             {
 #pragma warning disable IDE0055 // Disable formatting
-                "NSP"  => ConfigurationState.Instance.UI.ShownFileTypes.NSP.Value  = !ConfigurationState.Instance.UI.ShownFileTypes.NSP,
-                "PFS0" => ConfigurationState.Instance.UI.ShownFileTypes.PFS0.Value = !ConfigurationState.Instance.UI.ShownFileTypes.PFS0,
-                "XCI"  => ConfigurationState.Instance.UI.ShownFileTypes.XCI.Value  = !ConfigurationState.Instance.UI.ShownFileTypes.XCI,
-                "NCA"  => ConfigurationState.Instance.UI.ShownFileTypes.NCA.Value  = !ConfigurationState.Instance.UI.ShownFileTypes.NCA,
-                "NRO"  => ConfigurationState.Instance.UI.ShownFileTypes.NRO.Value  = !ConfigurationState.Instance.UI.ShownFileTypes.NRO,
-                "NSO"  => ConfigurationState.Instance.UI.ShownFileTypes.NSO.Value  = !ConfigurationState.Instance.UI.ShownFileTypes.NSO,
+                "NSP"  => ConfigurationState.Shared.UI.ShownFileTypes.NSP.Value  = !ConfigurationState.Shared.UI.ShownFileTypes.NSP,
+                "PFS0" => ConfigurationState.Shared.UI.ShownFileTypes.PFS0.Value = !ConfigurationState.Shared.UI.ShownFileTypes.PFS0,
+                "XCI"  => ConfigurationState.Shared.UI.ShownFileTypes.XCI.Value  = !ConfigurationState.Shared.UI.ShownFileTypes.XCI,
+                "NCA"  => ConfigurationState.Shared.UI.ShownFileTypes.NCA.Value  = !ConfigurationState.Shared.UI.ShownFileTypes.NCA,
+                "NRO"  => ConfigurationState.Shared.UI.ShownFileTypes.NRO.Value  = !ConfigurationState.Shared.UI.ShownFileTypes.NRO,
+                "NSO"  => ConfigurationState.Shared.UI.ShownFileTypes.NSO.Value  = !ConfigurationState.Shared.UI.ShownFileTypes.NSO,
                 _  => throw new ArgumentOutOfRangeException(fileType),
 #pragma warning restore IDE0055
             };
 
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
+            ConfigurationState.Shared.ToFileFormat().SaveConfig(Program.ConfigurationPath);
             LoadApplications();
         }
 
@@ -589,7 +593,7 @@ namespace Ryujinx.Ava.UI.Windows
 
             Thread applicationLibraryThread = new(() =>
             {
-                ApplicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
+                ApplicationLibrary.LoadApplications(ConfigurationState.Shared.UI.GameDirs, ConfigurationState.Shared.System.Language);
 
                 _isLoading = false;
             })

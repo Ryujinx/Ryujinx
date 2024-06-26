@@ -118,7 +118,7 @@ namespace Ryujinx.Ava.UI.Renderer
         [SupportedOSPlatform("linux")]
         private IPlatformHandle CreateLinux(IPlatformHandle control)
         {
-            if (ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Vulkan)
+            if (ConfigurationState.Shared.Graphics.GraphicsBackend.Value == GraphicsBackend.Vulkan)
             {
                 X11Window = new GLXWindow(new NativeHandle(X11.DefaultDisplay), new NativeHandle(control.Handle));
                 X11Window.Hide();

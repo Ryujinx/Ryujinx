@@ -19,6 +19,7 @@ using Ryujinx.Common.Configuration.Hid.Keyboard;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.Input;
+using Ryujinx.UI.App.Common;
 using Ryujinx.UI.Common.Configuration;
 using System;
 using System.Collections.Generic;
@@ -51,8 +52,11 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
         private object _configViewModel;
         private string _profileName;
         private bool _isLoaded;
+        private ApplicationData _applicationData;
 
         private static readonly InputConfigJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
+
+        public bool IsTitleSpecificSettings => _applicationData != null;
 
         public IGamepadDriver AvaloniaKeyboardDriver { get; }
         public IGamepad SelectedGamepad { get; private set; }
@@ -275,9 +279,20 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             PlayerIndexes.Add(new(PlayerIndex.Handheld, LocaleManager.Instance[LocaleKeys.ControllerSettingsHandheld]));
         }
 
+        internal void SetApplicationData(ApplicationData applicationData)
+        {
+            _applicationData = applicationData;
+            OnPropertyChanged(nameof(_applicationData));
+            _isLoaded = false;
+            LoadConfiguration(ConfigurationState.Instance(IsTitleSpecificSettings).Hid.InputConfig.Value.Find(inputConfig => inputConfig.PlayerIndex == _playerId));
+            LoadDevice();
+            _isLoaded = true;
+            LoadProfiles();
+        }
+
         private void LoadConfiguration(InputConfig inputConfig = null)
         {
-            Config = inputConfig ?? ConfigurationState.Instance.Hid.InputConfig.Value.Find(inputConfig => inputConfig.PlayerIndex == _playerId);
+            Config = inputConfig ?? ConfigurationState.Shared.Hid.InputConfig.Value.Find(inputConfig => inputConfig.PlayerIndex == _playerId);
 
             if (Config is StandardKeyboardInputConfig keyboardInputConfig)
             {
@@ -807,7 +822,9 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 
             List<InputConfig> newConfig = new();
 
-            newConfig.AddRange(ConfigurationState.Instance.Hid.InputConfig.Value);
+            ConfigurationState configState = ConfigurationState.Instance(IsTitleSpecificSettings);
+
+            newConfig.AddRange(configState.Hid.InputConfig.Value);
 
             newConfig.Remove(newConfig.Find(x => x == null));
 
@@ -847,13 +864,15 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
                 }
             }
 
-            _mainWindow.ViewModel.AppHost?.NpadManager.ReloadConfiguration(newConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
+            _mainWindow.ViewModel.AppHost?.NpadManager.ReloadConfiguration(newConfig, configState.Hid.EnableKeyboard, configState.Hid.EnableMouse);
 
             // Atomically replace and signal input change.
             // NOTE: Do not modify InputConfig.Value directly as other code depends on the on-change event.
-            ConfigurationState.Instance.Hid.InputConfig.Value = newConfig;
+            configState.Hid.InputConfig.Value = newConfig;
 
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
+            configState.ToFileFormat().SaveConfig(IsTitleSpecificSettings
+                ? ConfigurationState.ConfigurationFilePathForTitle(_applicationData.TitleId)
+                : Program.ConfigurationPath);
         }
 
         public void NotifyChange(string property)
@@ -863,6 +882,7 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
 
         public void NotifyChanges()
         {
+            OnPropertyChanged(nameof(_applicationData));
             OnPropertyChanged(nameof(ConfigViewModel));
             OnPropertyChanged(nameof(IsController));
             OnPropertyChanged(nameof(ShowSettings));

@@ -45,7 +45,7 @@ namespace Ryujinx.Ava.UI.Renderer
             }
 
             var flags = OpenGLContextFlags.Compat;
-            if (ConfigurationState.Instance.Logger.GraphicsDebugLevel != GraphicsDebugLevel.None)
+            if (ConfigurationState.Shared.Logger.GraphicsDebugLevel != GraphicsDebugLevel.None)
             {
                 flags |= OpenGLContextFlags.Debug;
             }

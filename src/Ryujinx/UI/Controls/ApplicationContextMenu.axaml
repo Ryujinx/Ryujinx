@@ -35,6 +35,10 @@
         ToolTip.Tip="{locale:Locale GameListContextMenuOpenBcatSaveDirectoryToolTip}" />
     <Separator />
     <MenuItem
+        Click="OpenTitleSettingsWindow_Click"
+        Header="{locale:Locale GameListContextMenuManageTitleSettings}"
+        ToolTip.Tip="{locale:Locale GameListContextMenuManageTitleSettingsTooltip}" />
+    <MenuItem
         Click="OpenTitleUpdateManager_Click"
         Header="{locale:Locale GameListContextMenuManageTitleUpdates}"
         ToolTip.Tip="{locale:Locale GameListContextMenuManageTitleUpdatesToolTip}" />

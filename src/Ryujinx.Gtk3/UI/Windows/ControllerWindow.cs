@@ -134,7 +134,7 @@ namespace Ryujinx.UI.Windows
             builder.Autoconnect(this);
 
             _playerIndex = controllerId;
-            _inputConfig = ConfigurationState.Instance.Hid.InputConfig.Value.Find(inputConfig => inputConfig.PlayerIndex == _playerIndex);
+            _inputConfig = ConfigurationState.Shared.Hid.InputConfig.Value.Find(inputConfig => inputConfig.PlayerIndex == _playerIndex);
 
             Title = $"Ryujinx - Controller Settings - {_playerIndex}";
 
@@ -1193,7 +1193,7 @@ namespace Ryujinx.UI.Windows
             InputConfig inputConfig = GetValues();
 
             var newConfig = new List<InputConfig>();
-            newConfig.AddRange(ConfigurationState.Instance.Hid.InputConfig.Value);
+            newConfig.AddRange(ConfigurationState.Shared.Hid.InputConfig.Value);
 
             if (_inputConfig == null && inputConfig != null)
             {
@@ -1213,13 +1213,13 @@ namespace Ryujinx.UI.Windows
                 }
             }
 
-            _mainWindow.RendererWidget?.NpadManager.ReloadConfiguration(newConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
+            _mainWindow.RendererWidget?.NpadManager.ReloadConfiguration(newConfig, ConfigurationState.Shared.Hid.EnableKeyboard, ConfigurationState.Shared.Hid.EnableMouse);
 
             // Atomically replace and signal input change.
             // NOTE: Do not modify InputConfig.Value directly as other code depends on the on-change event.
-            ConfigurationState.Instance.Hid.InputConfig.Value = newConfig;
+            ConfigurationState.Shared.Hid.InputConfig.Value = newConfig;
 
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
+            ConfigurationState.Shared.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
             Dispose();
         }

@@ -53,6 +53,8 @@
   "GameListContextMenuOpenDeviceSaveDirectory": "Open Device Save Directory",
   "GameListContextMenuOpenDeviceSaveDirectoryToolTip": "Opens the directory which contains Application's Device Save",
   "GameListContextMenuOpenBcatSaveDirectory": "Open BCAT Save Directory",
+  "GameListContextMenuManageTitleSettings": "Manage Title Settings",
+  "GameListContextMenuManageTitleSettingsTooltip": "Opens the title settings window",
   "GameListContextMenuOpenBcatSaveDirectoryToolTip": "Opens the directory which contains Application's BCAT Save",
   "GameListContextMenuManageTitleUpdates": "Manage Title Updates",
   "GameListContextMenuManageTitleUpdatesToolTip": "Opens the Title Update management window",

@@ -92,6 +92,16 @@ namespace Ryujinx.Ava.UI.Controls
             }
         }
 
+        public void OpenTitleSettingsWindow_Click(object sender, RoutedEventArgs args)
+        {
+            var viewModel = (sender as MenuItem)?.DataContext as MainWindowViewModel;
+
+            if (viewModel?.SelectedApplication != null)
+            {
+                new SettingsWindow(viewModel.VirtualFileSystem, viewModel.ContentManager, viewModel.SelectedApplication).Show();
+            }
+        }
+
         public async void OpenTitleUpdateManager_Click(object sender, RoutedEventArgs args)
         {
             var viewModel = (sender as MenuItem)?.DataContext as MainWindowViewModel;

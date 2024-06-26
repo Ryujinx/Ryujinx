@@ -202,32 +202,32 @@ namespace Ryujinx.UI
 
             RendererWidgetBase.StatusUpdatedEvent += Update_StatusBar;
 
-            ConfigurationState.Instance.System.IgnoreMissingServices.Event += UpdateIgnoreMissingServicesState;
-            ConfigurationState.Instance.Graphics.AspectRatio.Event += UpdateAspectRatioState;
-            ConfigurationState.Instance.System.EnableDockedMode.Event += UpdateDockedModeState;
-            ConfigurationState.Instance.System.AudioVolume.Event += UpdateAudioVolumeState;
+            ConfigurationState.Shared.System.IgnoreMissingServices.Event += UpdateIgnoreMissingServicesState;
+            ConfigurationState.Shared.Graphics.AspectRatio.Event += UpdateAspectRatioState;
+            ConfigurationState.Shared.System.EnableDockedMode.Event += UpdateDockedModeState;
+            ConfigurationState.Shared.System.AudioVolume.Event += UpdateAudioVolumeState;
 
-            ConfigurationState.Instance.Multiplayer.Mode.Event += UpdateMultiplayerMode;
-            ConfigurationState.Instance.Multiplayer.LanInterfaceId.Event += UpdateMultiplayerLanInterfaceId;
+            ConfigurationState.Shared.Multiplayer.Mode.Event += UpdateMultiplayerMode;
+            ConfigurationState.Shared.Multiplayer.LanInterfaceId.Event += UpdateMultiplayerLanInterfaceId;
 
-            if (ConfigurationState.Instance.UI.StartFullscreen)
+            if (ConfigurationState.Shared.UI.StartFullscreen)
             {
                 _startFullScreen.Active = true;
             }
 
-            _showConsole.Active = ConfigurationState.Instance.UI.ShowConsole.Value;
+            _showConsole.Active = ConfigurationState.Shared.UI.ShowConsole.Value;
             _showConsole.Visible = ConsoleHelper.SetConsoleWindowStateSupported;
 
             _actionMenu.Sensitive = false;
             _pauseEmulation.Sensitive = false;
             _resumeEmulation.Sensitive = false;
 
-            _nspShown.Active = ConfigurationState.Instance.UI.ShownFileTypes.NSP.Value;
-            _pfs0Shown.Active = ConfigurationState.Instance.UI.ShownFileTypes.PFS0.Value;
-            _xciShown.Active = ConfigurationState.Instance.UI.ShownFileTypes.XCI.Value;
-            _ncaShown.Active = ConfigurationState.Instance.UI.ShownFileTypes.NCA.Value;
-            _nroShown.Active = ConfigurationState.Instance.UI.ShownFileTypes.NRO.Value;
-            _nsoShown.Active = ConfigurationState.Instance.UI.ShownFileTypes.NSO.Value;
+            _nspShown.Active = ConfigurationState.Shared.UI.ShownFileTypes.NSP.Value;
+            _pfs0Shown.Active = ConfigurationState.Shared.UI.ShownFileTypes.PFS0.Value;
+            _xciShown.Active = ConfigurationState.Shared.UI.ShownFileTypes.XCI.Value;
+            _ncaShown.Active = ConfigurationState.Shared.UI.ShownFileTypes.NCA.Value;
+            _nroShown.Active = ConfigurationState.Shared.UI.ShownFileTypes.NRO.Value;
+            _nsoShown.Active = ConfigurationState.Shared.UI.ShownFileTypes.NSO.Value;
 
             _nspShown.Toggled += NSP_Shown_Toggled;
             _pfs0Shown.Toggled += PFS0_Shown_Toggled;
@@ -238,43 +238,43 @@ namespace Ryujinx.UI
 
             _fileTypesSubMenu.Visible = FileAssociationHelper.IsTypeAssociationSupported;
 
-            if (ConfigurationState.Instance.UI.GuiColumns.FavColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.FavColumn)
             {
                 _favToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.IconColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.IconColumn)
             {
                 _iconToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.AppColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.AppColumn)
             {
                 _appToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.DevColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.DevColumn)
             {
                 _developerToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.VersionColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.VersionColumn)
             {
                 _versionToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.TimePlayedColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.TimePlayedColumn)
             {
                 _timePlayedToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.LastPlayedColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.LastPlayedColumn)
             {
                 _lastPlayedToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.FileExtColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.FileExtColumn)
             {
                 _fileExtToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.FileSizeColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.FileSizeColumn)
             {
                 _fileSizeToggle.Active = true;
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.PathColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.PathColumn)
             {
                 _pathToggle.Active = true;
             }
@@ -307,8 +307,8 @@ namespace Ryujinx.UI
             _tableStore.SetSortFunc(6, SortHelper.LastPlayedSort);
             _tableStore.SetSortFunc(8, SortHelper.FileSizeSort);
 
-            int columnId = ConfigurationState.Instance.UI.ColumnSort.SortColumnId;
-            bool ascending = ConfigurationState.Instance.UI.ColumnSort.SortAscending;
+            int columnId = ConfigurationState.Shared.UI.ColumnSort.SortColumnId;
+            bool ascending = ConfigurationState.Shared.UI.ColumnSort.SortAscending;
 
             _tableStore.SetSortColumnId(columnId, ascending ? SortType.Ascending : SortType.Descending);
 
@@ -316,12 +316,12 @@ namespace Ryujinx.UI
             _gameTable.SearchColumn = 2;
             _gameTable.SearchEqualFunc = (model, col, key, iter) => !((string)model.GetValue(iter, col)).Contains(key, StringComparison.InvariantCultureIgnoreCase);
 
-            _hideUI.Label = _hideUI.Label.Replace("SHOWUIKEY", ConfigurationState.Instance.Hid.Hotkeys.Value.ShowUI.ToString());
+            _hideUI.Label = _hideUI.Label.Replace("SHOWUIKEY", ConfigurationState.Shared.Hid.Hotkeys.Value.ShowUI.ToString());
 
             UpdateColumns();
             UpdateGameTable();
 
-            ConfigurationState.Instance.UI.GameDirs.Event += (sender, args) =>
+            ConfigurationState.Shared.UI.GameDirs.Event += (sender, args) =>
             {
                 if (args.OldValue != args.NewValue)
                 {
@@ -401,43 +401,43 @@ namespace Ryujinx.UI
             CellRendererToggle favToggle = new();
             favToggle.Toggled += FavToggle_Toggled;
 
-            if (ConfigurationState.Instance.UI.GuiColumns.FavColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.FavColumn)
             {
                 _gameTable.AppendColumn("Fav", favToggle, "active", 0);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.IconColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.IconColumn)
             {
                 _gameTable.AppendColumn("Icon", new CellRendererPixbuf(), "pixbuf", 1);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.AppColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.AppColumn)
             {
                 _gameTable.AppendColumn("Application", new CellRendererText(), "text", 2);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.DevColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.DevColumn)
             {
                 _gameTable.AppendColumn("Developer", new CellRendererText(), "text", 3);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.VersionColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.VersionColumn)
             {
                 _gameTable.AppendColumn("Version", new CellRendererText(), "text", 4);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.TimePlayedColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.TimePlayedColumn)
             {
                 _gameTable.AppendColumn("Time Played", new CellRendererText(), "text", 5);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.LastPlayedColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.LastPlayedColumn)
             {
                 _gameTable.AppendColumn("Last Played", new CellRendererText(), "text", 6);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.FileExtColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.FileExtColumn)
             {
                 _gameTable.AppendColumn("File Ext", new CellRendererText(), "text", 7);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.FileSizeColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.FileSizeColumn)
             {
                 _gameTable.AppendColumn("File Size", new CellRendererText(), "text", 8);
             }
-            if (ConfigurationState.Instance.UI.GuiColumns.PathColumn)
+            if (ConfigurationState.Shared.UI.GuiColumns.PathColumn)
             {
                 _gameTable.AppendColumn("Path", new CellRendererText(), "text", 9);
             }
@@ -497,9 +497,9 @@ namespace Ryujinx.UI
 
             IRenderer renderer;
 
-            if (ConfigurationState.Instance.Graphics.GraphicsBackend == GraphicsBackend.Vulkan)
+            if (ConfigurationState.Shared.Graphics.GraphicsBackend == GraphicsBackend.Vulkan)
             {
-                string preferredGpu = ConfigurationState.Instance.Graphics.PreferredGpu.Value;
+                string preferredGpu = ConfigurationState.Shared.Graphics.PreferredGpu.Value;
                 renderer = new Graphics.Vulkan.VulkanRenderer(Vk.GetApi(), CreateVulkanSurface, VulkanHelper.GetRequiredInstanceExtensions, preferredGpu);
             }
             else
@@ -507,7 +507,7 @@ namespace Ryujinx.UI
                 renderer = new Graphics.OpenGL.OpenGLRenderer();
             }
 
-            BackendThreading threadingMode = ConfigurationState.Instance.Graphics.BackendThreading;
+            BackendThreading threadingMode = ConfigurationState.Shared.Graphics.BackendThreading;
 
             bool threadedGAL = threadingMode == BackendThreading.On || (threadingMode == BackendThreading.Auto && renderer.PreferThreading);
 
@@ -520,7 +520,7 @@ namespace Ryujinx.UI
 
             IHardwareDeviceDriver deviceDriver = new DummyHardwareDeviceDriver();
 
-            if (ConfigurationState.Instance.System.AudioBackend.Value == AudioBackend.SDL2)
+            if (ConfigurationState.Shared.System.AudioBackend.Value == AudioBackend.SDL2)
             {
                 if (SDL2HardwareDeviceDriver.IsSupported)
                 {
@@ -534,7 +534,7 @@ namespace Ryujinx.UI
                     {
                         Logger.Warning?.Print(LogClass.Audio, "Found OpenAL, changing configuration.");
 
-                        ConfigurationState.Instance.System.AudioBackend.Value = AudioBackend.OpenAl;
+                        ConfigurationState.Shared.System.AudioBackend.Value = AudioBackend.OpenAl;
                         SaveConfig();
 
                         deviceDriver = new OpenALHardwareDeviceDriver();
@@ -547,7 +547,7 @@ namespace Ryujinx.UI
                         {
                             Logger.Warning?.Print(LogClass.Audio, "Found SoundIO, changing configuration.");
 
-                            ConfigurationState.Instance.System.AudioBackend.Value = AudioBackend.SoundIo;
+                            ConfigurationState.Shared.System.AudioBackend.Value = AudioBackend.SoundIo;
                             SaveConfig();
 
                             deviceDriver = new SoundIoHardwareDeviceDriver();
@@ -559,7 +559,7 @@ namespace Ryujinx.UI
                     }
                 }
             }
-            else if (ConfigurationState.Instance.System.AudioBackend.Value == AudioBackend.SoundIo)
+            else if (ConfigurationState.Shared.System.AudioBackend.Value == AudioBackend.SoundIo)
             {
                 if (SoundIoHardwareDeviceDriver.IsSupported)
                 {
@@ -573,7 +573,7 @@ namespace Ryujinx.UI
                     {
                         Logger.Warning?.Print(LogClass.Audio, "Found SDL2, changing configuration.");
 
-                        ConfigurationState.Instance.System.AudioBackend.Value = AudioBackend.SDL2;
+                        ConfigurationState.Shared.System.AudioBackend.Value = AudioBackend.SDL2;
                         SaveConfig();
 
                         deviceDriver = new SDL2HardwareDeviceDriver();
@@ -586,7 +586,7 @@ namespace Ryujinx.UI
                         {
                             Logger.Warning?.Print(LogClass.Audio, "Found OpenAL, changing configuration.");
 
-                            ConfigurationState.Instance.System.AudioBackend.Value = AudioBackend.OpenAl;
+                            ConfigurationState.Shared.System.AudioBackend.Value = AudioBackend.OpenAl;
                             SaveConfig();
 
                             deviceDriver = new OpenALHardwareDeviceDriver();
@@ -598,7 +598,7 @@ namespace Ryujinx.UI
                     }
                 }
             }
-            else if (ConfigurationState.Instance.System.AudioBackend.Value == AudioBackend.OpenAl)
+            else if (ConfigurationState.Shared.System.AudioBackend.Value == AudioBackend.OpenAl)
             {
                 if (OpenALHardwareDeviceDriver.IsSupported)
                 {
@@ -612,7 +612,7 @@ namespace Ryujinx.UI
                     {
                         Logger.Warning?.Print(LogClass.Audio, "Found SDL2, changing configuration.");
 
-                        ConfigurationState.Instance.System.AudioBackend.Value = AudioBackend.SDL2;
+                        ConfigurationState.Shared.System.AudioBackend.Value = AudioBackend.SDL2;
                         SaveConfig();
 
                         deviceDriver = new SDL2HardwareDeviceDriver();
@@ -625,7 +625,7 @@ namespace Ryujinx.UI
                         {
                             Logger.Warning?.Print(LogClass.Audio, "Found SoundIO, changing configuration.");
 
-                            ConfigurationState.Instance.System.AudioBackend.Value = AudioBackend.SoundIo;
+                            ConfigurationState.Shared.System.AudioBackend.Value = AudioBackend.SoundIo;
                             SaveConfig();
 
                             deviceDriver = new SoundIoHardwareDeviceDriver();
@@ -638,11 +638,11 @@ namespace Ryujinx.UI
                 }
             }
 
-            var memoryConfiguration = ConfigurationState.Instance.System.ExpandRam.Value
+            var memoryConfiguration = ConfigurationState.Shared.System.ExpandRam.Value
                 ? HLE.MemoryConfiguration.MemoryConfiguration6GiB
                 : HLE.MemoryConfiguration.MemoryConfiguration4GiB;
 
-            IntegrityCheckLevel fsIntegrityCheckLevel = ConfigurationState.Instance.System.EnableFsIntegrityChecks ? IntegrityCheckLevel.ErrorOnInvalid : IntegrityCheckLevel.None;
+            IntegrityCheckLevel fsIntegrityCheckLevel = ConfigurationState.Shared.System.EnableFsIntegrityChecks ? IntegrityCheckLevel.ErrorOnInvalid : IntegrityCheckLevel.None;
 
             HLE.HLEConfiguration configuration = new(_virtualFileSystem,
                 _libHacHorizonManager,
@@ -653,23 +653,23 @@ namespace Ryujinx.UI
                 deviceDriver,
                 memoryConfiguration,
                 _uiHandler,
-                (SystemLanguage)ConfigurationState.Instance.System.Language.Value,
-                (RegionCode)ConfigurationState.Instance.System.Region.Value,
-                ConfigurationState.Instance.Graphics.EnableVsync,
-                ConfigurationState.Instance.System.EnableDockedMode,
-                ConfigurationState.Instance.System.EnablePtc,
-                ConfigurationState.Instance.System.EnableInternetAccess,
+                (SystemLanguage)ConfigurationState.Shared.System.Language.Value,
+                (RegionCode)ConfigurationState.Shared.System.Region.Value,
+                ConfigurationState.Shared.Graphics.EnableVsync,
+                ConfigurationState.Shared.System.EnableDockedMode,
+                ConfigurationState.Shared.System.EnablePtc,
+                ConfigurationState.Shared.System.EnableInternetAccess,
                 fsIntegrityCheckLevel,
-                ConfigurationState.Instance.System.FsGlobalAccessLogMode,
-                ConfigurationState.Instance.System.SystemTimeOffset,
-                ConfigurationState.Instance.System.TimeZone,
-                ConfigurationState.Instance.System.MemoryManagerMode,
-                ConfigurationState.Instance.System.IgnoreMissingServices,
-                ConfigurationState.Instance.Graphics.AspectRatio,
-                ConfigurationState.Instance.System.AudioVolume,
-                ConfigurationState.Instance.System.UseHypervisor,
-                ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value,
-                ConfigurationState.Instance.Multiplayer.Mode);
+                ConfigurationState.Shared.System.FsGlobalAccessLogMode,
+                ConfigurationState.Shared.System.SystemTimeOffset,
+                ConfigurationState.Shared.System.TimeZone,
+                ConfigurationState.Shared.System.MemoryManagerMode,
+                ConfigurationState.Shared.System.IgnoreMissingServices,
+                ConfigurationState.Shared.Graphics.AspectRatio,
+                ConfigurationState.Shared.System.AudioVolume,
+                ConfigurationState.Shared.System.UseHypervisor,
+                ConfigurationState.Shared.Multiplayer.LanInterfaceId.Value,
+                ConfigurationState.Shared.Multiplayer.Mode);
 
             _emulationContext = new HLE.Switch(configuration);
         }
@@ -732,7 +732,7 @@ namespace Ryujinx.UI
 
             Thread applicationLibraryThread = new(() =>
             {
-                _applicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
+                _applicationLibrary.LoadApplications(ConfigurationState.Shared.UI.GameDirs, ConfigurationState.Shared.System.Language);
 
                 _updatingGameTable = false;
             })
@@ -746,7 +746,7 @@ namespace Ryujinx.UI
         [Conditional("RELEASE")]
         public void PerformanceCheck()
         {
-            if (ConfigurationState.Instance.Logger.EnableTrace.Value)
+            if (ConfigurationState.Shared.Logger.EnableTrace.Value)
             {
                 MessageDialog debugWarningDialog = new(this, DialogFlags.Modal, MessageType.Warning, ButtonsType.YesNo, null)
                 {
@@ -757,14 +757,14 @@ namespace Ryujinx.UI
 
                 if (debugWarningDialog.Run() == (int)ResponseType.Yes)
                 {
-                    ConfigurationState.Instance.Logger.EnableTrace.Value = false;
+                    ConfigurationState.Shared.Logger.EnableTrace.Value = false;
                     SaveConfig();
                 }
 
                 debugWarningDialog.Dispose();
             }
 
-            if (!string.IsNullOrWhiteSpace(ConfigurationState.Instance.Graphics.ShadersDumpPath.Value))
+            if (!string.IsNullOrWhiteSpace(ConfigurationState.Shared.Graphics.ShadersDumpPath.Value))
             {
                 MessageDialog shadersDumpWarningDialog = new(this, DialogFlags.Modal, MessageType.Warning, ButtonsType.YesNo, null)
                 {
@@ -775,7 +775,7 @@ namespace Ryujinx.UI
 
                 if (shadersDumpWarningDialog.Run() == (int)ResponseType.Yes)
                 {
-                    ConfigurationState.Instance.Graphics.ShadersDumpPath.Value = "";
+                    ConfigurationState.Shared.Graphics.ShadersDumpPath.Value = "";
                     SaveConfig();
                 }
 
@@ -958,13 +958,13 @@ namespace Ryujinx.UI
 
         private RendererWidgetBase CreateRendererWidget()
         {
-            if (ConfigurationState.Instance.Graphics.GraphicsBackend == GraphicsBackend.Vulkan)
+            if (ConfigurationState.Shared.Graphics.GraphicsBackend == GraphicsBackend.Vulkan)
             {
-                return new VulkanRenderer(InputManager, ConfigurationState.Instance.Logger.GraphicsDebugLevel);
+                return new VulkanRenderer(InputManager, ConfigurationState.Shared.Logger.GraphicsDebugLevel);
             }
             else
             {
-                return new OpenGLRenderer(InputManager, ConfigurationState.Instance.Logger.GraphicsDebugLevel);
+                return new OpenGLRenderer(InputManager, ConfigurationState.Shared.Logger.GraphicsDebugLevel);
             }
         }
 
@@ -981,7 +981,7 @@ namespace Ryujinx.UI
             {
                 ToggleExtraWidgets(false);
             }
-            else if (startFullscreen || ConfigurationState.Instance.UI.StartFullscreen.Value)
+            else if (startFullscreen || ConfigurationState.Shared.UI.StartFullscreen.Value)
             {
                 FullScreen_Toggled(null, null);
             }
@@ -1101,28 +1101,28 @@ namespace Ryujinx.UI
 
         public static void UpdateGraphicsConfig()
         {
-            int resScale = ConfigurationState.Instance.Graphics.ResScale;
-            float resScaleCustom = ConfigurationState.Instance.Graphics.ResScaleCustom;
+            int resScale = ConfigurationState.Shared.Graphics.ResScale;
+            float resScaleCustom = ConfigurationState.Shared.Graphics.ResScaleCustom;
 
             Graphics.Gpu.GraphicsConfig.ResScale = (resScale == -1) ? resScaleCustom : resScale;
-            Graphics.Gpu.GraphicsConfig.MaxAnisotropy = ConfigurationState.Instance.Graphics.MaxAnisotropy;
-            Graphics.Gpu.GraphicsConfig.ShadersDumpPath = ConfigurationState.Instance.Graphics.ShadersDumpPath;
-            Graphics.Gpu.GraphicsConfig.EnableShaderCache = ConfigurationState.Instance.Graphics.EnableShaderCache;
-            Graphics.Gpu.GraphicsConfig.EnableTextureRecompression = ConfigurationState.Instance.Graphics.EnableTextureRecompression;
-            Graphics.Gpu.GraphicsConfig.EnableMacroHLE = ConfigurationState.Instance.Graphics.EnableMacroHLE;
+            Graphics.Gpu.GraphicsConfig.MaxAnisotropy = ConfigurationState.Shared.Graphics.MaxAnisotropy;
+            Graphics.Gpu.GraphicsConfig.ShadersDumpPath = ConfigurationState.Shared.Graphics.ShadersDumpPath;
+            Graphics.Gpu.GraphicsConfig.EnableShaderCache = ConfigurationState.Shared.Graphics.EnableShaderCache;
+            Graphics.Gpu.GraphicsConfig.EnableTextureRecompression = ConfigurationState.Shared.Graphics.EnableTextureRecompression;
+            Graphics.Gpu.GraphicsConfig.EnableMacroHLE = ConfigurationState.Shared.Graphics.EnableMacroHLE;
         }
 
         public void UpdateInternetAccess()
         {
             if (_gameLoaded)
             {
-                _emulationContext.Configuration.EnableInternetAccess = ConfigurationState.Instance.System.EnableInternetAccess.Value;
+                _emulationContext.Configuration.EnableInternetAccess = ConfigurationState.Shared.System.EnableInternetAccess.Value;
             }
         }
 
         public static void SaveConfig()
         {
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
+            ConfigurationState.Shared.ToFileFormat().SaveConfig(Program.ConfigurationPath);
         }
 
         private void End()
@@ -1243,8 +1243,8 @@ namespace Ryujinx.UI
         {
             TreeViewColumn column = (TreeViewColumn)sender;
 
-            ConfigurationState.Instance.UI.ColumnSort.SortColumnId.Value = column.SortColumnId;
-            ConfigurationState.Instance.UI.ColumnSort.SortAscending.Value = column.SortOrder == SortType.Ascending;
+            ConfigurationState.Shared.UI.ColumnSort.SortColumnId.Value = column.SortColumnId;
+            ConfigurationState.Shared.UI.ColumnSort.SortAscending.Value = column.SortOrder == SortType.Ascending;
 
             SaveConfig();
         }
@@ -1267,7 +1267,7 @@ namespace Ryujinx.UI
 
         private void DockedMode_Clicked(object sender, ButtonReleaseEventArgs args)
         {
-            ConfigurationState.Instance.System.EnableDockedMode.Value = !ConfigurationState.Instance.System.EnableDockedMode.Value;
+            ConfigurationState.Shared.System.EnableDockedMode.Value = !ConfigurationState.Shared.System.EnableDockedMode.Value;
         }
 
         private static string GetVolumeLabelText(float volume)
@@ -1283,7 +1283,7 @@ namespace Ryujinx.UI
             {
                 if (_emulationContext.IsAudioMuted())
                 {
-                    _emulationContext.SetVolume(ConfigurationState.Instance.System.AudioVolume);
+                    _emulationContext.SetVolume(ConfigurationState.Shared.System.AudioVolume);
                 }
                 else
                 {
@@ -1294,9 +1294,9 @@ namespace Ryujinx.UI
 
         private void AspectRatio_Clicked(object sender, ButtonReleaseEventArgs args)
         {
-            AspectRatio aspectRatio = ConfigurationState.Instance.Graphics.AspectRatio.Value;
+            AspectRatio aspectRatio = ConfigurationState.Shared.Graphics.AspectRatio.Value;
 
-            ConfigurationState.Instance.Graphics.AspectRatio.Value = ((int)aspectRatio + 1) > Enum.GetNames<AspectRatio>().Length - 1 ? AspectRatio.Fixed4x3 : aspectRatio + 1;
+            ConfigurationState.Shared.Graphics.AspectRatio.Value = ((int)aspectRatio + 1) > Enum.GetNames<AspectRatio>().Length - 1 ? AspectRatio.Fixed4x3 : aspectRatio + 1;
         }
 
         private void Row_Clicked(object sender, ButtonReleaseEventArgs args)
@@ -1385,7 +1385,7 @@ namespace Ryujinx.UI
 
         private void Exit_Pressed(object sender, EventArgs args)
         {
-            if (!_gameLoaded || !ConfigurationState.Instance.ShowConfirmExit || GtkDialog.CreateExitDialog())
+            if (!_gameLoaded || !ConfigurationState.Shared.ShowConfirmExit || GtkDialog.CreateExitDialog())
             {
                 SaveWindowSizePosition();
                 End();
@@ -1394,7 +1394,7 @@ namespace Ryujinx.UI
 
         private void Window_Close(object sender, DeleteEventArgs args)
         {
-            if (!_gameLoaded || !ConfigurationState.Instance.ShowConfirmExit || GtkDialog.CreateExitDialog())
+            if (!_gameLoaded || !ConfigurationState.Shared.ShowConfirmExit || GtkDialog.CreateExitDialog())
             {
                 SaveWindowSizePosition();
                 End();
@@ -1407,12 +1407,12 @@ namespace Ryujinx.UI
 
         private void SetWindowSizePosition()
         {
-            DefaultWidth = ConfigurationState.Instance.UI.WindowStartup.WindowSizeWidth;
-            DefaultHeight = ConfigurationState.Instance.UI.WindowStartup.WindowSizeHeight;
+            DefaultWidth = ConfigurationState.Shared.UI.WindowStartup.WindowSizeWidth;
+            DefaultHeight = ConfigurationState.Shared.UI.WindowStartup.WindowSizeHeight;
 
-            Move(ConfigurationState.Instance.UI.WindowStartup.WindowPositionX, ConfigurationState.Instance.UI.WindowStartup.WindowPositionY);
+            Move(ConfigurationState.Shared.UI.WindowStartup.WindowPositionX, ConfigurationState.Shared.UI.WindowStartup.WindowPositionY);
 
-            if (ConfigurationState.Instance.UI.WindowStartup.WindowMaximized)
+            if (ConfigurationState.Shared.UI.WindowStartup.WindowMaximized)
             {
                 Maximize();
             }
@@ -1423,11 +1423,11 @@ namespace Ryujinx.UI
             GetSize(out int windowWidth, out int windowHeight);
             GetPosition(out int windowXPos, out int windowYPos);
 
-            ConfigurationState.Instance.UI.WindowStartup.WindowMaximized.Value = IsMaximized;
-            ConfigurationState.Instance.UI.WindowStartup.WindowSizeWidth.Value = windowWidth;
-            ConfigurationState.Instance.UI.WindowStartup.WindowSizeHeight.Value = windowHeight;
-            ConfigurationState.Instance.UI.WindowStartup.WindowPositionX.Value = windowXPos;
-            ConfigurationState.Instance.UI.WindowStartup.WindowPositionY.Value = windowYPos;
+            ConfigurationState.Shared.UI.WindowStartup.WindowMaximized.Value = IsMaximized;
+            ConfigurationState.Shared.UI.WindowStartup.WindowSizeWidth.Value = windowWidth;
+            ConfigurationState.Shared.UI.WindowStartup.WindowSizeHeight.Value = windowHeight;
+            ConfigurationState.Shared.UI.WindowStartup.WindowPositionX.Value = windowXPos;
+            ConfigurationState.Shared.UI.WindowStartup.WindowPositionY.Value = windowYPos;
 
             SaveConfig();
         }
@@ -1677,14 +1677,14 @@ namespace Ryujinx.UI
 
         private void StartFullScreen_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.StartFullscreen.Value = _startFullScreen.Active;
+            ConfigurationState.Shared.UI.StartFullscreen.Value = _startFullScreen.Active;
 
             SaveConfig();
         }
 
         private void ShowConsole_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShowConsole.Value = _showConsole.Active;
+            ConfigurationState.Shared.UI.ShowConsole.Value = _showConsole.Active;
 
             SaveConfig();
         }
@@ -1807,7 +1807,7 @@ namespace Ryujinx.UI
 
         private void Fav_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.FavColumn.Value = _favToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.FavColumn.Value = _favToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1815,7 +1815,7 @@ namespace Ryujinx.UI
 
         private void Icon_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.IconColumn.Value = _iconToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.IconColumn.Value = _iconToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1823,7 +1823,7 @@ namespace Ryujinx.UI
 
         private void App_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.AppColumn.Value = _appToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.AppColumn.Value = _appToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1831,7 +1831,7 @@ namespace Ryujinx.UI
 
         private void Developer_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.DevColumn.Value = _developerToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.DevColumn.Value = _developerToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1839,7 +1839,7 @@ namespace Ryujinx.UI
 
         private void Version_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.VersionColumn.Value = _versionToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.VersionColumn.Value = _versionToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1847,7 +1847,7 @@ namespace Ryujinx.UI
 
         private void TimePlayed_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.TimePlayedColumn.Value = _timePlayedToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.TimePlayedColumn.Value = _timePlayedToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1855,7 +1855,7 @@ namespace Ryujinx.UI
 
         private void LastPlayed_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.LastPlayedColumn.Value = _lastPlayedToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.LastPlayedColumn.Value = _lastPlayedToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1863,7 +1863,7 @@ namespace Ryujinx.UI
 
         private void FileExt_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.FileExtColumn.Value = _fileExtToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.FileExtColumn.Value = _fileExtToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1871,7 +1871,7 @@ namespace Ryujinx.UI
 
         private void FileSize_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.FileSizeColumn.Value = _fileSizeToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.FileSizeColumn.Value = _fileSizeToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1879,7 +1879,7 @@ namespace Ryujinx.UI
 
         private void Path_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.GuiColumns.PathColumn.Value = _pathToggle.Active;
+            ConfigurationState.Shared.UI.GuiColumns.PathColumn.Value = _pathToggle.Active;
 
             SaveConfig();
             UpdateColumns();
@@ -1887,7 +1887,7 @@ namespace Ryujinx.UI
 
         private void NSP_Shown_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShownFileTypes.NSP.Value = _nspShown.Active;
+            ConfigurationState.Shared.UI.ShownFileTypes.NSP.Value = _nspShown.Active;
 
             SaveConfig();
             UpdateGameTable();
@@ -1895,7 +1895,7 @@ namespace Ryujinx.UI
 
         private void PFS0_Shown_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShownFileTypes.PFS0.Value = _pfs0Shown.Active;
+            ConfigurationState.Shared.UI.ShownFileTypes.PFS0.Value = _pfs0Shown.Active;
 
             SaveConfig();
             UpdateGameTable();
@@ -1903,7 +1903,7 @@ namespace Ryujinx.UI
 
         private void XCI_Shown_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShownFileTypes.XCI.Value = _xciShown.Active;
+            ConfigurationState.Shared.UI.ShownFileTypes.XCI.Value = _xciShown.Active;
 
             SaveConfig();
             UpdateGameTable();
@@ -1911,7 +1911,7 @@ namespace Ryujinx.UI
 
         private void NCA_Shown_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShownFileTypes.NCA.Value = _ncaShown.Active;
+            ConfigurationState.Shared.UI.ShownFileTypes.NCA.Value = _ncaShown.Active;
 
             SaveConfig();
             UpdateGameTable();
@@ -1919,7 +1919,7 @@ namespace Ryujinx.UI
 
         private void NRO_Shown_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShownFileTypes.NRO.Value = _nroShown.Active;
+            ConfigurationState.Shared.UI.ShownFileTypes.NRO.Value = _nroShown.Active;
 
             SaveConfig();
             UpdateGameTable();
@@ -1927,7 +1927,7 @@ namespace Ryujinx.UI
 
         private void NSO_Shown_Toggled(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.UI.ShownFileTypes.NSO.Value = _nsoShown.Active;
+            ConfigurationState.Shared.UI.ShownFileTypes.NSO.Value = _nsoShown.Active;
 
             SaveConfig();
             UpdateGameTable();

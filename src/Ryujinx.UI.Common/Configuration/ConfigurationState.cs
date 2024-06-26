@@ -12,6 +12,7 @@ using Ryujinx.UI.Common.Helper;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text.Json.Nodes;
 
 namespace Ryujinx.UI.Common.Configuration
@@ -578,9 +579,16 @@ namespace Ryujinx.UI.Common.Configuration
         }
 
         /// <summary>
-        /// The default configuration instance
+        /// The shared configuration instance
         /// </summary>
-        public static ConfigurationState Instance { get; private set; }
+        public static ConfigurationState Shared { get; private set; }
+
+        /// <summary>
+        /// The title-specific configuration instance
+        /// </summary>
+        public static ConfigurationState Title { get; private set; }
+
+        public string TitleId { get; private set; } = null;
 
         /// <summary>
         /// The UI section
@@ -1602,12 +1610,123 @@ namespace Ryujinx.UI.Common.Configuration
 
         public static void Initialize()
         {
-            if (Instance != null)
+            if (Shared != null)
             {
                 throw new InvalidOperationException("Configuration is already initialized");
             }
 
-            Instance = new ConfigurationState();
+            Shared = new ConfigurationState();
+        }
+
+        public static ConfigurationState Instance(bool titleSpecific = false)
+        {
+            if (titleSpecific)
+            {
+                return Title ?? throw new InvalidOperationException("Title Configuration is not initialized!");
+            }
+            return Shared;
+        }
+
+        /// <summary>
+        /// Returns the configuration path on disk for the specified title.
+        /// </summary>
+        /// <param name="titleId">Id of the selected title</param>
+        /// <returns>Disk path for the title's configuration file.</returns>
+        public static string ConfigurationFilePathForTitle(string titleId)
+        {
+            string localConfigurationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{titleId}.json");
+            string appDataConfigurationPath = Path.Combine(AppDataManager.BaseDirPath, $"{titleId}.json");
+
+            // Now load the configuration as the other subsystems are now registered
+            string gameConfigurationPath = File.Exists(localConfigurationPath)
+                ? localConfigurationPath
+                : appDataConfigurationPath;
+
+            return gameConfigurationPath;
+        }
+
+        /// <summary>
+        /// Returns true if a configuration file exists for the specified title.
+        /// </summary>
+        /// <param name="titleId">Id of the selected title</param>
+        /// <returns>True is a file exists, false otherwise.</returns>
+        public static bool HasConfigurationForTitle(string titleId)
+        {
+            if (titleId == null)
+                return false;
+
+            string localConfigurationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{titleId}.json");
+            string appDataConfigurationPath = Path.Combine(AppDataManager.BaseDirPath, $"{titleId}.json");
+
+            return File.Exists(localConfigurationPath) || File.Exists(appDataConfigurationPath);
+        }
+
+        /// <summary>
+        /// Loads the configuration for the specific title into the Title singleton.
+        /// <br/>
+        /// If no configuration exists, a new one will be written to disk with the same configuration as the Global configuration.
+        /// <br/>
+        /// If there is an issue with the Global configuration, the default values will be used instead.
+        /// </summary>
+        /// <param name="titleId">Id of the selected title</param>
+        public static void LoadOrCreateConfigurationStateForTitle(string titleId)
+        {
+            if (titleId == null)
+                return;
+
+            if (!HasConfigurationForTitle(titleId))
+            {
+                string gameConfigurationPath = ConfigurationFilePathForTitle(titleId);
+
+                // Program.ConfigurationPath is not visible, so we need to mimic it here..
+                string globalLocalConfigurationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"Config.json");
+                string globalAppDataConfigurationPath = Path.Combine(AppDataManager.BaseDirPath, $"Config.json");
+                string globalConfigurationPath = File.Exists(globalLocalConfigurationPath) ? globalLocalConfigurationPath : File.Exists(globalAppDataConfigurationPath) ? globalAppDataConfigurationPath : null;
+
+                Title = new ConfigurationState { TitleId = titleId };
+
+                // No configuration, we load the shared config values and save it to disk.
+                if (ConfigurationFileFormat.TryLoad(globalConfigurationPath, out ConfigurationFileFormat configurationFileFormat))
+                {
+                    Title.Load(configurationFileFormat, gameConfigurationPath);
+                }
+                else
+                {
+                    Title.LoadDefault();
+                }
+                Title.ToFileFormat().SaveConfig(gameConfigurationPath);
+            }
+            else
+            {
+                if (!LoadConfigurationStateForTitle(titleId))
+                {
+                    Title = new ConfigurationState { TitleId = titleId };
+                    Title.LoadDefault();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads the configuration for the specified title.
+        /// </summary>
+        /// <param name="titleId">Id of the title</param>
+        /// <returns>True if loading was successful, false otherwise.</returns>
+        public static bool LoadConfigurationStateForTitle(string titleId)
+        {
+            if (!HasConfigurationForTitle(titleId))
+                return false;
+
+            string gameConfigurationPath = ConfigurationFilePathForTitle(titleId);
+
+            if (ConfigurationFileFormat.TryLoad(gameConfigurationPath, out ConfigurationFileFormat configurationFileFormat))
+            {
+                Title = new ConfigurationState { TitleId = titleId };
+                Title.Load(configurationFileFormat, gameConfigurationPath);
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

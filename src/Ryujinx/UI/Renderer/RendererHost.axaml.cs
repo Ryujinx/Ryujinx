@@ -16,8 +16,11 @@ namespace Ryujinx.Ava.UI.Renderer
         public RendererHost()
         {
             InitializeComponent();
+        }
 
-            if (ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.OpenGl)
+        public RendererHost(GraphicsBackend graphicsBackend) : this()
+        {
+            if (graphicsBackend == GraphicsBackend.OpenGl)
             {
                 EmbeddedWindow = new EmbeddedWindowOpenGL();
             }

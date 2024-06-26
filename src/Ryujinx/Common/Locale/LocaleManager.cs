@@ -32,8 +32,8 @@ namespace Ryujinx.Ava.Common.Locale
 
         private void Load()
         {
-            var localeLanguageCode = !string.IsNullOrEmpty(ConfigurationState.Instance.UI.LanguageCode.Value) ?
-                ConfigurationState.Instance.UI.LanguageCode.Value : CultureInfo.CurrentCulture.Name.Replace('-', '_');
+            var localeLanguageCode = !string.IsNullOrEmpty(ConfigurationState.Shared.UI.LanguageCode.Value) ?
+                ConfigurationState.Shared.UI.LanguageCode.Value : CultureInfo.CurrentCulture.Name.Replace('-', '_');
 
             // Load en_US as default, if the target language translation is missing or incomplete.
             LoadDefaultLanguage();
@@ -42,9 +42,9 @@ namespace Ryujinx.Ava.Common.Locale
             // Save whatever we ended up with.
             if (Program.PreviewerDetached)
             {
-                ConfigurationState.Instance.UI.LanguageCode.Value = _localeLanguageCode;
+                ConfigurationState.Shared.UI.LanguageCode.Value = _localeLanguageCode;
 
-                ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
+                ConfigurationState.Shared.ToFileFormat().SaveConfig(Program.ConfigurationPath);
             }
         }
 

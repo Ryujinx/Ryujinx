@@ -44,7 +44,7 @@ namespace Ryujinx.Ava.UI.Views.Main
                 checkBoxes.Add(new CheckBox
                 {
                     Content = $".{fileName}",
-                    IsChecked = ((FileTypes)item).GetConfigValue(ConfigurationState.Instance.UI.ShownFileTypes),
+                    IsChecked = ((FileTypes)item).GetConfigValue(ConfigurationState.Shared.UI.ShownFileTypes),
                     Command = MiniCommand.Create(() => Window.ToggleFileType(fileName)),
                 });
             }
@@ -119,7 +119,15 @@ namespace Ryujinx.Ava.UI.Views.Main
 
         public async void OpenSettings(object sender, RoutedEventArgs e)
         {
-            Window.SettingsWindow = new(Window.VirtualFileSystem, Window.ContentManager);
+            if (ViewModel.IsGameRunning && ViewModel.SelectedApplication != null &&
+                ConfigurationState.HasConfigurationForTitle(ViewModel.SelectedApplication.TitleId))
+            {
+                Window.SettingsWindow = new(Window.VirtualFileSystem, Window.ContentManager, ViewModel.SelectedApplication);
+            }
+            else
+            {
+                Window.SettingsWindow = new(Window.VirtualFileSystem, Window.ContentManager);
+            }
 
             await Window.SettingsWindow.ShowDialog(Window);
 

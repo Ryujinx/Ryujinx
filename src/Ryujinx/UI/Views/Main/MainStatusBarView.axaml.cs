@@ -33,20 +33,24 @@ namespace Ryujinx.Ava.UI.Views.Main
 
         private void VsyncStatus_PointerReleased(object sender, PointerReleasedEventArgs e)
         {
+            ConfigurationState config = ConfigurationState.Instance(Window.ViewModel.SelectedApplication != null);
             Window.ViewModel.AppHost.ToggleVSync();
+            config.Graphics.EnableVsync.Value = Window.ViewModel.AppHost.Device.EnableDeviceVsync;
 
             Logger.Info?.Print(LogClass.Application, $"VSync toggled to: {Window.ViewModel.AppHost.Device.EnableDeviceVsync}");
         }
 
         private void DockedStatus_PointerReleased(object sender, PointerReleasedEventArgs e)
         {
-            ConfigurationState.Instance.System.EnableDockedMode.Value = !ConfigurationState.Instance.System.EnableDockedMode.Value;
+            ConfigurationState config = ConfigurationState.Instance(Window.ViewModel.SelectedApplication != null);
+            config.System.EnableDockedMode.Value = !config.System.EnableDockedMode.Value;
         }
 
         private void AspectRatioStatus_OnClick(object sender, RoutedEventArgs e)
         {
-            AspectRatio aspectRatio = ConfigurationState.Instance.Graphics.AspectRatio.Value;
-            ConfigurationState.Instance.Graphics.AspectRatio.Value = (int)aspectRatio + 1 > Enum.GetNames(typeof(AspectRatio)).Length - 1 ? AspectRatio.Fixed4x3 : aspectRatio + 1;
+            ConfigurationState config = ConfigurationState.Instance(Window.ViewModel.SelectedApplication != null);
+            AspectRatio aspectRatio = config.Graphics.AspectRatio.Value;
+            config.Graphics.AspectRatio.Value = (int)aspectRatio + 1 > Enum.GetNames(typeof(AspectRatio)).Length - 1 ? AspectRatio.Fixed4x3 : aspectRatio + 1;
         }
 
         private void Refresh_OnClick(object sender, RoutedEventArgs e)
@@ -56,6 +60,8 @@ namespace Ryujinx.Ava.UI.Views.Main
 
         private void VolumeStatus_OnPointerWheelChanged(object sender, PointerWheelEventArgs e)
         {
+            ConfigurationState config = ConfigurationState.Instance(Window.ViewModel.SelectedApplication != null);
+
             // Change the volume by 5% at a time
             float newValue = Window.ViewModel.Volume + (float)e.Delta.Y * 0.05f;
 
@@ -65,6 +71,8 @@ namespace Ryujinx.Ava.UI.Views.Main
                 > 1 => 1,
                 _ => newValue,
             };
+
+            config.System.AudioVolume.Value = Window.ViewModel.Volume;
 
             e.Handled = true;
         }

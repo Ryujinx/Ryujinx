@@ -151,54 +151,54 @@ namespace Ryujinx.UI.Windows
             _scalingFilter.Changed += (sender, args) => _scalingFilterSlider.Visible = _scalingFilter.ActiveId == "2";
             _galThreading.Changed += (sender, args) =>
             {
-                if (_galThreading.ActiveId != ConfigurationState.Instance.Graphics.BackendThreading.Value.ToString())
+                if (_galThreading.ActiveId != ConfigurationState.Shared.Graphics.BackendThreading.Value.ToString())
                 {
                     GtkDialog.CreateInfoDialog("Warning - Backend Threading", "Ryujinx must be restarted after changing this option for it to apply fully. Depending on your platform, you may need to manually disable your driver's own multithreading when using Ryujinx's.");
                 }
             };
 
             // Setup Currents.
-            if (ConfigurationState.Instance.Logger.EnableTrace)
+            if (ConfigurationState.Shared.Logger.EnableTrace)
             {
                 _traceLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableFileLog)
+            if (ConfigurationState.Shared.Logger.EnableFileLog)
             {
                 _fileLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableError)
+            if (ConfigurationState.Shared.Logger.EnableError)
             {
                 _errorLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableWarn)
+            if (ConfigurationState.Shared.Logger.EnableWarn)
             {
                 _warningLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableInfo)
+            if (ConfigurationState.Shared.Logger.EnableInfo)
             {
                 _infoLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableStub)
+            if (ConfigurationState.Shared.Logger.EnableStub)
             {
                 _stubLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableDebug)
+            if (ConfigurationState.Shared.Logger.EnableDebug)
             {
                 _debugLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableGuest)
+            if (ConfigurationState.Shared.Logger.EnableGuest)
             {
                 _guestLogToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Logger.EnableFsAccessLog)
+            if (ConfigurationState.Shared.Logger.EnableFsAccessLog)
             {
                 _fsAccessLogToggle.Click();
             }
@@ -208,29 +208,29 @@ namespace Ryujinx.UI.Windows
                 _graphicsDebugLevel.Append(level.ToString(), level.ToString());
             }
 
-            _graphicsDebugLevel.SetActiveId(ConfigurationState.Instance.Logger.GraphicsDebugLevel.Value.ToString());
+            _graphicsDebugLevel.SetActiveId(ConfigurationState.Shared.Logger.GraphicsDebugLevel.Value.ToString());
 
-            if (ConfigurationState.Instance.System.EnableDockedMode)
+            if (ConfigurationState.Shared.System.EnableDockedMode)
             {
                 _dockedModeToggle.Click();
             }
 
-            if (ConfigurationState.Instance.EnableDiscordIntegration)
+            if (ConfigurationState.Shared.EnableDiscordIntegration)
             {
                 _discordToggle.Click();
             }
 
-            if (ConfigurationState.Instance.CheckUpdatesOnStart)
+            if (ConfigurationState.Shared.CheckUpdatesOnStart)
             {
                 _checkUpdatesToggle.Click();
             }
 
-            if (ConfigurationState.Instance.ShowConfirmExit)
+            if (ConfigurationState.Shared.ShowConfirmExit)
             {
                 _showConfirmExitToggle.Click();
             }
 
-            switch (ConfigurationState.Instance.HideCursor.Value)
+            switch (ConfigurationState.Shared.HideCursor.Value)
             {
                 case HideCursorMode.Never:
                     _hideCursorNever.Click();
@@ -243,42 +243,42 @@ namespace Ryujinx.UI.Windows
                     break;
             }
 
-            if (ConfigurationState.Instance.Graphics.EnableVsync)
+            if (ConfigurationState.Shared.Graphics.EnableVsync)
             {
                 _vSyncToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Graphics.EnableShaderCache)
+            if (ConfigurationState.Shared.Graphics.EnableShaderCache)
             {
                 _shaderCacheToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Graphics.EnableTextureRecompression)
+            if (ConfigurationState.Shared.Graphics.EnableTextureRecompression)
             {
                 _textureRecompressionToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Graphics.EnableMacroHLE)
+            if (ConfigurationState.Shared.Graphics.EnableMacroHLE)
             {
                 _macroHLEToggle.Click();
             }
 
-            if (ConfigurationState.Instance.System.EnablePtc)
+            if (ConfigurationState.Shared.System.EnablePtc)
             {
                 _ptcToggle.Click();
             }
 
-            if (ConfigurationState.Instance.System.EnableInternetAccess)
+            if (ConfigurationState.Shared.System.EnableInternetAccess)
             {
                 _internetToggle.Click();
             }
 
-            if (ConfigurationState.Instance.System.EnableFsIntegrityChecks)
+            if (ConfigurationState.Shared.System.EnableFsIntegrityChecks)
             {
                 _fsicToggle.Click();
             }
 
-            switch (ConfigurationState.Instance.System.MemoryManagerMode.Value)
+            switch (ConfigurationState.Shared.System.MemoryManagerMode.Value)
             {
                 case MemoryManagerMode.SoftwarePageTable:
                     _mmSoftware.Click();
@@ -291,27 +291,27 @@ namespace Ryujinx.UI.Windows
                     break;
             }
 
-            if (ConfigurationState.Instance.System.ExpandRam)
+            if (ConfigurationState.Shared.System.ExpandRam)
             {
                 _expandRamToggle.Click();
             }
 
-            if (ConfigurationState.Instance.System.IgnoreMissingServices)
+            if (ConfigurationState.Shared.System.IgnoreMissingServices)
             {
                 _ignoreToggle.Click();
             }
 
-            if (ConfigurationState.Instance.Hid.EnableKeyboard)
+            if (ConfigurationState.Shared.Hid.EnableKeyboard)
             {
                 _directKeyboardAccess.Click();
             }
 
-            if (ConfigurationState.Instance.Hid.EnableMouse)
+            if (ConfigurationState.Shared.Hid.EnableMouse)
             {
                 _directMouseAccess.Click();
             }
 
-            if (ConfigurationState.Instance.UI.EnableCustomTheme)
+            if (ConfigurationState.Shared.UI.EnableCustomTheme)
             {
                 _custThemeToggle.Click();
             }
@@ -345,41 +345,41 @@ namespace Ryujinx.UI.Windows
             }
 
             _systemTimeZoneEntry.WidthChars = Math.Max(20, maxLocationLength + 1); // Ensure minimum Entry width
-            _systemTimeZoneEntry.Text = _timeZoneContentManager.SanityCheckDeviceLocationName(ConfigurationState.Instance.System.TimeZone);
+            _systemTimeZoneEntry.Text = _timeZoneContentManager.SanityCheckDeviceLocationName(ConfigurationState.Shared.System.TimeZone);
 
             _systemTimeZoneCompletion.MatchFunc = TimeZoneMatchFunc;
 
-            _systemLanguageSelect.SetActiveId(ConfigurationState.Instance.System.Language.Value.ToString());
-            _systemRegionSelect.SetActiveId(ConfigurationState.Instance.System.Region.Value.ToString());
-            _galThreading.SetActiveId(ConfigurationState.Instance.Graphics.BackendThreading.Value.ToString());
-            _resScaleCombo.SetActiveId(ConfigurationState.Instance.Graphics.ResScale.Value.ToString());
-            _anisotropy.SetActiveId(ConfigurationState.Instance.Graphics.MaxAnisotropy.Value.ToString());
-            _aspectRatio.SetActiveId(((int)ConfigurationState.Instance.Graphics.AspectRatio.Value).ToString());
-            _graphicsBackend.SetActiveId(((int)ConfigurationState.Instance.Graphics.GraphicsBackend.Value).ToString());
-            _antiAliasing.SetActiveId(((int)ConfigurationState.Instance.Graphics.AntiAliasing.Value).ToString());
-            _scalingFilter.SetActiveId(((int)ConfigurationState.Instance.Graphics.ScalingFilter.Value).ToString());
+            _systemLanguageSelect.SetActiveId(ConfigurationState.Shared.System.Language.Value.ToString());
+            _systemRegionSelect.SetActiveId(ConfigurationState.Shared.System.Region.Value.ToString());
+            _galThreading.SetActiveId(ConfigurationState.Shared.Graphics.BackendThreading.Value.ToString());
+            _resScaleCombo.SetActiveId(ConfigurationState.Shared.Graphics.ResScale.Value.ToString());
+            _anisotropy.SetActiveId(ConfigurationState.Shared.Graphics.MaxAnisotropy.Value.ToString());
+            _aspectRatio.SetActiveId(((int)ConfigurationState.Shared.Graphics.AspectRatio.Value).ToString());
+            _graphicsBackend.SetActiveId(((int)ConfigurationState.Shared.Graphics.GraphicsBackend.Value).ToString());
+            _antiAliasing.SetActiveId(((int)ConfigurationState.Shared.Graphics.AntiAliasing.Value).ToString());
+            _scalingFilter.SetActiveId(((int)ConfigurationState.Shared.Graphics.ScalingFilter.Value).ToString());
 
             UpdatePreferredGpuComboBox();
 
             _graphicsBackend.Changed += (sender, e) => UpdatePreferredGpuComboBox();
             PopulateNetworkInterfaces();
-            _multiLanSelect.SetActiveId(ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value);
-            _multiModeSelect.SetActiveId(ConfigurationState.Instance.Multiplayer.Mode.Value.ToString());
+            _multiLanSelect.SetActiveId(ConfigurationState.Shared.Multiplayer.LanInterfaceId.Value);
+            _multiModeSelect.SetActiveId(ConfigurationState.Shared.Multiplayer.Mode.Value.ToString());
 
-            _custThemePath.Buffer.Text = ConfigurationState.Instance.UI.CustomThemePath;
-            _resScaleText.Buffer.Text = ConfigurationState.Instance.Graphics.ResScaleCustom.Value.ToString();
-            _scalingFilterLevel.Value = ConfigurationState.Instance.Graphics.ScalingFilterLevel.Value;
+            _custThemePath.Buffer.Text = ConfigurationState.Shared.UI.CustomThemePath;
+            _resScaleText.Buffer.Text = ConfigurationState.Shared.Graphics.ResScaleCustom.Value.ToString();
+            _scalingFilterLevel.Value = ConfigurationState.Shared.Graphics.ScalingFilterLevel.Value;
             _resScaleText.Visible = _resScaleCombo.ActiveId == "-1";
             _scalingFilterSlider.Visible = _scalingFilter.ActiveId == "2";
-            _graphicsShadersDumpPath.Buffer.Text = ConfigurationState.Instance.Graphics.ShadersDumpPath;
-            _fsLogSpinAdjustment.Value = ConfigurationState.Instance.System.FsGlobalAccessLogMode;
-            _systemTimeOffset = ConfigurationState.Instance.System.SystemTimeOffset;
+            _graphicsShadersDumpPath.Buffer.Text = ConfigurationState.Shared.Graphics.ShadersDumpPath;
+            _fsLogSpinAdjustment.Value = ConfigurationState.Shared.System.FsGlobalAccessLogMode;
+            _systemTimeOffset = ConfigurationState.Shared.System.SystemTimeOffset;
 
             _gameDirsBox.AppendColumn("", new CellRendererText(), "text", 0);
             _gameDirsBoxStore = new ListStore(typeof(string));
             _gameDirsBox.Model = _gameDirsBoxStore;
 
-            foreach (string gameDir in ConfigurationState.Instance.UI.GameDirs.Value)
+            foreach (string gameDir in ConfigurationState.Shared.UI.GameDirs.Value)
             {
                 _gameDirsBoxStore.AppendValues(gameDir);
             }
@@ -405,7 +405,7 @@ namespace Ryujinx.UI.Windows
             _audioBackendSelect.EntryTextColumn = 0;
             _audioBackendSelect.Entry.IsEditable = false;
 
-            switch (ConfigurationState.Instance.System.AudioBackend.Value)
+            switch (ConfigurationState.Shared.System.AudioBackend.Value)
             {
                 case AudioBackend.OpenAl:
                     _audioBackendSelect.SetActiveIter(openAlIter);
@@ -420,13 +420,13 @@ namespace Ryujinx.UI.Windows
                     _audioBackendSelect.SetActiveIter(dummyIter);
                     break;
                 default:
-                    throw new InvalidOperationException($"{nameof(ConfigurationState.Instance.System.AudioBackend)} contains an invalid value: {ConfigurationState.Instance.System.AudioBackend.Value}");
+                    throw new InvalidOperationException($"{nameof(ConfigurationState.Shared.System.AudioBackend)} contains an invalid value: {ConfigurationState.Shared.System.AudioBackend.Value}");
             }
 
             _audioBackendBox.Add(_audioBackendSelect);
             _audioBackendSelect.Show();
 
-            _previousVolumeLevel = ConfigurationState.Instance.System.AudioVolume;
+            _previousVolumeLevel = ConfigurationState.Shared.System.AudioVolume;
             _audioVolumeLabel = new Label("Volume: ");
             _audioVolumeSlider = new Scale(Orientation.Horizontal, 0, 100, 1);
             _audioVolumeLabel.MarginStart = 10;
@@ -481,7 +481,7 @@ namespace Ryujinx.UI.Windows
             if (Enum.Parse<GraphicsBackend>(_graphicsBackend.ActiveId) == GraphicsBackend.Vulkan)
             {
                 var devices = Graphics.Vulkan.VulkanRenderer.GetPhysicalDevices();
-                string preferredGpuIdFromConfig = ConfigurationState.Instance.Graphics.PreferredGpu.Value;
+                string preferredGpuIdFromConfig = ConfigurationState.Shared.Graphics.PreferredGpu.Value;
                 string preferredGpuId = preferredGpuIdFromConfig;
                 bool noGpuId = string.IsNullOrEmpty(preferredGpuIdFromConfig);
 
@@ -568,7 +568,7 @@ namespace Ryujinx.UI.Windows
                     _gameDirsBoxStore.IterNext(ref treeIter);
                 }
 
-                ConfigurationState.Instance.UI.GameDirs.Value = gameDirs;
+                ConfigurationState.Shared.UI.GameDirs.Value = gameDirs;
 
                 _directoryChanged = false;
             }
@@ -592,7 +592,7 @@ namespace Ryujinx.UI.Windows
 
             if (_validTzRegions.Contains(_systemTimeZoneEntry.Text))
             {
-                ConfigurationState.Instance.System.TimeZone.Value = _systemTimeZoneEntry.Text;
+                ConfigurationState.Shared.System.TimeZone.Value = _systemTimeZoneEntry.Text;
             }
 
             MemoryManagerMode memoryMode = MemoryManagerMode.SoftwarePageTable;
@@ -608,69 +608,69 @@ namespace Ryujinx.UI.Windows
             }
 
             BackendThreading backendThreading = Enum.Parse<BackendThreading>(_galThreading.ActiveId);
-            if (ConfigurationState.Instance.Graphics.BackendThreading != backendThreading)
+            if (ConfigurationState.Shared.Graphics.BackendThreading != backendThreading)
             {
                 DriverUtilities.ToggleOGLThreading(backendThreading == BackendThreading.Off);
             }
 
-            ConfigurationState.Instance.Logger.EnableError.Value = _errorLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableTrace.Value = _traceLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableWarn.Value = _warningLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableInfo.Value = _infoLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableStub.Value = _stubLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableDebug.Value = _debugLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableGuest.Value = _guestLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableFsAccessLog.Value = _fsAccessLogToggle.Active;
-            ConfigurationState.Instance.Logger.EnableFileLog.Value = _fileLogToggle.Active;
-            ConfigurationState.Instance.Logger.GraphicsDebugLevel.Value = Enum.Parse<GraphicsDebugLevel>(_graphicsDebugLevel.ActiveId);
-            ConfigurationState.Instance.System.EnableDockedMode.Value = _dockedModeToggle.Active;
-            ConfigurationState.Instance.EnableDiscordIntegration.Value = _discordToggle.Active;
-            ConfigurationState.Instance.CheckUpdatesOnStart.Value = _checkUpdatesToggle.Active;
-            ConfigurationState.Instance.ShowConfirmExit.Value = _showConfirmExitToggle.Active;
-            ConfigurationState.Instance.HideCursor.Value = hideCursor;
-            ConfigurationState.Instance.Graphics.EnableVsync.Value = _vSyncToggle.Active;
-            ConfigurationState.Instance.Graphics.EnableShaderCache.Value = _shaderCacheToggle.Active;
-            ConfigurationState.Instance.Graphics.EnableTextureRecompression.Value = _textureRecompressionToggle.Active;
-            ConfigurationState.Instance.Graphics.EnableMacroHLE.Value = _macroHLEToggle.Active;
-            ConfigurationState.Instance.System.EnablePtc.Value = _ptcToggle.Active;
-            ConfigurationState.Instance.System.EnableInternetAccess.Value = _internetToggle.Active;
-            ConfigurationState.Instance.System.EnableFsIntegrityChecks.Value = _fsicToggle.Active;
-            ConfigurationState.Instance.System.MemoryManagerMode.Value = memoryMode;
-            ConfigurationState.Instance.System.ExpandRam.Value = _expandRamToggle.Active;
-            ConfigurationState.Instance.System.IgnoreMissingServices.Value = _ignoreToggle.Active;
-            ConfigurationState.Instance.Hid.EnableKeyboard.Value = _directKeyboardAccess.Active;
-            ConfigurationState.Instance.Hid.EnableMouse.Value = _directMouseAccess.Active;
-            ConfigurationState.Instance.UI.EnableCustomTheme.Value = _custThemeToggle.Active;
-            ConfigurationState.Instance.System.Language.Value = Enum.Parse<Language>(_systemLanguageSelect.ActiveId);
-            ConfigurationState.Instance.System.Region.Value = Enum.Parse<Common.Configuration.System.Region>(_systemRegionSelect.ActiveId);
-            ConfigurationState.Instance.System.SystemTimeOffset.Value = _systemTimeOffset;
-            ConfigurationState.Instance.UI.CustomThemePath.Value = _custThemePath.Buffer.Text;
-            ConfigurationState.Instance.Graphics.ShadersDumpPath.Value = _graphicsShadersDumpPath.Buffer.Text;
-            ConfigurationState.Instance.System.FsGlobalAccessLogMode.Value = (int)_fsLogSpinAdjustment.Value;
-            ConfigurationState.Instance.Graphics.MaxAnisotropy.Value = float.Parse(_anisotropy.ActiveId, CultureInfo.InvariantCulture);
-            ConfigurationState.Instance.Graphics.AspectRatio.Value = Enum.Parse<AspectRatio>(_aspectRatio.ActiveId);
-            ConfigurationState.Instance.Graphics.BackendThreading.Value = backendThreading;
-            ConfigurationState.Instance.Graphics.GraphicsBackend.Value = Enum.Parse<GraphicsBackend>(_graphicsBackend.ActiveId);
-            ConfigurationState.Instance.Graphics.PreferredGpu.Value = _preferredGpu.ActiveId;
-            ConfigurationState.Instance.Graphics.ResScale.Value = int.Parse(_resScaleCombo.ActiveId);
-            ConfigurationState.Instance.Graphics.ResScaleCustom.Value = resScaleCustom;
-            ConfigurationState.Instance.System.AudioVolume.Value = (float)_audioVolumeSlider.Value / 100.0f;
-            ConfigurationState.Instance.Graphics.AntiAliasing.Value = Enum.Parse<AntiAliasing>(_antiAliasing.ActiveId);
-            ConfigurationState.Instance.Graphics.ScalingFilter.Value = Enum.Parse<ScalingFilter>(_scalingFilter.ActiveId);
-            ConfigurationState.Instance.Graphics.ScalingFilterLevel.Value = (int)_scalingFilterLevel.Value;
-            ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value = _multiLanSelect.ActiveId;
+            ConfigurationState.Shared.Logger.EnableError.Value = _errorLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableTrace.Value = _traceLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableWarn.Value = _warningLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableInfo.Value = _infoLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableStub.Value = _stubLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableDebug.Value = _debugLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableGuest.Value = _guestLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableFsAccessLog.Value = _fsAccessLogToggle.Active;
+            ConfigurationState.Shared.Logger.EnableFileLog.Value = _fileLogToggle.Active;
+            ConfigurationState.Shared.Logger.GraphicsDebugLevel.Value = Enum.Parse<GraphicsDebugLevel>(_graphicsDebugLevel.ActiveId);
+            ConfigurationState.Shared.System.EnableDockedMode.Value = _dockedModeToggle.Active;
+            ConfigurationState.Shared.EnableDiscordIntegration.Value = _discordToggle.Active;
+            ConfigurationState.Shared.CheckUpdatesOnStart.Value = _checkUpdatesToggle.Active;
+            ConfigurationState.Shared.ShowConfirmExit.Value = _showConfirmExitToggle.Active;
+            ConfigurationState.Shared.HideCursor.Value = hideCursor;
+            ConfigurationState.Shared.Graphics.EnableVsync.Value = _vSyncToggle.Active;
+            ConfigurationState.Shared.Graphics.EnableShaderCache.Value = _shaderCacheToggle.Active;
+            ConfigurationState.Shared.Graphics.EnableTextureRecompression.Value = _textureRecompressionToggle.Active;
+            ConfigurationState.Shared.Graphics.EnableMacroHLE.Value = _macroHLEToggle.Active;
+            ConfigurationState.Shared.System.EnablePtc.Value = _ptcToggle.Active;
+            ConfigurationState.Shared.System.EnableInternetAccess.Value = _internetToggle.Active;
+            ConfigurationState.Shared.System.EnableFsIntegrityChecks.Value = _fsicToggle.Active;
+            ConfigurationState.Shared.System.MemoryManagerMode.Value = memoryMode;
+            ConfigurationState.Shared.System.ExpandRam.Value = _expandRamToggle.Active;
+            ConfigurationState.Shared.System.IgnoreMissingServices.Value = _ignoreToggle.Active;
+            ConfigurationState.Shared.Hid.EnableKeyboard.Value = _directKeyboardAccess.Active;
+            ConfigurationState.Shared.Hid.EnableMouse.Value = _directMouseAccess.Active;
+            ConfigurationState.Shared.UI.EnableCustomTheme.Value = _custThemeToggle.Active;
+            ConfigurationState.Shared.System.Language.Value = Enum.Parse<Language>(_systemLanguageSelect.ActiveId);
+            ConfigurationState.Shared.System.Region.Value = Enum.Parse<Common.Configuration.System.Region>(_systemRegionSelect.ActiveId);
+            ConfigurationState.Shared.System.SystemTimeOffset.Value = _systemTimeOffset;
+            ConfigurationState.Shared.UI.CustomThemePath.Value = _custThemePath.Buffer.Text;
+            ConfigurationState.Shared.Graphics.ShadersDumpPath.Value = _graphicsShadersDumpPath.Buffer.Text;
+            ConfigurationState.Shared.System.FsGlobalAccessLogMode.Value = (int)_fsLogSpinAdjustment.Value;
+            ConfigurationState.Shared.Graphics.MaxAnisotropy.Value = float.Parse(_anisotropy.ActiveId, CultureInfo.InvariantCulture);
+            ConfigurationState.Shared.Graphics.AspectRatio.Value = Enum.Parse<AspectRatio>(_aspectRatio.ActiveId);
+            ConfigurationState.Shared.Graphics.BackendThreading.Value = backendThreading;
+            ConfigurationState.Shared.Graphics.GraphicsBackend.Value = Enum.Parse<GraphicsBackend>(_graphicsBackend.ActiveId);
+            ConfigurationState.Shared.Graphics.PreferredGpu.Value = _preferredGpu.ActiveId;
+            ConfigurationState.Shared.Graphics.ResScale.Value = int.Parse(_resScaleCombo.ActiveId);
+            ConfigurationState.Shared.Graphics.ResScaleCustom.Value = resScaleCustom;
+            ConfigurationState.Shared.System.AudioVolume.Value = (float)_audioVolumeSlider.Value / 100.0f;
+            ConfigurationState.Shared.Graphics.AntiAliasing.Value = Enum.Parse<AntiAliasing>(_antiAliasing.ActiveId);
+            ConfigurationState.Shared.Graphics.ScalingFilter.Value = Enum.Parse<ScalingFilter>(_scalingFilter.ActiveId);
+            ConfigurationState.Shared.Graphics.ScalingFilterLevel.Value = (int)_scalingFilterLevel.Value;
+            ConfigurationState.Shared.Multiplayer.LanInterfaceId.Value = _multiLanSelect.ActiveId;
 
-            _previousVolumeLevel = ConfigurationState.Instance.System.AudioVolume.Value;
+            _previousVolumeLevel = ConfigurationState.Shared.System.AudioVolume.Value;
 
-            ConfigurationState.Instance.Multiplayer.Mode.Value = Enum.Parse<MultiplayerMode>(_multiModeSelect.ActiveId);
-            ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value = _multiLanSelect.ActiveId;
+            ConfigurationState.Shared.Multiplayer.Mode.Value = Enum.Parse<MultiplayerMode>(_multiModeSelect.ActiveId);
+            ConfigurationState.Shared.Multiplayer.LanInterfaceId.Value = _multiLanSelect.ActiveId;
 
             if (_audioBackendSelect.GetActiveIter(out TreeIter activeIter))
             {
-                ConfigurationState.Instance.System.AudioBackend.Value = (AudioBackend)_audioBackendStore.GetValue(activeIter, 1);
+                ConfigurationState.Shared.System.AudioBackend.Value = (AudioBackend)_audioBackendStore.GetValue(activeIter, 1);
             }
 
-            ConfigurationState.Instance.ToFileFormat().SaveConfig(Program.ConfigurationPath);
+            ConfigurationState.Shared.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
             _parent.UpdateInternetAccess();
             MainWindow.UpdateGraphicsConfig();
@@ -684,7 +684,7 @@ namespace Ryujinx.UI.Windows
         {
             if (!_validTzRegions.Contains(_systemTimeZoneEntry.Text))
             {
-                _systemTimeZoneEntry.Text = _timeZoneContentManager.SanityCheckDeviceLocationName(ConfigurationState.Instance.System.TimeZone);
+                _systemTimeZoneEntry.Text = _timeZoneContentManager.SanityCheckDeviceLocationName(ConfigurationState.Shared.System.TimeZone);
             }
         }
 
@@ -824,7 +824,7 @@ namespace Ryujinx.UI.Windows
 
         private void VolumeSlider_OnChange(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.System.AudioVolume.Value = (float)(_audioVolumeSlider.Value / 100);
+            ConfigurationState.Shared.System.AudioVolume.Value = (float)(_audioVolumeSlider.Value / 100);
         }
 
         private void SaveToggle_Activated(object sender, EventArgs args)
@@ -840,7 +840,7 @@ namespace Ryujinx.UI.Windows
 
         private void CloseToggle_Activated(object sender, EventArgs args)
         {
-            ConfigurationState.Instance.System.AudioVolume.Value = _previousVolumeLevel;
+            ConfigurationState.Shared.System.AudioVolume.Value = _previousVolumeLevel;
             Dispose();
         }
     }

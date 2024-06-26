@@ -88,7 +88,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public AboutWindowViewModel()
         {
             Version = Program.Version;
-            UpdateLogoTheme(ConfigurationState.Instance.UI.BaseStyle.Value);
+            UpdateLogoTheme(ConfigurationState.Shared.UI.BaseStyle.Value);
             Dispatcher.UIThread.InvokeAsync(DownloadPatronsJson);
 
             ThemeManager.ThemeChanged += ThemeManager_ThemeChanged;
@@ -96,7 +96,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void ThemeManager_ThemeChanged(object sender, EventArgs e)
         {
-            Dispatcher.UIThread.Post(() => UpdateLogoTheme(ConfigurationState.Instance.UI.BaseStyle.Value));
+            Dispatcher.UIThread.Post(() => UpdateLogoTheme(ConfigurationState.Shared.UI.BaseStyle.Value));
         }
 
         private void UpdateLogoTheme(string theme)

@@ -112,7 +112,7 @@ namespace Ryujinx.Ava
             PrintSystemInfo();
 
             // Enable OGL multithreading on the driver, when available.
-            DriverUtilities.ToggleOGLThreading(ConfigurationState.Instance.Graphics.BackendThreading == BackendThreading.Off);
+            DriverUtilities.ToggleOGLThreading(ConfigurationState.Shared.Graphics.BackendThreading == BackendThreading.Off);
 
             // Check if keys exists.
             if (!File.Exists(Path.Combine(AppDataManager.KeysDirPath, "prod.keys")))
@@ -150,8 +150,8 @@ namespace Ryujinx.Ava
                 ConfigurationPath = appDataConfigurationPath;
                 Logger.Notice.Print(LogClass.Application, $"No configuration file found. Saving default configuration to: {ConfigurationPath}");
 
-                ConfigurationState.Instance.LoadDefault();
-                ConfigurationState.Instance.ToFileFormat().SaveConfig(ConfigurationPath);
+                ConfigurationState.Shared.LoadDefault();
+                ConfigurationState.Shared.ToFileFormat().SaveConfig(ConfigurationPath);
             }
             else
             {
@@ -159,46 +159,46 @@ namespace Ryujinx.Ava
 
                 if (ConfigurationFileFormat.TryLoad(ConfigurationPath, out ConfigurationFileFormat configurationFileFormat))
                 {
-                    ConfigurationState.Instance.Load(configurationFileFormat, ConfigurationPath);
+                    ConfigurationState.Shared.Load(configurationFileFormat, ConfigurationPath);
                 }
                 else
                 {
                     Logger.Warning?.PrintMsg(LogClass.Application, $"Failed to load config! Loading the default config instead.\nFailed config location: {ConfigurationPath}");
 
-                    ConfigurationState.Instance.LoadDefault();
+                    ConfigurationState.Shared.LoadDefault();
                 }
             }
 
-            UseHardwareAcceleration = ConfigurationState.Instance.EnableHardwareAcceleration.Value;
+            UseHardwareAcceleration = ConfigurationState.Shared.EnableHardwareAcceleration.Value;
 
             // Check if graphics backend was overridden
             if (CommandLineState.OverrideGraphicsBackend != null)
             {
                 if (CommandLineState.OverrideGraphicsBackend.ToLower() == "opengl")
                 {
-                    ConfigurationState.Instance.Graphics.GraphicsBackend.Value = GraphicsBackend.OpenGl;
+                    ConfigurationState.Shared.Graphics.GraphicsBackend.Value = GraphicsBackend.OpenGl;
                 }
                 else if (CommandLineState.OverrideGraphicsBackend.ToLower() == "vulkan")
                 {
-                    ConfigurationState.Instance.Graphics.GraphicsBackend.Value = GraphicsBackend.Vulkan;
+                    ConfigurationState.Shared.Graphics.GraphicsBackend.Value = GraphicsBackend.Vulkan;
                 }
             }
 
             // Check if docked mode was overriden.
             if (CommandLineState.OverrideDockedMode.HasValue)
             {
-                ConfigurationState.Instance.System.EnableDockedMode.Value = CommandLineState.OverrideDockedMode.Value;
+                ConfigurationState.Shared.System.EnableDockedMode.Value = CommandLineState.OverrideDockedMode.Value;
             }
 
             // Check if HideCursor was overridden.
             if (CommandLineState.OverrideHideCursor is not null)
             {
-                ConfigurationState.Instance.HideCursor.Value = CommandLineState.OverrideHideCursor!.ToLower() switch
+                ConfigurationState.Shared.HideCursor.Value = CommandLineState.OverrideHideCursor!.ToLower() switch
                 {
                     "never" => HideCursorMode.Never,
                     "onidle" => HideCursorMode.OnIdle,
                     "always" => HideCursorMode.Always,
-                    _ => ConfigurationState.Instance.HideCursor.Value,
+                    _ => ConfigurationState.Shared.HideCursor.Value,
                 };
             }
 

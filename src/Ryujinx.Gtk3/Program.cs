@@ -183,8 +183,8 @@ namespace Ryujinx
                 ConfigurationPath = appDataConfigurationPath;
                 Logger.Notice.Print(LogClass.Application, $"No configuration file found. Saving default configuration to: {ConfigurationPath}");
 
-                ConfigurationState.Instance.LoadDefault();
-                ConfigurationState.Instance.ToFileFormat().SaveConfig(ConfigurationPath);
+                ConfigurationState.Shared.LoadDefault();
+                ConfigurationState.Shared.ToFileFormat().SaveConfig(ConfigurationPath);
             }
             else
             {
@@ -192,13 +192,13 @@ namespace Ryujinx
 
                 if (ConfigurationFileFormat.TryLoad(ConfigurationPath, out ConfigurationFileFormat configurationFileFormat))
                 {
-                    ConfigurationState.Instance.Load(configurationFileFormat, ConfigurationPath);
+                    ConfigurationState.Shared.Load(configurationFileFormat, ConfigurationPath);
                 }
                 else
                 {
                     Logger.Warning?.PrintMsg(LogClass.Application, $"Failed to load config! Loading the default config instead.\nFailed config location: {ConfigurationPath}");
 
-                    ConfigurationState.Instance.LoadDefault();
+                    ConfigurationState.Shared.LoadDefault();
                 }
             }
 
@@ -207,37 +207,37 @@ namespace Ryujinx
             {
                 if (CommandLineState.OverrideGraphicsBackend.ToLower() == "opengl")
                 {
-                    ConfigurationState.Instance.Graphics.GraphicsBackend.Value = GraphicsBackend.OpenGl;
+                    ConfigurationState.Shared.Graphics.GraphicsBackend.Value = GraphicsBackend.OpenGl;
                 }
                 else if (CommandLineState.OverrideGraphicsBackend.ToLower() == "vulkan")
                 {
-                    ConfigurationState.Instance.Graphics.GraphicsBackend.Value = GraphicsBackend.Vulkan;
+                    ConfigurationState.Shared.Graphics.GraphicsBackend.Value = GraphicsBackend.Vulkan;
                 }
             }
 
             // Check if HideCursor was overridden.
             if (CommandLineState.OverrideHideCursor is not null)
             {
-                ConfigurationState.Instance.HideCursor.Value = CommandLineState.OverrideHideCursor!.ToLower() switch
+                ConfigurationState.Shared.HideCursor.Value = CommandLineState.OverrideHideCursor!.ToLower() switch
                 {
                     "never" => HideCursorMode.Never,
                     "onidle" => HideCursorMode.OnIdle,
                     "always" => HideCursorMode.Always,
-                    _ => ConfigurationState.Instance.HideCursor.Value,
+                    _ => ConfigurationState.Shared.HideCursor.Value,
                 };
             }
 
             // Check if docked mode was overridden.
             if (CommandLineState.OverrideDockedMode.HasValue)
             {
-                ConfigurationState.Instance.System.EnableDockedMode.Value = CommandLineState.OverrideDockedMode.Value;
+                ConfigurationState.Shared.System.EnableDockedMode.Value = CommandLineState.OverrideDockedMode.Value;
             }
 
             // Logging system information.
             PrintSystemInfo();
 
             // Enable OGL multithreading on the driver, when available.
-            BackendThreading threadingMode = ConfigurationState.Instance.Graphics.BackendThreading;
+            BackendThreading threadingMode = ConfigurationState.Shared.Graphics.BackendThreading;
             DriverUtilities.ToggleOGLThreading(threadingMode == BackendThreading.Off);
 
             // Initialize Gtk.
@@ -325,7 +325,7 @@ namespace Ryujinx
                 mainWindow.RunApplication(CommandLineState.LaunchPathArg, CommandLineState.StartFullscreenArg);
             }
 
-            if (ConfigurationState.Instance.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))
+            if (ConfigurationState.Shared.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))
             {
                 Updater.BeginParse(mainWindow, false).ContinueWith(task =>
                 {

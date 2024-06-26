@@ -637,7 +637,7 @@ namespace Ryujinx.UI.Widgets
 
         private void CreateShortcut_Clicked(object sender, EventArgs args)
         {
-            byte[] appIcon = new ApplicationLibrary(_virtualFileSystem).GetApplicationIcon(_titleFilePath, ConfigurationState.Instance.System.Language);
+            byte[] appIcon = new ApplicationLibrary(_virtualFileSystem).GetApplicationIcon(_titleFilePath, ConfigurationState.Shared.System.Language);
             ShortcutHelper.CreateAppShortcut(_titleFilePath, _titleName, _titleIdText, appIcon);
         }
     }

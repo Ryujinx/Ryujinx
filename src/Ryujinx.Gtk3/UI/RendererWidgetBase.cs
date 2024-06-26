@@ -115,25 +115,25 @@ namespace Ryujinx.UI
 
             _gpuCancellationTokenSource = new CancellationTokenSource();
 
-            _hideCursorMode = ConfigurationState.Instance.HideCursor;
+            _hideCursorMode = ConfigurationState.Shared.HideCursor;
             _lastCursorMoveTime = Stopwatch.GetTimestamp();
 
-            ConfigurationState.Instance.HideCursor.Event += HideCursorStateChanged;
-            ConfigurationState.Instance.Graphics.AntiAliasing.Event += UpdateAnriAliasing;
-            ConfigurationState.Instance.Graphics.ScalingFilter.Event += UpdateScalingFilter;
-            ConfigurationState.Instance.Graphics.ScalingFilterLevel.Event += UpdateScalingFilterLevel;
+            ConfigurationState.Shared.HideCursor.Event += HideCursorStateChanged;
+            ConfigurationState.Shared.Graphics.AntiAliasing.Event += UpdateAnriAliasing;
+            ConfigurationState.Shared.Graphics.ScalingFilter.Event += UpdateScalingFilter;
+            ConfigurationState.Shared.Graphics.ScalingFilterLevel.Event += UpdateScalingFilterLevel;
         }
 
         private void UpdateScalingFilterLevel(object sender, ReactiveEventArgs<int> e)
         {
-            Renderer.Window.SetScalingFilter((ScalingFilter)ConfigurationState.Instance.Graphics.ScalingFilter.Value);
-            Renderer.Window.SetScalingFilterLevel(ConfigurationState.Instance.Graphics.ScalingFilterLevel.Value);
+            Renderer.Window.SetScalingFilter((ScalingFilter)ConfigurationState.Shared.Graphics.ScalingFilter.Value);
+            Renderer.Window.SetScalingFilterLevel(ConfigurationState.Shared.Graphics.ScalingFilterLevel.Value);
         }
 
         private void UpdateScalingFilter(object sender, ReactiveEventArgs<Ryujinx.Common.Configuration.ScalingFilter> e)
         {
-            Renderer.Window.SetScalingFilter((ScalingFilter)ConfigurationState.Instance.Graphics.ScalingFilter.Value);
-            Renderer.Window.SetScalingFilterLevel(ConfigurationState.Instance.Graphics.ScalingFilterLevel.Value);
+            Renderer.Window.SetScalingFilter((ScalingFilter)ConfigurationState.Shared.Graphics.ScalingFilter.Value);
+            Renderer.Window.SetScalingFilterLevel(ConfigurationState.Shared.Graphics.ScalingFilterLevel.Value);
         }
 
         public abstract void InitializeRenderer();
@@ -172,10 +172,10 @@ namespace Ryujinx.UI
 
         private void Renderer_Destroyed(object sender, EventArgs e)
         {
-            ConfigurationState.Instance.HideCursor.Event -= HideCursorStateChanged;
-            ConfigurationState.Instance.Graphics.AntiAliasing.Event -= UpdateAnriAliasing;
-            ConfigurationState.Instance.Graphics.ScalingFilter.Event -= UpdateScalingFilter;
-            ConfigurationState.Instance.Graphics.ScalingFilterLevel.Event -= UpdateScalingFilterLevel;
+            ConfigurationState.Shared.HideCursor.Event -= HideCursorStateChanged;
+            ConfigurationState.Shared.Graphics.AntiAliasing.Event -= UpdateAnriAliasing;
+            ConfigurationState.Shared.Graphics.ScalingFilter.Event -= UpdateScalingFilter;
+            ConfigurationState.Shared.Graphics.ScalingFilterLevel.Event -= UpdateScalingFilterLevel;
 
             NpadManager.Dispose();
             Dispose();
@@ -193,7 +193,7 @@ namespace Ryujinx.UI
                 _lastCursorMoveTime = Stopwatch.GetTimestamp();
             }
 
-            if (ConfigurationState.Instance.Hid.EnableMouse)
+            if (ConfigurationState.Shared.Hid.EnableMouse)
             {
                 Window.Cursor = _invisibleCursor;
             }
@@ -205,7 +205,7 @@ namespace Ryujinx.UI
 
         protected override bool OnEnterNotifyEvent(EventCrossing evnt)
         {
-            Window.Cursor = ConfigurationState.Instance.Hid.EnableMouse ? _invisibleCursor : null;
+            Window.Cursor = ConfigurationState.Shared.Hid.EnableMouse ? _invisibleCursor : null;
 
             _isMouseInClient = true;
 
@@ -294,7 +294,7 @@ namespace Ryujinx.UI
                     {
                         if (keyboard.IsPressed(Key.Escape))
                         {
-                            if (!ConfigurationState.Instance.ShowConfirmExit || GtkDialog.CreateExitDialog())
+                            if (!ConfigurationState.Shared.ShowConfirmExit || GtkDialog.CreateExitDialog())
                             {
                                 Exit();
                             }
@@ -316,8 +316,8 @@ namespace Ryujinx.UI
             {
                 if (toggleDockedMode)
                 {
-                    ConfigurationState.Instance.System.EnableDockedMode.Value =
-                        !ConfigurationState.Instance.System.EnableDockedMode.Value;
+                    ConfigurationState.Shared.System.EnableDockedMode.Value =
+                        !ConfigurationState.Shared.System.EnableDockedMode.Value;
                 }
             }
 
@@ -325,7 +325,7 @@ namespace Ryujinx.UI
 
             if (_isMouseInClient)
             {
-                if (ConfigurationState.Instance.Hid.EnableMouse.Value)
+                if (ConfigurationState.Shared.Hid.EnableMouse.Value)
                 {
                     Window.Cursor = _invisibleCursor;
                 }
@@ -367,7 +367,7 @@ namespace Ryujinx.UI
                 Renderer.ScreenCaptured += Renderer_ScreenCaptured;
             }
 
-            NpadManager.Initialize(device, ConfigurationState.Instance.Hid.InputConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
+            NpadManager.Initialize(device, ConfigurationState.Shared.Hid.InputConfig, ConfigurationState.Shared.Hid.EnableKeyboard, ConfigurationState.Shared.Hid.EnableMouse);
             TouchScreenManager.Initialize(device);
         }
 
@@ -443,9 +443,9 @@ namespace Ryujinx.UI
 
             Device.Gpu.Renderer.Initialize(_glLogLevel);
 
-            Renderer.Window.SetAntiAliasing((Graphics.GAL.AntiAliasing)ConfigurationState.Instance.Graphics.AntiAliasing.Value);
-            Renderer.Window.SetScalingFilter((Graphics.GAL.ScalingFilter)ConfigurationState.Instance.Graphics.ScalingFilter.Value);
-            Renderer.Window.SetScalingFilterLevel(ConfigurationState.Instance.Graphics.ScalingFilterLevel.Value);
+            Renderer.Window.SetAntiAliasing((Graphics.GAL.AntiAliasing)ConfigurationState.Shared.Graphics.AntiAliasing.Value);
+            Renderer.Window.SetScalingFilter((Graphics.GAL.ScalingFilter)ConfigurationState.Shared.Graphics.ScalingFilter.Value);
+            Renderer.Window.SetScalingFilterLevel(ConfigurationState.Shared.Graphics.ScalingFilterLevel.Value);
 
             _gpuBackendName = GetGpuBackendName();
             _gpuDriverName = GetGpuDriverName();
@@ -484,7 +484,7 @@ namespace Ryujinx.UI
 
                     if (_ticks >= _ticksPerFrame)
                     {
-                        string dockedMode = ConfigurationState.Instance.System.EnableDockedMode ? "Docked" : "Handheld";
+                        string dockedMode = ConfigurationState.Shared.System.EnableDockedMode ? "Docked" : "Handheld";
                         float scale = GraphicsConfig.ResScale;
                         if (scale != 1)
                         {
@@ -496,7 +496,7 @@ namespace Ryujinx.UI
                             Device.GetVolume(),
                             _gpuBackendName,
                             dockedMode,
-                            ConfigurationState.Instance.Graphics.AspectRatio.Value.ToText(),
+                            ConfigurationState.Shared.Graphics.AspectRatio.Value.ToText(),
                             $"Game: {Device.Statistics.GetGameFrameRate():00.00} FPS ({Device.Statistics.GetGameFrameTime():00.00} ms)",
                             $"FIFO: {Device.Statistics.GetFifoPercent():0.00} %",
                             $"GPU: {_gpuDriverName}"));
@@ -644,7 +644,7 @@ namespace Ryujinx.UI
                 });
             }
 
-            NpadManager.Update(ConfigurationState.Instance.Graphics.AspectRatio.Value.ToFloat());
+            NpadManager.Update(ConfigurationState.Shared.Graphics.AspectRatio.Value.ToFloat());
 
             if ((Toplevel as MainWindow).IsFocused)
             {
@@ -681,7 +681,7 @@ namespace Ryujinx.UI
                 {
                     if (Device.IsAudioMuted())
                     {
-                        Device.SetVolume(ConfigurationState.Instance.System.AudioVolume);
+                        Device.SetVolume(ConfigurationState.Shared.System.AudioVolume);
                     }
                     else
                     {
@@ -723,9 +723,9 @@ namespace Ryujinx.UI
             bool hasTouch = false;
 
             // Get screen touch position
-            if ((Toplevel as MainWindow).IsFocused && !ConfigurationState.Instance.Hid.EnableMouse)
+            if ((Toplevel as MainWindow).IsFocused && !ConfigurationState.Shared.Hid.EnableMouse)
             {
-                hasTouch = TouchScreenManager.Update(true, (_inputManager.MouseDriver as GTK3MouseDriver).IsButtonPressed(MouseButton.Button1), ConfigurationState.Instance.Graphics.AspectRatio.Value.ToFloat());
+                hasTouch = TouchScreenManager.Update(true, (_inputManager.MouseDriver as GTK3MouseDriver).IsButtonPressed(MouseButton.Button1), ConfigurationState.Shared.Graphics.AspectRatio.Value.ToFloat());
             }
 
             if (!hasTouch)
@@ -757,47 +757,47 @@ namespace Ryujinx.UI
         {
             KeyboardHotkeyState state = KeyboardHotkeyState.None;
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ToggleVsync))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.ToggleVsync))
             {
                 state |= KeyboardHotkeyState.ToggleVSync;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.Screenshot))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.Screenshot))
             {
                 state |= KeyboardHotkeyState.Screenshot;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ShowUI))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.ShowUI))
             {
                 state |= KeyboardHotkeyState.ShowUI;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.Pause))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.Pause))
             {
                 state |= KeyboardHotkeyState.Pause;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ToggleMute))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.ToggleMute))
             {
                 state |= KeyboardHotkeyState.ToggleMute;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ResScaleUp))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.ResScaleUp))
             {
                 state |= KeyboardHotkeyState.ResScaleUp;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ResScaleDown))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.ResScaleDown))
             {
                 state |= KeyboardHotkeyState.ResScaleDown;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.VolumeUp))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.VolumeUp))
             {
                 state |= KeyboardHotkeyState.VolumeUp;
             }
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.VolumeDown))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Shared.Hid.Hotkeys.Value.VolumeDown))
             {
                 state |= KeyboardHotkeyState.VolumeDown;
             }

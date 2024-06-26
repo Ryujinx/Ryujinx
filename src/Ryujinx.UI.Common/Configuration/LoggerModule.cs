@@ -11,16 +11,16 @@ namespace Ryujinx.UI.Common.Configuration
     {
         public static void Initialize()
         {
-            ConfigurationState.Instance.Logger.EnableDebug.Event += ReloadEnableDebug;
-            ConfigurationState.Instance.Logger.EnableStub.Event += ReloadEnableStub;
-            ConfigurationState.Instance.Logger.EnableInfo.Event += ReloadEnableInfo;
-            ConfigurationState.Instance.Logger.EnableWarn.Event += ReloadEnableWarning;
-            ConfigurationState.Instance.Logger.EnableError.Event += ReloadEnableError;
-            ConfigurationState.Instance.Logger.EnableTrace.Event += ReloadEnableTrace;
-            ConfigurationState.Instance.Logger.EnableGuest.Event += ReloadEnableGuest;
-            ConfigurationState.Instance.Logger.EnableFsAccessLog.Event += ReloadEnableFsAccessLog;
-            ConfigurationState.Instance.Logger.FilteredClasses.Event += ReloadFilteredClasses;
-            ConfigurationState.Instance.Logger.EnableFileLog.Event += ReloadFileLogger;
+            ConfigurationState.Shared.Logger.EnableDebug.Event += ReloadEnableDebug;
+            ConfigurationState.Shared.Logger.EnableStub.Event += ReloadEnableStub;
+            ConfigurationState.Shared.Logger.EnableInfo.Event += ReloadEnableInfo;
+            ConfigurationState.Shared.Logger.EnableWarn.Event += ReloadEnableWarning;
+            ConfigurationState.Shared.Logger.EnableError.Event += ReloadEnableError;
+            ConfigurationState.Shared.Logger.EnableTrace.Event += ReloadEnableTrace;
+            ConfigurationState.Shared.Logger.EnableGuest.Event += ReloadEnableGuest;
+            ConfigurationState.Shared.Logger.EnableFsAccessLog.Event += ReloadEnableFsAccessLog;
+            ConfigurationState.Shared.Logger.FilteredClasses.Event += ReloadFilteredClasses;
+            ConfigurationState.Shared.Logger.EnableFileLog.Event += ReloadFileLogger;
         }
 
         private static void ReloadEnableDebug(object sender, ReactiveEventArgs<bool> e)

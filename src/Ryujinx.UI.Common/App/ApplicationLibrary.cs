@@ -116,12 +116,12 @@ namespace Ryujinx.UI.App.Common
                         IEnumerable<string> files = Directory.EnumerateFiles(appDir, "*", SearchOption.AllDirectories).Where(file =>
                         {
                             return
-                            (Path.GetExtension(file).ToLower() is ".nsp" && ConfigurationState.Instance.UI.ShownFileTypes.NSP.Value) ||
-                            (Path.GetExtension(file).ToLower() is ".pfs0" && ConfigurationState.Instance.UI.ShownFileTypes.PFS0.Value) ||
-                            (Path.GetExtension(file).ToLower() is ".xci" && ConfigurationState.Instance.UI.ShownFileTypes.XCI.Value) ||
-                            (Path.GetExtension(file).ToLower() is ".nca" && ConfigurationState.Instance.UI.ShownFileTypes.NCA.Value) ||
-                            (Path.GetExtension(file).ToLower() is ".nro" && ConfigurationState.Instance.UI.ShownFileTypes.NRO.Value) ||
-                            (Path.GetExtension(file).ToLower() is ".nso" && ConfigurationState.Instance.UI.ShownFileTypes.NSO.Value);
+                            (Path.GetExtension(file).ToLower() is ".nsp" && ConfigurationState.Shared.UI.ShownFileTypes.NSP.Value) ||
+                            (Path.GetExtension(file).ToLower() is ".pfs0" && ConfigurationState.Shared.UI.ShownFileTypes.PFS0.Value) ||
+                            (Path.GetExtension(file).ToLower() is ".xci" && ConfigurationState.Shared.UI.ShownFileTypes.XCI.Value) ||
+                            (Path.GetExtension(file).ToLower() is ".nca" && ConfigurationState.Shared.UI.ShownFileTypes.NCA.Value) ||
+                            (Path.GetExtension(file).ToLower() is ".nro" && ConfigurationState.Shared.UI.ShownFileTypes.NRO.Value) ||
+                            (Path.GetExtension(file).ToLower() is ".nso" && ConfigurationState.Shared.UI.ShownFileTypes.NSO.Value);
                         });
 
                         foreach (string app in files)

@@ -3,7 +3,9 @@ using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.ViewModels.Input;
 using Ryujinx.HLE.FileSystem;
+using Ryujinx.UI.App.Common;
 using System;
 
 namespace Ryujinx.Ava.UI.Windows
@@ -17,6 +19,20 @@ namespace Ryujinx.Ava.UI.Windows
             Title = $"Ryujinx {Program.Version} - {LocaleManager.Instance[LocaleKeys.Settings]}";
 
             ViewModel = new SettingsViewModel(virtualFileSystem, contentManager);
+            DataContext = ViewModel;
+
+            ViewModel.CloseWindow += Close;
+            ViewModel.SaveSettingsEvent += SaveSettings;
+
+            InitializeComponent();
+            Load();
+        }
+
+        public SettingsWindow(VirtualFileSystem virtualFileSystem, ContentManager contentManager,
+            ApplicationData applicationData)
+        {
+            Title = $"Ryujinx {Program.Version} - {LocaleManager.Instance[LocaleKeys.Settings]} - {applicationData.TitleName}";
+            ViewModel = new SettingsViewModel(virtualFileSystem, contentManager, applicationData);
             DataContext = ViewModel;
 
             ViewModel.CloseWindow += Close;
@@ -49,7 +65,7 @@ namespace Ryujinx.Ava.UI.Windows
         {
             Pages.Children.Clear();
             NavPanel.SelectionChanged += NavPanelOnSelectionChanged;
-            NavPanel.SelectedItem = NavPanel.MenuItems.ElementAt(0);
+            NavPanel.SelectedItem = ViewModel.IsTitleSpecificSettings ? NavPanel.MenuItems.ElementAt(1) : NavPanel.MenuItems.ElementAt(0);
         }
 
         private void NavPanelOnSelectionChanged(object sender, NavigationViewSelectionChangedEventArgs e)
@@ -63,6 +79,8 @@ namespace Ryujinx.Ava.UI.Windows
                         NavPanel.Content = UiPage;
                         break;
                     case "InputPage":
+                        (InputPage.InputView.DataContext as InputViewModel)?.SetApplicationData(
+                            ViewModel.ApplicationData);
                         NavPanel.Content = InputPage;
                         break;
                     case "HotkeysPage":
