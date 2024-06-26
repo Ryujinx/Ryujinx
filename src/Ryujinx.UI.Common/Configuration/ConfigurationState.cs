@@ -269,6 +269,11 @@ namespace Ryujinx.UI.Common.Configuration
             /// </summary>
             public ReactiveObject<GraphicsDebugLevel> GraphicsDebugLevel { get; private set; }
 
+            /// <summary>
+            /// Disables the 500MB imposed file size limit on logs.
+            /// </summary>
+            public ReactiveObject<bool> DisableLogFileSizeLimit { get; private set; }
+
             public LoggerSection()
             {
                 EnableDebug = new ReactiveObject<bool>();
@@ -283,6 +288,7 @@ namespace Ryujinx.UI.Common.Configuration
                 EnableFileLog = new ReactiveObject<bool>();
                 EnableFileLog.Event += static (sender, e) => LogValueChange(e, nameof(EnableFileLog));
                 GraphicsDebugLevel = new ReactiveObject<GraphicsDebugLevel>();
+                DisableLogFileSizeLimit = new ReactiveObject<bool>();
             }
         }
 
@@ -683,6 +689,7 @@ namespace Ryujinx.UI.Common.Configuration
                 LoggingEnableFsAccessLog = Logger.EnableFsAccessLog,
                 LoggingFilteredClasses = Logger.FilteredClasses,
                 LoggingGraphicsDebugLevel = Logger.GraphicsDebugLevel,
+                LoggingDisableLogFileSizeLimit = Logger.DisableLogFileSizeLimit,
                 SystemLanguage = System.Language,
                 SystemRegion = System.Region,
                 SystemTimeZone = System.TimeZone,
@@ -790,6 +797,7 @@ namespace Ryujinx.UI.Common.Configuration
             Logger.EnableTrace.Value = false;
             Logger.EnableGuest.Value = true;
             Logger.EnableFsAccessLog.Value = false;
+            Logger.DisableLogFileSizeLimit.Value = false;
             Logger.FilteredClasses.Value = Array.Empty<LogClass>();
             Logger.GraphicsDebugLevel.Value = GraphicsDebugLevel.None;
             System.Language.Value = Language.AmericanEnglish;
@@ -1477,6 +1485,13 @@ namespace Ryujinx.UI.Common.Configuration
                 configurationFileUpdated = true;
             }
 
+            if (configurationFileFormat.Version < 52)
+            {
+                Ryujinx.Common.Logging.Logger.Warning?.Print(LogClass.Application, $"Outdated configuration version {configurationFileFormat.Version}, migrating to version 52.");
+
+                configurationFileFormat.LoggingDisableLogFileSizeLimit = false;
+            }
+
             Logger.EnableFileLog.Value = configurationFileFormat.EnableFileLog;
             Graphics.ResScale.Value = configurationFileFormat.ResScale;
             Graphics.ResScaleCustom.Value = configurationFileFormat.ResScaleCustom;
@@ -1497,6 +1512,7 @@ namespace Ryujinx.UI.Common.Configuration
             Logger.EnableTrace.Value = configurationFileFormat.LoggingEnableTrace;
             Logger.EnableGuest.Value = configurationFileFormat.LoggingEnableGuest;
             Logger.EnableFsAccessLog.Value = configurationFileFormat.LoggingEnableFsAccessLog;
+            Logger.DisableLogFileSizeLimit.Value = configurationFileFormat.LoggingDisableLogFileSizeLimit;
             Logger.FilteredClasses.Value = configurationFileFormat.LoggingFilteredClasses;
             Logger.GraphicsDebugLevel.Value = configurationFileFormat.LoggingGraphicsDebugLevel;
             System.Language.Value = configurationFileFormat.SystemLanguage;

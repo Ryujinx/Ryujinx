@@ -156,6 +156,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool EnableGuest { get; set; }
         public bool EnableFsAccessLog { get; set; }
         public bool EnableDebug { get; set; }
+        public bool DisableLogFileSizeLimit { get; set; }
         public bool IsOpenAlEnabled { get; set; }
         public bool IsSoundIoEnabled { get; set; }
         public bool IsSDL2Enabled { get; set; }
@@ -471,6 +472,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             EnableFsAccessLog = config.Logger.EnableFsAccessLog;
             FsGlobalAccessLogMode = config.System.FsGlobalAccessLogMode;
             OpenglDebugLevel = (int)config.Logger.GraphicsDebugLevel.Value;
+            DisableLogFileSizeLimit = config.Logger.DisableLogFileSizeLimit;
 
             MultiplayerModeIndex = (int)config.Multiplayer.Mode.Value;
         }
@@ -577,6 +579,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.Logger.EnableFsAccessLog.Value = EnableFsAccessLog;
             config.System.FsGlobalAccessLogMode.Value = FsGlobalAccessLogMode;
             config.Logger.GraphicsDebugLevel.Value = (GraphicsDebugLevel)OpenglDebugLevel;
+            config.Logger.DisableLogFileSizeLimit.Value = DisableLogFileSizeLimit;
 
             config.Multiplayer.LanInterfaceId.Value = _networkInterfaces[NetworkInterfaceList[NetworkInterfaceIndex]];
             config.Multiplayer.Mode.Value = (MultiplayerMode)MultiplayerModeIndex;

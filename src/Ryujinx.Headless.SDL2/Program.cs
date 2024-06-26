@@ -437,8 +437,9 @@ namespace Ryujinx.Headless.SDL2
 
                 if (logFile != null)
                 {
+                    bool limitsFileSize = !option.LoggingDisableLogFileSizeLimit;
                     Logger.AddTarget(new AsyncLogTargetWrapper(
-                        new FileLogTarget("file", logFile),
+                        new FileLogTarget("file", logFile, limitsFileSize),
                         1000,
                         AsyncLogTargetOverflowAction.Block
                     ));
