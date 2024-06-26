@@ -13,6 +13,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.Common.GraphicsDriver;
 using Ryujinx.Common.Logging;
+using Ryujinx.Cpu;
 using Ryujinx.Graphics.Vulkan;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Time.TimeZone;
@@ -49,6 +50,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private int _graphicsBackendIndex;
         private int _scalingFilter;
         private int _scalingFilterLevel;
+        private long _turboModeMultiplier;
 
         public event Action CloseWindow;
         public event Action SaveSettingsEvent;
@@ -135,6 +137,26 @@ namespace Ryujinx.Ava.UI.ViewModels
         public int HideCursor { get; set; }
         public bool EnableDockedMode { get; set; }
         public bool EnableKeyboard { get; set; }
+        public long TurboMultiplier
+        {
+            get => _turboModeMultiplier;
+            set
+            {
+                if (_turboModeMultiplier != value)
+                {
+                    _turboModeMultiplier = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged((nameof(TurboMultiplierPercentageText)));
+                }
+            }
+        }
+        public string TurboMultiplierPercentageText
+        {
+            get
+            {
+                return TurboMultiplier.ToString() + "%";
+            }
+        }
         public bool EnableMouse { get; set; }
         public bool EnableVsync { get; set; }
         public bool EnablePptc { get; set; }
@@ -433,6 +455,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             EnablePptc = config.System.EnablePtc;
             MemoryMode = (int)config.System.MemoryManagerMode.Value;
             UseHypervisor = config.System.UseHypervisor;
+            _turboModeMultiplier = config.System.TurboMultiplier;
 
             // Graphics
             GraphicsBackendIndex = (int)config.Graphics.GraphicsBackend.Value;
@@ -518,6 +541,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
 
             config.System.SystemTimeOffset.Value = Convert.ToInt64((CurrentDate.ToUnixTimeSeconds() + CurrentTime.TotalSeconds) - DateTimeOffset.Now.ToUnixTimeSeconds());
+            config.System.TurboMultiplier.Value = TurboMultiplier;
             config.Graphics.EnableVsync.Value = EnableVsync;
             config.System.EnableFsIntegrityChecks.Value = EnableFsIntegrityChecks;
             config.System.ExpandRam.Value = ExpandDramSize;
@@ -584,6 +608,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
             MainWindow.UpdateGraphicsConfig();
+            MainWindow.UpdateTurboConfig(TurboMultiplier);
 
             SaveSettingsEvent?.Invoke();
 

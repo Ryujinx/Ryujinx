@@ -15,11 +15,25 @@ namespace Ryujinx.Cpu
         /// <inheritdoc/>
         public ulong Counter => (ulong)(ElapsedSeconds * Frequency);
 
-        /// <inheritdoc/>
-        public TimeSpan ElapsedTime => _tickCounter.Elapsed;
+        public long TickMultiplier { get; set; } = 100;
+        private static long AcumElapsedTicks = 0;
+        private static long LastElapsedTicks = 0;
+        private long Elapsedticks
+        {
+            get
+            {
+                long elapsedTicks = _tickCounter.ElapsedTicks;
+                AcumElapsedTicks += (elapsedTicks - LastElapsedTicks) * TickMultiplier / 100;
+                LastElapsedTicks = elapsedTicks;
+                return AcumElapsedTicks;
+            }
+        }
 
         /// <inheritdoc/>
-        public double ElapsedSeconds => _tickCounter.ElapsedTicks * _hostTickFreq;
+        public TimeSpan ElapsedTime => Stopwatch.GetElapsedTime(0, Elapsedticks);
+
+        /// <inheritdoc/>
+        public double ElapsedSeconds => Elapsedticks * _hostTickFreq;
 
         public TickSource(ulong frequency)
         {

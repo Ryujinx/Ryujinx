@@ -669,7 +669,8 @@ namespace Ryujinx.UI
                 ConfigurationState.Instance.System.AudioVolume,
                 ConfigurationState.Instance.System.UseHypervisor,
                 ConfigurationState.Instance.Multiplayer.LanInterfaceId.Value,
-                ConfigurationState.Instance.Multiplayer.Mode);
+                ConfigurationState.Instance.Multiplayer.Mode,
+                ConfigurationState.Instance.System.TurboMultiplier);
 
             _emulationContext = new HLE.Switch(configuration);
         }

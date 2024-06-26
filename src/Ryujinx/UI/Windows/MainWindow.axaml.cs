@@ -456,6 +456,18 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
+        public static void UpdateTurboConfig(long turboMultiplier)
+        {
+            if (MainWindow.MainWindowViewModel.IsGameRunning)
+            {
+                MainWindow.MainWindowViewModel.AppHost.Device.Configuration.TurboMultiplier = turboMultiplier;
+                if (MainWindow.MainWindowViewModel.AppHost.Device.TurboMode)
+                {
+                    MainWindow.MainWindowViewModel.AppHost.Device.SetTickSourceMultiplier(turboMultiplier);
+                }
+            }
+        }
+
         public static void UpdateGraphicsConfig()
         {
 #pragma warning disable IDE0055 // Disable formatting
