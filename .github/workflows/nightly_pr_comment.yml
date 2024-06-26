@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ fromJSON(vars.JOB_TIMEOUT) }}
     steps:
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         with:
           script: |
             const {owner, repo} = context.repo;
@@ -19,7 +19,7 @@ jobs:
             const pull_head_sha = '${{github.event.workflow_run.head_sha}}';
 
             const issue_number = await (async () => {
-              const pulls = await github.rest.pulls.list({owner, repo});
+              const pulls = await github.rest.pulls.list.endpoint.merge({owner, repo});
               for await (const {data} of github.paginate.iterator(pulls)) {
                 for (const pull of data) {
                   if (pull.head.sha === pull_head_sha) {
