@@ -139,7 +139,7 @@ namespace Ryujinx.Graphics.Vulkan.Queries
             }
         }
 
-        public CounterQueueEvent QueueReport(EventHandler<ulong> resultHandler, float divisor, ulong lastDrawIndex, bool hostReserved)
+        public CounterQueueEvent QueueReport(EventHandler<ulong> resultHandler, float divisor, ulong lastDrawIndex, int hostReserved)
         {
             CounterQueueEvent result;
             ulong draws = lastDrawIndex - _current.DrawIndex;
@@ -149,9 +149,9 @@ namespace Ryujinx.Graphics.Vulkan.Queries
                 // A query's result only matters if more than one draw was performed during it.
                 // Otherwise, dummy it out and return 0 immediately.
 
-                if (hostReserved)
+                while (hostReserved-- > 0)
                 {
-                    // This counter event is guaranteed to be available for host conditional rendering.
+                    // This counter event is guaranteed to be available for host conditional rendering for the given number of uses.
                     _current.ReserveForHostAccess();
                 }
 

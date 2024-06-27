@@ -48,7 +48,7 @@ namespace Ryujinx.Graphics.GAL
 
         void PreFrame();
 
-        ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, bool hostReserved);
+        ICounterEvent ReportCounter(CounterType type, EventHandler<ulong> resultHandler, float divisor, int hostReserved);
 
         void ResetCounter(CounterType type);
 
