@@ -14,6 +14,7 @@ namespace Ryujinx.Ava.UI.Helpers
             { Glyph.List, char.ConvertFromUtf32((int)Symbol.List) },
             { Glyph.Grid, char.ConvertFromUtf32((int)Symbol.ViewAll) },
             { Glyph.Chip, char.ConvertFromUtf32(59748) },
+            { Glyph.Profiles, char.ConvertFromUtf32((int)Symbol.People) }
         };
 
         public GlyphValueConverter(string key)
