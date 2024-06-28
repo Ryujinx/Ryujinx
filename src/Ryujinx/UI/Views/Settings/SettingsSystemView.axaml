@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
@@ -181,11 +182,78 @@
                             Width="350"
                             ToolTip.Tip="{locale:Locale TimeTooltip}" />
                     </StackPanel>
-                    <CheckBox IsChecked="{Binding EnableVsync}">
+                    <StackPanel Margin="0,0,0,10"
+                                Orientation="Horizontal">
                         <TextBlock
-                            Text="{locale:Locale SettingsTabSystemEnableVsync}"
-                            ToolTip.Tip="{locale:Locale VSyncToggleTooltip}" />
-                    </CheckBox>
+                            VerticalAlignment="Center"
+                            Text="{locale:Locale SettingsTabSystemVSyncMode}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemVSyncModeTooltip}"
+                            Width="250" />
+                        <ComboBox
+                            IsVisible="{Binding EnableCustomVSyncInterval}"
+                            SelectedIndex="{Binding VSyncMode}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemVSyncModeTooltipCustom}"
+                            HorizontalContentAlignment="Left"
+                            Width="350">
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemVSyncModeSwitch}" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemVSyncModeUnbounded}" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemVSyncModeCustom}" />
+                            </ComboBoxItem>
+                        </ComboBox>
+                        <ComboBox
+                            IsVisible="{Binding !EnableCustomVSyncInterval}"
+                            SelectedIndex="{Binding VSyncMode}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemVSyncModeTooltip}"
+                            HorizontalContentAlignment="Left"
+                            Width="350">
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemVSyncModeSwitch}" />
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="{locale:Locale SettingsTabSystemVSyncModeUnbounded}" />
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding EnableCustomVSyncInterval}"
+                                Margin="0,0,0,10"
+                                Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{locale:Locale SettingsTabSystemCustomVSyncIntervalValue}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalValueTooltip}"
+                            Width="250" />
+                        <ui:NumberBox IsVisible="{Binding EnableCustomVSyncInterval}"
+                                      ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalValueTooltip}"
+                                      Value="{Binding CustomVSyncInterval}"
+                                      Width="165"
+                                      SmallChange="1.0"
+                                      LargeChange="10"
+                                      SimpleNumberFormat="F0"
+                                      SpinButtonPlacementMode="Hidden"
+                                      Minimum="6"
+                                      Maximum="1000" />
+                        <Slider Value="{Binding CustomVSyncIntervalPercentageProxy}"
+                                ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalSliderTooltip}"
+                                MinWidth="175"
+                                Margin="10,-3,0,0"
+                                Height="32"
+                                Padding="0,-5"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                LargeChange="10"
+                                SmallChange="1"
+                                VerticalAlignment="Center"
+                                Minimum="10"
+                                Maximum="400" />
+                        <TextBlock Margin="5,0"
+                                   Width="40"
+                                   Text="{Binding CustomVSyncIntervalPercentageText}"/>
+                    </StackPanel>
                     <CheckBox IsChecked="{Binding EnableFsIntegrityChecks}">
                         <TextBlock
                             Text="{locale:Locale SettingsTabSystemEnableFsIntegrityChecks}"
@@ -216,6 +284,11 @@
                         IsChecked="{Binding IgnoreMissingServices}"
                         ToolTip.Tip="{locale:Locale IgnoreMissingServicesTooltip}">
                         <TextBlock Text="{locale:Locale SettingsTabSystemIgnoreMissingServices}" />
+                    </CheckBox>
+                    <CheckBox
+                        IsChecked="{Binding EnableCustomVSyncInterval}"
+                        ToolTip.Tip="{locale:Locale SettingsTabSystemEnableCustomVSyncIntervalTooltip}">
+                        <TextBlock Text="{locale:Locale SettingsTabSystemEnableCustomVSyncInterval}" />
                     </CheckBox>
                 </StackPanel>
             </StackPanel>

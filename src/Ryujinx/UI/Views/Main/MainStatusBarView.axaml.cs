@@ -31,11 +31,10 @@ namespace Ryujinx.Ava.UI.Views.Main
             DataContext = Window.ViewModel;
         }
 
-        private void VsyncStatus_PointerReleased(object sender, PointerReleasedEventArgs e)
+        private void VSyncMode_PointerReleased(object sender, PointerReleasedEventArgs e)
         {
-            Window.ViewModel.AppHost.ToggleVSync();
-
-            Logger.Info?.Print(LogClass.Application, $"VSync toggled to: {Window.ViewModel.AppHost.Device.EnableDeviceVsync}");
+            Window.ViewModel.ToggleVSyncMode();
+            Logger.Info?.Print(LogClass.Application, $"VSync Mode toggled to: {Window.ViewModel.AppHost.Device.VSyncMode}");
         }
 
         private void DockedStatus_PointerReleased(object sender, PointerReleasedEventArgs e)

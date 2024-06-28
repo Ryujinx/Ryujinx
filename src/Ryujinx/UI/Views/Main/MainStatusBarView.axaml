@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -80,15 +80,69 @@
             MaxHeight="18"
             Orientation="Horizontal">
             <TextBlock
-                Name="VsyncStatus"
+                Name="VSyncMode"
                 Margin="5,0,5,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Foreground="{Binding VsyncColor}"
+                Foreground="{Binding VSyncModeColor}"
                 IsVisible="{Binding !ShowLoadProgress}"
-                PointerReleased="VsyncStatus_PointerReleased"
-                Text="VSync"
-                TextAlignment="Start" />
+                PointerReleased="VSyncMode_PointerReleased"
+                Text="{Binding VSyncModeText}"
+                TextAlignment="Start"/>
+                <Button MinWidth="0"
+                        Width="20"
+                        IsVisible="{Binding ShowCustomVSyncIntervalPicker}"
+                        Margin="-5,0,5,0"
+                        Background="Transparent"
+                        BorderThickness="0">
+                    <ui:SymbolIcon Symbol="Settings"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   Width="14"
+                                   Height="14"/>
+                    <Button.Styles>
+                        <Style Selector=":checked">
+                            <Style Selector="^:checked ContentPresenter">
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundColor}" />
+                            </Style>
+                        </Style>
+                        <Style Selector="Border#SeparatorBorder">
+                            <Setter Property="Opacity" Value="0" />
+                        </Style>
+                    </Button.Styles>
+                    <Button.Flyout>
+                        <Flyout Placement="Top" ShowMode="TransientWithDismissOnPointerMoveAway">
+                            <StackPanel Margin="0,0,0,10"
+                                        Orientation="Horizontal">
+                                <ui:NumberBox ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalValueTooltip}"
+                                              Value="{Binding CustomVSyncInterval}"
+                                              Width="175"
+                                              SmallChange="1.0"
+                                              LargeChange="10"
+                                              SimpleNumberFormat="F0"
+                                              SpinButtonPlacementMode="Hidden"
+                                              Minimum="10"
+                                              Maximum="1000" />
+                                <Slider Value="{Binding CustomVSyncIntervalPercentageProxy}"
+                                        ToolTip.Tip="{locale:Locale SettingsTabSystemCustomVSyncIntervalSliderTooltip}"
+                                        MinWidth="175"
+                                        Margin="10,-3,0,0"
+                                        Height="32"
+                                        Padding="0,-5"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        LargeChange="10"
+                                        SmallChange="1"
+                                        VerticalAlignment="Center"
+                                        Minimum="10"
+                                        Maximum="400" />
+                                <TextBlock Margin="5,0"
+                                           Width="40"
+                                           Text="{Binding CustomVSyncIntervalPercentageText}"/>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
             <Border
                 Width="2"
                 Height="12"

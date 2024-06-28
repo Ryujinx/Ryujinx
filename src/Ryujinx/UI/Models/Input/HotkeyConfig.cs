@@ -5,13 +5,13 @@ namespace Ryujinx.Ava.UI.Models.Input
 {
     public class HotkeyConfig : BaseModel
     {
-        private Key _toggleVsync;
-        public Key ToggleVsync
+        private Key _toggleVSyncMode;
+        public Key ToggleVSyncMode
         {
-            get => _toggleVsync;
+            get => _toggleVSyncMode;
             set
             {
-                _toggleVsync = value;
+                _toggleVSyncMode = value;
                 OnPropertyChanged();
             }
         }
@@ -104,11 +104,33 @@ namespace Ryujinx.Ava.UI.Models.Input
             }
         }
 
+        private Key _customVSyncIntervalIncrement;
+        public Key CustomVSyncIntervalIncrement
+        {
+            get => _customVSyncIntervalIncrement;
+            set
+            {
+                _customVSyncIntervalIncrement = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Key _customVSyncIntervalDecrement;
+        public Key CustomVSyncIntervalDecrement
+        {
+            get => _customVSyncIntervalDecrement;
+            set
+            {
+                _customVSyncIntervalDecrement = value;
+                OnPropertyChanged();
+            }
+        }
+
         public HotkeyConfig(KeyboardHotkeys config)
         {
             if (config != null)
             {
-                ToggleVsync = config.ToggleVsync;
+                ToggleVSyncMode = config.ToggleVSyncMode;
                 Screenshot = config.Screenshot;
                 ShowUI = config.ShowUI;
                 Pause = config.Pause;
@@ -117,6 +139,8 @@ namespace Ryujinx.Ava.UI.Models.Input
                 ResScaleDown = config.ResScaleDown;
                 VolumeUp = config.VolumeUp;
                 VolumeDown = config.VolumeDown;
+                CustomVSyncIntervalIncrement = config.CustomVSyncIntervalIncrement;
+                CustomVSyncIntervalDecrement = config.CustomVSyncIntervalDecrement;
             }
         }
 
@@ -124,7 +148,7 @@ namespace Ryujinx.Ava.UI.Models.Input
         {
             var config = new KeyboardHotkeys
             {
-                ToggleVsync = ToggleVsync,
+                ToggleVSyncMode = ToggleVSyncMode,
                 Screenshot = Screenshot,
                 ShowUI = ShowUI,
                 Pause = Pause,
@@ -133,6 +157,8 @@ namespace Ryujinx.Ava.UI.Models.Input
                 ResScaleDown = ResScaleDown,
                 VolumeUp = VolumeUp,
                 VolumeDown = VolumeDown,
+                CustomVSyncIntervalIncrement = CustomVSyncIntervalIncrement,
+                CustomVSyncIntervalDecrement = CustomVSyncIntervalDecrement,
             };
 
             return config;
