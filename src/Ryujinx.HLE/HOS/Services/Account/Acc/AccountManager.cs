@@ -37,13 +37,16 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc
 
             _accountSaveDataManager = new AccountSaveDataManager(_profiles);
 
-            if (!_profiles.TryGetValue(DefaultUserId.ToString(), out _))
+            if (_profiles.IsEmpty)
             {
                 byte[] defaultUserImage = EmbeddedResources.Read("Ryujinx.HLE/HOS/Services/Account/Acc/DefaultUserImage.jpg");
 
-                AddUser("RyuPlayer", defaultUserImage, DefaultUserId);
+                // Use a random UserId as default to avoid issues in multiplayer per #3396.
+                UserId userId = new UserId(Guid.NewGuid().ToString().Replace("-", ""));
 
-                OpenUser(DefaultUserId);
+                AddUser("RyuPlayer", defaultUserImage, userId);
+
+                OpenUser(userId);
             }
             else
             {
@@ -184,7 +187,7 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc
 
             _profiles.Remove(userId.ToString(), out _);
 
-            OpenUser(DefaultUserId);
+            OpenUser(new UserId(_profiles.First().Key));
 
             _accountSaveDataManager.Save(_profiles);
         }
