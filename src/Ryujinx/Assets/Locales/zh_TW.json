@@ -404,6 +404,7 @@
   "GameListContextMenuToggleFavorite": "加入/移除為我的最愛",
   "GameListContextMenuToggleFavoriteToolTip": "切換遊戲的我的最愛狀態",
   "SettingsTabGeneralTheme": "佈景主題:",
+  "SettingsTabGeneralThemeAuto": "跟隨系統 (自動)",
   "SettingsTabGeneralThemeDark": "深色",
   "SettingsTabGeneralThemeLight": "淺色",
   "ControllerSettingsConfigureGeneral": "配置",

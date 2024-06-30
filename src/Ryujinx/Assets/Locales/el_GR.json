@@ -404,6 +404,7 @@
   "GameListContextMenuToggleFavorite": "Εναλλαγή Αγαπημένου",
   "GameListContextMenuToggleFavoriteToolTip": "Εναλλαγή της Κατάστασης Αγαπημένο του Παιχνιδιού",
   "SettingsTabGeneralTheme": "Theme:",
+  "SettingsTabGeneralThemeAuto": "Auto",
   "SettingsTabGeneralThemeDark": "Dark",
   "SettingsTabGeneralThemeLight": "Light",
   "ControllerSettingsConfigureGeneral": "Παραμέτρων",

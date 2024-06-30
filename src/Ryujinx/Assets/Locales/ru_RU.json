@@ -404,6 +404,7 @@
   "GameListContextMenuToggleFavorite": "Добавить в избранное",
   "GameListContextMenuToggleFavoriteToolTip": "Добавляет игру в избранное и помечает звездочкой",
   "SettingsTabGeneralTheme": "Тема:",
+  "SettingsTabGeneralThemeAuto": "Системная",
   "SettingsTabGeneralThemeDark": "Темная",
   "SettingsTabGeneralThemeLight": "Светлая",
   "ControllerSettingsConfigureGeneral": "Настройка",

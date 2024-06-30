@@ -404,6 +404,7 @@
   "GameListContextMenuToggleFavorite": "즐겨찾기 전환",
   "GameListContextMenuToggleFavoriteToolTip": "게임 즐겨찾기 상태 전환",
   "SettingsTabGeneralTheme": "테마:",
+  "SettingsTabGeneralThemeAuto": "자동",
   "SettingsTabGeneralThemeDark": "어두운 테마",
   "SettingsTabGeneralThemeLight": "밝은 테마",
   "ControllerSettingsConfigureGeneral": "구성",

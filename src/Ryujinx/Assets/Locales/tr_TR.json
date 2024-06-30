@@ -404,6 +404,7 @@
   "GameListContextMenuToggleFavorite": "Favori Ayarla",
   "GameListContextMenuToggleFavoriteToolTip": "Oyunu Favorilere Ekle/Çıkar",
   "SettingsTabGeneralTheme": "Tema:",
+  "SettingsTabGeneralThemeAuto": "Auto",
   "SettingsTabGeneralThemeDark": "Karanlık",
   "SettingsTabGeneralThemeLight": "Aydınlık",
   "ControllerSettingsConfigureGeneral": "Ayarla",
