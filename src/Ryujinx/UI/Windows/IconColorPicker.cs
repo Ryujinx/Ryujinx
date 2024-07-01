@@ -1,5 +1,4 @@
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 
@@ -36,35 +35,34 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
-        public static Color GetFilteredColor(Image<Bgra32> image)
+        public static SKColor GetFilteredColor(SKBitmap image)
         {
-            var color = GetColor(image).ToPixel<Bgra32>();
+            var color = GetColor(image);
+
 
             // We don't want colors that are too dark.
             // If the color is too dark, make it brighter by reducing the range
             // and adding a constant color.
-            int luminosity = GetColorApproximateLuminosity(color.R, color.G, color.B);
+            int luminosity = GetColorApproximateLuminosity(color.Red, color.Green, color.Blue);
             if (luminosity < CutOffLuminosity)
             {
-                color = Color.FromRgb(
-                    (byte)Math.Min(CutOffLuminosity + color.R, byte.MaxValue),
-                    (byte)Math.Min(CutOffLuminosity + color.G, byte.MaxValue),
-                    (byte)Math.Min(CutOffLuminosity + color.B, byte.MaxValue));
+                color = new SKColor(
+                    (byte)Math.Min(CutOffLuminosity + color.Red, byte.MaxValue),
+                    (byte)Math.Min(CutOffLuminosity + color.Green, byte.MaxValue),
+                    (byte)Math.Min(CutOffLuminosity + color.Blue, byte.MaxValue));
             }
 
             return color;
         }
 
-        public static Color GetColor(Image<Bgra32> image)
+        public static SKColor GetColor(SKBitmap image)
         {
             var colors = new PaletteColor[TotalColors];
-
             var dominantColorBin = new Dictionary<int, int>();
 
             var buffer = GetBuffer(image);
 
             int w = image.Width;
-
             int w8 = w << 8;
             int h8 = image.Height << 8;
 
@@ -84,9 +82,10 @@ namespace Ryujinx.Ava.UI.Windows
                 {
                     int offset = x + yOffset;
 
-                    byte cb = buffer[offset].B;
-                    byte cg = buffer[offset].G;
-                    byte cr = buffer[offset].R;
+                    SKColor pixel = buffer[offset];
+                    byte cr = pixel.Red;
+                    byte cg = pixel.Green;
+                    byte cb = pixel.Blue;
 
                     var qck = GetQuantizedColorKey(cr, cg, cb);
 
@@ -122,12 +121,22 @@ namespace Ryujinx.Ava.UI.Windows
                 }
             }
 
-            return Color.FromRgb(bestCandidate.R, bestCandidate.G, bestCandidate.B);
+            return new SKColor(bestCandidate.R, bestCandidate.G, bestCandidate.B);
         }
 
-        public static Bgra32[] GetBuffer(Image<Bgra32> image)
+        public static SKColor[] GetBuffer(SKBitmap image)
         {
-            return image.DangerousTryGetSinglePixelMemory(out var data) ? data.ToArray() : Array.Empty<Bgra32>();
+            var pixels = new SKColor[image.Width * image.Height];
+
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    pixels[x + y * image.Width] = image.GetPixel(x, y);
+                }
+            }
+
+            return pixels;
         }
 
         private static int GetColorScore(Dictionary<int, int> dominantColorBin, int maxHitCount, PaletteColor color)

@@ -9,14 +9,14 @@ using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Ava.UI.Models;
 using Ryujinx.HLE.FileSystem;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using Color = Avalonia.Media.Color;
+using Image = SkiaSharp.SKImage;
 
 namespace Ryujinx.Ava.UI.ViewModels
 {
@@ -130,9 +130,12 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                         stream.Position = 0;
 
-                        Image avatarImage = Image.LoadPixelData<Rgba32>(DecompressYaz0(stream), 256, 256);
+                        Image avatarImage = Image.FromPixelCopy(new SKImageInfo(256, 256, SKColorType.Rgba8888, SKAlphaType.Premul), DecompressYaz0(stream));
 
-                        avatarImage.SaveAsPng(streamPng);
+                        using (SKData data = avatarImage.Encode(SKEncodedImageFormat.Png, 100))
+                        {
+                            data.SaveTo(streamPng);
+                        }
 
                         _avatarStore.Add(item.FullPath, streamPng.ToArray());
                     }

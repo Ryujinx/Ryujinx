@@ -9,11 +9,9 @@ using Ryujinx.Ava.UI.Controls;
 using Ryujinx.Ava.UI.Models;
 using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.HLE.FileSystem;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using System.Collections.Generic;
 using System.IO;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace Ryujinx.Ava.UI.Views.User
 {
@@ -102,13 +100,19 @@ namespace Ryujinx.Ava.UI.Views.User
 
         private static byte[] ProcessProfileImage(byte[] buffer)
         {
-            using Image image = Image.Load(buffer);
+            using var bitmap = SKBitmap.Decode(buffer);
 
-            image.Mutate(x => x.Resize(256, 256));
+            var resizedBitmap = bitmap.Resize(new SKImageInfo(256, 256), SKFilterQuality.High);
 
-            using MemoryStream streamJpg = new();
+            using var streamJpg = new MemoryStream();
 
-            image.SaveAsJpeg(streamJpg);
+            if (resizedBitmap != null)
+            {
+                using var image = SKImage.FromBitmap(resizedBitmap);
+                using var dataJpeg = image.Encode(SKEncodedImageFormat.Jpeg, 100);
+
+                dataJpeg.SaveTo(streamJpg);
+            }
 
             return streamJpg.ToArray();
         }

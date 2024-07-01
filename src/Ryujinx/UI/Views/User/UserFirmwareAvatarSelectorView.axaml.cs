@@ -6,12 +6,8 @@ using Ryujinx.Ava.UI.Controls;
 using Ryujinx.Ava.UI.Models;
 using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.HLE.FileSystem;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using System.IO;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace Ryujinx.Ava.UI.Views.User
 {
@@ -70,15 +66,25 @@ namespace Ryujinx.Ava.UI.Views.User
         {
             if (ViewModel.SelectedImage != null)
             {
-                MemoryStream streamJpg = new();
-                Image avatarImage = Image.Load(ViewModel.SelectedImage, new PngDecoder());
+                using var streamJpg = new MemoryStream();
+                using var bitmap = SKBitmap.Decode(ViewModel.SelectedImage);
+                using var newBitmap = new SKBitmap(bitmap.Width, bitmap.Height);
 
-                avatarImage.Mutate(x => x.BackgroundColor(new Rgba32(
-                    ViewModel.BackgroundColor.R,
-                    ViewModel.BackgroundColor.G,
-                    ViewModel.BackgroundColor.B,
-                    ViewModel.BackgroundColor.A)));
-                avatarImage.SaveAsJpeg(streamJpg);
+                using (var canvas = new SKCanvas(newBitmap))
+                {
+                    canvas.Clear(new SKColor(
+                        ViewModel.BackgroundColor.R,
+                        ViewModel.BackgroundColor.G,
+                        ViewModel.BackgroundColor.B,
+                        ViewModel.BackgroundColor.A));
+                    canvas.DrawBitmap(bitmap, 0, 0);
+                }
+
+                using (var image = SKImage.FromBitmap(newBitmap))
+                using (var dataJpeg = image.Encode(SKEncodedImageFormat.Jpeg, 100))
+                {
+                    dataJpeg.SaveTo(streamJpg);
+                }
 
                 _profile.Image = streamJpg.ToArray();
 
