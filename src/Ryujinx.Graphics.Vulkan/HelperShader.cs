@@ -1,4 +1,4 @@
-using Ryujinx.Common;
+﻿using Ryujinx.Common;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.Shader;
 using Ryujinx.Graphics.Shader.Translation;

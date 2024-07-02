@@ -16,8 +16,10 @@ using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.GAL.Multithreading;
 using Ryujinx.Graphics.Gpu;
 using Ryujinx.Graphics.Gpu.Shader;
+using Ryujinx.Graphics.Metal;
 using Ryujinx.Graphics.OpenGL;
 using Ryujinx.Graphics.Vulkan;
+using Ryujinx.Headless.SDL2.Metal;
 using Ryujinx.Headless.SDL2.OpenGL;
 using Ryujinx.Headless.SDL2.Vulkan;
 using Ryujinx.HLE;
@@ -498,9 +500,14 @@ namespace Ryujinx.Headless.SDL2
 
         private static WindowBase CreateWindow(Options options)
         {
-            return options.GraphicsBackend == GraphicsBackend.Vulkan
-                ? new VulkanWindow(_inputManager, options.LoggingGraphicsDebugLevel, options.AspectRatio, options.EnableMouse, options.HideCursorMode)
-                : new OpenGLWindow(_inputManager, options.LoggingGraphicsDebugLevel, options.AspectRatio, options.EnableMouse, options.HideCursorMode);
+            return options.GraphicsBackend switch
+            {
+                GraphicsBackend.Vulkan => new VulkanWindow(_inputManager, options.LoggingGraphicsDebugLevel, options.AspectRatio, options.EnableMouse, options.HideCursorMode),
+                GraphicsBackend.Metal => OperatingSystem.IsMacOS() ?
+                    new MetalWindow(_inputManager, options.LoggingGraphicsDebugLevel, options.AspectRatio, options.EnableKeyboard, options.HideCursorMode) :
+                    throw new Exception("Attempted to use Metal renderer on non-macOS platform!"),
+                _ => new OpenGLWindow(_inputManager, options.LoggingGraphicsDebugLevel, options.AspectRatio, options.EnableMouse, options.HideCursorMode)
+            };
         }
 
         private static IRenderer CreateRenderer(Options options, WindowBase window)
@@ -530,6 +537,11 @@ namespace Ryujinx.Headless.SDL2
                     (instance, vk) => new SurfaceKHR((ulong)(vulkanWindow.CreateWindowSurface(instance.Handle))),
                     vulkanWindow.GetRequiredInstanceExtensions,
                     preferredGpuId);
+            }
+
+            if (options.GraphicsBackend == GraphicsBackend.Metal && window is MetalWindow metalWindow && OperatingSystem.IsMacOS())
+            {
+                return new MetalRenderer(metalWindow.GetLayer);
             }
 
             return new OpenGLRenderer();

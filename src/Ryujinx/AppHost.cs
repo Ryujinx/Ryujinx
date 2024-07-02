@@ -26,6 +26,7 @@ using Ryujinx.Common.Utilities;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.GAL.Multithreading;
 using Ryujinx.Graphics.Gpu;
+using Ryujinx.Graphics.Metal;
 using Ryujinx.Graphics.OpenGL;
 using Ryujinx.Graphics.Vulkan;
 using Ryujinx.HLE;
@@ -821,6 +822,10 @@ namespace Ryujinx.Ava
                     VulkanHelper.GetRequiredInstanceExtensions,
                     ConfigurationState.Instance.Graphics.PreferredGpu.Value);
             }
+            else if (ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.Metal && OperatingSystem.IsMacOS())
+            {
+                renderer = new MetalRenderer((RendererHost.EmbeddedWindow as EmbeddedWindowMetal).CreateSurface);
+            }
             else
             {
                 renderer = new OpenGLRenderer();
@@ -1041,6 +1046,7 @@ namespace Ryujinx.Ava
                 {
                     GraphicsBackend.Vulkan => "Vulkan",
                     GraphicsBackend.OpenGl => "OpenGL",
+                    GraphicsBackend.Metal => "Metal",
                     _ => throw new NotImplementedException()
                 },
                 $"GPU: {_renderer.GetHardwareInfo().GpuDriver}"));

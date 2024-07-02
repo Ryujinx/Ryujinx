@@ -48,7 +48,7 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed.ComputeDraw
                         1,
                         1,
                         1,
-                        1,
+                        format.GetBytesPerElement(),
                         format,
                         DepthStencilMode.Depth,
                         Target.TextureBuffer,

@@ -392,7 +392,8 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
                                 context,
                                 shaders,
                                 specState.PipelineState,
-                                specState.TransformFeedbackDescriptors != null);
+                                specState.TransformFeedbackDescriptors != null,
+                                specState.ComputeState.GetLocalSize());
 
                             IProgram hostProgram;
 

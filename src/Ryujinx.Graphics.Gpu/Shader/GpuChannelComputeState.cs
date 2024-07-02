@@ -1,3 +1,5 @@
+using Ryujinx.Graphics.GAL;
+
 namespace Ryujinx.Graphics.Gpu.Shader
 {
     /// <summary>
@@ -60,6 +62,15 @@ namespace Ryujinx.Graphics.Gpu.Shader
             LocalMemorySize = localMemorySize;
             SharedMemorySize = sharedMemorySize;
             HasUnalignedStorageBuffer = hasUnalignedStorageBuffer;
+        }
+
+        /// <summary>
+        /// Gets the local group size of the shader in a GAL compatible struct.
+        /// </summary>
+        /// <returns>Local group size</returns>
+        public ComputeSize GetLocalSize()
+        {
+            return new ComputeSize(LocalSizeX, LocalSizeY, LocalSizeZ);
         }
     }
 }

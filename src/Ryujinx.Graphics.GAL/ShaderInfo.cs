@@ -4,22 +4,21 @@ namespace Ryujinx.Graphics.GAL
     {
         public int FragmentOutputMap { get; }
         public ResourceLayout ResourceLayout { get; }
+        public ComputeSize ComputeLocalSize { get; }
         public ProgramPipelineState? State { get; }
         public bool FromCache { get; set; }
 
-        public ShaderInfo(int fragmentOutputMap, ResourceLayout resourceLayout, ProgramPipelineState state, bool fromCache = false)
+        public ShaderInfo(
+            int fragmentOutputMap,
+            ResourceLayout resourceLayout,
+            ComputeSize computeLocalSize,
+            ProgramPipelineState? state,
+            bool fromCache = false)
         {
             FragmentOutputMap = fragmentOutputMap;
             ResourceLayout = resourceLayout;
+            ComputeLocalSize = computeLocalSize;
             State = state;
-            FromCache = fromCache;
-        }
-
-        public ShaderInfo(int fragmentOutputMap, ResourceLayout resourceLayout, bool fromCache = false)
-        {
-            FragmentOutputMap = fragmentOutputMap;
-            ResourceLayout = resourceLayout;
-            State = null;
             FromCache = fromCache;
         }
     }

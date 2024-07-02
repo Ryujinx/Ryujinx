@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Ryujinx.Common\Ryujinx.Common.csproj" />
+        <ProjectReference Include="..\Ryujinx.Graphics.GAL\Ryujinx.Graphics.GAL.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="SharpMetal" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Shaders\Blit.metal" />
+      <EmbeddedResource Include="Shaders\ChangeBufferStride.metal" />
+      <EmbeddedResource Include="Shaders\ColorClear.metal" />
+      <EmbeddedResource Include="Shaders\DepthStencilClear.metal" />
+    </ItemGroup>
+
+</Project>
