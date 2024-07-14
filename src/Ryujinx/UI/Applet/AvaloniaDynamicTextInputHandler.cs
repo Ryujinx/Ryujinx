@@ -46,11 +46,6 @@ namespace Ryujinx.Ava.UI.Applet
 
         private void SelectionChanged(int selection)
         {
-            if (_hiddenTextBox.SelectionEnd < _hiddenTextBox.SelectionStart)
-            {
-                _hiddenTextBox.SelectionStart = _hiddenTextBox.SelectionEnd;
-            }
-
             TextChangedEvent?.Invoke(_hiddenTextBox.Text ?? string.Empty, _hiddenTextBox.SelectionStart, _hiddenTextBox.SelectionEnd, true);
         }
 

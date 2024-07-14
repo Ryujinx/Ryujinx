@@ -1,7 +1,6 @@
 using Ryujinx.Common.Memory;
 using Ryujinx.HLE.HOS.Services.Caps.Types;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -118,7 +117,10 @@ namespace Ryujinx.HLE.HOS.Services.Caps
                 }
 
                 // NOTE: The saved JPEG file doesn't have the limitation in the extra EXIF data.
-                Image.LoadPixelData<Rgba32>(screenshotData, 1280, 720).SaveAsJpegAsync(filePath);
+                using var bitmap = SKBitmap.Decode(screenshotData, new SKImageInfo(1280, 720, SKColorType.Rgba8888));
+                using var data = bitmap.Encode(SKEncodedImageFormat.Jpeg, 80);
+                using var file = File.OpenWrite(filePath);
+                data.SaveTo(file);
 
                 return ResultCode.Success;
             }
