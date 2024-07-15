@@ -33,13 +33,22 @@ namespace Ryujinx.Graphics.Device
             }
 
             var fields = typeof(TState).GetFields();
+            var t = typeof(TState);
             int offset = 0;
 
             for (int fieldIndex = 0; fieldIndex < fields.Length; fieldIndex++)
             {
                 var field = fields[fieldIndex];
 
-                int sizeOfField = SizeCalculator.SizeOf(field.FieldType);
+                var cuurentFieldOffset = (int)Marshal.OffsetOf<TState>(field.Name);
+                var nextFieldOffset = fieldIndex + 1 == fields.Length ? Unsafe.SizeOf<TState>() : (int)Marshal.OffsetOf<TState>(fields[fieldIndex + 1].Name);
+
+                int sizeOfField = nextFieldOffset - cuurentFieldOffset;
+
+                if(sizeOfField == 0)
+                {
+
+                }
 
                 for (int i = 0; i < ((sizeOfField + 3) & ~3); i += 4)
                 {
