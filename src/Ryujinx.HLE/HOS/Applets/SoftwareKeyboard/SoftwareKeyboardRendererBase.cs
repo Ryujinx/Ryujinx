@@ -307,11 +307,11 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
 
             if (text == "")
             {
-                var emptyWidth = paint.MeasureText(" ", ref bounds);
+                paint.MeasureText(" ", ref bounds);
             }
             else
             {
-                var width = paint.MeasureText(text, ref bounds);
+                paint.MeasureText(text, ref bounds);
             }
 
             return bounds;
@@ -323,11 +323,11 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
 
             if (text == "")
             {
-                var emptyWidth = paint.MeasureText(" ", ref bounds);
+                paint.MeasureText(" ", ref bounds);
             }
             else
             {
-                var width = paint.MeasureText(text, ref bounds);
+                paint.MeasureText(text, ref bounds);
             }
 
             return bounds;
