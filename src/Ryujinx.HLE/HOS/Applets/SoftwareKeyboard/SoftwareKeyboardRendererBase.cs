@@ -181,7 +181,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
             if (newHeight != 0 && newWidth != 0)
             {
                 var resized = bitmap.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.High);
-                if(resized != null)
+                if (resized != null)
                 {
                     bitmap.Dispose();
                     bitmap = resized;
@@ -600,7 +600,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
                         return;
                     }
                 }
-                
+
                 _bufferData = buffer;
 
                 Debug.Assert(buffer.Length == _surfaceInfo.Size);
