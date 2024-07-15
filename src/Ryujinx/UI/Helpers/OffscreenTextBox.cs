@@ -1,11 +1,14 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using System;
 
 namespace Ryujinx.Ava.UI.Helpers
 {
     public class OffscreenTextBox : TextBox
     {
+        protected override Type StyleKeyOverride => typeof(TextBox);
+
         public static RoutedEvent<KeyEventArgs> GetKeyDownRoutedEvent()
         {
             return KeyDownEvent;
