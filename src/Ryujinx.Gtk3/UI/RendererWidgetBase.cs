@@ -13,16 +13,13 @@ using Ryujinx.Input.HLE;
 using Ryujinx.UI.Common.Configuration;
 using Ryujinx.UI.Common.Helper;
 using Ryujinx.UI.Widgets;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Image = SixLabors.ImageSharp.Image;
 using Key = Ryujinx.Input.Key;
 using ScalingFilter = Ryujinx.Graphics.GAL.ScalingFilter;
 using Switch = Ryujinx.HLE.Switch;
@@ -404,23 +401,31 @@ namespace Ryujinx.UI
                             return;
                         }
 
-                        Image image = e.IsBgra ? Image.LoadPixelData<Bgra32>(e.Data, e.Width, e.Height)
-                                               : Image.LoadPixelData<Rgba32>(e.Data, e.Width, e.Height);
+                        var colorType = e.IsBgra ? SKColorType.Bgra8888 : SKColorType.Rgba8888;
+                        using var image = new SKBitmap(new SKImageInfo(e.Width, e.Height, colorType, SKAlphaType.Premul));
 
-                        if (e.FlipX)
+                        Marshal.Copy(e.Data, 0, image.GetPixels(), e.Data.Length);
+                        using var surface = SKSurface.Create(image.Info);
+                        var canvas = surface.Canvas;
+
+                        if (e.FlipX || e.FlipY)
                         {
-                            image.Mutate(x => x.Flip(FlipMode.Horizontal));
+                            canvas.Clear(SKColors.Transparent);
+
+                            float scaleX = e.FlipX ? -1 : 1;
+                            float scaleY = e.FlipY ? -1 : 1;
+
+                            var matrix = SKMatrix.CreateScale(scaleX, scaleY, image.Width / 2f, image.Height / 2f);
+
+                            canvas.SetMatrix(matrix);
                         }
+                        canvas.DrawBitmap(image, new SKPoint());
 
-                        if (e.FlipY)
-                        {
-                            image.Mutate(x => x.Flip(FlipMode.Vertical));
-                        }
-
-                        image.SaveAsPng(path, new PngEncoder()
-                        {
-                            ColorType = PngColorType.Rgb,
-                        });
+                        surface.Flush();
+                        using var snapshot = surface.Snapshot();
+                        using var encoded = snapshot.Encode(SKEncodedImageFormat.Png, 80);
+                        using var file = File.OpenWrite(path);
+                        encoded.SaveTo(file);
 
                         image.Dispose();
 

@@ -9,16 +9,13 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Memory;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.UI.Common.Configuration;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Image = SixLabors.ImageSharp.Image;
+using System.Runtime.InteropServices;
 
 namespace Ryujinx.UI.Windows
 {
@@ -144,9 +141,11 @@ namespace Ryujinx.UI.Windows
 
                         stream.Position = 0;
 
-                        Image avatarImage = Image.LoadPixelData<Rgba32>(DecompressYaz0(stream), 256, 256);
+                        using var avatarImage = new SKBitmap(new SKImageInfo(256, 256, SKColorType.Rgba8888));
+                        var data = DecompressYaz0(stream);
+                        Marshal.Copy(data, 0, avatarImage.GetPixels(), data.Length);
 
-                        avatarImage.SaveAsPng(streamPng);
+                        avatarImage.Encode(streamPng, SKEncodedImageFormat.Png, 80);
 
                         _avatarDict.Add(item.FullPath, streamPng.ToArray());
                     }
@@ -170,15 +169,23 @@ namespace Ryujinx.UI.Windows
         {
             using MemoryStream streamJpg = MemoryStreamManager.Shared.GetStream();
 
-            Image avatarImage = Image.Load(data, new PngDecoder());
+            using var avatarImage = SKBitmap.Decode(data);
+            using var surface = SKSurface.Create(avatarImage.Info);
 
-            avatarImage.Mutate(x => x.BackgroundColor(new Rgba32(
+            var background = new SKColor(
                 (byte)(_backgroundColor.Red * 255),
                 (byte)(_backgroundColor.Green * 255),
                 (byte)(_backgroundColor.Blue * 255),
                 (byte)(_backgroundColor.Alpha * 255)
-            )));
-            avatarImage.SaveAsJpeg(streamJpg);
+            );
+            var canvas = surface.Canvas;
+            canvas.Clear(background);
+            canvas.DrawBitmap(avatarImage, new SKPoint());
+
+            surface.Flush();
+            using var snapshot = surface.Snapshot();
+            using var encoded = snapshot.Encode(SKEncodedImageFormat.Jpeg, 80);
+            encoded.SaveTo(streamJpg);
 
             return streamJpg.ToArray();
         }
