@@ -17,8 +17,6 @@ namespace Ryujinx.HLE.Generators
                     return;
                 }
 
-                var name = classDeclaration.Identifier.ToString();
-
                 Types.Add(classDeclaration);
             }
         }

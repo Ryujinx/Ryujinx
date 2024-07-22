@@ -33,7 +33,6 @@ namespace Ryujinx.Graphics.Device
             }
 
             var fields = typeof(TState).GetFields();
-            var t = typeof(TState);
             int offset = 0;
 
             for (int fieldIndex = 0; fieldIndex < fields.Length; fieldIndex++)
