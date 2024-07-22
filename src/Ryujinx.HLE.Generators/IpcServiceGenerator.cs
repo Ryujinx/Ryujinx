@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -12,24 +12,6 @@ namespace Ryujinx.HLE.Generators
         {
             var syntaxReceiver = (ServiceSyntaxReceiver)context.SyntaxReceiver;
             CodeGenerator generator = new CodeGenerator();
-
-            generator.EnterScope($"namespace Ryujinx.rd");
-            generator.EnterScope($"public class Rd");
-
-            generator.AppendLine($"public string rd = \"\"\"");
-            foreach (var className in syntaxReceiver.Types)
-            {
-                if (className.Modifiers.Any(SyntaxKind.AbstractKeyword) || className.Modifiers.Any(SyntaxKind.PrivateKeyword))
-                    continue;
-
-                var name = GetFullName(className, context).Replace("global::", "");
-                generator.AppendLine($"<Type Name=\"{name}\"  Dynamic=\"Required All\" />");
-            }
-            generator.AppendLine($"\"\"\";");
-
-            generator.LeaveScope();
-            generator.LeaveScope();
-            context.AddSource($"rd.g.cs", generator.ToString());
             generator = new CodeGenerator();
 
             generator.AppendLine("using System;");
@@ -86,6 +68,7 @@ namespace Ryujinx.HLE.Generators
 
             return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         }
+
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new ServiceSyntaxReceiver());
