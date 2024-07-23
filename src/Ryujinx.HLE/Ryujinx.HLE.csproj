@@ -13,7 +13,6 @@
     <ProjectReference Include="..\Ryujinx.Graphics.Vic\Ryujinx.Graphics.Vic.csproj" />
     <ProjectReference Include="..\Ryujinx.HLE.Generators\Ryujinx.HLE.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\Ryujinx.Horizon.Common\Ryujinx.Horizon.Common.csproj" />
-    <ProjectReference Include="..\Ryujinx.Horizon.Generators\Ryujinx.Horizon.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Ryujinx.Horizon.Kernel.Generators\Ryujinx.Horizon.Kernel.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Ryujinx.Horizon\Ryujinx.Horizon.csproj" />
     <ProjectReference Include="..\Ryujinx.Memory\Ryujinx.Memory.csproj" />
