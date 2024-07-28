@@ -27,6 +27,7 @@
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" />
     <PackageReference Include="NetCoreServer" />
+    <PackageReference Include="RyuSocks" />
   </ItemGroup>
 
   <ItemGroup>

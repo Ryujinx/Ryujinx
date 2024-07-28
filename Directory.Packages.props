@@ -36,6 +36,7 @@
     <PackageVersion Include="Ryujinx.Graphics.Vulkan.Dependencies.MoltenVK" Version="1.2.0" />
     <PackageVersion Include="Ryujinx.GtkSharp" Version="3.24.24.59-ryujinx" />
     <PackageVersion Include="Ryujinx.SDL2-CS" Version="2.30.0-build32" />
+    <PackageVersion Include="RyuSocks" Version="0.2.0-alpha" />
     <PackageVersion Include="securifybv.ShellLink" Version="0.1.0" />
     <PackageVersion Include="shaderc.net" Version="0.1.0" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
