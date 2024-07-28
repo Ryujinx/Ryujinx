@@ -325,15 +325,13 @@ namespace Ryujinx.Ava.UI.Windows
 
                     if (ApplicationLibrary.TryGetApplicationsFromFile(_launchPath, out List<ApplicationData> applications))
                     {
-                        ApplicationData applicationData;
-
                         if (_launchApplicationId != null)
                         {
-                            applicationData = applications.Find(application => application.IdString == _launchApplicationId);
+                            int applicationIndex = applications.FindIndex(application => application.IdString.Equals(_launchApplicationId, StringComparison.InvariantCultureIgnoreCase));
 
-                            if (applicationData != null)
+                            if (applicationIndex != -1)
                             {
-                                await ViewModel.LoadApplication(applicationData, _startFullscreen);
+                                await ViewModel.LoadApplication(applications[applicationIndex], _startFullscreen);
                             }
                             else
                             {
@@ -343,8 +341,7 @@ namespace Ryujinx.Ava.UI.Windows
                         }
                         else
                         {
-                            applicationData = applications[0];
-                            await ViewModel.LoadApplication(applicationData, _startFullscreen);
+                            await ViewModel.LoadApplication(applications[0], _startFullscreen);
                         }
                     }
                     else
