@@ -556,19 +556,13 @@ namespace Ryujinx.UI.App.Common
                             {
                                 AppData = application,
                             });
-                        }
 
-                        if (applications.Count > 1)
-                        {
-                            numApplicationsFound += applications.Count - 1;
+                            numApplicationsFound++;
+                            numApplicationsLoaded++;
                         }
+                    }
 
-                        numApplicationsLoaded += applications.Count;
-                    }
-                    else
-                    {
-                        numApplicationsFound--;
-                    }
+                    numApplicationsFound--;
 
                     OnApplicationCountUpdated(new ApplicationCountUpdatedEventArgs
                     {
