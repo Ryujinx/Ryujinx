@@ -18,7 +18,10 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Proxy
 
         internal static ISocket GetSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
-            // TODO: Return proxy socket if AddressFamily, SocketType and ProtocolType match.
+            if (_proxyEndpoints.TryGetValue(GetKey(addressFamily, socketType, protocolType), out EndPoint endPoint))
+            {
+                return new ManagedProxySocket(addressFamily, socketType, protocolType, endPoint);
+            }
 
             return new ManagedSocket(addressFamily, socketType, protocolType);
         }
