@@ -173,5 +173,22 @@
             VerticalAlignment="Center"
             DockPanel.Dock="Right"
             Text="{locale:Locale CommonSort}" />
+        <Button
+            Width="40"
+            MinWidth="40"
+            Margin="5,2,5,2"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Stretch"
+            Command="{Binding ManageProfiles}"
+            IsEnabled="{Binding EnableNonGameRunningControls}"
+            DockPanel.Dock="Right"
+            ToolTip.Tip="{locale:Locale OpenProfileManagerTooltip}">
+            <ui:FontIcon
+                Margin="0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
+                FontFamily="avares://FluentAvalonia/Fonts#Symbols"
+                Glyph="{helpers:GlyphValueConverter Profiles}" />
+        </Button>
     </DockPanel>
 </UserControl>
