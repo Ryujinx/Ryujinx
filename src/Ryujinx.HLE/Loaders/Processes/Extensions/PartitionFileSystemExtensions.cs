@@ -71,10 +71,11 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
 
                 if (applicationId == 0)
                 {
-                    foreach ((ulong _, ContentMetaData content) in applications)
+                    foreach ((ulong id, ContentMetaData content) in applications)
                     {
                         mainNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Program, device.Configuration.UserChannelPersistence.Index);
                         controlNca = content.GetNcaByType(device.FileSystem.KeySet, ContentType.Control, device.Configuration.UserChannelPersistence.Index);
+                        applicationId = id;
                         break;
                     }
                 }
@@ -142,7 +143,24 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                     }
                 }
 
-                return (true, mainNca.Load(device, patchNca, controlNca));
+                try
+                {
+                    return (true, mainNca.Load(device, patchNca, controlNca));
+                }
+                catch (HorizonResultException ex)
+                {
+                    // The exception message already contains enough information here.
+                    errorMessage = $"Failed to load: {ex.Message}";
+
+                    return (false, ProcessResult.Failed);
+                }
+                catch (Exception ex)
+                {
+                    // Add the stacktrace in addition to the exception message.
+                    errorMessage = $"Failed to load: {ex}";
+
+                    return (false, ProcessResult.Failed);
+                }
             }
 
             errorMessage = $"Unable to load: Could not find Main NCA for title \"{applicationId:X16}\"";

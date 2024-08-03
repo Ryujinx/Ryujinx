@@ -34,6 +34,7 @@ namespace Ryujinx.UI.App.Common
 {
     public class ApplicationLibrary
     {
+        public Language DesiredTitleLanguage { get; set; }
         public event EventHandler<ApplicationAddedEventArgs> ApplicationAdded;
         public event EventHandler<ApplicationCountUpdatedEventArgs> ApplicationCountUpdated;
 
@@ -45,7 +46,6 @@ namespace Ryujinx.UI.App.Common
 
         private readonly VirtualFileSystem _virtualFileSystem;
         private readonly IntegrityCheckLevel _checkLevel;
-        private Language _desiredTitleLanguage;
         private CancellationTokenSource _cancellationToken;
 
         private static readonly ApplicationJsonSerializerContext _serializerContext = new(JsonHelper.GetDefaultSerializerOptions());
@@ -221,7 +221,7 @@ namespace Ryujinx.UI.App.Common
                 {
                     using UniqueRef<IFile> icon = new();
 
-                    controlFs.OpenFile(ref icon.Ref, $"/icon_{_desiredTitleLanguage}.dat".ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                    controlFs.OpenFile(ref icon.Ref, $"/icon_{DesiredTitleLanguage}.dat".ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
                     using MemoryStream stream = new();
 
@@ -432,35 +432,40 @@ namespace Ryujinx.UI.App.Common
 
             foreach (var data in applications)
             {
-                ApplicationMetadata appMetadata = LoadAndSaveMetaData(data.IdString, appMetadata =>
+                // Only load metadata for applications with an ID
+                if (data.Id != 0)
                 {
-                    appMetadata.Title = data.Name;
-
-                    // Only do the migration if time_played has a value and timespan_played hasn't been updated yet.
-                    if (appMetadata.TimePlayedOld != default && appMetadata.TimePlayed == TimeSpan.Zero)
+                    ApplicationMetadata appMetadata = LoadAndSaveMetaData(data.IdString, appMetadata =>
                     {
-                        appMetadata.TimePlayed = TimeSpan.FromSeconds(appMetadata.TimePlayedOld);
-                        appMetadata.TimePlayedOld = default;
-                    }
+                        appMetadata.Title = data.Name;
 
-                    // Only do the migration if last_played has a value and last_played_utc doesn't exist yet.
-                    if (appMetadata.LastPlayedOld != default && !appMetadata.LastPlayed.HasValue)
-                    {
-                        // Migrate from string-based last_played to DateTime-based last_played_utc.
-                        if (DateTime.TryParse(appMetadata.LastPlayedOld, out DateTime lastPlayedOldParsed))
+                        // Only do the migration if time_played has a value and timespan_played hasn't been updated yet.
+                        if (appMetadata.TimePlayedOld != default && appMetadata.TimePlayed == TimeSpan.Zero)
                         {
-                            appMetadata.LastPlayed = lastPlayedOldParsed;
-
-                            // Migration successful: deleting last_played from the metadata file.
-                            appMetadata.LastPlayedOld = default;
+                            appMetadata.TimePlayed = TimeSpan.FromSeconds(appMetadata.TimePlayedOld);
+                            appMetadata.TimePlayedOld = default;
                         }
 
-                    }
-                });
+                        // Only do the migration if last_played has a value and last_played_utc doesn't exist yet.
+                        if (appMetadata.LastPlayedOld != default && !appMetadata.LastPlayed.HasValue)
+                        {
+                            // Migrate from string-based last_played to DateTime-based last_played_utc.
+                            if (DateTime.TryParse(appMetadata.LastPlayedOld, out DateTime lastPlayedOldParsed))
+                            {
+                                appMetadata.LastPlayed = lastPlayedOldParsed;
 
-                data.Favorite = appMetadata.Favorite;
-                data.TimePlayed = appMetadata.TimePlayed;
-                data.LastPlayed = appMetadata.LastPlayed;
+                                // Migration successful: deleting last_played from the metadata file.
+                                appMetadata.LastPlayedOld = default;
+                            }
+
+                        }
+                    });
+
+                    data.Favorite = appMetadata.Favorite;
+                    data.TimePlayed = appMetadata.TimePlayed;
+                    data.LastPlayed = appMetadata.LastPlayed;
+                }
+
                 data.FileExtension = Path.GetExtension(applicationPath).TrimStart('.').ToUpper();
                 data.FileSize = fileSize;
                 data.Path = applicationPath;
@@ -482,12 +487,10 @@ namespace Ryujinx.UI.App.Common
             controlFile.Get.Read(out _, 0, outProperty, ReadOption.None).ThrowIfFailure();
         }
 
-        public void LoadApplications(List<string> appDirs, Language desiredTitleLanguage)
+        public void LoadApplications(List<string> appDirs)
         {
             int numApplicationsFound = 0;
             int numApplicationsLoaded = 0;
-
-            _desiredTitleLanguage = desiredTitleLanguage;
 
             _cancellationToken = new CancellationTokenSource();
 
@@ -573,19 +576,13 @@ namespace Ryujinx.UI.App.Common
                             {
                                 AppData = application,
                             });
-                        }
 
-                        if (applications.Count > 1)
-                        {
-                            numApplicationsFound += applications.Count - 1;
+                            numApplicationsFound++;
+                            numApplicationsLoaded++;
                         }
+                    }
 
-                        numApplicationsLoaded += applications.Count;
-                    }
-                    else
-                    {
-                        numApplicationsFound--;
-                    }
+                    numApplicationsFound--;
 
                     OnApplicationCountUpdated(new ApplicationCountUpdatedEventArgs
                     {
@@ -847,7 +844,7 @@ namespace Ryujinx.UI.App.Common
 
         private void GetApplicationInformation(ref ApplicationControlProperty controlData, ref ApplicationData data)
         {
-            _ = Enum.TryParse(_desiredTitleLanguage.ToString(), out TitleLanguage desiredTitleLanguage);
+            _ = Enum.TryParse(DesiredTitleLanguage.ToString(), out TitleLanguage desiredTitleLanguage);
 
             if (controlData.Title.ItemsRo.Length > (int)desiredTitleLanguage)
             {

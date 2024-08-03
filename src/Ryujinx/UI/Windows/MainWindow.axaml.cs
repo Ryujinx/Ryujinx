@@ -37,6 +37,7 @@ namespace Ryujinx.Ava.UI.Windows
         internal static MainWindowViewModel MainWindowViewModel { get; private set; }
 
         private bool _isLoading;
+        private bool _applicationsLoadedOnce;
 
         private UserChannelPersistence _userChannelPersistence;
         private static bool _deferLoad;
@@ -224,7 +225,10 @@ namespace Ryujinx.Ava.UI.Windows
                 ? IntegrityCheckLevel.ErrorOnInvalid
                 : IntegrityCheckLevel.None;
 
-            ApplicationLibrary = new ApplicationLibrary(VirtualFileSystem, checkLevel);
+            ApplicationLibrary = new ApplicationLibrary(VirtualFileSystem, checkLevel)
+            {
+                DesiredTitleLanguage = ConfigurationState.Instance.System.Language,
+            };
 
             // Save data created before we supported extra data in directory save data will not work properly if
             // given empty extra data. Luckily some of that extra data can be created using the data from the
@@ -321,15 +325,13 @@ namespace Ryujinx.Ava.UI.Windows
 
                     if (ApplicationLibrary.TryGetApplicationsFromFile(_launchPath, out List<ApplicationData> applications))
                     {
-                        ApplicationData applicationData;
-
                         if (_launchApplicationId != null)
                         {
-                            applicationData = applications.Find(application => application.IdString == _launchApplicationId);
+                            int applicationIndex = applications.FindIndex(application => application.IdString.Equals(_launchApplicationId, StringComparison.InvariantCultureIgnoreCase));
 
-                            if (applicationData != null)
+                            if (applicationIndex != -1)
                             {
-                                await ViewModel.LoadApplication(applicationData, _startFullscreen);
+                                await ViewModel.LoadApplication(applications[applicationIndex], _startFullscreen);
                             }
                             else
                             {
@@ -339,8 +341,7 @@ namespace Ryujinx.Ava.UI.Windows
                         }
                         else
                         {
-                            applicationData = applications[0];
-                            await ViewModel.LoadApplication(applicationData, _startFullscreen);
+                            await ViewModel.LoadApplication(applications[0], _startFullscreen);
                         }
                     }
                     else
@@ -472,7 +473,11 @@ namespace Ryujinx.Ava.UI.Windows
 
             ViewModel.RefreshFirmwareStatus();
 
-            LoadApplications();
+            // Load applications if no application was requested by the command line
+            if (!_deferLoad)
+            {
+                LoadApplications();
+            }
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             CheckLaunchState();
@@ -485,6 +490,12 @@ namespace Ryujinx.Ava.UI.Windows
 
             if (MainContent.Content != content)
             {
+                // Load applications while switching to the GameLibrary if we haven't done that yet
+                if (!_applicationsLoadedOnce && content == GameLibrary)
+                {
+                    LoadApplications();
+                }
+
                 MainContent.Content = content;
             }
         }
@@ -581,6 +592,7 @@ namespace Ryujinx.Ava.UI.Windows
 
         public void LoadApplications()
         {
+            _applicationsLoadedOnce = true;
             ViewModel.Applications.Clear();
 
             StatusBarView.LoadProgressBar.IsVisible = true;
@@ -622,7 +634,8 @@ namespace Ryujinx.Ava.UI.Windows
 
             Thread applicationLibraryThread = new(() =>
             {
-                ApplicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs, ConfigurationState.Instance.System.Language);
+                ApplicationLibrary.DesiredTitleLanguage = ConfigurationState.Instance.System.Language;
+                ApplicationLibrary.LoadApplications(ConfigurationState.Instance.UI.GameDirs);
 
                 _isLoading = false;
             })

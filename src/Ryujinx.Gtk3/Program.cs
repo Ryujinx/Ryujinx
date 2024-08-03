@@ -256,6 +256,12 @@ namespace Ryujinx
             MainWindow mainWindow = new();
             mainWindow.Show();
 
+            // Load the game table if no application was requested by the command line
+            if (CommandLineState.LaunchPathArg == null)
+            {
+                mainWindow.UpdateGameTable();
+            }
+
             if (OperatingSystem.IsLinux())
             {
                 int currentVmMaxMapCount = LinuxHelper.VmMaxMapCount;
@@ -325,15 +331,13 @@ namespace Ryujinx
             {
                 if (mainWindow.ApplicationLibrary.TryGetApplicationsFromFile(CommandLineState.LaunchPathArg, out List<ApplicationData> applications))
                 {
-                    ApplicationData applicationData;
-
                     if (CommandLineState.LaunchApplicationId != null)
                     {
-                        applicationData = applications.Find(application => application.IdString == CommandLineState.LaunchApplicationId);
+                        int applicationIndex = applications.FindIndex(application => application.IdString.Equals(CommandLineState.LaunchApplicationId, StringComparison.InvariantCultureIgnoreCase));
 
-                        if (applicationData != null)
+                        if (applicationIndex != -1)
                         {
-                            mainWindow.RunApplication(applicationData, CommandLineState.StartFullscreenArg);
+                            mainWindow.RunApplication(applications[applicationIndex], CommandLineState.StartFullscreenArg);
                         }
                         else
                         {
@@ -343,8 +347,7 @@ namespace Ryujinx
                     }
                     else
                     {
-                        applicationData = applications[0];
-                        mainWindow.RunApplication(applicationData, CommandLineState.StartFullscreenArg);
+                        mainWindow.RunApplication(applications[0], CommandLineState.StartFullscreenArg);
                     }
                 }
                 else
