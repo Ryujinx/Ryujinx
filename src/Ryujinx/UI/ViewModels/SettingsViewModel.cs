@@ -133,6 +133,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool ShowConfirmExit { get; set; }
         public bool RememberWindowState { get; set; }
         public int HideCursor { get; set; }
+        public int HideCursorIdleTime { get; set; }
         public bool EnableDockedMode { get; set; }
         public bool EnableKeyboard { get; set; }
         public bool EnableMouse { get; set; }
@@ -393,6 +394,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             ShowConfirmExit = config.ShowConfirmExit;
             RememberWindowState = config.RememberWindowState;
             HideCursor = (int)config.HideCursor.Value;
+            HideCursorIdleTime = (int)config.HideCursorIdleTime.Value;
 
             GameDirectories.Clear();
             GameDirectories.AddRange(config.UI.GameDirs.Value);
@@ -485,6 +487,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.ShowConfirmExit.Value = ShowConfirmExit;
             config.RememberWindowState.Value = RememberWindowState;
             config.HideCursor.Value = (HideCursorMode)HideCursor;
+            config.HideCursorIdleTime.Value = HideCursorIdleTime;
 
             if (_directoryChanged)
             {

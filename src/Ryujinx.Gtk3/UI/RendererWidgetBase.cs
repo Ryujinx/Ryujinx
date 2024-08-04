@@ -70,10 +70,10 @@ namespace Ryujinx.UI
         private readonly CancellationTokenSource _gpuCancellationTokenSource;
 
         // Hide Cursor
-        const int CursorHideIdleTime = 5; // seconds
         private static readonly Cursor _invisibleCursor = new(Display.Default, CursorType.BlankCursor);
         private long _lastCursorMoveTime;
         private HideCursorMode _hideCursorMode;
+        private int _hideCursorIdleTime;
         private readonly InputManager _inputManager;
         private readonly IKeyboard _keyboardInterface;
         private readonly GraphicsDebugLevel _glLogLevel;
@@ -116,9 +116,12 @@ namespace Ryujinx.UI
             _gpuCancellationTokenSource = new CancellationTokenSource();
 
             _hideCursorMode = ConfigurationState.Instance.HideCursor;
+            _hideCursorIdleTime = ConfigurationState.Instance.HideCursorIdleTime;
+
             _lastCursorMoveTime = Stopwatch.GetTimestamp();
 
             ConfigurationState.Instance.HideCursor.Event += HideCursorStateChanged;
+            ConfigurationState.Instance.HideCursorIdleTime.Event += HideCursorIdleTimeStateChanged;
             ConfigurationState.Instance.Graphics.AntiAliasing.Event += UpdateAnriAliasing;
             ConfigurationState.Instance.Graphics.ScalingFilter.Event += UpdateScalingFilter;
             ConfigurationState.Instance.Graphics.ScalingFilterLevel.Event += UpdateScalingFilterLevel;
@@ -170,9 +173,18 @@ namespace Ryujinx.UI
             });
         }
 
+        private void HideCursorIdleTimeStateChanged(object sender, ReactiveEventArgs<int> state)
+        {
+            Application.Invoke(delegate
+            {
+                _hideCursorIdleTime = state.NewValue;
+            });
+        }
+
         private void Renderer_Destroyed(object sender, EventArgs e)
         {
             ConfigurationState.Instance.HideCursor.Event -= HideCursorStateChanged;
+            ConfigurationState.Instance.HideCursorIdleTime.Event -= HideCursorIdleTimeStateChanged;
             ConfigurationState.Instance.Graphics.AntiAliasing.Event -= UpdateAnriAliasing;
             ConfigurationState.Instance.Graphics.ScalingFilter.Event -= UpdateScalingFilter;
             ConfigurationState.Instance.Graphics.ScalingFilterLevel.Event -= UpdateScalingFilterLevel;
@@ -335,7 +347,7 @@ namespace Ryujinx.UI
                     {
                         case HideCursorMode.OnIdle:
                             long cursorMoveDelta = Stopwatch.GetTimestamp() - _lastCursorMoveTime;
-                            Window.Cursor = (cursorMoveDelta >= CursorHideIdleTime * Stopwatch.Frequency) ? _invisibleCursor : null;
+                            Window.Cursor = (cursorMoveDelta >= _hideCursorIdleTime * Stopwatch.Frequency) ? _invisibleCursor : null;
                             break;
                         case HideCursorMode.Always:
                             Window.Cursor = _invisibleCursor;
