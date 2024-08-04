@@ -58,6 +58,8 @@ namespace Ryujinx.Ava.UI.Windows
         public SettingsWindow SettingsWindow { get; set; }
 
         public static bool ShowKeyErrorOnLoad { get; set; }
+
+        public static bool ShowNewUserEditPrompt { get; set; }
         public ApplicationLibrary ApplicationLibrary { get; set; }
 
         public readonly double StatusBarHeight;
@@ -359,6 +361,20 @@ namespace Ryujinx.Ava.UI.Windows
                 ShowKeyErrorOnLoad = false;
 
                 await Dispatcher.UIThread.InvokeAsync(async () => await UserErrorDialog.ShowUserErrorDialog(UserError.NoKeys));
+            }
+
+            if (ShowNewUserEditPrompt)
+            {
+                ShowNewUserEditPrompt = false;
+
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    UserResult result = await ContentDialogHelper.CreateInfoDialog("The default profile has been created.", "Would you like to manage profiles now?", "Yes", "No", "First Launch");
+                    if (result == UserResult.Ok)
+                    {
+                        await ViewModel.ManageProfiles();
+                    }
+                });
             }
 
             if (ConfigurationState.Instance.CheckUpdatesOnStart.Value && Updater.CanUpdate(false))

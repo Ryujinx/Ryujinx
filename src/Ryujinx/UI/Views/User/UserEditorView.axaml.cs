@@ -1,13 +1,13 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
+using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Controls;
 using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Models;
-using Ryujinx.HLE.HOS.Services.Account.Acc;
 using System;
 using UserProfile = Ryujinx.Ava.UI.Models.UserProfile;
 
@@ -21,7 +21,9 @@ namespace Ryujinx.Ava.UI.Views.User
 
         public TempProfile TempProfile { get; set; }
         public static uint MaxProfileNameLength => 0x20;
-        public bool IsDeletable => _profile.UserId != AccountManager.DefaultUserId;
+
+        // Don't allow deletion if there is only one user
+        public bool IsDeletable => _parent.AccountManager.GetAllUsers().Count() != 1;
 
         public UserEditorView()
         {
