@@ -11,6 +11,10 @@ on:
       - '!*.md'
       - '.github/workflows/*.yml'
 
+  pull_request_target:
+    branches: [ master ]
+    types: [closed]
+
 permissions:
   pull-requests: write
   checks: write
@@ -72,3 +76,29 @@ jobs:
     uses: ./.github/workflows/build.yml
     needs: format
     secrets: inherit
+
+  cleanup:
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup gh extension
+        run: |
+          gh extension install actions/gh-actions-cache
+
+      - name: Cleanup
+        run: |
+          echo "Fetching list of cache keys"
+          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH -L 100 | cut -f 1 )
+
+          ## Setting this to not fail the workflow while deleting cache keys.
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR
+          do
+              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+          done
+          echo "Done"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
