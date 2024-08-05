@@ -166,6 +166,13 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Sfdnsres
             return GetAddrInfoRequestImpl(context, responseBufferPosition, responseBufferSize, false, 0, 0);
         }
 
+        [CommandCmif(7)]
+        // GetNameInfoRequest
+        public ResultCode GetNameInfoRequest(ServiceCtx context)
+        {
+            return GetNameInfoRequestImpl(context, false);
+        }
+
         [CommandCmif(8)]
         // GetCancelHandleRequest(u64, pid) -> u32
         public ResultCode GetCancelHandleRequest(ServiceCtx context)
@@ -242,6 +249,12 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Sfdnsres
             (ulong optionsBufferPosition, ulong optionsBufferSize) = context.Request.GetBufferType0x21();
 
             return GetAddrInfoRequestImpl(context, outputBufferPosition, outputBufferSize, true, optionsBufferPosition, optionsBufferSize);
+        }
+
+        [CommandCmif(13)]
+        public ResultCode GetNameInfoRequestWithOptions(ServiceCtx context)
+        {
+            return GetNameInfoRequestImpl(context, true);
         }
 
         [CommandCmif(14)] // 5.0.0+
@@ -658,6 +671,26 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Sfdnsres
             data = data[sizeof(uint)..];
 
             return region.Memory.Span.Length - data.Length;
+        }
+
+        private static ResultCode GetNameInfoRequestImpl(
+            ServiceCtx context,
+            bool withOptions)
+        {
+            if (!context.Device.Configuration.EnableInternetAccess)
+            {
+                Logger.Info?.Print(LogClass.ServiceSfdnsres, "Guest network access disabled, DNS Blocked.");
+
+                WriteResponse(context, withOptions, 0, GaiError.NoData, NetDbError.NoAddress);
+
+                return ResultCode.Success;
+            }
+
+            Logger.Info?.PrintStub(LogClass.ServiceSfdnsres);
+
+            WriteResponse(context, withOptions, 0, GaiError.NoData, NetDbError.NoAddress);
+
+            return ResultCode.Success;
         }
 
         private static void WriteResponse(
