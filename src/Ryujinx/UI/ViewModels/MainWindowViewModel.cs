@@ -62,6 +62,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private string _gameStatusText;
         private string _volumeStatusText;
         private string _gpuStatusText;
+        private string _shaderCountText;
         private bool _isAmiiboRequested;
         private bool _isGameRunning;
         private bool _isFullScreen;
@@ -497,6 +498,17 @@ namespace Ryujinx.Ava.UI.ViewModels
             set
             {
                 _gpuStatusText = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        public string ShaderCountText
+        {
+            get => _shaderCountText;
+            set
+            {
+                _shaderCountText = value;
 
                 OnPropertyChanged();
             }
@@ -1243,6 +1255,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                     GameStatusText = args.GameStatus;
                     VolumeStatusText = args.VolumeStatus;
                     FifoStatusText = args.FifoStatus;
+                    ShaderCountText = args.ShaderCount > 0 ? LocaleManager.Instance[LocaleKeys.CompilingShaders] + $": {args.ShaderCount}" : "";
 
                     ShowStatusSeparator = true;
                 });

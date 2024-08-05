@@ -13,7 +13,15 @@ namespace Ryujinx.UI
         public string GpuName;
         public string GpuBackend;
 
-        public StatusUpdatedEventArgs(bool vSyncEnabled, float volume, string gpuBackend, string dockedMode, string aspectRatio, string gameStatus, string fifoStatus, string gpuName)
+        public StatusUpdatedEventArgs(
+            bool vSyncEnabled,
+            float volume,
+            string gpuBackend,
+            string dockedMode,
+            string aspectRatio,
+            string gameStatus,
+            string fifoStatus,
+            string gpuName)
         {
             VSyncEnabled = vSyncEnabled;
             Volume = volume;

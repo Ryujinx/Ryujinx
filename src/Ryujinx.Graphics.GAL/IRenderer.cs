@@ -14,6 +14,8 @@ namespace Ryujinx.Graphics.GAL
 
         IWindow Window { get; }
 
+        uint ProgramCount { get; }
+
         void BackgroundContextAction(Action action, bool alwaysBackground = false);
 
         BufferHandle CreateBuffer(int size, BufferAccess access = BufferAccess.Default);
