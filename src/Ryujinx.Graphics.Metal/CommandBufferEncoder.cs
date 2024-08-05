@@ -18,11 +18,11 @@ class CommandBufferEncoder
 {
     public EncoderType CurrentEncoderType { get; private set; } = EncoderType.None;
 
-    public MTLBlitCommandEncoder BlitEncoder => new MTLBlitCommandEncoder(CurrentEncoder.Value);
+    public MTLBlitCommandEncoder BlitEncoder => new(CurrentEncoder.Value);
 
-    public MTLComputeCommandEncoder ComputeEncoder => new MTLComputeCommandEncoder(CurrentEncoder.Value);
+    public MTLComputeCommandEncoder ComputeEncoder => new(CurrentEncoder.Value);
 
-    public MTLRenderCommandEncoder RenderEncoder => new MTLRenderCommandEncoder(CurrentEncoder.Value);
+    public MTLRenderCommandEncoder RenderEncoder => new(CurrentEncoder.Value);
 
     internal MTLCommandEncoder? CurrentEncoder { get; private set; }
 
