@@ -19,7 +19,7 @@ namespace Ryujinx.Graphics.GAL.Multithreading.Commands
 
         public static void Run(ref TryHostConditionalRenderingCommand command, ThreadedRenderer threaded, IRenderer renderer)
         {
-            renderer.Pipeline.TryHostConditionalRendering(command._value.Get(threaded)?.Base, command._compare, command._isEqual);
+            renderer.Pipeline.TryHostConditionalRendering(command._value.Get(threaded)?.Base, command._compare, command._isEqual, true);
         }
     }
 }

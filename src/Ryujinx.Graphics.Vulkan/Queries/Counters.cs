@@ -37,7 +37,7 @@ namespace Ryujinx.Graphics.Vulkan.Queries
             _counterQueues[(int)CounterType.SamplesPassed].ResetFutureCounters(cmd, count);
         }
 
-        public CounterQueueEvent QueueReport(CounterType type, EventHandler<ulong> resultHandler, float divisor, bool hostReserved)
+        public CounterQueueEvent QueueReport(CounterType type, EventHandler<ulong> resultHandler, float divisor, int hostReserved)
         {
             return _counterQueues[(int)type].QueueReport(resultHandler, divisor, _pipeline.DrawCount, hostReserved);
         }

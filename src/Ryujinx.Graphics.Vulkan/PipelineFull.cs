@@ -133,7 +133,7 @@ namespace Ryujinx.Graphics.Vulkan
             _activeConditionalRender = null;
         }
 
-        public bool TryHostConditionalRendering(ICounterEvent value, ulong compare, bool isEqual)
+        public bool TryHostConditionalRendering(ICounterEvent value, ulong compare, bool isEqual, bool forwarded = false)
         {
             // Compare an event and a constant value.
             if (value is CounterQueueEvent evt)
@@ -146,7 +146,8 @@ namespace Ryujinx.Graphics.Vulkan
 
                 if (compare == 0 && evt.Type == CounterType.SamplesPassed && evt.ClearCounter)
                 {
-                    if (!value.ReserveForHostAccess())
+                    // If the call is forwarded from backend threading, then we have already reserved host access.
+                    if (!forwarded && !value.ReserveForHostAccess())
                     {
                         // If the event has been flushed, then just use the values on the CPU.
                         // The query object may already be repurposed for another draw (eg. begin + end).

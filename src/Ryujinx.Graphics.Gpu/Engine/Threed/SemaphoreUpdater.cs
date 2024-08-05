@@ -179,13 +179,13 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
                 case ReportCounterType.SamplesPassed:
                     float scale = _channel.TextureManager.RenderTargetScale;
                     float divisor = scale * scale;
-                    counter = _context.Renderer.ReportCounter(CounterType.SamplesPassed, resultHandler, divisor, false);
+                    counter = _context.Renderer.ReportCounter(CounterType.SamplesPassed, resultHandler, divisor, 0);
                     break;
                 case ReportCounterType.PrimitivesGenerated:
-                    counter = _context.Renderer.ReportCounter(CounterType.PrimitivesGenerated, resultHandler, 1f, false);
+                    counter = _context.Renderer.ReportCounter(CounterType.PrimitivesGenerated, resultHandler, 1f, 0);
                     break;
                 case ReportCounterType.TransformFeedbackPrimitivesWritten:
-                    counter = _context.Renderer.ReportCounter(CounterType.TransformFeedbackPrimitivesWritten, resultHandler, 1f, false);
+                    counter = _context.Renderer.ReportCounter(CounterType.TransformFeedbackPrimitivesWritten, resultHandler, 1f, 0);
                     break;
             }
 

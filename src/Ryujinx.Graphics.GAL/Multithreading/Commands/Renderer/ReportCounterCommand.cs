@@ -11,9 +11,9 @@ namespace Ryujinx.Graphics.GAL.Multithreading.Commands.Renderer
         private CounterType _type;
         private TableRef<EventHandler<ulong>> _resultHandler;
         private float _divisor;
-        private bool _hostReserved;
+        private int _hostReserved;
 
-        public void Set(TableRef<ThreadedCounterEvent> evt, CounterType type, TableRef<EventHandler<ulong>> resultHandler, float divisor, bool hostReserved)
+        public void Set(TableRef<ThreadedCounterEvent> evt, CounterType type, TableRef<EventHandler<ulong>> resultHandler, float divisor, int hostReserved)
         {
             _event = evt;
             _type = type;
