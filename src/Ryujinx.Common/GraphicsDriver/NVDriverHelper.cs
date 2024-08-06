@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Ryujinx.Common.GraphicsDriver
 {
-    static partial class NVThreadedOptimization
+    static partial class NVDriverHelper
     {
         private const string ProfileName = "Ryujinx Nvidia Profile";
 
@@ -49,6 +49,9 @@ namespace Ryujinx.Common.GraphicsDriver
         private delegate int NvAPI_DRS_DestroySessionDelegate(IntPtr handle);
         private static NvAPI_DRS_DestroySessionDelegate NvAPI_DRS_DestroySession;
 
+        private static IntPtr _handle;
+        private static nint _profileHandle;
+
         private static bool _initialized;
 
         private static void Check(int status)
@@ -80,17 +83,8 @@ namespace Ryujinx.Common.GraphicsDriver
             }
         }
 
-        private static uint MakeVersion<T>(uint version) where T : unmanaged
+        private static void SetupNvProfile()
         {
-            return (uint)Unsafe.SizeOf<T>() | version << 16;
-        }
-
-        public static void SetThreadedOptimization(bool enabled)
-        {
-            Initialize();
-
-            uint targetValue = (uint)(enabled ? Nvapi.OglThreadControlEnable : Nvapi.OglThreadControlDisable);
-
             Check(NvAPI_Initialize());
 
             Check(NvAPI_DRS_CreateSession(out IntPtr handle));
@@ -98,7 +92,6 @@ namespace Ryujinx.Common.GraphicsDriver
             Check(NvAPI_DRS_LoadSettings(handle));
 
             // Check if the profile already exists.
-
             int status = NvAPI_DRS_FindProfileByName(handle, new NvapiUnicodeString(ProfileName), out nint profileHandle);
 
             if (status != 0)
@@ -126,10 +119,32 @@ namespace Ryujinx.Common.GraphicsDriver
                 Check(NvAPI_DRS_CreateApplication(handle, profileHandle, ref application));
             }
 
+            _handle = handle;
+            _profileHandle = profileHandle;
+        }
+
+        private static uint MakeVersion<T>(uint version) where T : unmanaged
+        {
+            return (uint)Unsafe.SizeOf<T>() | version << 16;
+        }
+
+        public static void SetControlOption(NvapiSettingId id, bool enabled)
+        {
+            Initialize();
+
+            SetupNvProfile();
+
+            uint targetValue = id switch
+            {
+                NvapiSettingId.OglThreadControlId => (uint)(enabled ? OglThreadControl.Enabled : OglThreadControl.Disabled),
+                NvapiSettingId.OglCplPreferDxPresentId => (uint)(enabled ? OglCplDxPresent.Enabled : OglCplDxPresent.Disabled),
+                _ => throw new ArgumentException($"Invalid NVAPI setting id: 0x{id:X}"),
+            };
+
             NvdrsSetting setting = new()
             {
                 Version = MakeVersion<NvdrsSetting>(1),
-                SettingId = Nvapi.OglThreadControlId,
+                SettingId = id,
                 SettingType = NvdrsSettingType.NvdrsDwordType,
                 SettingLocation = NvdrsSettingLocation.NvdrsCurrentProfileLocation,
                 IsCurrentPredefined = 0,
@@ -138,11 +153,10 @@ namespace Ryujinx.Common.GraphicsDriver
                 PredefinedValue = targetValue,
             };
 
-            Check(NvAPI_DRS_SetSetting(handle, profileHandle, ref setting));
+            Check(NvAPI_DRS_SetSetting(_handle, _profileHandle, ref setting));
+            Check(NvAPI_DRS_SaveSettings(_handle));
 
-            Check(NvAPI_DRS_SaveSettings(handle));
-
-            NvAPI_DRS_DestroySession(handle);
+            NvAPI_DRS_DestroySession(_handle);
         }
 
         private static T NvAPI_Delegate<T>(uint id) where T : class

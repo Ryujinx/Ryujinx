@@ -26,7 +26,7 @@ namespace Ryujinx.Common.GraphicsDriver.NVAPI
         [FieldOffset(0x4)]
         public NvapiUnicodeString SettingName;
         [FieldOffset(0x1004)]
-        public Nvapi SettingId;
+        public NvapiSettingId SettingId;
         [FieldOffset(0x1008)]
         public NvdrsSettingType SettingType;
         [FieldOffset(0x100C)]

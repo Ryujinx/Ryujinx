@@ -2,6 +2,7 @@ using Gtk;
 using Ryujinx.Common;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.GraphicsDriver;
+using Ryujinx.Common.GraphicsDriver.NVAPI;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.SystemInterop;
 using Ryujinx.Modules;
@@ -239,7 +240,10 @@ namespace Ryujinx
 
             // Enable OGL multithreading on the driver, when available.
             BackendThreading threadingMode = ConfigurationState.Instance.Graphics.BackendThreading;
-            DriverUtilities.ToggleOGLThreading(threadingMode == BackendThreading.Off);
+            DriverUtilities.ToggleOglThreading(threadingMode == BackendThreading.Off);
+
+            // Enable DXGI present mode on the driver, when available.
+            DriverUtilities.ToggleNvDriverSetting(NvapiSettingId.OglCplPreferDxPresentId, true);
 
             // Initialize Gtk.
             Application.Init();

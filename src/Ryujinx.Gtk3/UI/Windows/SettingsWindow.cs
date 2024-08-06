@@ -7,6 +7,7 @@ using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Hid;
 using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.Common.GraphicsDriver;
+using Ryujinx.Common.GraphicsDriver.NVAPI;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Time.TimeZone;
 using Ryujinx.UI.Common.Configuration;
@@ -610,7 +611,7 @@ namespace Ryujinx.UI.Windows
             BackendThreading backendThreading = Enum.Parse<BackendThreading>(_galThreading.ActiveId);
             if (ConfigurationState.Instance.Graphics.BackendThreading != backendThreading)
             {
-                DriverUtilities.ToggleOGLThreading(backendThreading == BackendThreading.Off);
+                DriverUtilities.ToggleOglThreading(backendThreading == BackendThreading.Off);
             }
 
             ConfigurationState.Instance.Logger.EnableError.Value = _errorLogToggle.Active;
