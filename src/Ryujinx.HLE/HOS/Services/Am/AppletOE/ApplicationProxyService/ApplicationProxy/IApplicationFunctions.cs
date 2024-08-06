@@ -269,6 +269,19 @@ namespace Ryujinx.HLE.HOS.Services.Am.AppletOE.ApplicationProxyService.Applicati
             return ResultCode.Success;
         }
 
+        [CommandCmif(29)] // 11.0.0+
+        // GetCacheStorageMax() -> (s32 cache_storage_index_max, s64 cache_storage_data_and_journal_size_max)
+        public ResultCode GetCacheStorageMax(ServiceCtx context)
+        {
+            ApplicationControlProperty nacp = context.Device.Processes.ActiveApplication.ApplicationControlProperties;
+
+            context.ResponseData.Write((Int32)nacp.CacheStorageIndexMax);
+            context.ResponseData.Write(0);
+            context.ResponseData.Write(nacp.CacheStorageDataAndJournalSizeMax);
+
+            return ResultCode.Success;
+        }
+
         [CommandCmif(30)]
         // BeginBlockingHomeButtonShortAndLongPressed()
         public ResultCode BeginBlockingHomeButtonShortAndLongPressed(ServiceCtx context)
