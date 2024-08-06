@@ -33,6 +33,7 @@ using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.HOS.SystemState;
+using Ryujinx.Horizon;
 using Ryujinx.Input;
 using Ryujinx.Input.HLE;
 using Ryujinx.UI.App.Common;
@@ -414,7 +415,6 @@ namespace Ryujinx.Ava
             DisplaySleep.Prevent();
 
             NpadManager.Initialize(Device, ConfigurationState.Instance.Hid.InputConfig, ConfigurationState.Instance.Hid.EnableKeyboard, ConfigurationState.Instance.Hid.EnableMouse);
-            TouchScreenManager.Initialize(Device);
 
             _viewModel.IsGameRunning = true;
 
@@ -1225,10 +1225,10 @@ namespace Ryujinx.Ava
 
             if (!hasTouch)
             {
-                Device.Hid.Touchscreen.Update();
+                HorizonStatic.Hid.Touchscreen.Update();
             }
 
-            Device.Hid.DebugPad.Update();
+            HorizonStatic.Hid.DebugPad.Update();
 
             return true;
         }

@@ -1,5 +1,6 @@
 using Ryujinx.HLE.HOS.Services.Hid;
 using Ryujinx.HLE.HOS.Tamper.Operations;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 
 namespace Ryujinx.HLE.HOS.Tamper
 {

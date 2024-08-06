@@ -1,4 +1,5 @@
 using Ryujinx.HLE.HOS.Services.Hid;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 using System.Collections.Generic;
 
 namespace Ryujinx.HLE.HOS.Applets

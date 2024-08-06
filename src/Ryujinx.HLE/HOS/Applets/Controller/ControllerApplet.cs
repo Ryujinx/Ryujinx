@@ -2,7 +2,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Memory;
 using Ryujinx.HLE.HOS.Services.Am.AppletAE;
 using Ryujinx.HLE.HOS.Services.Hid;
-using Ryujinx.HLE.HOS.Services.Hid.Types;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;

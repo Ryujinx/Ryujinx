@@ -5,9 +5,9 @@ using Ryujinx.Graphics.Gpu;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
 using Ryujinx.HLE.HOS.Services.Apm;
-using Ryujinx.HLE.HOS.Services.Hid;
 using Ryujinx.HLE.Loaders.Processes;
 using Ryujinx.HLE.UI;
+using Ryujinx.Horizon.Sdk.Hid;
 using Ryujinx.Memory;
 using System;
 
@@ -23,7 +23,6 @@ namespace Ryujinx.HLE
         public HOS.Horizon System { get; }
         public ProcessLoader Processes { get; }
         public PerformanceStatistics Statistics { get; }
-        public Hid Hid { get; }
         public TamperMachine TamperMachine { get; }
         public IHostUIHandler UIHandler { get; }
 
@@ -51,7 +50,6 @@ namespace Ryujinx.HLE
             Gpu               = new GpuContext(Configuration.GpuRenderer);
             System            = new HOS.Horizon(this);
             Statistics        = new PerformanceStatistics();
-            Hid               = new Hid(this, System.HidStorage);
             Processes         = new ProcessLoader(this);
             TamperMachine     = new TamperMachine();
 

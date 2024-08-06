@@ -8,6 +8,7 @@ using Ryujinx.Graphics.OpenGL;
 using Ryujinx.HLE.HOS.Applets;
 using Ryujinx.HLE.HOS.Services.Am.AppletOE.ApplicationProxyService.ApplicationProxy.Types;
 using Ryujinx.HLE.UI;
+using Ryujinx.Horizon;
 using Ryujinx.Input;
 using Ryujinx.Input.HLE;
 using Ryujinx.SDL2.Common;
@@ -125,7 +126,6 @@ namespace Ryujinx.Headless.SDL2
             Renderer = renderer;
 
             NpadManager.Initialize(device, inputConfigs, enableKeyboard, enableMouse);
-            TouchScreenManager.Initialize(device);
         }
 
         private void SetWindowIcon()
@@ -423,7 +423,7 @@ namespace Ryujinx.Headless.SDL2
                 TouchScreenManager.Update(false);
             }
 
-            Device.Hid.DebugPad.Update();
+            HorizonStatic.Hid.DebugPad.Update();
 
             // TODO: Replace this with MouseDriver.CheckIdle() when mouse motion events are received on every supported platform.
             MouseDriver.UpdatePosition();

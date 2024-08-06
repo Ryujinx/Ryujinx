@@ -7,6 +7,9 @@ namespace Ryujinx.Horizon
     public static class HorizonStatic
     {
         [ThreadStatic]
+        private static Sdk.Hid.Hid _hid;
+
+        [ThreadStatic]
         private static HorizonOptions _options;
 
         [ThreadStatic]
@@ -21,6 +24,7 @@ namespace Ryujinx.Horizon
         [ThreadStatic]
         private static int _threadHandle;
 
+        public static Sdk.Hid.Hid Hid => _hid;
         public static HorizonOptions Options => _options;
         public static ISyscallApi Syscall => _syscall;
         public static IVirtualMemoryManager AddressSpace => _addressSpace;

@@ -41,7 +41,6 @@ namespace Ryujinx.HLE.HOS
 
     public class Horizon : IDisposable
     {
-        internal const int HidSize = 0x40000;
         internal const int FontSize = 0x1100000;
         internal const int IirsSize = 0x8000;
         internal const int TimeSize = 0x1000;
@@ -68,7 +67,6 @@ namespace Ryujinx.HLE.HOS
         internal ServerBase SmServer { get; private set; }
         internal ServerBase BsdServer { get; private set; }
         internal ServerBase FsServer { get; private set; }
-        internal ServerBase HidServer { get; private set; }
         internal ServerBase NvDrvServer { get; private set; }
         internal ServerBase TimeServer { get; private set; }
         internal ServerBase ViServer { get; private set; }
@@ -76,7 +74,6 @@ namespace Ryujinx.HLE.HOS
         internal ServerBase ViServerS { get; private set; }
         internal ServerBase LdnServer { get; private set; }
 
-        internal KSharedMemory HidSharedMem { get; private set; }
         internal KSharedMemory FontSharedMem { get; private set; }
         internal KSharedMemory IirsSharedMem { get; private set; }
 
@@ -101,7 +98,6 @@ namespace Ryujinx.HLE.HOS
 
         public int GlobalAccessLogMode { get; set; }
 
-        internal SharedMemoryStorage HidStorage { get; private set; }
 
         internal NvHostSyncpt HostSyncpoint { get; private set; }
 
@@ -134,33 +130,26 @@ namespace Ryujinx.HLE.HOS
             // region used that is used is Application, so we can use the other ones for anything.
             KMemoryRegionManager region = KernelContext.MemoryManager.MemoryRegions[(int)MemoryRegion.NvServices];
 
-            ulong hidPa = region.Address;
-            ulong fontPa = region.Address + HidSize;
-            ulong iirsPa = region.Address + HidSize + FontSize;
-            ulong timePa = region.Address + HidSize + FontSize + IirsSize;
-            ulong appletCaptureBufferPa = region.Address + HidSize + FontSize + IirsSize + TimeSize;
+            ulong fontPa = region.Address;
+            ulong iirsPa = region.Address + FontSize;
+            ulong timePa = region.Address + FontSize + IirsSize;
+            ulong appletCaptureBufferPa = region.Address + FontSize + IirsSize + TimeSize;
 
-            KPageList hidPageList = new();
             KPageList fontPageList = new();
             KPageList iirsPageList = new();
             KPageList timePageList = new();
             KPageList appletCaptureBufferPageList = new();
 
-            hidPageList.AddRange(hidPa, HidSize / KPageTableBase.PageSize);
             fontPageList.AddRange(fontPa, FontSize / KPageTableBase.PageSize);
             iirsPageList.AddRange(iirsPa, IirsSize / KPageTableBase.PageSize);
             timePageList.AddRange(timePa, TimeSize / KPageTableBase.PageSize);
             appletCaptureBufferPageList.AddRange(appletCaptureBufferPa, AppletCaptureBufferSize / KPageTableBase.PageSize);
 
-            var hidStorage = new SharedMemoryStorage(KernelContext, hidPageList);
             var fontStorage = new SharedMemoryStorage(KernelContext, fontPageList);
             var iirsStorage = new SharedMemoryStorage(KernelContext, iirsPageList);
             var timeStorage = new SharedMemoryStorage(KernelContext, timePageList);
             var appletCaptureBufferStorage = new SharedMemoryStorage(KernelContext, appletCaptureBufferPageList);
 
-            HidStorage = hidStorage;
-
-            HidSharedMem = new KSharedMemory(KernelContext, hidStorage, 0, 0, KMemoryPermission.Read);
             FontSharedMem = new KSharedMemory(KernelContext, fontStorage, 0, 0, KMemoryPermission.Read);
             IirsSharedMem = new KSharedMemory(KernelContext, iirsStorage, 0, 0, KMemoryPermission.Read);
 
@@ -247,7 +236,6 @@ namespace Ryujinx.HLE.HOS
 
             BsdServer = new ServerBase(KernelContext, "BsdServer");
             FsServer = new ServerBase(KernelContext, "FsServer");
-            HidServer = new ServerBase(KernelContext, "HidServer");
             NvDrvServer = new ServerBase(KernelContext, "NvservicesServer");
             TimeServer = new ServerBase(KernelContext, "TimeServer");
             ViServer = new ServerBase(KernelContext, "ViServerU");

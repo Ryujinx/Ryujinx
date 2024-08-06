@@ -8,7 +8,7 @@ using Ryujinx.Ava.UI.Helpers;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Common;
 using Ryujinx.HLE.HOS.Applets;
-using Ryujinx.HLE.HOS.Services.Hid;
+using Ryujinx.Horizon.Sdk.Hid.Npad;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -46,10 +46,10 @@ namespace Ryujinx.Ava.UI.Applet
                 PlayerCount = $"{args.PlayerCountMin} - {args.PlayerCountMax}";
             }
 
-            SupportsProController = (args.SupportedStyles & ControllerType.ProController) != 0;
-            SupportsLeftJoycon = (args.SupportedStyles & ControllerType.JoyconLeft) != 0;
-            SupportsRightJoycon = (args.SupportedStyles & ControllerType.JoyconRight) != 0;
-            SupportsJoyconPair = (args.SupportedStyles & ControllerType.JoyconPair) != 0;
+            SupportsProController = (args.SupportedStyles & NpadStyleIndex.FullKey) != 0;
+            SupportsLeftJoycon = (args.SupportedStyles & NpadStyleIndex.JoyLeft) != 0;
+            SupportsRightJoycon = (args.SupportedStyles & NpadStyleIndex.JoyRight) != 0;
+            SupportsJoyconPair = (args.SupportedStyles & NpadStyleIndex.JoyDual) != 0;
 
             IsDocked = args.IsDocked;
 
