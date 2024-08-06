@@ -8,7 +8,7 @@ namespace Ryujinx.Horizon.Sdk.Bcat
     internal interface IDeliveryCacheDirectoryService : IServiceObject
     {
         Result GetCount(out int count);
-        Result Open(DirectoryName directoryName);
+        Result Open(LibHac.Bcat.DirectoryName directoryName);
         Result Read(out int entriesRead, Span<DeliveryCacheDirectoryEntry> entriesBuffer);
     }
 }

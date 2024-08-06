@@ -58,7 +58,7 @@ namespace Ryujinx.Horizon.Bcat.Ipc
         }
 
         [CmifCommand(10)]
-        public Result EnumerateDeliveryCacheDirectory(out int count, [Buffer(HipcBufferFlags.Out | HipcBufferFlags.MapAlias)] Span<DirectoryName> directoryNames)
+        public Result EnumerateDeliveryCacheDirectory(out int count, [Buffer(HipcBufferFlags.Out | HipcBufferFlags.MapAlias)] Span<LibHac.Bcat.DirectoryName> directoryNames)
         {
             return _libHacService.Get.EnumerateDeliveryCacheDirectory(out count, directoryNames).ToHorizonResult();
         }

@@ -20,7 +20,7 @@ namespace Ryujinx.Horizon.Bcat.Ipc
         }
 
         [CmifCommand(0)]
-        public Result Open(DirectoryName directoryName, FileName fileName)
+        public Result Open(LibHac.Bcat.DirectoryName directoryName, FileName fileName)
         {
             return _libHacService.Get.Open(ref directoryName, ref fileName).ToHorizonResult();
         }
