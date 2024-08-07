@@ -15,7 +15,7 @@ namespace Ryujinx.UI.Common.Configuration
         /// <summary>
         /// The current version of the file format
         /// </summary>
-        public const int CurrentVersion = 51;
+        public const int CurrentVersion = 52;
 
         /// <summary>
         /// Version of the configuration file format
@@ -121,6 +121,11 @@ namespace Ryujinx.UI.Common.Configuration
         /// Change Graphics API debug log level
         /// </summary>
         public GraphicsDebugLevel LoggingGraphicsDebugLevel { get; set; }
+
+        /// <summary>
+        /// Disables the 500MB log file size limit.
+        /// </summary>
+        public bool LoggingDisableLogFileSizeLimit { get; set; }
 
         /// <summary>
         /// Change System Language

@@ -21,6 +21,7 @@ namespace Ryujinx.UI.Common.Configuration
             ConfigurationState.Instance.Logger.EnableFsAccessLog.Event += ReloadEnableFsAccessLog;
             ConfigurationState.Instance.Logger.FilteredClasses.Event += ReloadFilteredClasses;
             ConfigurationState.Instance.Logger.EnableFileLog.Event += ReloadFileLogger;
+            ConfigurationState.Instance.Logger.DisableLogFileSizeLimit.Event += ReloadDisableLogFileSizeLimit;
         }
 
         private static void ReloadEnableDebug(object sender, ReactiveEventArgs<bool> e)
@@ -78,6 +79,14 @@ namespace Ryujinx.UI.Common.Configuration
             }
         }
 
+        private static void ReloadDisableLogFileSizeLimit(object sender, ReactiveEventArgs<bool> e)
+        {
+            //TODO: add function to add or remove the file size limit during runtime.
+            //NOTE: Is this needed? If we want it, we would need to add a function on ILogTarget to do the job
+            //or some mechanism to directly access the FileLogTarget via AsyncLogTargetWrapper. For now,
+            //changes to this value only take effect after restart (which is probably what the user wants anyway).
+        }
+
         private static void ReloadFileLogger(object sender, ReactiveEventArgs<bool> e)
         {
             if (e.NewValue)
@@ -98,8 +107,10 @@ namespace Ryujinx.UI.Common.Configuration
                     return;
                 }
 
+                bool limitsFileSize = !ConfigurationState.Instance.Logger.DisableLogFileSizeLimit;
+
                 Logger.AddTarget(new AsyncLogTargetWrapper(
-                    new FileLogTarget("file", logFile),
+                    new FileLogTarget("file", logFile, limitsFileSize),
                     1000,
                     AsyncLogTargetOverflowAction.Block
                 ));

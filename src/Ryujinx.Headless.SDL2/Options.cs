@@ -182,6 +182,9 @@ namespace Ryujinx.Headless.SDL2
         [Option("graphics-debug-level", Required = false, Default = GraphicsDebugLevel.None, HelpText = "Change Graphics API debug log level.")]
         public GraphicsDebugLevel LoggingGraphicsDebugLevel { get; set; }
 
+        [Option("disable-log-size-limit", Required = false, Default = false, HelpText = "Disable 500MB log file size limit.")]
+        public bool LoggingDisableLogFileSizeLimit { get; set; }
+
         // Graphics
 
         [Option("resolution-scale", Required = false, Default = 1, HelpText = "Resolution Scale. A floating point scale applied to applicable render targets.")]

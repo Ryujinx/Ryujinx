@@ -10,14 +10,18 @@ namespace Ryujinx.Common.Logging.Targets
         private readonly StreamWriter _logWriter;
         private readonly ILogFormatter _formatter;
         private readonly string _name;
+        private ulong _logLength = 0;
+        private static readonly ulong _maxLogCharacterLength = 500000000;
+        private static bool _limitsFileSize = true;
 
         string ILogTarget.Name { get => _name; }
 
-        public FileLogTarget(string name, FileStream fileStream)
+        public FileLogTarget(string name, FileStream fileStream, bool limitsFileSize)
         {
             _name = name;
             _logWriter = new StreamWriter(fileStream);
             _formatter = new DefaultLogFormatter();
+            _limitsFileSize = limitsFileSize;
         }
 
         public static FileStream PrepareLogFile(string path)
@@ -93,8 +97,14 @@ namespace Ryujinx.Common.Logging.Targets
 
         public void Log(object sender, LogEventArgs args)
         {
-            _logWriter.WriteLine(_formatter.Format(args));
-            _logWriter.Flush();
+            string toWrite = _formatter.Format(args);
+            _logLength += (ulong)toWrite.Length;
+
+            if (_logLength <= _maxLogCharacterLength || !_limitsFileSize)
+            {
+                _logWriter.WriteLine(toWrite);
+                _logWriter.Flush();
+            }
         }
 
         public void Dispose()

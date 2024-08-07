@@ -74,6 +74,10 @@
                                   ToolTip.Tip="{locale:Locale DebugLogTooltip}">
                             <TextBlock Text="{locale:Locale SettingsTabLoggingEnableDebugLogs}" />
                         </CheckBox>
+                        <CheckBox IsChecked="{Binding DisableLogFileSizeLimit}"
+                                  ToolTip.Tip="{locale:Locale DisableLogFileSizeTooltip}">
+                            <TextBlock Text="{locale:Locale SettingsTabLoggingDisableLogFileSizeLimit}" />
+                        </CheckBox>
                         <StackPanel Margin="0,10,0,0" Orientation="Horizontal" VerticalAlignment="Stretch">
                             <TextBlock VerticalAlignment="Center"
                                     ToolTip.Tip="{locale:Locale FSAccessLogModeTooltip}"
