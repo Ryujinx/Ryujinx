@@ -109,6 +109,9 @@ namespace Ryujinx.Ava.UI.Views.Settings
                                     case "VolumeDown":
                                         viewModel.KeyboardHotkey.VolumeDown = buttonValue.AsHidType<Key>();
                                         break;
+                                    case "ToggleTurbo":
+                                        viewModel.KeyboardHotkey.ToggleTurbo = buttonValue.AsHidType<Key>();
+                                        break;
                                 }
                             }
                         };

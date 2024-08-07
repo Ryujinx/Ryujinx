@@ -28,6 +28,7 @@ namespace Ryujinx.HLE
         public IHostUIHandler UIHandler { get; }
 
         public bool EnableDeviceVsync { get; set; } = true;
+        public bool TurboMode { get; set; } = false;
 
         public bool IsFrameAvailable => Gpu.Window.IsFrameAvailable;
 
@@ -123,6 +124,18 @@ namespace Ryujinx.HLE
         public float GetVolume()
         {
             return AudioDeviceDriver.Volume;
+        }
+
+        public void SetTickSourceMultiplier(long tickMultiplier)
+        {
+            System.TickSource.TickMultiplier = tickMultiplier;
+        }
+
+        public void ToggleTurbo()
+        {
+            TurboMode = !TurboMode;
+            long turboMultiplier = TurboMode ? Configuration.TurboMultiplier : 100;
+            SetTickSourceMultiplier(turboMultiplier);
         }
 
         public void EnableCheats()

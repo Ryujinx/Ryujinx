@@ -84,6 +84,11 @@ namespace Ryujinx.HLE
         internal readonly RegionCode Region;
 
         /// <summary>
+        /// Turbo mode speed multiplier
+        /// </summary>
+        public long TurboMultiplier;
+
+        /// <summary>
         /// Control the initial state of the vertical sync in the SurfaceFlinger service.
         /// </summary>
         internal readonly bool EnableVsync;
@@ -194,7 +199,8 @@ namespace Ryujinx.HLE
                                 float audioVolume,
                                 bool useHypervisor,
                                 string multiplayerLanInterfaceId,
-                                MultiplayerMode multiplayerMode)
+                                MultiplayerMode multiplayerMode,
+                                long turboMultiplier)
         {
             VirtualFileSystem = virtualFileSystem;
             LibHacHorizonManager = libHacHorizonManager;
@@ -207,6 +213,7 @@ namespace Ryujinx.HLE
             HostUIHandler = hostUIHandler;
             SystemLanguage = systemLanguage;
             Region = region;
+            TurboMultiplier = turboMultiplier;
             EnableVsync = enableVsync;
             EnableDockedMode = enableDockedMode;
             EnablePtc = enablePtc;

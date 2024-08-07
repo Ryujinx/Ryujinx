@@ -497,7 +497,8 @@ namespace Ryujinx.UI
                             _gpuBackendName,
                             dockedMode,
                             ConfigurationState.Instance.Graphics.AspectRatio.Value.ToText(),
-                            $"Game: {Device.Statistics.GetGameFrameRate():00.00} FPS ({Device.Statistics.GetGameFrameTime():00.00} ms)",
+                            $"Game: {Device.Statistics.GetGameFrameRate():00.00} FPS ({Device.Statistics.GetGameFrameTime():00.00} ms)"
+                            + (Device.TurboMode ? $" Turbo ({Device.Configuration.TurboMultiplier}%)" : ""),
                             $"FIFO: {Device.Statistics.GetFifoPercent():0.00} %",
                             $"GPU: {_gpuDriverName}"));
 

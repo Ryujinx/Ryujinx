@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Ryujinx.Ava.UI.Views.Settings.SettingsHotkeysView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -102,6 +102,20 @@
                     <ToggleButton Name="VolumeDown">
                         <TextBlock Text="{Binding KeyboardHotkey.VolumeDown, Converter={StaticResource Key}}" />
                     </ToggleButton>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{locale:Locale SettingsTabHotkeysToggleTurboHotkey}" Width="230" />
+                    <ToggleButton Name="ToggleTurbo">
+                        <TextBlock
+                            Text="{Binding KeyboardHotkey.ToggleTurbo, Mode=TwoWay, Converter={StaticResource Key}}"
+                            TextAlignment="Center" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <TextBlock Text="{locale:Locale SettingsTabHotkeysToggleTurboToggle}"
+                               ToolTip.Tip="{locale:Locale SettingsTabHotkeysToggleTurboToggleTooltip}"
+                                Width="230" />
+                    <CheckBox IsChecked="{Binding KeyboardHotkey.TurboWhileHeld}" />
                 </StackPanel>
             </StackPanel>
         </Border>

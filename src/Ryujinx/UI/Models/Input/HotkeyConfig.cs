@@ -104,6 +104,28 @@ namespace Ryujinx.Ava.UI.Models.Input
             }
         }
 
+        private Key _toggleTurbo;
+        public Key ToggleTurbo
+        {
+            get => _toggleTurbo;
+            set
+            {
+                _toggleTurbo = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _turboWhileHeld;
+        public bool TurboWhileHeld
+        {
+            get => _turboWhileHeld;
+            set
+            {
+                _turboWhileHeld = value;
+                OnPropertyChanged();
+            }
+        }
+
         public HotkeyConfig(KeyboardHotkeys config)
         {
             if (config != null)
@@ -117,6 +139,8 @@ namespace Ryujinx.Ava.UI.Models.Input
                 ResScaleDown = config.ResScaleDown;
                 VolumeUp = config.VolumeUp;
                 VolumeDown = config.VolumeDown;
+                ToggleTurbo = config.ToggleTurbo;
+                TurboWhileHeld = config.TurboWhileHeld;
             }
         }
 
@@ -133,6 +157,8 @@ namespace Ryujinx.Ava.UI.Models.Input
                 ResScaleDown = ResScaleDown,
                 VolumeUp = VolumeUp,
                 VolumeDown = VolumeDown,
+                ToggleTurbo = ToggleTurbo,
+                TurboWhileHeld = TurboWhileHeld,
             };
 
             return config;

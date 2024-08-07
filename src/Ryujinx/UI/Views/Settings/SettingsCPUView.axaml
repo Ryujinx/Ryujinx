@@ -1,10 +1,11 @@
-﻿<UserControl
+<UserControl
     x:Class="Ryujinx.Ava.UI.Views.Settings.SettingsCPUView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     mc:Ignorable="d"
     x:DataType="viewModels:SettingsViewModel">
@@ -70,6 +71,48 @@
                         <TextBlock Text="{locale:Locale SettingsTabSystemUseHypervisor}"
                                    ToolTip.Tip="{locale:Locale UseHypervisorTooltip}" />
                     </CheckBox>
+                </StackPanel>
+
+                <Separator Height="1" />
+                <StackPanel
+                    Orientation="Vertical"
+                    Spacing="2">
+                    <TextBlock
+                        Classes="h1"
+                        Text="{locale:Locale SettingsTabCpuHacks}" />
+                    <TextBlock
+                        Foreground="{DynamicResource SecondaryTextColor}"
+                        Text="{locale:Locale SettingsTabSystemHacksNote}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,0,10"
+                            Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="{locale:Locale SettingsTabSystemTurboMultiplierValue}"
+                        ToolTip.Tip="{locale:Locale SettingsTabSystemTurboMultiplierValueTooltip}"
+                        Width="250" />
+                    <ui:NumberBox ToolTip.Tip="{locale:Locale SettingsTabSystemTurboMultiplierValueTooltip}"
+                                  Value="{Binding TurboMultiplier}"
+                                  Width="165"
+                                  SmallChange="1.0"
+                                  LargeChange="10"
+                                  SimpleNumberFormat="F0"
+                                  SpinButtonPlacementMode="Hidden"
+                                  Minimum="50"
+                                  Maximum="500" />
+                    <Slider Value="{Binding TurboMultiplier}"
+                            ToolTip.Tip="{locale:Locale SettingsTabSystemTurboMultiplierSliderTooltip}"
+                            MinWidth="175"
+                            Margin="10,-3,0,0"
+                            Height="32"
+                            Padding="0,-5"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            LargeChange="10"
+                            SmallChange="1"
+                            VerticalAlignment="Center"
+                            Minimum="50"
+                            Maximum="500" />
                 </StackPanel>
             </StackPanel>
         </Border>

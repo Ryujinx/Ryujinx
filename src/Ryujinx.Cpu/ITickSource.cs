@@ -14,6 +14,11 @@ namespace Ryujinx.Cpu
         TimeSpan ElapsedTime { get; }
 
         /// <summary>
+        /// Clock tick multiplier, in percent points (100 = 1.0).
+        /// </summary>
+        long TickMultiplier { get; set; }
+
+        /// <summary>
         /// Time elapsed since the counter was created, in seconds.
         /// </summary>
         double ElapsedSeconds { get; }

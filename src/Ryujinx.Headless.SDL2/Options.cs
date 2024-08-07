@@ -114,6 +114,9 @@ namespace Ryujinx.Headless.SDL2
         [Option("fs-global-access-log-mode", Required = false, Default = 0, HelpText = "Enables FS access log output to the console.")]
         public int FsGlobalAccessLogMode { get; set; }
 
+        [Option("turbo-multiplier", Required = false, Default = 200, HelpText = "The Turbo mode clock speed multiplier.")]
+        public long TurboMultiplier { get; set; }
+
         [Option("disable-vsync", Required = false, HelpText = "Disables Vertical Sync.")]
         public bool DisableVSync { get; set; }
 
