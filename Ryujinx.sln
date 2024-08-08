@@ -87,6 +87,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Horizon", "src\Ryuj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Horizon.Kernel.Generators", "src\Ryujinx.Horizon.Kernel.Generators\Ryujinx.Horizon.Kernel.Generators.csproj", "{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.HLE.Generators", "src\Ryujinx.HLE.Generators\Ryujinx.HLE.Generators.csproj", "{B575BCDE-2FD8-4A5D-8756-31CDD7FE81F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -249,6 +251,10 @@ Global
 		{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B575BCDE-2FD8-4A5D-8756-31CDD7FE81F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B575BCDE-2FD8-4A5D-8756-31CDD7FE81F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B575BCDE-2FD8-4A5D-8756-31CDD7FE81F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B575BCDE-2FD8-4A5D-8756-31CDD7FE81F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

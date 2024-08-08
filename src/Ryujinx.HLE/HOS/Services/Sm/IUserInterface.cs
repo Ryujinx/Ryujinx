@@ -2,6 +2,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.Ipc;
 using Ryujinx.HLE.HOS.Kernel;
 using Ryujinx.HLE.HOS.Kernel.Ipc;
+using Ryujinx.HLE.HOS.Services.Apm;
 using Ryujinx.Horizon.Common;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Text;
 
 namespace Ryujinx.HLE.HOS.Services.Sm
 {
-    class IUserInterface : IpcService
+    partial class IUserInterface : IpcService
     {
         private static readonly Dictionary<string, Type> _services;
 
@@ -95,9 +96,7 @@ namespace Ryujinx.HLE.HOS.Services.Sm
                 {
                     ServiceAttribute serviceAttribute = (ServiceAttribute)type.GetCustomAttributes(typeof(ServiceAttribute)).First(service => ((ServiceAttribute)service).Name == name);
 
-                    IpcService service = serviceAttribute.Parameter != null
-                        ? (IpcService)Activator.CreateInstance(type, context, serviceAttribute.Parameter)
-                        : (IpcService)Activator.CreateInstance(type, context);
+                    IpcService service = GetServiceInstance(type, context, serviceAttribute.Parameter);
 
                     service.TrySetServer(_commonServer);
                     service.Server.AddSessionObj(session.ServerSession, service);

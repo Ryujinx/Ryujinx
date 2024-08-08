@@ -39,7 +39,10 @@ namespace Ryujinx.Graphics.Device
             {
                 var field = fields[fieldIndex];
 
-                int sizeOfField = SizeCalculator.SizeOf(field.FieldType);
+                var currentFieldOffset = (int)Marshal.OffsetOf<TState>(field.Name);
+                var nextFieldOffset = fieldIndex + 1 == fields.Length ? Unsafe.SizeOf<TState>() : (int)Marshal.OffsetOf<TState>(fields[fieldIndex + 1].Name);
+
+                int sizeOfField = nextFieldOffset - currentFieldOffset;
 
                 for (int i = 0; i < ((sizeOfField + 3) & ~3); i += 4)
                 {

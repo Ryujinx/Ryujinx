@@ -79,7 +79,10 @@ namespace Ryujinx.Graphics.Gpu.Engine.Threed
             {
                 var field = fields[fieldIndex];
 
-                int sizeOfField = SizeCalculator.SizeOf(field.FieldType);
+                var currentFieldOffset = (int)Marshal.OffsetOf<TState>(field.Name);
+                var nextFieldOffset = fieldIndex + 1 == fields.Length ? Unsafe.SizeOf<TState>() : (int)Marshal.OffsetOf<TState>(fields[fieldIndex + 1].Name);
+
+                int sizeOfField = nextFieldOffset - currentFieldOffset;
 
                 if (fieldToDelegate.TryGetValue(field.Name, out int entryIndex))
                 {
