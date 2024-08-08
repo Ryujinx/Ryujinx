@@ -965,8 +965,8 @@ namespace Ryujinx.Ava.UI.ViewModels
                                                                : SortExpressionComparer<ApplicationData>.Descending(app => app.FileSize),
                 ApplicationSort.Path            => IsAscending ? SortExpressionComparer<ApplicationData>.Ascending(app => app.Path)
                                                                : SortExpressionComparer<ApplicationData>.Descending(app => app.Path),
-                ApplicationSort.Favorite        => !IsAscending ? SortExpressionComparer<ApplicationData>.Ascending(app => app.Favorite)
-                                                                : SortExpressionComparer<ApplicationData>.Descending(app => app.Favorite),
+                ApplicationSort.Favorite        => IsAscending ? SortExpressionComparer<ApplicationData>.Ascending(app => new AppListFavoriteComparable(app))
+                                                                : SortExpressionComparer<ApplicationData>.Descending(app => new AppListFavoriteComparable(app)),
                 _ => null,
 #pragma warning restore IDE0055
             };
