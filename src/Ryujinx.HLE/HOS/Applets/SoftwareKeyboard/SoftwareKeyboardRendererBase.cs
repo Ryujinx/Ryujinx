@@ -11,6 +11,7 @@ using System.IO;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
 {
@@ -26,7 +27,7 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
         const string CancelText = "Cancel";
         const string ControllerToggleText = "Toggle input";
 
-        private readonly object _bufferLock = new();
+        private readonly Lock _bufferLock = new();
 
         private RenderingSurfaceInfo _surfaceInfo = null;
         private Image<Argb32> _surface = null;

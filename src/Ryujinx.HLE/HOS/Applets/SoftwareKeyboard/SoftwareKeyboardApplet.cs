@@ -14,6 +14,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Ryujinx.HLE.HOS.Applets
 {
@@ -62,7 +63,7 @@ namespace Ryujinx.HLE.HOS.Applets
         private bool _canAcceptController = false;
         private KeyboardInputMode _inputMode = KeyboardInputMode.ControllerAndKeyboard;
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         public event EventHandler AppletStateChanged;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Ryujinx.Audio.Renderer.Server.Upsampler
 {
@@ -16,7 +17,7 @@ namespace Ryujinx.Audio.Renderer.Server.Upsampler
         /// <summary>
         /// Global lock of the object.
         /// </summary>
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         /// <summary>
         /// The upsamplers instances.

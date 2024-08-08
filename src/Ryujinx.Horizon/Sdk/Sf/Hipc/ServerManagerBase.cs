@@ -4,6 +4,7 @@ using Ryujinx.Horizon.Sdk.Sf.Cmif;
 using Ryujinx.Horizon.Sdk.Sm;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace Ryujinx.Horizon.Sdk.Sf.Hipc
 {
@@ -16,8 +17,8 @@ namespace Ryujinx.Horizon.Sdk.Sf.Hipc
         private readonly MultiWait _multiWait;
         private readonly MultiWait _waitList;
 
-        private readonly object _multiWaitSelectionLock;
-        private readonly object _waitListLock;
+        private readonly Lock _multiWaitSelectionLock;
+        private readonly Lock _waitListLock;
 
         private readonly Event _requestStopEvent;
         private readonly Event _notifyEvent;
@@ -39,8 +40,8 @@ namespace Ryujinx.Horizon.Sdk.Sf.Hipc
             _multiWait = new MultiWait();
             _waitList = new MultiWait();
 
-            _multiWaitSelectionLock = new object();
-            _waitListLock = new object();
+            _multiWaitSelectionLock = new Lock();
+            _waitListLock = new Lock();
 
             _requestStopEvent = new Event(EventClearMode.ManualClear);
             _notifyEvent = new Event(EventClearMode.ManualClear);

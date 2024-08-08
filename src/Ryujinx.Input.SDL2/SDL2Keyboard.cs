@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using static SDL2.SDL;
 
 using ConfigKey = Ryujinx.Common.Configuration.Hid.Key;
@@ -24,7 +25,7 @@ namespace Ryujinx.Input.SDL2
             }
         }
 
-        private readonly object _userMappingLock = new();
+        private readonly Lock _userMappingLock = new();
 
 #pragma warning disable IDE0052 // Remove unread private member
         private readonly SDL2KeyboardDriver _driver;

@@ -11,7 +11,7 @@ namespace Ryujinx.Audio
         /// <summary>
         /// Lock used to control the waiters registration.
         /// </summary>
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         /// <summary>
         /// Events signaled when the driver played audio buffers.

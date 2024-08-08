@@ -1,6 +1,7 @@
 using Ryujinx.Horizon.Common;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ryujinx.Horizon.Sdk.Sf.Cmif
 {
@@ -209,14 +210,14 @@ namespace Ryujinx.Horizon.Sdk.Sf.Cmif
         }
 
         private readonly EntryManager _entryManager;
-        private readonly object _entryOwnerLock;
+        private readonly Lock _entryOwnerLock;
         private readonly HashSet<Domain> _domains;
         private readonly int _maxDomains;
 
         public ServerDomainManager(int entryCount, int maxDomains)
         {
             _entryManager = new EntryManager(entryCount);
-            _entryOwnerLock = new object();
+            _entryOwnerLock = new Lock();
             _domains = new HashSet<Domain>();
             _maxDomains = maxDomains;
         }

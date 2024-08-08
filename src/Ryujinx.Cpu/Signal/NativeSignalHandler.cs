@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Ryujinx.Cpu.Signal
 {
@@ -59,7 +60,7 @@ namespace Ryujinx.Cpu.Signal
 
         private static MemoryBlock _codeBlock;
 
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
         private static bool _initialized;
 
         static NativeSignalHandler()

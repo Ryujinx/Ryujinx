@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using CemuHookClient = Ryujinx.Input.Motion.CemuHook.Client;
 using ControllerType = Ryujinx.Common.Configuration.Hid.ControllerType;
 using PlayerIndex = Ryujinx.HLE.HOS.Services.Hid.PlayerIndex;
@@ -18,7 +19,7 @@ namespace Ryujinx.Input.HLE
     {
         private readonly CemuHookClient _cemuHookClient;
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         private bool _blockInputUpdates;
 

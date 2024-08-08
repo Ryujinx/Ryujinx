@@ -3,6 +3,7 @@ using Ryujinx.Common.Configuration.Hid.Keyboard;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using ConfigKey = Ryujinx.Common.Configuration.Hid.Key;
 
 namespace Ryujinx.Input.GTK3
@@ -21,7 +22,7 @@ namespace Ryujinx.Input.GTK3
             }
         }
 
-        private readonly object _userMappingLock = new();
+        private readonly Lock _userMappingLock = new();
 
         private readonly GTK3KeyboardDriver _driver;
         private StandardKeyboardInputConfig _configuration;

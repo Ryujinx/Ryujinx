@@ -4,6 +4,7 @@ using Ryujinx.Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using static SDL2.SDL;
 
 namespace Ryujinx.Input.SDL2
@@ -55,7 +56,7 @@ namespace Ryujinx.Input.SDL2
             SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_INVALID,
         };
 
-        private readonly object _userMappingLock = new();
+        private readonly Lock _userMappingLock = new();
 
         private readonly List<ButtonMappingEntry> _buttonsUserMapping;
 

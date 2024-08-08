@@ -4,6 +4,7 @@ using Ryujinx.Input;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using ConfigKey = Ryujinx.Common.Configuration.Hid.Key;
 using Key = Ryujinx.Input.Key;
 
@@ -15,7 +16,7 @@ namespace Ryujinx.Ava.Input
         private readonly AvaloniaKeyboardDriver _driver;
         private StandardKeyboardInputConfig _configuration;
 
-        private readonly object _userMappingLock = new();
+        private readonly Lock _userMappingLock = new();
 
         public string Id { get; }
         public string Name { get; }

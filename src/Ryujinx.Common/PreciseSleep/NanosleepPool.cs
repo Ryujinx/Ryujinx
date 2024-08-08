@@ -124,7 +124,7 @@ namespace Ryujinx.Common.PreciseSleep
             }
         }
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
         private readonly List<NanosleepThread> _threads = new();
         private readonly List<NanosleepThread> _active = new();
         private readonly Stack<NanosleepThread> _free = new();

@@ -5,6 +5,7 @@ using Ryujinx.Memory;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Ryujinx.Audio.Backends.OpenAL
 {
@@ -18,7 +19,7 @@ namespace Ryujinx.Audio.Backends.OpenAL
         private ulong _playedSampleCount;
         private float _volume;
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         public OpenALHardwareDeviceSession(OpenALHardwareDeviceDriver driver, IVirtualMemoryManager memoryManager, SampleFormat requestedSampleFormat, uint requestedSampleRate, uint requestedChannelCount) : base(memoryManager, requestedSampleFormat, requestedSampleRate, requestedChannelCount)
         {

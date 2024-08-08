@@ -25,7 +25,7 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 bool useBackground = _gd.BackgroundQueue.Handle != 0 && _gd.Vendor != Vendor.Amd;
                 Queue queue = useBackground ? _gd.BackgroundQueue : _gd.Queue;
-                object queueLock = useBackground ? _gd.BackgroundQueueLock : _gd.QueueLock;
+                Lock queueLock = useBackground ? _gd.BackgroundQueueLock : _gd.QueueLock;
 
                 lock (queueLock)
                 {

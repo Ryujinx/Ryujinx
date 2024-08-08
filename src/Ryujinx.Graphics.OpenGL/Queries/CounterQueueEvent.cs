@@ -24,7 +24,7 @@ namespace Ryujinx.Graphics.OpenGL.Queries
         private bool _hostAccessReserved = false;
         private int _refCount = 1; // Starts with a reference from the counter queue.
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
         private ulong _result = ulong.MaxValue;
         private double _divisor = 1f;
 

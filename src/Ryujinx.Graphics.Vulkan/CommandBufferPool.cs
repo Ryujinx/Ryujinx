@@ -17,7 +17,7 @@ namespace Ryujinx.Graphics.Vulkan
         private readonly Vk _api;
         private readonly Device _device;
         private readonly Queue _queue;
-        private readonly object _queueLock;
+        private readonly Lock _queueLock;
         private readonly bool _concurrentFenceWaitUnsupported;
         private readonly CommandPool _pool;
         private readonly Thread _owner;
@@ -63,7 +63,7 @@ namespace Ryujinx.Graphics.Vulkan
             Vk api,
             Device device,
             Queue queue,
-            object queueLock,
+            Lock queueLock,
             uint queueFamilyIndex,
             bool concurrentFenceWaitUnsupported,
             bool isLight = false)

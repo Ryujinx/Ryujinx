@@ -1,5 +1,7 @@
 using Ryujinx.Common;
+using System.Threading;
 using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace Ryujinx.HLE
 {
@@ -20,8 +22,8 @@ namespace Ryujinx.HLE
         private readonly long[] _framesRendered;
         private readonly double[] _percentTime;
 
-        private readonly object[] _frameLock;
-        private readonly object[] _percentLock;
+        private readonly Lock[] _frameLock;
+        private readonly Lock[] _percentLock;
 
         private readonly double _ticksToSeconds;
 
@@ -41,8 +43,8 @@ namespace Ryujinx.HLE
             _framesRendered = new long[1];
             _percentTime = new double[1];
 
-            _frameLock = new[] { new object() };
-            _percentLock = new[] { new object() };
+            _frameLock = new[] { new Lock() };
+            _percentLock = new[] { new Lock() };
 
             _resetTimer = new Timer(750);
 

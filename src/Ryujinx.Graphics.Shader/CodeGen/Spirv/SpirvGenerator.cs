@@ -4,6 +4,7 @@ using Ryujinx.Graphics.Shader.StructuredIr;
 using Ryujinx.Graphics.Shader.Translation;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using static Spv.Specification;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
@@ -19,13 +20,13 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
         private const int GeneratorPoolCount = 1;
         private static readonly ObjectPool<SpvInstructionPool> _instructionPool;
         private static readonly ObjectPool<SpvLiteralIntegerPool> _integerPool;
-        private static readonly object _poolLock;
+        private static readonly Lock _poolLock;
 
         static SpirvGenerator()
         {
             _instructionPool = new(() => new SpvInstructionPool(), GeneratorPoolCount);
             _integerPool = new(() => new SpvLiteralIntegerPool(), GeneratorPoolCount);
-            _poolLock = new object();
+            _poolLock = new Lock();
         }
 
         private const HelperFunctionsMask NeedsInvocationIdMask = HelperFunctionsMask.SwizzleAdd;

@@ -1,5 +1,6 @@
 using Ryujinx.Common.Memory;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Ryujinx.HLE.HOS.Services.Ldn.Types
 {
@@ -12,7 +13,7 @@ namespace Ryujinx.HLE.HOS.Services.Ldn.Types
 
     static class NodeLatestUpdateHelper
     {
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         public static void CalculateLatestUpdate(this Array8<NodeLatestUpdate> array, Array8<NodeInfo> beforeNodes, Array8<NodeInfo> afterNodes)
         {

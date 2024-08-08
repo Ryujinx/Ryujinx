@@ -4,6 +4,7 @@ using Ryujinx.Memory;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Ryujinx.Cpu.LightningJit.Cache
 {
@@ -104,7 +105,7 @@ namespace Ryujinx.Cpu.LightningJit.Cache
         private readonly MemoryCache _sharedCache;
         private readonly MemoryCache _localCache;
         private readonly PageAlignedRangeList _pendingMap;
-        private readonly object _lock;
+        private readonly Lock _lock;
 
         class ThreadLocalCacheEntry
         {

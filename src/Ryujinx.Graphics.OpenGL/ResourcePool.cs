@@ -2,6 +2,7 @@ using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.OpenGL.Image;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ryujinx.Graphics.OpenGL
 {
@@ -19,7 +20,7 @@ namespace Ryujinx.Graphics.OpenGL
     {
         private const int DisposedLiveFrames = 2;
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
         private readonly Dictionary<TextureCreateInfo, List<DisposedTexture>> _textures = new();
 
         /// <summary>

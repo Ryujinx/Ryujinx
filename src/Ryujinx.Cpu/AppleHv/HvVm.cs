@@ -1,6 +1,7 @@
 using Ryujinx.Memory;
 using System;
 using System.Runtime.Versioning;
+using System.Threading;
 
 namespace Ryujinx.Cpu.AppleHv
 {
@@ -12,7 +13,7 @@ namespace Ryujinx.Cpu.AppleHv
 
         private static int _addressSpaces;
         private static HvIpaAllocator _ipaAllocator;
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         public static (ulong, HvIpaAllocator) CreateAddressSpace(MemoryBlock block)
         {

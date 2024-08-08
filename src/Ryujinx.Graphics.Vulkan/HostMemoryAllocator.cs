@@ -5,6 +5,7 @@ using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.EXT;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ryujinx.Graphics.Vulkan
 {
@@ -31,7 +32,7 @@ namespace Ryujinx.Graphics.Vulkan
         private readonly Vk _api;
         private readonly ExtExternalMemoryHost _hostMemoryApi;
         private readonly Device _device;
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         private readonly List<HostMemoryAllocation> _allocations;
         private readonly IntervalTree<ulong, HostMemoryAllocation> _allocationTree;

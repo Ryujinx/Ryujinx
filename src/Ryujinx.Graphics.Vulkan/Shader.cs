@@ -5,6 +5,7 @@ using shaderc;
 using Silk.NET.Vulkan;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ryujinx.Graphics.Vulkan
@@ -13,7 +14,7 @@ namespace Ryujinx.Graphics.Vulkan
     {
         // The shaderc.net dependency's Options constructor and dispose are not thread safe.
         // Take this lock when using them.
-        private static readonly object _shaderOptionsLock = new();
+        private static readonly Lock _shaderOptionsLock = new();
 
         private static readonly IntPtr _ptrMainEntryPointName = Marshal.StringToHGlobalAnsi("main");
 

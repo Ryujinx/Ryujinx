@@ -2,6 +2,7 @@ using Ryujinx.Common.Pools;
 using Ryujinx.Memory.Range;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace Ryujinx.Graphics.Gpu.Memory
 {
@@ -76,7 +77,7 @@ namespace Ryujinx.Graphics.Gpu.Memory
         private BufferMigration _source;
         private BufferModifiedRangeList _migrationTarget;
 
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         /// <summary>
         /// Whether the modified range list has any entries or not.

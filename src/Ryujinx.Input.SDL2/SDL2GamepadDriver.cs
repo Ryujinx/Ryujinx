@@ -1,6 +1,7 @@
 using Ryujinx.SDL2.Common;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using static SDL2.SDL;
 
 namespace Ryujinx.Input.SDL2
@@ -9,7 +10,7 @@ namespace Ryujinx.Input.SDL2
     {
         private readonly Dictionary<int, string> _gamepadsInstanceIdsMapping;
         private readonly List<string> _gamepadsIds;
-        private readonly object _lock = new object();
+        private readonly Lock _lock = new();
 
         public ReadOnlySpan<string> GamepadsIds
         {

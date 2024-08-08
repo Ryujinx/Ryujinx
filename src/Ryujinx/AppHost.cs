@@ -117,7 +117,7 @@ namespace Ryujinx.Ava
         private bool _dialogShown;
         private readonly bool _isFirmwareTitle;
 
-        private readonly object _lockObject = new();
+        private readonly Lock _lock = new();
 
         public event EventHandler AppExit;
         public event EventHandler<StatusInitEventArgs> StatusInitEvent;
@@ -339,7 +339,7 @@ namespace Ryujinx.Ava
             {
                 Task.Run(() =>
                 {
-                    lock (_lockObject)
+                    lock (_lock)
                     {
                         string applicationName = Device.Processes.ActiveApplication.Name;
                         string sanitizedApplicationName = FileSystemUtils.SanitizeFileName(applicationName);

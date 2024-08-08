@@ -4,6 +4,7 @@ using Ryujinx.Horizon.Sdk.Sm;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 
 namespace Ryujinx.Horizon.Sdk.Sf.Hipc
 {
@@ -17,7 +18,7 @@ namespace Ryujinx.Horizon.Sdk.Sf.Hipc
         private readonly ulong _pointerBuffersBaseAddress;
         private readonly ulong _savedMessagesBaseAddress;
 
-        private readonly object _resourceLock;
+        private readonly Lock _resourceLock;
         private readonly ulong[] _sessionAllocationBitmap;
         private readonly HashSet<ServerSession> _sessions;
         private readonly HashSet<Server> _servers;
@@ -42,7 +43,7 @@ namespace Ryujinx.Horizon.Sdk.Sf.Hipc
                 }
             }
 
-            _resourceLock = new object();
+            _resourceLock = new Lock();
             _sessionAllocationBitmap = new ulong[(maxSessions + 63) / 64];
             _sessions = new HashSet<ServerSession>();
             _servers = new HashSet<Server>();
