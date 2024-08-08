@@ -40,5 +40,12 @@ namespace Ryujinx.HLE.HOS.Services.Nim
 
             return ResultCode.Success;
         }
+
+        [CommandCmif(5)] //17.0.0+
+        // CreateServerInterface2(pid, handle<unknown>, u64) -> object<nn::ec::IshopServiceAccessServer>
+        public ResultCode CreateServerInterface2(ServiceCtx context)
+        {
+            return CreateServerInterface(context);
+        }
     }
 }
