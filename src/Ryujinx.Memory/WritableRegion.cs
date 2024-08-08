@@ -1,5 +1,5 @@
+using Ryujinx.Common.Memory;
 using System;
-using System.Buffers;
 
 namespace Ryujinx.Memory
 {
@@ -7,7 +7,7 @@ namespace Ryujinx.Memory
     {
         private readonly IWritableBlock _block;
         private readonly ulong _va;
-        private readonly IMemoryOwner<byte> _memoryOwner;
+        private readonly MemoryOwner<byte> _memoryOwner;
         private readonly bool _tracked;
 
         private bool NeedsWriteback => _block != null;
@@ -22,7 +22,7 @@ namespace Ryujinx.Memory
             Memory = memory;
         }
 
-        public WritableRegion(IWritableBlock block, ulong va, IMemoryOwner<byte> memoryOwner, bool tracked = false)
+        public WritableRegion(IWritableBlock block, ulong va, MemoryOwner<byte> memoryOwner, bool tracked = false)
             : this(block, va, memoryOwner.Memory, tracked)
         {
             _memoryOwner = memoryOwner;

@@ -14,7 +14,7 @@ namespace Ryujinx.HLE.HOS.Services.SurfaceFlinger
     {
         private readonly MemoryOwner<byte> _rawDataOwner;
 
-        private Span<byte> Raw => _rawDataOwner.Memory.Span;
+        private Span<byte> Raw => _rawDataOwner.Span;
 
         private ref ParcelHeader Header => ref MemoryMarshal.Cast<byte, ParcelHeader>(Raw)[0];
 
