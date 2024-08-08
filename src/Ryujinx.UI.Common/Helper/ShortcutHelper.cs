@@ -1,10 +1,7 @@
 using Ryujinx.Common;
 using Ryujinx.Common.Configuration;
 using ShellLink;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,8 +18,8 @@ namespace Ryujinx.UI.Common.Helper
             iconPath += ".ico";
 
             MemoryStream iconDataStream = new(iconData);
-            var image = Image.Load(iconDataStream);
-            image.Mutate(x => x.Resize(128, 128));
+            using var image = SKBitmap.Decode(iconDataStream);
+            image.Resize(new SKImageInfo(128, 128), SKFilterQuality.High);
             SaveBitmapAsIcon(image, iconPath);
 
             var shortcut = Shortcut.CreateShortcut(basePath, GetArgsString(applicationFilePath, applicationId), iconPath, 0);
@@ -37,8 +34,10 @@ namespace Ryujinx.UI.Common.Helper
             var desktopFile = EmbeddedResources.ReadAllText("Ryujinx.UI.Common/shortcut-template.desktop");
             iconPath += ".png";
 
-            var image = Image.Load<Rgba32>(iconData);
-            image.SaveAsPng(iconPath);
+            var image = SKBitmap.Decode(iconData);
+            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var file = File.OpenWrite(iconPath);
+            data.SaveTo(file);
 
             using StreamWriter outputFile = new(Path.Combine(desktopPath, cleanedAppName + ".desktop"));
             outputFile.Write(desktopFile, cleanedAppName, iconPath, $"{basePath} {GetArgsString(applicationFilePath, applicationId)}");
@@ -78,8 +77,10 @@ namespace Ryujinx.UI.Common.Helper
             }
 
             const string IconName = "icon.png";
-            var image = Image.Load<Rgba32>(iconData);
-            image.SaveAsPng(Path.Combine(resourceFolderPath, IconName));
+            var image = SKBitmap.Decode(iconData);
+            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var file = File.OpenWrite(Path.Combine(resourceFolderPath, IconName));
+            data.SaveTo(file);
 
             // plist file
             using StreamWriter outputFile = new(Path.Combine(contentFolderPath, "Info.plist"));
@@ -148,7 +149,7 @@ namespace Ryujinx.UI.Common.Helper
         /// <param name="source">The source bitmap image that will be saved as an .ico file</param>
         /// <param name="filePath">The location that the new .ico file will be saved too (Make sure to include '.ico' in the path).</param>
         [SupportedOSPlatform("windows")]
-        private static void SaveBitmapAsIcon(Image source, string filePath)
+        private static void SaveBitmapAsIcon(SKBitmap source, string filePath)
         {
             // Code Modified From https://stackoverflow.com/a/11448060/368354 by Benlitz
             byte[] header = { 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 22, 0, 0, 0 };
@@ -156,7 +157,8 @@ namespace Ryujinx.UI.Common.Helper
 
             fs.Write(header);
             // Writing actual data
-            source.Save(fs, PngFormat.Instance);
+            using var data = source.Encode(SKEncodedImageFormat.Png, 100);
+            data.SaveTo(fs);
             // Getting data length (file length minus header)
             long dataLength = fs.Length - header.Length;
             // Write it in the correct place

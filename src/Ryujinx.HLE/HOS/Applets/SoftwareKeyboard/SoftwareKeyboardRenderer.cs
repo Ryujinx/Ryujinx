@@ -112,10 +112,15 @@ namespace Ryujinx.HLE.HOS.Applets.SoftwareKeyboard
             {
                 // Update the parameters that were provided.
                 _state.InputText = inputText ?? _state.InputText;
-                _state.CursorBegin = cursorBegin.GetValueOrDefault(_state.CursorBegin);
-                _state.CursorEnd = cursorEnd.GetValueOrDefault(_state.CursorEnd);
+                _state.CursorBegin = Math.Max(0, cursorBegin.GetValueOrDefault(_state.CursorBegin));
+                _state.CursorEnd = Math.Min(cursorEnd.GetValueOrDefault(_state.CursorEnd), _state.InputText.Length);
                 _state.OverwriteMode = overwriteMode.GetValueOrDefault(_state.OverwriteMode);
                 _state.TypingEnabled = typingEnabled.GetValueOrDefault(_state.TypingEnabled);
+
+                var begin = _state.CursorBegin;
+                var end = _state.CursorEnd;
+                _state.CursorBegin = Math.Min(begin, end);
+                _state.CursorEnd = Math.Max(begin, end);
 
                 // Reset the cursor blink.
                 _state.TextBoxBlinkCounter = 0;
