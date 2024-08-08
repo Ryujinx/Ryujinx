@@ -265,6 +265,7 @@
                         <ComboBox Width="350"
                                   HorizontalContentAlignment="Left"
                                   ToolTip.Tip="{locale:Locale GalThreadingTooltip}"
+                                  SelectionChanged="GraphicsBackendMultithreadingIndex_OnSelectionChanged"
                                   SelectedIndex="{Binding GraphicsBackendMultithreadingIndex}">
                             <ComboBoxItem>
                                 <TextBlock Text="{locale:Locale CommonAuto}" />

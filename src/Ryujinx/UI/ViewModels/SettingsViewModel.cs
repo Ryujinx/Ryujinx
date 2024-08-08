@@ -74,17 +74,6 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 _graphicsBackendMultithreadingIndex = value;
 
-                if (_graphicsBackendMultithreadingIndex != (int)ConfigurationState.Instance.Graphics.BackendThreading.Value)
-                {
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                         ContentDialogHelper.CreateInfoDialog(LocaleManager.Instance[LocaleKeys.DialogSettingsBackendThreadingWarningMessage],
-                            "",
-                            "",
-                            LocaleManager.Instance[LocaleKeys.InputDialogOk],
-                            LocaleManager.Instance[LocaleKeys.DialogSettingsBackendThreadingWarningTitle])
-                    );
-                }
-
                 OnPropertyChanged();
             }
         }
