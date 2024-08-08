@@ -14,13 +14,20 @@ namespace Ryujinx.Graphics.Vulkan
 
         private int _bindCount;
 
-        protected void SetDirty(VulkanRenderer gd)
+        protected void SetDirty(VulkanRenderer gd, bool isImage)
         {
             ReleaseDescriptorSet();
 
             if (_bindCount != 0)
             {
-                gd.PipelineInternal.ForceTextureDirty();
+                if (isImage)
+                {
+                    gd.PipelineInternal.ForceImageDirty();
+                }
+                else
+                {
+                    gd.PipelineInternal.ForceTextureDirty();
+                }
             }
         }
 

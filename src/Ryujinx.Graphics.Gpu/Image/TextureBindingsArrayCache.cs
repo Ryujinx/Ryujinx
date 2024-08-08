@@ -340,7 +340,7 @@ namespace Ryujinx.Graphics.Gpu.Image
             /// <returns>True if any used entries of the pool might have been modified, false otherwise</returns>
             public bool SamplerPoolModified()
             {
-                return SamplerPool.WasModified(ref _samplerPoolSequence);
+                return SamplerPool != null && SamplerPool.WasModified(ref _samplerPoolSequence);
             }
         }
 
@@ -516,12 +516,15 @@ namespace Ryujinx.Graphics.Gpu.Image
                 }
 
                 // Check if any of our cached samplers changed on the pool.
-                foreach ((int samplerId, (Sampler sampler, SamplerDescriptor descriptor)) in SamplerIds)
+                if (SamplerPool != null)
                 {
-                    if (SamplerPool.GetCachedItem(samplerId) != sampler ||
-                        (sampler == null && SamplerPool.IsValidId(samplerId) && !SamplerPool.GetDescriptorRef(samplerId).Equals(descriptor)))
+                    foreach ((int samplerId, (Sampler sampler, SamplerDescriptor descriptor)) in SamplerIds)
                     {
-                        return true;
+                        if (SamplerPool.GetCachedItem(samplerId) != sampler ||
+                            (sampler == null && SamplerPool.IsValidId(samplerId) && !SamplerPool.GetDescriptorRef(samplerId).Equals(descriptor)))
+                        {
+                            return true;
+                        }
                     }
                 }
 
@@ -899,13 +902,19 @@ namespace Ryujinx.Graphics.Gpu.Image
                     }
                 }
 
-                Sampler sampler = samplerPool?.Get(samplerId);
-
                 entry.TextureIds[textureId] = (texture, descriptor);
-                entry.SamplerIds[samplerId] = (sampler, samplerPool?.GetDescriptorRef(samplerId) ?? default);
 
                 ITexture hostTexture = texture?.GetTargetTexture(bindingInfo.Target);
-                ISampler hostSampler = sampler?.GetHostSampler(texture);
+                ISampler hostSampler = null;
+
+                if (!isImage && bindingInfo.Target != Target.TextureBuffer)
+                {
+                    Sampler sampler = samplerPool?.Get(samplerId);
+
+                    entry.SamplerIds[samplerId] = (sampler, samplerPool?.GetDescriptorRef(samplerId) ?? default);
+
+                    hostSampler = sampler?.GetHostSampler(texture);
+                }
 
                 Format format = bindingInfo.Format;
 

@@ -95,7 +95,7 @@ namespace Ryujinx.Graphics.Vulkan
         {
             _cachedCommandBufferIndex = -1;
             _storages = null;
-            SetDirty(_gd);
+            SetDirty(_gd, isImage: true);
         }
 
         public void QueueWriteToReadBarriers(CommandBufferScoped cbs, PipelineStageFlags stageFlags)
