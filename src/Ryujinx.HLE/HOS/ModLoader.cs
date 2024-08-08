@@ -741,6 +741,11 @@ namespace Ryujinx.HLE.HOS
         internal static void EnableCheats(ulong applicationId, TamperMachine tamperMachine)
         {
             var contentDirectory = FindApplicationDir(new DirectoryInfo(Path.Combine(GetModsBasePath(), AmsContentsDir)), $"{applicationId:x16}");
+            if (contentDirectory == null)
+            {
+                return;
+            }
+
             string enabledCheatsPath = Path.Combine(contentDirectory.FullName, CheatDir, "enabled.txt");
 
             if (File.Exists(enabledCheatsPath))
