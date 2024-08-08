@@ -310,6 +310,25 @@ namespace Ryujinx.Graphics.Vulkan
             };
         }
 
+        public static PrimitiveTopology ConvertToClass(this PrimitiveTopology topology)
+        {
+            return topology switch
+            {
+                PrimitiveTopology.PointList => PrimitiveTopology.PointList,
+                PrimitiveTopology.LineList or
+                    PrimitiveTopology.LineStrip or
+                    PrimitiveTopology.LineListWithAdjacency or
+                    PrimitiveTopology.LineStripWithAdjacency => PrimitiveTopology.LineList,
+                PrimitiveTopology.TriangleList or
+                    PrimitiveTopology.TriangleStrip or
+                    PrimitiveTopology.TriangleFan or
+                    PrimitiveTopology.TriangleListWithAdjacency or
+                    PrimitiveTopology.TriangleStripWithAdjacency => PrimitiveTopology.TriangleList,
+                PrimitiveTopology.PatchList => PrimitiveTopology.PatchList,
+                _ => LogInvalidAndReturn(topology, nameof(PrimitiveTopology), PrimitiveTopology.TriangleList),
+            };
+        }
+
         public static StencilOp Convert(this GAL.StencilOp op)
         {
             return op switch

@@ -31,6 +31,7 @@ namespace Ryujinx.Graphics.Vulkan
         public readonly bool SupportsShaderStorageImageMultisample;
         public readonly bool SupportsConditionalRendering;
         public readonly bool SupportsExtendedDynamicState;
+        public readonly PhysicalDeviceExtendedDynamicState2FeaturesEXT SupportsExtendedDynamicState2;
         public readonly bool SupportsMultiView;
         public readonly bool SupportsNullDescriptors;
         public readonly bool SupportsPushDescriptors;
@@ -46,12 +47,14 @@ namespace Ryujinx.Graphics.Vulkan
         public readonly bool SupportsViewportArray2;
         public readonly bool SupportsHostImportedMemory;
         public readonly bool SupportsDepthClipControl;
+        public readonly bool SupportsWideLines;
         public readonly uint SubgroupSize;
         public readonly SampleCountFlags SupportedSampleCounts;
         public readonly PortabilitySubsetFlags PortabilitySubset;
         public readonly uint VertexBufferAlignment;
         public readonly uint SubTexelPrecisionBits;
         public readonly ulong MinResourceAlignment;
+        public readonly uint MaxTessellationPatchSize;
 
         public HardwareCapabilities(
             bool supportsIndexTypeUint8,
@@ -69,6 +72,8 @@ namespace Ryujinx.Graphics.Vulkan
             bool supportsShaderStorageImageMultisample,
             bool supportsConditionalRendering,
             bool supportsExtendedDynamicState,
+            PhysicalDeviceExtendedDynamicState2FeaturesEXT supportsExtendedDynamicState2,
+            uint maxTessellationPatchSize,
             bool supportsMultiView,
             bool supportsNullDescriptors,
             bool supportsPushDescriptors,
@@ -84,6 +89,7 @@ namespace Ryujinx.Graphics.Vulkan
             bool supportsViewportArray2,
             bool supportsHostImportedMemory,
             bool supportsDepthClipControl,
+            bool supportsWideLines,
             uint subgroupSize,
             SampleCountFlags supportedSampleCounts,
             PortabilitySubsetFlags portabilitySubset,
@@ -106,6 +112,8 @@ namespace Ryujinx.Graphics.Vulkan
             SupportsShaderStorageImageMultisample = supportsShaderStorageImageMultisample;
             SupportsConditionalRendering = supportsConditionalRendering;
             SupportsExtendedDynamicState = supportsExtendedDynamicState;
+            SupportsExtendedDynamicState2 = supportsExtendedDynamicState2;
+            MaxTessellationPatchSize = maxTessellationPatchSize;
             SupportsMultiView = supportsMultiView;
             SupportsNullDescriptors = supportsNullDescriptors;
             SupportsPushDescriptors = supportsPushDescriptors;
@@ -121,6 +129,7 @@ namespace Ryujinx.Graphics.Vulkan
             SupportsViewportArray2 = supportsViewportArray2;
             SupportsHostImportedMemory = supportsHostImportedMemory;
             SupportsDepthClipControl = supportsDepthClipControl;
+            SupportsWideLines = supportsWideLines;
             SubgroupSize = subgroupSize;
             SupportedSampleCounts = supportedSampleCounts;
             PortabilitySubset = portabilitySubset;

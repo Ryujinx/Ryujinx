@@ -11,292 +11,232 @@ namespace Ryujinx.Graphics.Vulkan
 
         public PipelineUid Internal;
 
-        public float LineWidth
+        public PolygonMode PolygonMode
         {
-            readonly get => BitConverter.Int32BitsToSingle((int)((Internal.Id0 >> 0) & 0xFFFFFFFF));
-            set => Internal.Id0 = (Internal.Id0 & 0xFFFFFFFF00000000) | ((ulong)(uint)BitConverter.SingleToInt32Bits(value) << 0);
+            readonly get => (PolygonMode)((Internal.Id0 >> 0) & 0x3FFFFFFF);
+            set => Internal.Id0 = (Internal.Id0 & 0xFFFFFFFFC0000000) | ((ulong)value << 0);
         }
 
-        public float DepthBiasClamp
+        public uint StagesCount
         {
-            readonly get => BitConverter.Int32BitsToSingle((int)((Internal.Id0 >> 32) & 0xFFFFFFFF));
-            set => Internal.Id0 = (Internal.Id0 & 0xFFFFFFFF) | ((ulong)(uint)BitConverter.SingleToInt32Bits(value) << 32);
+            readonly get => (byte)((Internal.Id0 >> 30) & 0xFF);
+            set => Internal.Id0 = (Internal.Id0 & 0xFFFFFFC03FFFFFFF) | ((ulong)value << 30);
         }
 
-        public float DepthBiasConstantFactor
+        public uint VertexAttributeDescriptionsCount
         {
-            readonly get => BitConverter.Int32BitsToSingle((int)((Internal.Id1 >> 0) & 0xFFFFFFFF));
-            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFF00000000) | ((ulong)(uint)BitConverter.SingleToInt32Bits(value) << 0);
+            readonly get => (byte)((Internal.Id0 >> 38) & 0xFF);
+            set => Internal.Id0 = (Internal.Id0 & 0xFFFFC03FFFFFFFFF) | ((ulong)value << 38);
         }
 
-        public float DepthBiasSlopeFactor
+        public uint VertexBindingDescriptionsCount
         {
-            readonly get => BitConverter.Int32BitsToSingle((int)((Internal.Id1 >> 32) & 0xFFFFFFFF));
-            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFF) | ((ulong)(uint)BitConverter.SingleToInt32Bits(value) << 32);
+            readonly get => (byte)((Internal.Id0 >> 46) & 0xFF);
+            set => Internal.Id0 = (Internal.Id0 & 0xFFC03FFFFFFFFFFF) | ((ulong)value << 46);
         }
 
-        public uint StencilFrontCompareMask
+        public uint ViewportsCount
+        {
+            readonly get => (byte)((Internal.Id0 >> 54) & 0xFF);
+            set => Internal.Id0 = (Internal.Id0 & 0xC03FFFFFFFFFFFFF) | ((ulong)value << 54);
+        }
+
+        public uint ScissorsCount
+        {
+            readonly get => (byte)((Internal.Id1 >> 0) & 0xFF);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFFFFFFFF00) | ((ulong)value << 0);
+        }
+
+        public uint ColorBlendAttachmentStateCount
+        {
+            readonly get => (byte)((Internal.Id1 >> 8) & 0xFF);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFFFFFF00FF) | ((ulong)value << 8);
+        }
+
+        public PrimitiveTopology Topology
+        {
+            readonly get => (PrimitiveTopology)((Internal.Id1 >> 16) & 0xF);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFFFFF0FFFF) | ((ulong)value << 16);
+        }
+
+        public LogicOp LogicOp
+        {
+            readonly get => (LogicOp)((Internal.Id1 >> 20) & 0xF);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFFFF0FFFFF) | ((ulong)value << 20);
+        }
+
+        public CompareOp DepthCompareOp
+        {
+            readonly get => (CompareOp)((Internal.Id1 >> 24) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFFF8FFFFFF) | ((ulong)value << 24);
+        }
+
+        public StencilOp StencilFrontFailOp
+        {
+            readonly get => (StencilOp)((Internal.Id1 >> 27) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFFC7FFFFFF) | ((ulong)value << 27);
+        }
+
+        public StencilOp StencilFrontPassOp
+        {
+            readonly get => (StencilOp)((Internal.Id1 >> 30) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFFE3FFFFFFF) | ((ulong)value << 30);
+        }
+
+        public StencilOp StencilFrontDepthFailOp
+        {
+            readonly get => (StencilOp)((Internal.Id1 >> 33) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFFF1FFFFFFFF) | ((ulong)value << 33);
+        }
+
+        public CompareOp StencilFrontCompareOp
+        {
+            readonly get => (CompareOp)((Internal.Id1 >> 36) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFF8FFFFFFFFF) | ((ulong)value << 36);
+        }
+
+        public StencilOp StencilBackFailOp
+        {
+            readonly get => (StencilOp)((Internal.Id1 >> 39) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFFC7FFFFFFFFF) | ((ulong)value << 39);
+        }
+
+        public StencilOp StencilBackPassOp
+        {
+            readonly get => (StencilOp)((Internal.Id1 >> 42) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFFE3FFFFFFFFFF) | ((ulong)value << 42);
+        }
+
+        public StencilOp StencilBackDepthFailOp
+        {
+            readonly get => (StencilOp)((Internal.Id1 >> 45) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFFF1FFFFFFFFFFF) | ((ulong)value << 45);
+        }
+
+        public CompareOp StencilBackCompareOp
+        {
+            readonly get => (CompareOp)((Internal.Id1 >> 48) & 0x7);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFF8FFFFFFFFFFFF) | ((ulong)value << 48);
+        }
+
+        public CullModeFlags CullMode
+        {
+            readonly get => (CullModeFlags)((Internal.Id1 >> 51) & 0x3);
+            set => Internal.Id1 = (Internal.Id1 & 0xFFE7FFFFFFFFFFFF) | ((ulong)value << 51);
+        }
+
+        public bool PrimitiveRestartEnable
+        {
+            readonly get => ((Internal.Id1 >> 53) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xFFDFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 53);
+        }
+
+        public bool DepthClampEnable
+        {
+            readonly get => ((Internal.Id1 >> 54) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xFFBFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 54);
+        }
+
+        public bool RasterizerDiscardEnable
+        {
+            readonly get => ((Internal.Id1 >> 55) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xFF7FFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 55);
+        }
+
+        public FrontFace FrontFace
+        {
+            readonly get => (FrontFace)((Internal.Id1 >> 56) & 0x1);
+            set => Internal.Id1 = (Internal.Id1 & 0xFEFFFFFFFFFFFFFF) | ((ulong)value << 56);
+        }
+
+        public bool DepthBiasEnable
+        {
+            readonly get => ((Internal.Id1 >> 57) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xFDFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 57);
+        }
+
+        public bool DepthTestEnable
+        {
+            readonly get => ((Internal.Id1 >> 58) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xFBFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 58);
+        }
+
+        public bool DepthWriteEnable
+        {
+            readonly get => ((Internal.Id1 >> 59) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xF7FFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 59);
+        }
+
+        public bool DepthBoundsTestEnable
+        {
+            readonly get => ((Internal.Id1 >> 60) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xEFFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 60);
+        }
+
+        public bool StencilTestEnable
+        {
+            readonly get => ((Internal.Id1 >> 61) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xDFFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 61);
+        }
+
+        public bool LogicOpEnable
+        {
+            readonly get => ((Internal.Id1 >> 62) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0xBFFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 62);
+        }
+
+        public bool HasDepthStencil
+        {
+            readonly get => ((Internal.Id1 >> 63) & 0x1) != 0UL;
+            set => Internal.Id1 = (Internal.Id1 & 0x7FFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 63);
+        }
+
+        public uint PatchControlPoints
         {
             readonly get => (uint)((Internal.Id2 >> 0) & 0xFFFFFFFF);
             set => Internal.Id2 = (Internal.Id2 & 0xFFFFFFFF00000000) | ((ulong)value << 0);
         }
 
-        public uint StencilFrontWriteMask
+        public uint SamplesCount
         {
             readonly get => (uint)((Internal.Id2 >> 32) & 0xFFFFFFFF);
             set => Internal.Id2 = (Internal.Id2 & 0xFFFFFFFF) | ((ulong)value << 32);
         }
 
-        public uint StencilFrontReference
-        {
-            readonly get => (uint)((Internal.Id3 >> 0) & 0xFFFFFFFF);
-            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFF00000000) | ((ulong)value << 0);
-        }
-
-        public uint StencilBackCompareMask
-        {
-            readonly get => (uint)((Internal.Id3 >> 32) & 0xFFFFFFFF);
-            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFF) | ((ulong)value << 32);
-        }
-
-        public uint StencilBackWriteMask
-        {
-            readonly get => (uint)((Internal.Id4 >> 0) & 0xFFFFFFFF);
-            set => Internal.Id4 = (Internal.Id4 & 0xFFFFFFFF00000000) | ((ulong)value << 0);
-        }
-
-        public uint StencilBackReference
-        {
-            readonly get => (uint)((Internal.Id4 >> 32) & 0xFFFFFFFF);
-            set => Internal.Id4 = (Internal.Id4 & 0xFFFFFFFF) | ((ulong)value << 32);
-        }
-
-        public PolygonMode PolygonMode
-        {
-            readonly get => (PolygonMode)((Internal.Id5 >> 0) & 0x3FFFFFFF);
-            set => Internal.Id5 = (Internal.Id5 & 0xFFFFFFFFC0000000) | ((ulong)value << 0);
-        }
-
-        public uint StagesCount
-        {
-            readonly get => (byte)((Internal.Id5 >> 30) & 0xFF);
-            set => Internal.Id5 = (Internal.Id5 & 0xFFFFFFC03FFFFFFF) | ((ulong)value << 30);
-        }
-
-        public uint VertexAttributeDescriptionsCount
-        {
-            readonly get => (byte)((Internal.Id5 >> 38) & 0xFF);
-            set => Internal.Id5 = (Internal.Id5 & 0xFFFFC03FFFFFFFFF) | ((ulong)value << 38);
-        }
-
-        public uint VertexBindingDescriptionsCount
-        {
-            readonly get => (byte)((Internal.Id5 >> 46) & 0xFF);
-            set => Internal.Id5 = (Internal.Id5 & 0xFFC03FFFFFFFFFFF) | ((ulong)value << 46);
-        }
-
-        public uint ViewportsCount
-        {
-            readonly get => (byte)((Internal.Id5 >> 54) & 0xFF);
-            set => Internal.Id5 = (Internal.Id5 & 0xC03FFFFFFFFFFFFF) | ((ulong)value << 54);
-        }
-
-        public uint ScissorsCount
-        {
-            readonly get => (byte)((Internal.Id6 >> 0) & 0xFF);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFFFFFFFF00) | ((ulong)value << 0);
-        }
-
-        public uint ColorBlendAttachmentStateCount
-        {
-            readonly get => (byte)((Internal.Id6 >> 8) & 0xFF);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFFFFFF00FF) | ((ulong)value << 8);
-        }
-
-        public PrimitiveTopology Topology
-        {
-            readonly get => (PrimitiveTopology)((Internal.Id6 >> 16) & 0xF);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFFFFF0FFFF) | ((ulong)value << 16);
-        }
-
-        public LogicOp LogicOp
-        {
-            readonly get => (LogicOp)((Internal.Id6 >> 20) & 0xF);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFFFF0FFFFF) | ((ulong)value << 20);
-        }
-
-        public CompareOp DepthCompareOp
-        {
-            readonly get => (CompareOp)((Internal.Id6 >> 24) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFFF8FFFFFF) | ((ulong)value << 24);
-        }
-
-        public StencilOp StencilFrontFailOp
-        {
-            readonly get => (StencilOp)((Internal.Id6 >> 27) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFFC7FFFFFF) | ((ulong)value << 27);
-        }
-
-        public StencilOp StencilFrontPassOp
-        {
-            readonly get => (StencilOp)((Internal.Id6 >> 30) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFFE3FFFFFFF) | ((ulong)value << 30);
-        }
-
-        public StencilOp StencilFrontDepthFailOp
-        {
-            readonly get => (StencilOp)((Internal.Id6 >> 33) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFFF1FFFFFFFF) | ((ulong)value << 33);
-        }
-
-        public CompareOp StencilFrontCompareOp
-        {
-            readonly get => (CompareOp)((Internal.Id6 >> 36) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFF8FFFFFFFFF) | ((ulong)value << 36);
-        }
-
-        public StencilOp StencilBackFailOp
-        {
-            readonly get => (StencilOp)((Internal.Id6 >> 39) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFFC7FFFFFFFFF) | ((ulong)value << 39);
-        }
-
-        public StencilOp StencilBackPassOp
-        {
-            readonly get => (StencilOp)((Internal.Id6 >> 42) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFFE3FFFFFFFFFF) | ((ulong)value << 42);
-        }
-
-        public StencilOp StencilBackDepthFailOp
-        {
-            readonly get => (StencilOp)((Internal.Id6 >> 45) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFFF1FFFFFFFFFFF) | ((ulong)value << 45);
-        }
-
-        public CompareOp StencilBackCompareOp
-        {
-            readonly get => (CompareOp)((Internal.Id6 >> 48) & 0x7);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFF8FFFFFFFFFFFF) | ((ulong)value << 48);
-        }
-
-        public CullModeFlags CullMode
-        {
-            readonly get => (CullModeFlags)((Internal.Id6 >> 51) & 0x3);
-            set => Internal.Id6 = (Internal.Id6 & 0xFFE7FFFFFFFFFFFF) | ((ulong)value << 51);
-        }
-
-        public bool PrimitiveRestartEnable
-        {
-            readonly get => ((Internal.Id6 >> 53) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xFFDFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 53);
-        }
-
-        public bool DepthClampEnable
-        {
-            readonly get => ((Internal.Id6 >> 54) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xFFBFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 54);
-        }
-
-        public bool RasterizerDiscardEnable
-        {
-            readonly get => ((Internal.Id6 >> 55) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xFF7FFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 55);
-        }
-
-        public FrontFace FrontFace
-        {
-            readonly get => (FrontFace)((Internal.Id6 >> 56) & 0x1);
-            set => Internal.Id6 = (Internal.Id6 & 0xFEFFFFFFFFFFFFFF) | ((ulong)value << 56);
-        }
-
-        public bool DepthBiasEnable
-        {
-            readonly get => ((Internal.Id6 >> 57) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xFDFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 57);
-        }
-
-        public bool DepthTestEnable
-        {
-            readonly get => ((Internal.Id6 >> 58) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xFBFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 58);
-        }
-
-        public bool DepthWriteEnable
-        {
-            readonly get => ((Internal.Id6 >> 59) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xF7FFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 59);
-        }
-
-        public bool DepthBoundsTestEnable
-        {
-            readonly get => ((Internal.Id6 >> 60) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xEFFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 60);
-        }
-
-        public bool StencilTestEnable
-        {
-            readonly get => ((Internal.Id6 >> 61) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xDFFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 61);
-        }
-
-        public bool LogicOpEnable
-        {
-            readonly get => ((Internal.Id6 >> 62) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0xBFFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 62);
-        }
-
-        public bool HasDepthStencil
-        {
-            readonly get => ((Internal.Id6 >> 63) & 0x1) != 0UL;
-            set => Internal.Id6 = (Internal.Id6 & 0x7FFFFFFFFFFFFFFF) | ((value ? 1UL : 0UL) << 63);
-        }
-
-        public uint PatchControlPoints
-        {
-            readonly get => (uint)((Internal.Id7 >> 0) & 0xFFFFFFFF);
-            set => Internal.Id7 = (Internal.Id7 & 0xFFFFFFFF00000000) | ((ulong)value << 0);
-        }
-
-        public uint SamplesCount
-        {
-            readonly get => (uint)((Internal.Id7 >> 32) & 0xFFFFFFFF);
-            set => Internal.Id7 = (Internal.Id7 & 0xFFFFFFFF) | ((ulong)value << 32);
-        }
-
         public bool AlphaToCoverageEnable
         {
-            readonly get => ((Internal.Id8 >> 0) & 0x1) != 0UL;
-            set => Internal.Id8 = (Internal.Id8 & 0xFFFFFFFFFFFFFFFE) | ((value ? 1UL : 0UL) << 0);
+            readonly get => ((Internal.Id3 >> 0) & 0x1) != 0UL;
+            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFFFFFFFFFE) | ((value ? 1UL : 0UL) << 0);
         }
 
         public bool AlphaToOneEnable
         {
-            readonly get => ((Internal.Id8 >> 1) & 0x1) != 0UL;
-            set => Internal.Id8 = (Internal.Id8 & 0xFFFFFFFFFFFFFFFD) | ((value ? 1UL : 0UL) << 1);
+            readonly get => ((Internal.Id3 >> 1) & 0x1) != 0UL;
+            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFFFFFFFFFD) | ((value ? 1UL : 0UL) << 1);
         }
 
         public bool AdvancedBlendSrcPreMultiplied
         {
-            readonly get => ((Internal.Id8 >> 2) & 0x1) != 0UL;
-            set => Internal.Id8 = (Internal.Id8 & 0xFFFFFFFFFFFFFFFB) | ((value ? 1UL : 0UL) << 2);
+            readonly get => ((Internal.Id3 >> 2) & 0x1) != 0UL;
+            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFFFFFFFFFB) | ((value ? 1UL : 0UL) << 2);
         }
 
         public bool AdvancedBlendDstPreMultiplied
         {
-            readonly get => ((Internal.Id8 >> 3) & 0x1) != 0UL;
-            set => Internal.Id8 = (Internal.Id8 & 0xFFFFFFFFFFFFFFF7) | ((value ? 1UL : 0UL) << 3);
+            readonly get => ((Internal.Id3 >> 3) & 0x1) != 0UL;
+            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFFFFFFFFF7) | ((value ? 1UL : 0UL) << 3);
         }
 
         public BlendOverlapEXT AdvancedBlendOverlap
         {
-            readonly get => (BlendOverlapEXT)((Internal.Id8 >> 4) & 0x3);
-            set => Internal.Id8 = (Internal.Id8 & 0xFFFFFFFFFFFFFFCF) | ((ulong)value << 4);
+            readonly get => (BlendOverlapEXT)((Internal.Id3 >> 4) & 0x3);
+            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFFFFFFFFCF) | ((ulong)value << 4);
         }
 
         public bool DepthMode
         {
-            readonly get => ((Internal.Id8 >> 6) & 0x1) != 0UL;
-            set => Internal.Id8 = (Internal.Id8 & 0xFFFFFFFFFFFFFFBF) | ((value ? 1UL : 0UL) << 6);
+            readonly get => ((Internal.Id3 >> 6) & 0x1) != 0UL;
+            set => Internal.Id3 = (Internal.Id3 & 0xFFFFFFFFFFFFFFBF) | ((value ? 1UL : 0UL) << 6);
         }
 
         public bool HasTessellationControlShader;
@@ -315,7 +255,6 @@ namespace Ryujinx.Graphics.Vulkan
             AdvancedBlendDstPreMultiplied = true;
             AdvancedBlendOverlap = BlendOverlapEXT.UncorrelatedExt;
 
-            LineWidth = 1f;
             SamplesCount = 1;
             DepthMode = true;
         }
@@ -335,7 +274,6 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 SType = StructureType.ComputePipelineCreateInfo,
                 Stage = Stages[0],
-                BasePipelineIndex = -1,
                 Layout = PipelineLayout,
             };
 
@@ -379,6 +317,15 @@ namespace Ryujinx.Graphics.Vulkan
             RenderPass renderPass,
             bool throwOnError = false)
         {
+            // Using patches topology without a tessellation shader is invalid.
+            // If we find such a case, return null pipeline to skip the draw.
+            if (Topology == PrimitiveTopology.PatchList && !HasTessellationControlShader)
+            {
+                program.AddGraphicsPipeline(ref Internal, null);
+
+                return null;
+            }
+
             if (program.TryGetGraphicsPipeline(ref Internal, out var pipeline))
             {
                 return pipeline;
@@ -392,6 +339,9 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 UpdateVertexAttributeDescriptions(gd);
             }
+
+            bool supportsExtDynamicState = gd.Capabilities.SupportsExtendedDynamicState;
+            bool supportsExtDynamicState2 = gd.Capabilities.SupportsExtendedDynamicState2.ExtendedDynamicState2;
 
             fixed (VertexInputAttributeDescription* pVertexAttributeDescriptions = &Internal.VertexAttributeDescriptions[0])
             fixed (VertexInputAttributeDescription* pVertexAttributeDescriptions2 = &_vertexAttributeDescriptions2[0])
@@ -407,64 +357,30 @@ namespace Ryujinx.Graphics.Vulkan
                     PVertexBindingDescriptions = pVertexBindingDescriptions,
                 };
 
-                // Using patches topology without a tessellation shader is invalid.
-                // If we find such a case, return null pipeline to skip the draw.
-                if (Topology == PrimitiveTopology.PatchList && !HasTessellationControlShader)
-                {
-                    program.AddGraphicsPipeline(ref Internal, null);
-
-                    return null;
-                }
-
-                bool primitiveRestartEnable = PrimitiveRestartEnable;
-
-                bool topologySupportsRestart;
-
-                if (gd.Capabilities.SupportsPrimitiveTopologyListRestart)
-                {
-                    topologySupportsRestart = gd.Capabilities.SupportsPrimitiveTopologyPatchListRestart || Topology != PrimitiveTopology.PatchList;
-                }
-                else
-                {
-                    topologySupportsRestart = Topology == PrimitiveTopology.LineStrip ||
-                                              Topology == PrimitiveTopology.TriangleStrip ||
-                                              Topology == PrimitiveTopology.TriangleFan ||
-                                              Topology == PrimitiveTopology.LineStripWithAdjacency ||
-                                              Topology == PrimitiveTopology.TriangleStripWithAdjacency;
-                }
-
-                primitiveRestartEnable &= topologySupportsRestart;
-
                 var inputAssemblyState = new PipelineInputAssemblyStateCreateInfo
                 {
                     SType = StructureType.PipelineInputAssemblyStateCreateInfo,
-                    PrimitiveRestartEnable = primitiveRestartEnable,
-                    Topology = HasTessellationControlShader ? PrimitiveTopology.PatchList : Topology,
+                    Topology = Topology,
                 };
 
-                var tessellationState = new PipelineTessellationStateCreateInfo
-                {
-                    SType = StructureType.PipelineTessellationStateCreateInfo,
-                    PatchControlPoints = PatchControlPoints,
-                };
+                PipelineTessellationStateCreateInfo tessellationState;
 
                 var rasterizationState = new PipelineRasterizationStateCreateInfo
                 {
                     SType = StructureType.PipelineRasterizationStateCreateInfo,
-                    DepthClampEnable = DepthClampEnable,
-                    RasterizerDiscardEnable = RasterizerDiscardEnable,
                     PolygonMode = PolygonMode,
-                    LineWidth = LineWidth,
-                    CullMode = CullMode,
-                    FrontFace = FrontFace,
-                    DepthBiasEnable = DepthBiasEnable,
+                    DepthClampEnable = DepthClampEnable,
                 };
+
+                if (isMoltenVk)
+                {
+                    //When widelines feature is not supported it must be 1.0f. 
+                    rasterizationState.LineWidth = 1.0f;
+                }
 
                 var viewportState = new PipelineViewportStateCreateInfo
                 {
                     SType = StructureType.PipelineViewportStateCreateInfo,
-                    ViewportCount = ViewportsCount,
-                    ScissorCount = ScissorsCount,
                 };
 
                 if (gd.Capabilities.SupportsDepthClipControl)
@@ -488,33 +404,56 @@ namespace Ryujinx.Graphics.Vulkan
                     AlphaToOneEnable = AlphaToOneEnable,
                 };
 
-                var stencilFront = new StencilOpState(
-                    StencilFrontFailOp,
-                    StencilFrontPassOp,
-                    StencilFrontDepthFailOp,
-                    StencilFrontCompareOp);
-
-                var stencilBack = new StencilOpState(
-                    StencilBackFailOp,
-                    StencilBackPassOp,
-                    StencilBackDepthFailOp,
-                    StencilBackCompareOp);
-
                 var depthStencilState = new PipelineDepthStencilStateCreateInfo
                 {
                     SType = StructureType.PipelineDepthStencilStateCreateInfo,
-                    DepthTestEnable = DepthTestEnable,
-                    DepthWriteEnable = DepthWriteEnable,
-                    DepthCompareOp = DepthCompareOp,
                     DepthBoundsTestEnable = false,
-                    StencilTestEnable = StencilTestEnable,
-                    Front = stencilFront,
-                    Back = stencilBack,
                 };
+
+                if (!supportsExtDynamicState)
+                {
+                    rasterizationState.CullMode = CullMode;
+                    rasterizationState.FrontFace = FrontFace;
+
+                    viewportState.ViewportCount = ViewportsCount;
+                    viewportState.ScissorCount = ScissorsCount;
+
+                    var stencilFront = new StencilOpState(
+                        StencilFrontFailOp,
+                        StencilFrontPassOp,
+                        StencilFrontDepthFailOp,
+                        StencilFrontCompareOp);
+
+                    var stencilBack = new StencilOpState(
+                        StencilBackFailOp,
+                        StencilBackPassOp,
+                        StencilBackDepthFailOp,
+                        StencilBackCompareOp);
+
+                    depthStencilState.Front = stencilFront;
+                    depthStencilState.Back = stencilBack;
+                    depthStencilState.StencilTestEnable = StencilTestEnable;
+                    depthStencilState.DepthTestEnable = DepthTestEnable;
+                    depthStencilState.DepthWriteEnable = DepthWriteEnable;
+                    depthStencilState.DepthCompareOp = DepthCompareOp;
+                }
+
+                if (!supportsExtDynamicState2)
+                {
+                    inputAssemblyState.PrimitiveRestartEnable = PrimitiveRestartEnable;
+                    rasterizationState.DepthBiasEnable = DepthBiasEnable;
+                    rasterizationState.RasterizerDiscardEnable = RasterizerDiscardEnable;
+                }
+
+                if (!gd.Capabilities.SupportsExtendedDynamicState2.ExtendedDynamicState2PatchControlPoints)
+                {
+                    tessellationState.SType = StructureType.PipelineTessellationStateCreateInfo;
+                    tessellationState.PatchControlPoints = PatchControlPoints;
+                }
 
                 uint blendEnables = 0;
 
-                if (gd.IsMoltenVk && Internal.AttachmentIntegerFormatMask != 0)
+                if (isMoltenVk && Internal.AttachmentIntegerFormatMask != 0)
                 {
                     // Blend can't be enabled for integer formats, so let's make sure it is disabled.
                     uint attachmentIntegerFormatMask = Internal.AttachmentIntegerFormatMask;
@@ -533,26 +472,24 @@ namespace Ryujinx.Graphics.Vulkan
                     }
                 }
 
-                // Vendors other than NVIDIA have a bug where it enables logical operations even for float formats,
-                // so we need to force disable them here.
-                bool logicOpEnable = LogicOpEnable && (gd.Vendor == Vendor.Nvidia || Internal.LogicOpsAllowed);
-
                 var colorBlendState = new PipelineColorBlendStateCreateInfo
                 {
                     SType = StructureType.PipelineColorBlendStateCreateInfo,
-                    LogicOpEnable = logicOpEnable,
-                    LogicOp = LogicOp,
                     AttachmentCount = ColorBlendAttachmentStateCount,
                     PAttachments = pColorBlendAttachmentState,
+                    LogicOpEnable = LogicOpEnable,
                 };
 
-                PipelineColorBlendAdvancedStateCreateInfoEXT colorBlendAdvancedState;
+                if (!gd.Capabilities.SupportsExtendedDynamicState2.ExtendedDynamicState2LogicOp)
+                {
+                    colorBlendState.LogicOp = LogicOp;
+                }
 
                 if (!AdvancedBlendSrcPreMultiplied ||
                     !AdvancedBlendDstPreMultiplied ||
                     AdvancedBlendOverlap != BlendOverlapEXT.UncorrelatedExt)
                 {
-                    colorBlendAdvancedState = new PipelineColorBlendAdvancedStateCreateInfoEXT
+                    PipelineColorBlendAdvancedStateCreateInfoEXT colorBlendAdvancedState = new PipelineColorBlendAdvancedStateCreateInfoEXT
                     {
                         SType = StructureType.PipelineColorBlendAdvancedStateCreateInfoExt,
                         SrcPremultiplied = AdvancedBlendSrcPreMultiplied,
@@ -563,28 +500,64 @@ namespace Ryujinx.Graphics.Vulkan
                     colorBlendState.PNext = &colorBlendAdvancedState;
                 }
 
-                bool supportsExtDynamicState = gd.Capabilities.SupportsExtendedDynamicState;
-                int dynamicStatesCount = supportsExtDynamicState ? 8 : 7;
-
-                DynamicState* dynamicStates = stackalloc DynamicState[dynamicStatesCount];
+                DynamicState* dynamicStates = stackalloc DynamicState[22];
 
                 dynamicStates[0] = DynamicState.Viewport;
                 dynamicStates[1] = DynamicState.Scissor;
-                dynamicStates[2] = DynamicState.DepthBias;
-                dynamicStates[3] = DynamicState.StencilCompareMask;
-                dynamicStates[4] = DynamicState.StencilWriteMask;
-                dynamicStates[5] = DynamicState.StencilReference;
-                dynamicStates[6] = DynamicState.BlendConstants;
+                dynamicStates[2] = DynamicState.StencilCompareMask;
+                dynamicStates[3] = DynamicState.StencilWriteMask;
+                dynamicStates[4] = DynamicState.StencilReference;
+                dynamicStates[5] = DynamicState.BlendConstants;
+                dynamicStates[6] = DynamicState.DepthBias;
+
+                uint currentIndex = 7;
+
+                if (!isMoltenVk)
+                {
+                    //LineWidth dynamic state is only supported on macOS when using Metal Private API on newer version of MoltenVK
+                    dynamicStates[currentIndex++] = DynamicState.LineWidth;
+                }
 
                 if (supportsExtDynamicState)
                 {
-                    dynamicStates[7] = DynamicState.VertexInputBindingStrideExt;
+                    if (!isMoltenVk)
+                    {
+                        //Requires Metal 3.1 and new MoltenVK
+                        dynamicStates[currentIndex++] = DynamicState.VertexInputBindingStrideExt;
+                    }
+                    dynamicStates[0] = DynamicState.ViewportWithCountExt;
+                    dynamicStates[1] = DynamicState.ScissorWithCountExt;
+                    dynamicStates[currentIndex++] = DynamicState.CullModeExt;
+                    dynamicStates[currentIndex++] = DynamicState.FrontFaceExt;
+                    dynamicStates[currentIndex++] = DynamicState.DepthTestEnableExt;
+                    dynamicStates[currentIndex++] = DynamicState.DepthWriteEnableExt;
+
+                    dynamicStates[currentIndex++] = DynamicState.DepthCompareOpExt;
+                    dynamicStates[currentIndex++] = DynamicState.StencilTestEnableExt;
+                    dynamicStates[currentIndex++] = DynamicState.StencilOpExt;
+                    dynamicStates[currentIndex++] = DynamicState.PrimitiveTopologyExt;
+                }
+
+                if (supportsExtDynamicState2)
+                {
+                    dynamicStates[currentIndex++] = DynamicState.DepthBiasEnableExt;
+                    dynamicStates[currentIndex++] = DynamicState.RasterizerDiscardEnableExt;
+                    dynamicStates[currentIndex++] = DynamicState.PrimitiveRestartEnableExt;
+
+                    if (gd.Capabilities.SupportsExtendedDynamicState2.ExtendedDynamicState2LogicOp)
+                    {
+                        dynamicStates[currentIndex++] = DynamicState.LogicOpExt;
+                    }
+                    if (gd.Capabilities.SupportsExtendedDynamicState2.ExtendedDynamicState2PatchControlPoints)
+                    {
+                        dynamicStates[currentIndex++] = DynamicState.PatchControlPointsExt;
+                    }
                 }
 
                 var pipelineDynamicStateCreateInfo = new PipelineDynamicStateCreateInfo
                 {
                     SType = StructureType.PipelineDynamicStateCreateInfo,
-                    DynamicStateCount = (uint)dynamicStatesCount,
+                    DynamicStateCount = currentIndex,
                     PDynamicStates = dynamicStates,
                 };
 
@@ -595,7 +568,6 @@ namespace Ryujinx.Graphics.Vulkan
                     PStages = Stages.Pointer,
                     PVertexInputState = &vertexInputState,
                     PInputAssemblyState = &inputAssemblyState,
-                    PTessellationState = &tessellationState,
                     PViewportState = &viewportState,
                     PRasterizationState = &rasterizationState,
                     PMultisampleState = &multisampleState,
@@ -605,6 +577,11 @@ namespace Ryujinx.Graphics.Vulkan
                     Layout = PipelineLayout,
                     RenderPass = renderPass,
                 };
+
+                if (!gd.Capabilities.SupportsExtendedDynamicState2.ExtendedDynamicState2PatchControlPoints && HasTessellationControlShader)
+                {
+                    pipelineCreateInfo.PTessellationState = &tessellationState;
+                }
 
                 Result result = gd.Api.CreateGraphicsPipelines(device, cache, 1, &pipelineCreateInfo, null, &pipelineHandle);
 
