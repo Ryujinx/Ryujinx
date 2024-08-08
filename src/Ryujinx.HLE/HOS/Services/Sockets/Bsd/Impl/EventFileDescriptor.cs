@@ -32,7 +32,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             UpdateEventStates();
         }
 
-        public int Refcount { get; set; }
+        public int RefCount { get; set; }
 
         public void Dispose()
         {

@@ -11,7 +11,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
 {
     class ManagedSocket : ISocket
     {
-        public int Refcount { get; set; }
+        public int RefCount { get; set; }
 
         public AddressFamily AddressFamily => Socket.AddressFamily;
 
@@ -32,57 +32,13 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
         public ManagedSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
             Socket = new Socket(addressFamily, socketType, protocolType);
-            Refcount = 1;
+            RefCount = 1;
         }
 
         private ManagedSocket(Socket socket)
         {
             Socket = socket;
-            Refcount = 1;
-        }
-
-        private static SocketFlags ConvertBsdSocketFlags(BsdSocketFlags bsdSocketFlags)
-        {
-            SocketFlags socketFlags = SocketFlags.None;
-
-            if (bsdSocketFlags.HasFlag(BsdSocketFlags.Oob))
-            {
-                socketFlags |= SocketFlags.OutOfBand;
-            }
-
-            if (bsdSocketFlags.HasFlag(BsdSocketFlags.Peek))
-            {
-                socketFlags |= SocketFlags.Peek;
-            }
-
-            if (bsdSocketFlags.HasFlag(BsdSocketFlags.DontRoute))
-            {
-                socketFlags |= SocketFlags.DontRoute;
-            }
-
-            if (bsdSocketFlags.HasFlag(BsdSocketFlags.Trunc))
-            {
-                socketFlags |= SocketFlags.Truncated;
-            }
-
-            if (bsdSocketFlags.HasFlag(BsdSocketFlags.CTrunc))
-            {
-                socketFlags |= SocketFlags.ControlDataTruncated;
-            }
-
-            bsdSocketFlags &= ~(BsdSocketFlags.Oob |
-                BsdSocketFlags.Peek |
-                BsdSocketFlags.DontRoute |
-                BsdSocketFlags.DontWait |
-                BsdSocketFlags.Trunc |
-                BsdSocketFlags.CTrunc);
-
-            if (bsdSocketFlags != BsdSocketFlags.None)
-            {
-                Logger.Warning?.Print(LogClass.ServiceBsd, $"Unsupported socket flags: {bsdSocketFlags}");
-            }
-
-            return socketFlags;
+            RefCount = 1;
         }
 
         public LinuxError Accept(out ISocket newSocket)
@@ -199,7 +155,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                     shouldBlockAfterOperation = true;
                 }
 
-                receiveSize = Socket.Receive(buffer, ConvertBsdSocketFlags(flags));
+                receiveSize = Socket.Receive(buffer, WinSockHelper.ConvertBsdSocketFlags(flags));
 
                 result = LinuxError.SUCCESS;
             }
@@ -243,7 +199,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
                     return LinuxError.EOPNOTSUPP;
                 }
 
-                receiveSize = Socket.ReceiveFrom(buffer[..size], ConvertBsdSocketFlags(flags), ref temp);
+                receiveSize = Socket.ReceiveFrom(buffer[..size], WinSockHelper.ConvertBsdSocketFlags(flags), ref temp);
 
                 remoteEndPoint = (IPEndPoint)temp;
                 result = LinuxError.SUCCESS;
@@ -267,7 +223,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
         {
             try
             {
-                sendSize = Socket.Send(buffer, ConvertBsdSocketFlags(flags));
+                sendSize = Socket.Send(buffer, WinSockHelper.ConvertBsdSocketFlags(flags));
 
                 return LinuxError.SUCCESS;
             }
@@ -283,7 +239,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
         {
             try
             {
-                sendSize = Socket.SendTo(buffer[..size], ConvertBsdSocketFlags(flags), remoteEndPoint);
+                sendSize = Socket.SendTo(buffer[..size], WinSockHelper.ConvertBsdSocketFlags(flags), remoteEndPoint);
 
                 return LinuxError.SUCCESS;
             }
@@ -493,7 +449,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
 
             try
             {
-                int receiveSize = Socket.Receive(ConvertMessagesToBuffer(message), ConvertBsdSocketFlags(flags), out SocketError socketError);
+                int receiveSize = Socket.Receive(ConvertMessagesToBuffer(message), WinSockHelper.ConvertBsdSocketFlags(flags), out SocketError socketError);
 
                 if (receiveSize > 0)
                 {
@@ -531,7 +487,7 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
 
             try
             {
-                int sendSize = Socket.Send(ConvertMessagesToBuffer(message), ConvertBsdSocketFlags(flags), out SocketError socketError);
+                int sendSize = Socket.Send(ConvertMessagesToBuffer(message), WinSockHelper.ConvertBsdSocketFlags(flags), out SocketError socketError);
 
                 if (sendSize > 0)
                 {

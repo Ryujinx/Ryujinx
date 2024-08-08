@@ -1,3 +1,4 @@
+using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.Services.Sockets.Bsd.Types;
 using System;
 using System.Collections.Generic;
@@ -342,6 +343,50 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Bsd.Impl
             }
 
             return LinuxError.SUCCESS;
+        }
+
+        public static SocketFlags ConvertBsdSocketFlags(BsdSocketFlags bsdSocketFlags)
+        {
+            SocketFlags socketFlags = SocketFlags.None;
+
+            if (bsdSocketFlags.HasFlag(BsdSocketFlags.Oob))
+            {
+                socketFlags |= SocketFlags.OutOfBand;
+            }
+
+            if (bsdSocketFlags.HasFlag(BsdSocketFlags.Peek))
+            {
+                socketFlags |= SocketFlags.Peek;
+            }
+
+            if (bsdSocketFlags.HasFlag(BsdSocketFlags.DontRoute))
+            {
+                socketFlags |= SocketFlags.DontRoute;
+            }
+
+            if (bsdSocketFlags.HasFlag(BsdSocketFlags.Trunc))
+            {
+                socketFlags |= SocketFlags.Truncated;
+            }
+
+            if (bsdSocketFlags.HasFlag(BsdSocketFlags.CTrunc))
+            {
+                socketFlags |= SocketFlags.ControlDataTruncated;
+            }
+
+            bsdSocketFlags &= ~(BsdSocketFlags.Oob |
+                                BsdSocketFlags.Peek |
+                                BsdSocketFlags.DontRoute |
+                                BsdSocketFlags.DontWait |
+                                BsdSocketFlags.Trunc |
+                                BsdSocketFlags.CTrunc);
+
+            if (bsdSocketFlags != BsdSocketFlags.None)
+            {
+                Logger.Warning?.Print(LogClass.ServiceBsd, $"Unsupported socket flags: {bsdSocketFlags}");
+            }
+
+            return socketFlags;
         }
     }
 }
