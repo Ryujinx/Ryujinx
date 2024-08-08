@@ -42,7 +42,7 @@
     <PackageVersion Include="Silk.NET.Vulkan" Version="2.16.0" />
     <PackageVersion Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.16.0" />
     <PackageVersion Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.16.0" />
-    <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.8" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.9" />
     <PackageVersion Include="SixLabors.ImageSharp.Drawing" Version="1.0.0" />
     <PackageVersion Include="SPB" Version="0.0.4-build32" />
     <PackageVersion Include="System.IO.Hashing" Version="8.0.0" />
