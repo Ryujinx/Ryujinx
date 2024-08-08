@@ -57,75 +57,34 @@
             </MenuItem>
             <MenuItem VerticalAlignment="Center" Header="{locale:Locale MenuBarOptions}">
                 <MenuItem
-                    Padding="-10,0,0,0"
                     Command="{Binding ToggleFullscreen}"
                     Header="{locale:Locale MenuBarOptionsToggleFullscreen}"
                     InputGesture="F11" />
                 <MenuItem
-                    Padding="0"
                     Command="{Binding ToggleStartGamesInFullscreen}"
-                    Header="{locale:Locale MenuBarOptionsStartGamesInFullscreen}">
-                    <MenuItem.Icon>
-                        <CheckBox
-                            MinWidth="{DynamicResource CheckBoxSize}"
-                            MinHeight="{DynamicResource CheckBoxSize}"
-                            IsChecked="{Binding StartGamesInFullscreen, Mode=TwoWay}"
-                            Padding="0" />
-                    </MenuItem.Icon>
-                    <MenuItem.Styles>
-                        <Style Selector="Viewbox#PART_IconPresenter">
-                            <Setter Property="MaxHeight" Value="36" />
-                            <Setter Property="MinHeight" Value="36" />
-                            <Setter Property="MaxWidth" Value="36" />
-                            <Setter Property="MinWidth" Value="36" />
-                        </Style>
-                        <Style Selector="ContentPresenter#PART_HeaderPresenter">
-                            <Setter Property="Padding" Value="-10,0,0,0" />
-                        </Style>
-                    </MenuItem.Styles>
-                </MenuItem>
+                    Header="{locale:Locale MenuBarOptionsStartGamesInFullscreen}"
+                    ToggleType="CheckBox"
+                    IsChecked="{Binding StartGamesInFullscreen}" />
                 <MenuItem
-                    Padding="0"
                     IsVisible="{Binding ShowConsoleVisible}"
                     Command="{Binding ToggleShowConsole}"
-                    Header="{locale:Locale MenuBarOptionsShowConsole}">
-                    <MenuItem.Icon>
-                        <CheckBox 
-                            MinWidth="{DynamicResource CheckBoxSize}"
-                            MinHeight="{DynamicResource CheckBoxSize}"
-                            IsChecked="{Binding ShowConsole, Mode=TwoWay}"
-                            Padding="0" />
-                    </MenuItem.Icon>
-                    <MenuItem.Styles>
-                        <Style Selector="Viewbox#PART_IconPresenter">
-                            <Setter Property="MaxHeight" Value="36" />
-                            <Setter Property="MinHeight" Value="36" />
-                            <Setter Property="MaxWidth" Value="36" />
-                            <Setter Property="MinWidth" Value="36" />
-                        </Style>
-                        <Style Selector="ContentPresenter#PART_HeaderPresenter">
-                            <Setter Property="Padding" Value="-10,0,0,0" />
-                        </Style>
-                    </MenuItem.Styles>
-                </MenuItem>
+                    Header="{locale:Locale MenuBarOptionsShowConsole}"
+                    ToggleType="CheckBox"
+                    IsChecked="{Binding ShowConsole}" />
                 <Separator />
                 <MenuItem
-                    Name="ChangeLanguageMenuItem" 
-                    Padding="-10,0,0,0"
+                    Name="ChangeLanguageMenuItem"
                     Header="{locale:Locale MenuBarOptionsChangeLanguage}" />
-                <MenuItem 
-                    Name="ToggleFileTypesMenuItem" 
-                    Padding="-10,0,0,0"
+                <MenuItem
+                    Name="ToggleFileTypesMenuItem"
                     Header="{locale:Locale MenuBarShowFileTypes}" />
                 <Separator />
                 <MenuItem
                     Click="OpenSettings"
-                    Padding="-10,0,0,0"
                     Header="{locale:Locale MenuBarOptionsSettings}"
                     ToolTip.Tip="{locale:Locale OpenSettingsTooltip}" />
                 <MenuItem
                     Command="{Binding ManageProfiles}"
-                    Padding="-10,0,0,0"
                     Header="{locale:Locale MenuBarOptionsManageUserProfiles}"
                     IsEnabled="{Binding EnableNonGameRunningControls}"
                     ToolTip.Tip="{locale:Locale OpenProfileManagerTooltip}" />

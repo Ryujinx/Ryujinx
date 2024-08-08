@@ -35,22 +35,23 @@ namespace Ryujinx.Ava.UI.Views.Main
             ChangeLanguageMenuItem.ItemsSource = GenerateLanguageMenuItems();
         }
 
-        private CheckBox[] GenerateToggleFileTypeItems()
+        private MenuItem[] GenerateToggleFileTypeItems()
         {
-            List<CheckBox> checkBoxes = new();
+            List<MenuItem> items = new();
 
             foreach (var item in Enum.GetValues(typeof(FileTypes)))
             {
                 string fileName = Enum.GetName(typeof(FileTypes), item);
-                checkBoxes.Add(new CheckBox
+                items.Add(new MenuItem
                 {
-                    Content = $".{fileName}",
+                    Header = $".{fileName}",
+                    ToggleType = MenuItemToggleType.CheckBox,
                     IsChecked = ((FileTypes)item).GetConfigValue(ConfigurationState.Instance.UI.ShownFileTypes),
                     Command = MiniCommand.Create(() => Window.ToggleFileType(fileName)),
                 });
             }
 
-            return checkBoxes.ToArray();
+            return items.ToArray();
         }
 
         private static MenuItem[] GenerateLanguageMenuItems()
@@ -78,6 +79,8 @@ namespace Ryujinx.Ava.UI.Views.Main
                 MenuItem menuItem = new()
                 {
                     Header = languageName,
+                    ToggleType = MenuItemToggleType.Radio,
+                    IsChecked = languageCode == ConfigurationState.Instance.UI.LanguageCode,
                     Command = MiniCommand.Create(() =>
                     {
                         MainWindowViewModel.ChangeLanguage(languageCode);
