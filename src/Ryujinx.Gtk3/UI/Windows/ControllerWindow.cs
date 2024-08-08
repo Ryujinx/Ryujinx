@@ -112,7 +112,7 @@ namespace Ryujinx.UI.Windows
 #pragma warning restore CS0649, IDE0044
 
         private readonly MainWindow _mainWindow;
-        private readonly IGamepadDriver _gtk3KeyboardDriver;
+        private readonly GTK3KeyboardDriver _gtk3KeyboardDriver;
         private IGamepad _selectedGamepad;
         private bool _mousePressed;
         private bool _middleMousePressed;

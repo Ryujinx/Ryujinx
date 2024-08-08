@@ -266,7 +266,7 @@ namespace ARMeilleure.Instructions
             }
         }
 
-        private static Exception InvalidOpCodeType(OpCode opCode)
+        private static InvalidOperationException InvalidOpCodeType(OpCode opCode)
         {
             return new InvalidOperationException($"Invalid OpCode type \"{opCode?.GetType().Name ?? "null"}\".");
         }

@@ -58,7 +58,7 @@ namespace Ryujinx.Common.Utilities
 
         public static async Task<byte[]> StreamToBytesAsync(Stream input, CancellationToken cancellationToken = default)
         {
-            using MemoryStream stream = MemoryStreamManager.Shared.GetStream();
+            using RecyclableMemoryStream stream = MemoryStreamManager.Shared.GetStream();
 
             await input.CopyToAsync(stream, cancellationToken);
 

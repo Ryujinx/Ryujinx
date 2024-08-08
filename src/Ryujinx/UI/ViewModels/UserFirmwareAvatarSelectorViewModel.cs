@@ -143,7 +143,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        private static byte[] DecompressYaz0(Stream stream)
+        private static byte[] DecompressYaz0(MemoryStream stream)
         {
             using BinaryReader reader = new(stream);
 

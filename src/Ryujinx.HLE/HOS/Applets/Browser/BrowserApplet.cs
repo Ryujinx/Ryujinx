@@ -1,3 +1,4 @@
+using Microsoft.IO;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Memory;
@@ -70,7 +71,7 @@ namespace Ryujinx.HLE.HOS.Applets.Browser
 
         private static byte[] BuildResponseOld(WebCommonReturnValue result)
         {
-            using MemoryStream stream = MemoryStreamManager.Shared.GetStream();
+            using RecyclableMemoryStream stream = MemoryStreamManager.Shared.GetStream();
             using BinaryWriter writer = new(stream);
             writer.WriteStruct(result);
 
@@ -78,7 +79,7 @@ namespace Ryujinx.HLE.HOS.Applets.Browser
         }
         private byte[] BuildResponseNew(List<BrowserOutput> outputArguments)
         {
-            using MemoryStream stream = MemoryStreamManager.Shared.GetStream();
+            using RecyclableMemoryStream stream = MemoryStreamManager.Shared.GetStream();
             using BinaryWriter writer = new(stream);
             writer.WriteStruct(new WebArgHeader
             {

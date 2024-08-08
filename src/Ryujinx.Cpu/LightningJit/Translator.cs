@@ -74,7 +74,7 @@ namespace Ryujinx.Cpu.LightningJit
             }
         }
 
-        private static IStackWalker CreateStackWalker()
+        private static StackWalker CreateStackWalker()
         {
             if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
             {

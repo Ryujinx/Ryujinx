@@ -542,7 +542,7 @@ namespace Ryujinx.HLE.HOS
             return newStorage;
         }
 
-        private static void AddFiles(IFileSystem fs, string modName, string rootPath, ISet<string> fileSet, RomFsBuilder builder)
+        private static void AddFiles(IFileSystem fs, string modName, string rootPath, HashSet<string> fileSet, RomFsBuilder builder)
         {
             foreach (var entry in fs.EnumerateEntries()
                                     .AsParallel()

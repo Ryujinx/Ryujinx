@@ -406,7 +406,7 @@ namespace Ryujinx.Ava.UI.Helpers
             return dialogWindow.ShowDialog(_contentDialogOverlayWindow ?? mainWindow);
         }
 
-        private static Window GetMainWindow()
+        private static MainWindow GetMainWindow()
         {
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime al)
             {

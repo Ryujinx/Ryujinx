@@ -1,4 +1,5 @@
 using Gtk;
+using Microsoft.IO;
 using Ryujinx.Common.Memory;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
@@ -181,7 +182,7 @@ namespace Ryujinx.UI.Windows
 
             image.Mutate(x => x.Resize(256, 256));
 
-            using MemoryStream streamJpg = MemoryStreamManager.Shared.GetStream();
+            using RecyclableMemoryStream streamJpg = MemoryStreamManager.Shared.GetStream();
 
             image.SaveAsJpeg(streamJpg);
 

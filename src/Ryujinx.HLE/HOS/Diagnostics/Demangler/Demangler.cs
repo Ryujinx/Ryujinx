@@ -252,7 +252,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         //  <exception-spec>        ::= Do                # non-throwing exception-specification (e.g., noexcept, throw())
         //                          ::= DO <expression> E # computed (instantiation-dependent) noexcept
         //                          ::= Dw <type>+ E      # dynamic exception specification with instantiation-dependent types
-        private BaseNode ParseFunctionType()
+        private FunctionType ParseFunctionType()
         {
             Cv cvQualifiers = ParseCvQualifiers();
 
@@ -347,7 +347,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
 
         //   <array-type> ::= A <positive dimension number> _ <element type>
         //                ::= A [<dimension expression>] _ <element type>
-        private BaseNode ParseArrayType()
+        private ArrayType ParseArrayType()
         {
             if (!ConsumeIf("A"))
             {
@@ -945,7 +945,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         }
 
         // <source-name> ::= <positive length number> <identifier>
-        private BaseNode ParseSourceName()
+        private NameType ParseSourceName()
         {
             int length = ParsePositiveNumber();
             if (Count() < length || length <= 0)
@@ -1320,7 +1320,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         //                  ::= D0  # deleting destructor
         //                  ::= D1  # complete object destructor
         //                  ::= D2  # base object destructor
-        private BaseNode ParseCtorDtorName(NameParserContext context, BaseNode prev)
+        private CtorDtorNameType ParseCtorDtorName(NameParserContext context, BaseNode prev)
         {
             if (prev.Type == NodeType.SpecialSubstitution && prev is SpecialSubstitution substitution)
             {
@@ -1377,7 +1377,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         //                  ::= fp <top-level CV-qualifiers> <parameter-2 non-negative number> _                                                         # L == 0, second and later parameters
         //                  ::= fL <L-1 non-negative number> p <top-level CV-qualifiers> _                                                               # L > 0, first parameter
         //                  ::= fL <L-1 non-negative number> p <top-level CV-qualifiers> <parameter-2 non-negative number> _                             # L > 0, second and later parameters
-        private BaseNode ParseFunctionParameter()
+        private FunctionParameter ParseFunctionParameter()
         {
             if (ConsumeIf("fp"))
             {
@@ -1422,7 +1422,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         //             ::= fR <binary-operator-name> <expression> <expression>
         //             ::= fl <binary-operator-name> <expression>
         //             ::= fr <binary-operator-name> <expression>
-        private BaseNode ParseFoldExpression()
+        private FoldExpression ParseFoldExpression()
         {
             if (!ConsumeIf("f"))
             {
@@ -1571,7 +1571,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
 
         //                ::= cv <type> <expression>                               # type (expression), conversion with one argument
         //                ::= cv <type> _ <expression>* E                          # type (expr-list), conversion with other than one argument
-        private BaseNode ParseConversionExpression()
+        private ConversionExpression ParseConversionExpression()
         {
             if (!ConsumeIf("cv"))
             {
@@ -1616,7 +1616,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
             return new ConversionExpression(type, new NodeArray(expressions));
         }
 
-        private BaseNode ParseBinaryExpression(string name)
+        private BinaryExpression ParseBinaryExpression(string name)
         {
             BaseNode leftPart = ParseExpression();
             if (leftPart == null)
@@ -1633,7 +1633,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
             return new BinaryExpression(leftPart, name, rightPart);
         }
 
-        private BaseNode ParsePrefixExpression(string name)
+        private PrefixExpression ParsePrefixExpression(string name)
         {
             BaseNode expression = ParseExpression();
             if (expression == null)
@@ -1720,7 +1720,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         //               ::= [gs] na <expression>* _ <type> <initializer>        # new[] (expr-list) type (init)
         //
         // <initializer> ::= pi <expression>* E                                  # parenthesized initialization
-        private BaseNode ParseNewExpression()
+        private NewExpression ParseNewExpression()
         {
             bool isGlobal = ConsumeIf("gs");
             bool isArray = Peek(1) == 'a';
@@ -2404,7 +2404,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
             return null;
         }
 
-        private BaseNode ParseIntegerLiteral(string literalName)
+        private IntegerLiteral ParseIntegerLiteral(string literalName)
         {
             string number = ParseNumber(true);
             if (number == null || number.Length == 0 || !ConsumeIf("E"))
@@ -2521,7 +2521,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
 
         // <decltype>  ::= Dt <expression> E  # decltype of an id-expression or class member access (C++0x)
         //             ::= DT <expression> E  # decltype of an expression (C++0x)
-        private BaseNode ParseDecltype()
+        private EnclosedExpression ParseDecltype()
         {
             if (!ConsumeIf("D") || (!ConsumeIf("t") && !ConsumeIf("T")))
             {
@@ -2588,7 +2588,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         }
 
         // <template-args> ::= I <template-arg>+ E
-        private BaseNode ParseTemplateArguments(bool hasContext = false)
+        private TemplateArguments ParseTemplateArguments(bool hasContext = false)
         {
             if (!ConsumeIf("I"))
             {
@@ -2740,7 +2740,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
 
         //  <destructor-name> ::= <unresolved-type>                               # e.g., ~T or ~decltype(f())
         //                    ::= <simple-id>                                     # e.g., ~A<2*N>
-        private BaseNode ParseDestructorName()
+        private DtorName ParseDestructorName()
         {
             BaseNode node;
             if (char.IsDigit(Peek()))
@@ -3134,7 +3134,7 @@ namespace Ryujinx.HLE.HOS.Diagnostics.Demangler
         //   <local-name> ::= Z <function encoding> E <entity name> [<discriminator>]
         //                ::= Z <function encoding> E s [<discriminator>]
         //                ::= Z <function encoding> Ed [ <parameter number> ] _ <entity name>
-        private BaseNode ParseLocalName(NameParserContext context)
+        private LocalName ParseLocalName(NameParserContext context)
         {
             if (!ConsumeIf("Z"))
             {

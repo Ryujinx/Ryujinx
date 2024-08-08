@@ -1,3 +1,4 @@
+using Microsoft.IO;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Memory;
@@ -46,10 +47,10 @@ namespace Ryujinx.HLE.HOS.Services
         private readonly Dictionary<int, IpcService> _sessions = new();
         private readonly Dictionary<int, Func<IpcService>> _ports = new();
 
-        private readonly MemoryStream _requestDataStream;
+        private readonly RecyclableMemoryStream _requestDataStream;
         private readonly BinaryReader _requestDataReader;
 
-        private readonly MemoryStream _responseDataStream;
+        private readonly RecyclableMemoryStream _responseDataStream;
         private readonly BinaryWriter _responseDataWriter;
 
         private int _isDisposed = 0;

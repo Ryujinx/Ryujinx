@@ -379,8 +379,8 @@ namespace Ryujinx.Graphics.Gpu.Shader.DiskCache
         /// <param name="hash">Code and constant buffer data hash</param>
         /// <returns>Entry index</returns>
         private int WriteNewEntry(
-            Stream tocFileStream,
-            Stream dataFileStream,
+            FileStream tocFileStream,
+            FileStream dataFileStream,
             ref TocHeader header,
             ReadOnlySpan<byte> data,
             ReadOnlySpan<byte> cb1Data,

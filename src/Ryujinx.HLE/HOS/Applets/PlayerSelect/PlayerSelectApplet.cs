@@ -1,3 +1,4 @@
+using Microsoft.IO;
 using Ryujinx.Common.Memory;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.HOS.Services.Am.AppletAE;
@@ -46,7 +47,7 @@ namespace Ryujinx.HLE.HOS.Applets
         {
             UserProfile currentUser = _system.AccountManager.LastOpenedUser;
 
-            using MemoryStream stream = MemoryStreamManager.Shared.GetStream();
+            using RecyclableMemoryStream stream = MemoryStreamManager.Shared.GetStream();
             using BinaryWriter writer = new(stream);
 
             writer.Write((ulong)PlayerSelectResult.Success);

@@ -5,7 +5,7 @@ namespace Ryujinx.Horizon.Common
     static class ResultNames
     {
         // Reference: https://github.com/Thealexbarney/LibHac/blob/master/build/CodeGen/results.csv
-        private static readonly IReadOnlyDictionary<int, string> _names = new Dictionary<int, string>()
+        private static readonly Dictionary<int, string> _names = new()
         {
             { 0x0, "Success" },
             { 0xE01, "OutOfSessions" },

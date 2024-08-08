@@ -100,7 +100,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             return false;
         }
 
-        private IComparer<SaveModel> GetComparer()
+        private SortExpressionComparer<SaveModel> GetComparer()
         {
             return SortIndex switch
             {

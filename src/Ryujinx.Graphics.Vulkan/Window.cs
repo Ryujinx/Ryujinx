@@ -35,7 +35,7 @@ namespace Ryujinx.Graphics.Vulkan
         private AntiAliasing _currentAntiAliasing;
         private bool _updateEffect;
         private IPostProcessingEffect _effect;
-        private IScalingFilter _scalingFilter;
+        private FsrScalingFilter _scalingFilter;
         private bool _isLinear;
         private float _scalingFilterLevel;
         private bool _updateScalingFilter;
@@ -560,12 +560,7 @@ namespace Ryujinx.Graphics.Vulkan
                         _isLinear = _currentScalingFilter == ScalingFilter.Bilinear;
                         break;
                     case ScalingFilter.Fsr:
-                        if (_scalingFilter is not FsrScalingFilter)
-                        {
-                            _scalingFilter?.Dispose();
-                            _scalingFilter = new FsrScalingFilter(_gd, _device);
-                        }
-
+                        _scalingFilter ??= new FsrScalingFilter(_gd, _device);
                         _scalingFilter.Level = _scalingFilterLevel;
                         break;
                 }

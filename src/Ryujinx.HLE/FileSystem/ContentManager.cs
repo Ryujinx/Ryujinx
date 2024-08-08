@@ -571,7 +571,7 @@ namespace Ryujinx.HLE.FileSystem
             return file.Release();
         }
 
-        private static Stream GetZipStream(ZipArchiveEntry entry)
+        private static MemoryStream GetZipStream(ZipArchiveEntry entry)
         {
             MemoryStream dest = MemoryStreamManager.Shared.GetStream();
 
