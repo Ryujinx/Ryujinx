@@ -67,7 +67,9 @@ namespace Ryujinx.Graphics.Vulkan
             _device = device;
             _info = info;
 
-            var format = _gd.FormatCapabilities.ConvertToVkFormat(info.Format);
+            bool isNotMsOrSupportsStorage = gd.Capabilities.SupportsShaderStorageImageMultisample || !info.Target.IsMultisample();
+
+            var format = _gd.FormatCapabilities.ConvertToVkFormat(info.Format, isNotMsOrSupportsStorage);
             var levels = (uint)info.Levels;
             var layers = (uint)info.GetLayers();
             var depth = (uint)(info.Target == Target.Texture3D ? info.Depth : 1);
@@ -80,7 +82,7 @@ namespace Ryujinx.Graphics.Vulkan
 
             var sampleCountFlags = ConvertToSampleCountFlags(gd.Capabilities.SupportedSampleCounts, (uint)info.Samples);
 
-            var usage = GetImageUsage(info.Format, info.Target, gd.Capabilities.SupportsShaderStorageImageMultisample);
+            var usage = GetImageUsage(info.Format, isNotMsOrSupportsStorage, true);
 
             var flags = ImageCreateFlags.CreateMutableFormatBit | ImageCreateFlags.CreateExtendedUsageBit;
 
@@ -292,7 +294,7 @@ namespace Ryujinx.Graphics.Vulkan
             }
         }
 
-        public static ImageUsageFlags GetImageUsage(Format format, Target target, bool supportsMsStorage)
+        public static ImageUsageFlags GetImageUsage(Format format, bool isNotMsOrSupportsStorage, bool extendedUsage)
         {
             var usage = DefaultUsageFlags;
 
@@ -305,7 +307,7 @@ namespace Ryujinx.Graphics.Vulkan
                 usage |= ImageUsageFlags.ColorAttachmentBit;
             }
 
-            if (format.IsImageCompatible() && (supportsMsStorage || !target.IsMultisample()))
+            if ((format.IsImageCompatible() && isNotMsOrSupportsStorage) || extendedUsage)
             {
                 usage |= ImageUsageFlags.StorageBit;
             }

@@ -29,11 +29,17 @@ namespace Ryujinx.Graphics.Vulkan
             int colorCount = 0;
             int maxColorAttachmentIndex = -1;
 
+            bool isNotMsOrSupportsStorage = gd.Capabilities.SupportsShaderStorageImageMultisample ||
+                 !state.DepthStencilFormat.IsImageCompatible();
+
             for (int i = 0; i < state.AttachmentEnable.Length; i++)
             {
                 if (state.AttachmentEnable[i])
                 {
-                    attachmentFormats[attachmentCount] = gd.FormatCapabilities.ConvertToVkFormat(state.AttachmentFormats[i]);
+                    bool isNotMsOrSupportsStorageAttachments = gd.Capabilities.SupportsShaderStorageImageMultisample ||
+                         !state.AttachmentFormats[i].IsImageCompatible();
+
+                    attachmentFormats[attachmentCount] = gd.FormatCapabilities.ConvertToVkFormat(state.AttachmentFormats[i], isNotMsOrSupportsStorageAttachments);
 
                     attachmentIndices[attachmentCount++] = i;
                     colorCount++;
@@ -43,7 +49,7 @@ namespace Ryujinx.Graphics.Vulkan
 
             if (state.DepthStencilEnable)
             {
-                attachmentFormats[attachmentCount++] = gd.FormatCapabilities.ConvertToVkFormat(state.DepthStencilFormat);
+                attachmentFormats[attachmentCount++] = gd.FormatCapabilities.ConvertToVkFormat(state.DepthStencilFormat, isNotMsOrSupportsStorage);
             }
 
             if (attachmentCount != 0)
@@ -296,7 +302,10 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 if (state.AttachmentEnable[i])
                 {
-                    pipeline.Internal.AttachmentFormats[attachmentCount++] = gd.FormatCapabilities.ConvertToVkFormat(state.AttachmentFormats[i]);
+                    bool isNotMsOrSupportsStorage = gd.Capabilities.SupportsShaderStorageImageMultisample ||
+                         !state.AttachmentFormats[i].IsImageCompatible();
+
+                    pipeline.Internal.AttachmentFormats[attachmentCount++] = gd.FormatCapabilities.ConvertToVkFormat(state.AttachmentFormats[i], isNotMsOrSupportsStorage);
                     maxColorAttachmentIndex = i;
 
                     if (state.AttachmentFormats[i].IsInteger())
@@ -310,7 +319,10 @@ namespace Ryujinx.Graphics.Vulkan
 
             if (state.DepthStencilEnable)
             {
-                pipeline.Internal.AttachmentFormats[attachmentCount++] = gd.FormatCapabilities.ConvertToVkFormat(state.DepthStencilFormat);
+                bool isNotMsOrSupportsStorage = !state.DepthStencilFormat.IsImageCompatible() ||
+                     gd.Capabilities.SupportsShaderStorageImageMultisample;
+
+                pipeline.Internal.AttachmentFormats[attachmentCount++] = gd.FormatCapabilities.ConvertToVkFormat(state.DepthStencilFormat, isNotMsOrSupportsStorage);
             }
 
             pipeline.ColorBlendAttachmentStateCount = (uint)(maxColorAttachmentIndex + 1);
