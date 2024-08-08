@@ -15,7 +15,7 @@
     Width="{Binding WindowWidth}"
     Height="{Binding WindowHeight}"
     MinWidth="800"
-    MinHeight="500"
+    MinHeight="400"
     d:DesignHeight="720"
     d:DesignWidth="1280"
     x:DataType="viewModels:MainWindowViewModel"
