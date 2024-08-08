@@ -10,11 +10,16 @@ namespace Ryujinx.Graphics.Shader.StructuredIr
 
         public HelperFunctionsMask HelperFunctionsMask { get; set; }
 
-        public StructuredProgramInfo()
+        public StructuredProgramInfo(bool precise)
         {
             Functions = new List<StructuredFunction>();
 
             IoDefinitions = new HashSet<IoDefinition>();
+
+            if (precise)
+            {
+                HelperFunctionsMask |= HelperFunctionsMask.Precise;
+            }
         }
     }
 }

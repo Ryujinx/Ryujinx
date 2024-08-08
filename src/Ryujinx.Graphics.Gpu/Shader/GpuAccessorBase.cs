@@ -55,7 +55,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         {
             int binding;
 
-            if (_context.Capabilities.Api == TargetApi.Vulkan)
+            if (_context.Capabilities.Api != TargetApi.OpenGL)
             {
                 binding = GetBindingFromIndex(index, _context.Capabilities.MaximumUniformBuffersPerStage, "Uniform buffer");
             }
@@ -71,7 +71,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         {
             int binding;
 
-            if (_context.Capabilities.Api == TargetApi.Vulkan)
+            if (_context.Capabilities.Api != TargetApi.OpenGL)
             {
                 if (count == 1)
                 {
@@ -103,7 +103,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         {
             int binding;
 
-            if (_context.Capabilities.Api == TargetApi.Vulkan)
+            if (_context.Capabilities.Api != TargetApi.OpenGL)
             {
                 binding = GetBindingFromIndex(index, _context.Capabilities.MaximumStorageBuffersPerStage, "Storage buffer");
             }
@@ -119,7 +119,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         {
             int binding;
 
-            if (_context.Capabilities.Api == TargetApi.Vulkan)
+            if (_context.Capabilities.Api != TargetApi.OpenGL)
             {
                 if (count == 1)
                 {

@@ -27,6 +27,8 @@ namespace Ryujinx.Graphics.Shader.Translation.Transforms
                 addOp.Inst == (Instruction.FP32 | Instruction.Add) &&
                 addOp.GetSource(1).Type == OperandType.Constant)
             {
+                context.UsedFeatures |= FeatureFlags.Precise;
+
                 addOp.ForcePrecise = true;
             }
 

@@ -18,9 +18,10 @@ namespace Ryujinx.Graphics.Shader.StructuredIr
             ShaderDefinitions definitions,
             ResourceManager resourceManager,
             TargetLanguage targetLanguage,
+            bool precise,
             bool debugMode)
         {
-            StructuredProgramContext context = new(attributeUsage, definitions, resourceManager, debugMode);
+            StructuredProgramContext context = new(attributeUsage, definitions, resourceManager, precise, debugMode);
 
             for (int funcIndex = 0; funcIndex < functions.Count; funcIndex++)
             {
@@ -321,8 +322,9 @@ namespace Ryujinx.Graphics.Shader.StructuredIr
             }
 
             // Those instructions needs to be emulated by using helper functions,
-            // because they are NVIDIA specific. Those flags helps the backend to
-            // decide which helper functions are needed on the final generated code.
+            // because they are NVIDIA specific or because the target language has
+            // no direct equivalent. Those flags helps the backend to decide which
+            // helper functions are needed on the final generated code.
             switch (operation.Inst)
             {
                 case Instruction.MultiplyHighS32:
@@ -330,6 +332,15 @@ namespace Ryujinx.Graphics.Shader.StructuredIr
                     break;
                 case Instruction.MultiplyHighU32:
                     context.Info.HelperFunctionsMask |= HelperFunctionsMask.MultiplyHighU32;
+                    break;
+                case Instruction.FindLSB:
+                    context.Info.HelperFunctionsMask |= HelperFunctionsMask.FindLSB;
+                    break;
+                case Instruction.FindMSBS32:
+                    context.Info.HelperFunctionsMask |= HelperFunctionsMask.FindMSBS32;
+                    break;
+                case Instruction.FindMSBU32:
+                    context.Info.HelperFunctionsMask |= HelperFunctionsMask.FindMSBU32;
                     break;
                 case Instruction.SwizzleAdd:
                     context.Info.HelperFunctionsMask |= HelperFunctionsMask.SwizzleAdd;

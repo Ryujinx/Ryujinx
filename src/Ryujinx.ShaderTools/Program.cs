@@ -116,7 +116,7 @@ namespace Ryujinx.ShaderTools
 
             if (options.VertexPassthrough)
             {
-                program = translatorContext.GenerateVertexPassthroughForCompute();
+                (program, _) = translatorContext.GenerateVertexPassthroughForCompute();
             }
             else
             {

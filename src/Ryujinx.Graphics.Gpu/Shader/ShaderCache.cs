@@ -224,7 +224,10 @@ namespace Ryujinx.Graphics.Gpu.Shader
             TranslatedShader translatedShader = TranslateShader(_dumper, channel, translatorContext, cachedGuestCode, asCompute: false);
 
             ShaderSource[] shaderSourcesArray = new ShaderSource[] { CreateShaderSource(translatedShader.Program) };
-            ShaderInfo info = ShaderInfoBuilder.BuildForCompute(_context, translatedShader.Program.Info);
+            ShaderInfo info = ShaderInfoBuilder.BuildForCompute(
+                _context,
+                translatedShader.Program.Info,
+                computeState.GetLocalSize());
             IProgram hostProgram = _context.Renderer.CreateProgram(shaderSourcesArray, info);
 
             cpShader = new CachedShaderProgram(hostProgram, specState, translatedShader.Shader);
@@ -425,7 +428,8 @@ namespace Ryujinx.Graphics.Gpu.Shader
 
                             TranslatorContext lastInVertexPipeline = geometryToCompute ? translatorContexts[4] ?? currentStage : currentStage;
 
-                            program = lastInVertexPipeline.GenerateVertexPassthroughForCompute();
+                            (program, ShaderProgramInfo vacInfo) = lastInVertexPipeline.GenerateVertexPassthroughForCompute();
+                            infoBuilder.AddStageInfoVac(vacInfo);
                         }
                         else
                         {
@@ -530,7 +534,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         private ShaderAsCompute CreateHostVertexAsComputeProgram(ShaderProgram program, TranslatorContext context, bool tfEnabled)
         {
             ShaderSource source = new(program.Code, program.BinaryCode, ShaderStage.Compute, program.Language);
-            ShaderInfo info = ShaderInfoBuilder.BuildForVertexAsCompute(_context, program.Info, tfEnabled);
+            ShaderInfo info = ShaderInfoBuilder.BuildForVertexAsCompute(_context, program.Info, context.GetVertexAsComputeInfo(), tfEnabled);
 
             return new(_context.Renderer.CreateProgram(new[] { source }, info), program.Info, context.GetResourceReservations());
         }
@@ -822,16 +826,19 @@ namespace Ryujinx.Graphics.Gpu.Shader
 
         /// <summary>
         /// Creates shader translation options with the requested graphics API and flags.
-        /// The shader language is choosen based on the current configuration and graphics API.
+        /// The shader language is chosen based on the current configuration and graphics API.
         /// </summary>
         /// <param name="api">Target graphics API</param>
         /// <param name="flags">Translation flags</param>
         /// <returns>Translation options</returns>
         private static TranslationOptions CreateTranslationOptions(TargetApi api, TranslationFlags flags)
         {
-            TargetLanguage lang = GraphicsConfig.EnableSpirvCompilationOnVulkan && api == TargetApi.Vulkan
-                ? TargetLanguage.Spirv
-                : TargetLanguage.Glsl;
+            TargetLanguage lang = api switch
+            {
+                TargetApi.OpenGL => TargetLanguage.Glsl,
+                TargetApi.Vulkan => GraphicsConfig.EnableSpirvCompilationOnVulkan ? TargetLanguage.Spirv : TargetLanguage.Glsl,
+                TargetApi.Metal => TargetLanguage.Msl,
+            };
 
             return new TranslationOptions(lang, api, flags);
         }

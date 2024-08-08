@@ -182,6 +182,10 @@ namespace Ryujinx.Ava
                 {
                     ConfigurationState.Instance.Graphics.GraphicsBackend.Value = GraphicsBackend.Vulkan;
                 }
+                else if (CommandLineState.OverrideGraphicsBackend.ToLower() == "metal")
+                {
+                    ConfigurationState.Instance.Graphics.GraphicsBackend.Value = GraphicsBackend.Metal;
+                }
             }
 
             // Check if docked mode was overriden.

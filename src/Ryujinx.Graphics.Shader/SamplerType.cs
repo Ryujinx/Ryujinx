@@ -155,5 +155,51 @@ namespace Ryujinx.Graphics.Shader
 
             return typeName;
         }
+
+        public static string ToMslTextureType(this SamplerType type, AggregateType aggregateType, bool image = false)
+        {
+            string typeName;
+
+            if ((type & SamplerType.Shadow) != 0)
+            {
+                typeName = (type & SamplerType.Mask) switch
+                {
+                    SamplerType.Texture2D => "depth2d",
+                    SamplerType.TextureCube => "depthcube",
+                    _ => throw new ArgumentException($"Invalid shadow texture type \"{type}\"."),
+                };
+            }
+            else
+            {
+                typeName = (type & SamplerType.Mask) switch
+                {
+                    SamplerType.Texture1D => "texture1d",
+                    SamplerType.TextureBuffer => "texture_buffer",
+                    SamplerType.Texture2D => "texture2d",
+                    SamplerType.Texture3D => "texture3d",
+                    SamplerType.TextureCube => "texturecube",
+                    _ => throw new ArgumentException($"Invalid texture type \"{type}\"."),
+                };
+            }
+
+            if ((type & SamplerType.Multisample) != 0)
+            {
+                typeName += "_ms";
+            }
+
+            if ((type & SamplerType.Array) != 0)
+            {
+                typeName += "_array";
+            }
+
+            var format = aggregateType switch
+            {
+                AggregateType.S32 => "int",
+                AggregateType.U32 => "uint",
+                _ => "float"
+            };
+
+            return $"{typeName}<{format}{(image ? ", access::read_write" : "")}>";
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
             ResourceStages.Geometry;
 
         private readonly GpuContext _context;
+        private readonly ComputeSize _computeLocalSize;
 
         private int _fragmentOutputMap;
 
@@ -39,9 +40,11 @@ namespace Ryujinx.Graphics.Gpu.Shader
         /// <param name="context">GPU context that owns the shaders that will be added to the builder</param>
         /// <param name="tfEnabled">Indicates if the graphics shader is used with transform feedback enabled</param>
         /// <param name="vertexAsCompute">Indicates that the vertex shader will be emulated on a compute shader</param>
-        public ShaderInfoBuilder(GpuContext context, bool tfEnabled, bool vertexAsCompute = false)
+        /// <param name="computeLocalSize">Indicates the local thread size for a compute shader</param>
+        public ShaderInfoBuilder(GpuContext context, bool tfEnabled, bool vertexAsCompute = false, ComputeSize computeLocalSize = default)
         {
             _context = context;
+            _computeLocalSize = computeLocalSize;
 
             _fragmentOutputMap = -1;
 
@@ -95,7 +98,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
         private void PopulateDescriptorAndUsages(ResourceStages stages, ResourceType type, int setIndex, int start, int count, bool write = false)
         {
             AddDescriptor(stages, type, setIndex, start, count);
-            AddUsage(stages, type, setIndex, start, count, write);
+            // AddUsage(stages, type, setIndex, start, count, write);
         }
 
         /// <summary>
@@ -152,6 +155,25 @@ namespace Ryujinx.Graphics.Gpu.Shader
 
             AddArrayDescriptors(info.Textures, stages, isImage: false);
             AddArrayDescriptors(info.Images, stages, isImage: true);
+
+            AddUsage(info.CBuffers, stages, isStorage: false);
+            AddUsage(info.SBuffers, stages, isStorage: true);
+            AddUsage(info.Textures, stages, isImage: false);
+            AddUsage(info.Images, stages, isImage: true);
+        }
+
+        public void AddStageInfoVac(ShaderProgramInfo info)
+        {
+            ResourceStages stages = info.Stage switch
+            {
+                ShaderStage.Compute => ResourceStages.Compute,
+                ShaderStage.Vertex => ResourceStages.Vertex,
+                ShaderStage.TessellationControl => ResourceStages.TessellationControl,
+                ShaderStage.TessellationEvaluation => ResourceStages.TessellationEvaluation,
+                ShaderStage.Geometry => ResourceStages.Geometry,
+                ShaderStage.Fragment => ResourceStages.Fragment,
+                _ => ResourceStages.None,
+            };
 
             AddUsage(info.CBuffers, stages, isStorage: false);
             AddUsage(info.SBuffers, stages, isStorage: true);
@@ -361,14 +383,7 @@ namespace Ryujinx.Graphics.Gpu.Shader
 
             ResourceLayout resourceLayout = new(descriptors.AsReadOnly(), usages.AsReadOnly());
 
-            if (pipeline.HasValue)
-            {
-                return new ShaderInfo(_fragmentOutputMap, resourceLayout, pipeline.Value, fromCache);
-            }
-            else
-            {
-                return new ShaderInfo(_fragmentOutputMap, resourceLayout, fromCache);
-            }
+            return new ShaderInfo(_fragmentOutputMap, resourceLayout, _computeLocalSize, pipeline, fromCache);
         }
 
         /// <summary>
@@ -378,14 +393,16 @@ namespace Ryujinx.Graphics.Gpu.Shader
         /// <param name="programs">Shaders from the disk cache</param>
         /// <param name="pipeline">Optional pipeline for background compilation</param>
         /// <param name="tfEnabled">Indicates if the graphics shader is used with transform feedback enabled</param>
+        /// <param name="computeLocalSize">Compute local thread size</param>
         /// <returns>Shader information</returns>
         public static ShaderInfo BuildForCache(
             GpuContext context,
             IEnumerable<CachedShaderStage> programs,
             ProgramPipelineState? pipeline,
-            bool tfEnabled)
+            bool tfEnabled,
+            ComputeSize computeLocalSize)
         {
-            ShaderInfoBuilder builder = new(context, tfEnabled);
+            ShaderInfoBuilder builder = new(context, tfEnabled, computeLocalSize: computeLocalSize);
 
             foreach (CachedShaderStage program in programs)
             {
@@ -403,11 +420,12 @@ namespace Ryujinx.Graphics.Gpu.Shader
         /// </summary>
         /// <param name="context">GPU context that owns the shader</param>
         /// <param name="info">Compute shader information</param>
+        /// <param name="computeLocalSize">Compute local thread size</param>
         /// <param name="fromCache">True if the compute shader comes from a disk cache, false otherwise</param>
         /// <returns>Shader information</returns>
-        public static ShaderInfo BuildForCompute(GpuContext context, ShaderProgramInfo info, bool fromCache = false)
+        public static ShaderInfo BuildForCompute(GpuContext context, ShaderProgramInfo info, ComputeSize computeLocalSize, bool fromCache = false)
         {
-            ShaderInfoBuilder builder = new(context, tfEnabled: false, vertexAsCompute: false);
+            ShaderInfoBuilder builder = new(context, tfEnabled: false, vertexAsCompute: false, computeLocalSize: computeLocalSize);
 
             builder.AddStageInfo(info);
 
@@ -422,10 +440,11 @@ namespace Ryujinx.Graphics.Gpu.Shader
         /// <param name="tfEnabled">Indicates if the graphics shader is used with transform feedback enabled</param>
         /// <param name="fromCache">True if the compute shader comes from a disk cache, false otherwise</param>
         /// <returns>Shader information</returns>
-        public static ShaderInfo BuildForVertexAsCompute(GpuContext context, ShaderProgramInfo info, bool tfEnabled, bool fromCache = false)
+        public static ShaderInfo BuildForVertexAsCompute(GpuContext context, ShaderProgramInfo info, ShaderProgramInfo info2, bool tfEnabled, bool fromCache = false)
         {
-            ShaderInfoBuilder builder = new(context, tfEnabled, vertexAsCompute: true);
+            ShaderInfoBuilder builder = new(context, tfEnabled, vertexAsCompute: true, computeLocalSize: ComputeSize.VtgAsCompute);
 
+            builder.AddStageInfoVac(info2);
             builder.AddStageInfo(info, vertexAsCompute: true);
 
             return builder.Build(null, fromCache);

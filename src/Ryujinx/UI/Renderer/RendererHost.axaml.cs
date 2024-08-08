@@ -17,14 +17,13 @@ namespace Ryujinx.Ava.UI.Renderer
         {
             InitializeComponent();
 
-            if (ConfigurationState.Instance.Graphics.GraphicsBackend.Value == GraphicsBackend.OpenGl)
+            EmbeddedWindow = ConfigurationState.Instance.Graphics.GraphicsBackend.Value switch
             {
-                EmbeddedWindow = new EmbeddedWindowOpenGL();
-            }
-            else
-            {
-                EmbeddedWindow = new EmbeddedWindowVulkan();
-            }
+                GraphicsBackend.OpenGl => new EmbeddedWindowOpenGL(),
+                GraphicsBackend.Metal => new EmbeddedWindowMetal(),
+                GraphicsBackend.Vulkan => new EmbeddedWindowVulkan(),
+                _ => throw new NotSupportedException()
+            };
 
             Initialize();
         }

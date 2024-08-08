@@ -340,6 +340,84 @@ namespace Ryujinx.Graphics.GAL
         }
 
         /// <summary>
+        /// Get bytes per element for this format.
+        /// </summary>
+        /// <param name="format">Texture format</param>
+        /// <returns>Byte size for an element of this format (pixel, vertex attribute, etc)</returns>
+        public static int GetBytesPerElement(this Format format)
+        {
+            int scalarSize = format.GetScalarSize();
+
+            switch (format)
+            {
+                case Format.R8G8Unorm:
+                case Format.R8G8Snorm:
+                case Format.R8G8Uint:
+                case Format.R8G8Sint:
+                case Format.R8G8Uscaled:
+                case Format.R8G8Sscaled:
+                case Format.R16G16Float:
+                case Format.R16G16Unorm:
+                case Format.R16G16Snorm:
+                case Format.R16G16Uint:
+                case Format.R16G16Sint:
+                case Format.R16G16Uscaled:
+                case Format.R16G16Sscaled:
+                case Format.R32G32Float:
+                case Format.R32G32Uint:
+                case Format.R32G32Sint:
+                case Format.R32G32Uscaled:
+                case Format.R32G32Sscaled:
+                    return 2 * scalarSize;
+
+                case Format.R8G8B8Unorm:
+                case Format.R8G8B8Snorm:
+                case Format.R8G8B8Uint:
+                case Format.R8G8B8Sint:
+                case Format.R8G8B8Uscaled:
+                case Format.R8G8B8Sscaled:
+                case Format.R16G16B16Float:
+                case Format.R16G16B16Unorm:
+                case Format.R16G16B16Snorm:
+                case Format.R16G16B16Uint:
+                case Format.R16G16B16Sint:
+                case Format.R16G16B16Uscaled:
+                case Format.R16G16B16Sscaled:
+                case Format.R32G32B32Float:
+                case Format.R32G32B32Uint:
+                case Format.R32G32B32Sint:
+                case Format.R32G32B32Uscaled:
+                case Format.R32G32B32Sscaled:
+                    return 3 * scalarSize;
+
+                case Format.R8G8B8A8Unorm:
+                case Format.R8G8B8A8Snorm:
+                case Format.R8G8B8A8Uint:
+                case Format.R8G8B8A8Sint:
+                case Format.R8G8B8A8Srgb:
+                case Format.R8G8B8A8Uscaled:
+                case Format.R8G8B8A8Sscaled:
+                case Format.B8G8R8A8Unorm:
+                case Format.B8G8R8A8Srgb:
+                case Format.R16G16B16A16Float:
+                case Format.R16G16B16A16Unorm:
+                case Format.R16G16B16A16Snorm:
+                case Format.R16G16B16A16Uint:
+                case Format.R16G16B16A16Sint:
+                case Format.R16G16B16A16Uscaled:
+                case Format.R16G16B16A16Sscaled:
+                case Format.R32G32B32A32Float:
+                case Format.R32G32B32A32Uint:
+                case Format.R32G32B32A32Sint:
+                case Format.R32G32B32A32Uscaled:
+                case Format.R32G32B32A32Sscaled:
+                    return 4 * scalarSize;
+            }
+
+            return scalarSize;
+        }
+
+        /// <summary>
         /// Checks if the texture format is a depth or depth-stencil format.
         /// </summary>
         /// <param name="format">Texture format</param>

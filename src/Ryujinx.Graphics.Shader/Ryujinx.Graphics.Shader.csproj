@@ -15,4 +15,11 @@
     <EmbeddedResource Include="CodeGen\Glsl\HelperFunctions\SwizzleAdd.glsl" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="CodeGen\Msl\HelperFunctions\FindLSB.metal" />
+    <EmbeddedResource Include="CodeGen\Msl\HelperFunctions\FindMSBS32.metal" />
+    <EmbeddedResource Include="CodeGen\Msl\HelperFunctions\FindMSBU32.metal" />
+    <EmbeddedResource Include="CodeGen\Msl\HelperFunctions\SwizzleAdd.metal" />
+    <EmbeddedResource Include="CodeGen\Msl\HelperFunctions\Precise.metal" />
+  </ItemGroup>
 </Project>
