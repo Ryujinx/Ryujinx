@@ -1,5 +1,6 @@
 using Avalonia.Svg.Skia;
 using Ryujinx.Ava.UI.Models.Input;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 
 namespace Ryujinx.Ava.UI.ViewModels.Input
 {
@@ -53,9 +54,9 @@ namespace Ryujinx.Ava.UI.ViewModels.Input
             }
         }
 
-        public readonly InputViewModel ParentModel;
+        public readonly SettingsInputViewModel ParentModel;
 
-        public KeyboardInputViewModel(InputViewModel model, KeyboardInputConfig config)
+        public KeyboardInputViewModel(SettingsInputViewModel model, KeyboardInputConfig config)
         {
             ParentModel = model;
             model.NotifyChangesEvent += OnParentModelChanged;

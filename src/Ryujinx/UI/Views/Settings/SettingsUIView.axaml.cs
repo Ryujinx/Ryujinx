@@ -2,8 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
-using Ryujinx.Ava.Common.Locale;
-using Ryujinx.Ava.UI.ViewModels;
+using Ryujinx.Ava.UI.ViewModels.Settings;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,10 +11,11 @@ namespace Ryujinx.Ava.UI.Views.Settings
 {
     public partial class SettingsUiView : UserControl
     {
-        public SettingsViewModel ViewModel;
+        public SettingsUIViewModel ViewModel;
 
         public SettingsUiView()
         {
+            DataContext = ViewModel = new SettingsUIViewModel();
             InitializeComponent();
         }
 
@@ -26,7 +26,6 @@ namespace Ryujinx.Ava.UI.Views.Settings
             if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path) && !ViewModel.GameDirectories.Contains(path))
             {
                 ViewModel.GameDirectories.Add(path);
-                ViewModel.DirectoryChanged = true;
             }
             else
             {
@@ -40,7 +39,6 @@ namespace Ryujinx.Ava.UI.Views.Settings
                     if (result.Count > 0)
                     {
                         ViewModel.GameDirectories.Add(result[0].Path.LocalPath);
-                        ViewModel.DirectoryChanged = true;
                     }
                 }
             }
@@ -53,7 +51,6 @@ namespace Ryujinx.Ava.UI.Views.Settings
             foreach (string path in new List<string>(GameList.SelectedItems.Cast<string>()))
             {
                 ViewModel.GameDirectories.Remove(path);
-                ViewModel.DirectoryChanged = true;
             }
 
             if (GameList.ItemCount > 0)

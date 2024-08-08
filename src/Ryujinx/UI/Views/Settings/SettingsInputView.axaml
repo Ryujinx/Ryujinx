@@ -2,15 +2,18 @@
     x:Class="Ryujinx.Ava.UI.Views.Settings.SettingsInputView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+    xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
     xmlns:views="clr-namespace:Ryujinx.Ava.UI.Views.Input"
-    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
+    xmlns:inputViewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Input"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
+    xmlns:models="clr-namespace:Ryujinx.Ava.UI.Models"
     mc:Ignorable="d"
-    x:DataType="viewModels:SettingsViewModel">
+    x:DataType="viewModels:SettingsInputViewModel">
     <Design.DataContext>
-        <viewModels:SettingsViewModel />
+        <viewModels:SettingsInputViewModel />
     </Design.DataContext>
     <ScrollViewer
         Name="InputPage"
@@ -27,39 +30,231 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <views:InputView
-                        Grid.Row="0"
-                        Name="InputView" />
-                    <StackPanel
-                        Orientation="Vertical"
-                        Grid.Row="2">
-                        <Separator
-                            Margin="0 10"
-                            Height="1" />
                         <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="10">
-                            <CheckBox
-                                ToolTip.Tip="{locale:Locale DockModeToggleTooltip}"
-                                MinWidth="0"
-                                IsChecked="{Binding EnableDockedMode}">
-                                <TextBlock
-                                    Text="{locale:Locale SettingsTabInputEnableDockedMode}" />
-                            </CheckBox>
-                            <CheckBox
-                                ToolTip.Tip="{locale:Locale DirectKeyboardTooltip}"
-                                IsChecked="{Binding EnableKeyboard}">
-                                <TextBlock
-                                    Text="{locale:Locale SettingsTabInputDirectKeyboardAccess}" />
-                            </CheckBox>
-                            <CheckBox
-                                ToolTip.Tip="{locale:Locale DirectMouseTooltip}"
-                                IsChecked="{Binding EnableMouse}">
-                                <TextBlock
-                                    Text="{locale:Locale SettingsTabInputDirectMouseAccess}" />
-                            </CheckBox>
+                            Grid.Row="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Orientation="Vertical">
+                            <StackPanel
+                                Margin="0 0 0 5"
+                                Orientation="Vertical"
+                                Spacing="5">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Player Selection -->
+                                    <Grid
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Margin="5,0,10,0"
+                                            Width="90"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Text="{locale:Locale ControllerSettingsPlayer}" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            Name="PlayerIndexBox"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            ItemsSource="{Binding PlayerIndexes}"
+                                            SelectedIndex="{Binding PlayerId}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </Grid>
+                                    <!-- Profile Selection -->
+                                    <Grid
+                                        Grid.Column="2"
+                                        Margin="2"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Margin="5,0,10,0"
+                                            Width="90"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Text="{locale:Locale ControllerSettingsProfile}" />
+                                        <ui:FAComboBox
+                                            Grid.Column="1"
+                                            IsEditable="True"
+                                            Name="ProfileBox"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            SelectedIndex="0"
+                                            ItemsSource="{Binding ProfilesList}"
+                                            Text="{Binding ProfileName, Mode=TwoWay}" />
+                                        <Button
+                                            Grid.Column="2"
+                                            MinWidth="0"
+                                            Margin="5,0,0,0"
+                                            VerticalAlignment="Center"
+                                            ToolTip.Tip="{locale:Locale ControllerSettingsLoadProfileToolTip}"
+                                            Command="{Binding LoadProfile}">
+                                            <ui:SymbolIcon
+                                                Symbol="Upload"
+                                                FontSize="15"
+                                                Height="20" />
+                                        </Button>
+                                        <Button
+                                            Grid.Column="3"
+                                                MinWidth="0"
+                                                Margin="5,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip.Tip="{locale:Locale ControllerSettingsSaveProfileToolTip}"
+                                                Command="{Binding SaveProfile}">
+                                            <ui:SymbolIcon
+                                                Symbol="Save"
+                                                FontSize="15"
+                                                Height="20" />
+                                        </Button>
+                                        <Button
+                                            Grid.Column="4"
+                                                MinWidth="0"
+                                                Margin="5,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip.Tip="{locale:Locale ControllerSettingsRemoveProfileToolTip}"
+                                                Command="{Binding RemoveProfile}">
+                                            <ui:SymbolIcon
+                                                Symbol="Delete"
+                                                FontSize="15"
+                                                Height="20" />
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                                <Separator />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Input Device -->
+                                    <Grid
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Stretch">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Margin="5,0,10,0"
+                                            Width="90"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Text="{locale:Locale ControllerSettingsInputDevice}" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            Name="DeviceBox"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            ItemsSource="{Binding DeviceList}"
+                                            SelectedIndex="{Binding Device}" />
+                                        <Button
+                                            Grid.Column="2"
+                                            MinWidth="0"
+                                            Margin="5,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding LoadDevices}">
+                                            <ui:SymbolIcon
+                                                Symbol="Refresh"
+                                                FontSize="15"
+                                                Height="20"/>
+                                        </Button>
+                                    </Grid>
+                                    <!-- Controller Type -->
+                                    <Grid
+                                        Grid.Column="2"
+                                        Margin="2"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Margin="5,0,10,0"
+                                            Width="90"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Text="{locale:Locale ControllerSettingsControllerType}" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            HorizontalAlignment="Stretch"
+                                            ItemsSource="{Binding Controllers}"
+                                            SelectedIndex="{Binding Controller}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate DataType="models:ControllerModel">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </Grid>
+                                </Grid>
+                            </StackPanel>
+                            <ContentControl Content="{Binding ConfigViewModel}" IsVisible="{Binding ShowSettings}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="inputViewModels:ControllerInputViewModel">
+                                        <views:ControllerInputView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="inputViewModels:KeyboardInputViewModel">
+                                        <views:KeyboardInputView />
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
                         </StackPanel>
-                    </StackPanel>
+                        <StackPanel
+                            Orientation="Vertical"
+                            Grid.Row="2">
+                            <Separator
+                                Margin="0 10"
+                                Height="1" />
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="10">
+                                <CheckBox
+                                    ToolTip.Tip="{locale:Locale DockModeToggleTooltip}"
+                                    MinWidth="0"
+                                    IsChecked="{Binding EnableDockedMode}">
+                                    <TextBlock
+                                        Text="{locale:Locale SettingsTabInputEnableDockedMode}" />
+                                </CheckBox>
+                                <CheckBox
+                                    ToolTip.Tip="{locale:Locale DirectKeyboardTooltip}"
+                                    IsChecked="{Binding EnableKeyboard}">
+                                    <TextBlock
+                                        Text="{locale:Locale SettingsTabInputDirectKeyboardAccess}" />
+                                </CheckBox>
+                                <CheckBox
+                                    ToolTip.Tip="{locale:Locale DirectMouseTooltip}"
+                                    IsChecked="{Binding EnableMouse}">
+                                    <TextBlock
+                                        Text="{locale:Locale SettingsTabInputDirectMouseAccess}" />
+                                </CheckBox>
+                            </StackPanel>
+                        </StackPanel>
                 </Grid>
             </Panel>
         </Border>

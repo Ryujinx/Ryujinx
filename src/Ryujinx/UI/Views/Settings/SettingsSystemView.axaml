@@ -5,15 +5,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:locale="clr-namespace:Ryujinx.Ava.Common.Locale"
-    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
     mc:Ignorable="d"
-    x:DataType="viewModels:SettingsViewModel">
+    x:DataType="viewModels:SettingsSystemViewModel">
     <UserControl.Resources>
         <helpers:TimeZoneConverter x:Key="TimeZone" />
     </UserControl.Resources>
     <Design.DataContext>
-        <viewModels:SettingsViewModel />
+        <viewModels:SettingsSystemViewModel />
     </Design.DataContext>
     <ScrollViewer
         Name="SystemPage"
@@ -154,7 +154,7 @@
                             SelectionChanged="TimeZoneBox_OnSelectionChanged"
                             Text="{Binding Path=TimeZone, Mode=OneWay}"
                             TextChanged="TimeZoneBox_OnTextChanged"
-                            ToolTip.Tip="{locale:Locale TimezoneTooltip}" 
+                            ToolTip.Tip="{locale:Locale TimezoneTooltip}"
                             ValueMemberBinding="{Binding Mode=OneWay, Converter={StaticResource TimeZone}}" />
                     </StackPanel>
                     <StackPanel
@@ -166,7 +166,7 @@
                             ToolTip.Tip="{locale:Locale TimeTooltip}"
                             Width="250"/>
                         <DatePicker
-                            VerticalAlignment="Center" 
+                            VerticalAlignment="Center"
                             SelectedDate="{Binding CurrentDate}"
                             ToolTip.Tip="{locale:Locale TimeTooltip}"
                             Width="350" />

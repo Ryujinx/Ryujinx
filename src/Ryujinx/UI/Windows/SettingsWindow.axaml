@@ -7,8 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:window="clr-namespace:Ryujinx.Ava.UI.Windows"
-    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
-    xmlns:settings="clr-namespace:Ryujinx.Ava.UI.Views.Settings"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels.Settings"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
     Width="1100"
     Height="768"
@@ -32,17 +31,6 @@
             Grid.Row="1"
             IsVisible="False"
             KeyboardNavigation.IsTabStop="False"/>
-        <Grid Name="Pages" IsVisible="False" Grid.Row="2">
-            <settings:SettingsUiView Name="UiPage" />
-            <settings:SettingsInputView Name="InputPage" />
-            <settings:SettingsHotkeysView Name="HotkeysPage" />
-            <settings:SettingsSystemView Name="SystemPage" />
-            <settings:SettingsCPUView Name="CpuPage" />
-            <settings:SettingsGraphicsView Name="GraphicsPage" />
-            <settings:SettingsAudioView Name="AudioPage" />
-            <settings:SettingsNetworkView Name="NetworkPage" />
-            <settings:SettingsLoggingView Name="LoggingPage" />
-        </Grid>
         <ui:NavigationView
             Grid.Row="1"
             IsSettingsVisible="False"
@@ -108,21 +96,24 @@
         </ui:NavigationView>
         <ReversibleStackPanel
             Grid.Row="2"
+            Name="Buttons"
             Margin="10"
             Spacing="10"
             Orientation="Horizontal"
             HorizontalAlignment="Right"
             ReverseOrder="{Binding IsMacOS}">
             <Button
-                HotKey="Enter"
+                IsDefault="True"
                 Classes="accent"
                 Content="{locale:Locale SettingsButtonOk}"
                 Command="{Binding OkButton}" />
             <Button
-                HotKey="Escape"
+                IsCancel="True"
                 Content="{locale:Locale SettingsButtonCancel}"
-                Command="{Binding CancelButton}" />
+                Click="Cancel_OnClick" />
             <Button
+                Name="Apply"
+                IsEnabled="False"
                 Content="{locale:Locale SettingsButtonApply}"
                 Command="{Binding ApplyButton}" />
         </ReversibleStackPanel>
