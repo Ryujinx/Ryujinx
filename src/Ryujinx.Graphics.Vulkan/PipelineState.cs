@@ -564,17 +564,18 @@ namespace Ryujinx.Graphics.Vulkan
                 }
 
                 bool supportsExtDynamicState = gd.Capabilities.SupportsExtendedDynamicState;
+
                 int dynamicStatesCount = supportsExtDynamicState ? 8 : 7;
 
                 DynamicState* dynamicStates = stackalloc DynamicState[dynamicStatesCount];
 
                 dynamicStates[0] = DynamicState.Viewport;
                 dynamicStates[1] = DynamicState.Scissor;
-                dynamicStates[2] = DynamicState.DepthBias;
-                dynamicStates[3] = DynamicState.StencilCompareMask;
-                dynamicStates[4] = DynamicState.StencilWriteMask;
-                dynamicStates[5] = DynamicState.StencilReference;
-                dynamicStates[6] = DynamicState.BlendConstants;
+                dynamicStates[2] = DynamicState.StencilCompareMask;
+                dynamicStates[3] = DynamicState.StencilWriteMask;
+                dynamicStates[4] = DynamicState.StencilReference;
+                dynamicStates[5] = DynamicState.BlendConstants;
+                dynamicStates[6] = DynamicState.DepthBias;
 
                 if (supportsExtDynamicState)
                 {
