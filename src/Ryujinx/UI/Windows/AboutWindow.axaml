@@ -87,8 +87,7 @@
                     Padding="5"
                     HorizontalAlignment="Center"
                     Background="Transparent"
-                    Click="Button_OnClick"
-                    Tag="https://github.com/Ryujinx/Ryujinx/wiki/Changelog#ryujinx-changelog">
+                    Click="OpenChangelogWindow">
                     <TextBlock
                         FontSize="10"
                         Text="{locale:Locale AboutChangelogButton}"
@@ -145,7 +144,6 @@
                         Background="Transparent"
                         Click="Button_OnClick"
                         CornerRadius="15"
-                        Tag="https://github.com/Ryujinx/Ryujinx"
                         ToolTip.Tip="{locale:Locale AboutGithubUrlTooltipMessage}">
                         <Image Source="{Binding GithubLogo}" />
                     </Button>
