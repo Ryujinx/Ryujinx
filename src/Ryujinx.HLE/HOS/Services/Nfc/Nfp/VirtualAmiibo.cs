@@ -8,6 +8,8 @@ using Ryujinx.HLE.HOS.Services.Nfc.Nfp.NfpManager;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Ryujinx.HLE.HOS.Services.Nfc.Nfp
 {
@@ -85,7 +87,8 @@ namespace Ryujinx.HLE.HOS.Services.Nfc.Nfp
                 Reserved1 = new Array64<byte>(),
                 Reserved2 = new Array58<byte>(),
             };
-            "Ryujinx"u8.CopyTo(registerInfo.Nickname.AsSpan());
+
+            Encoding.UTF8.GetBytes(amiiboFile.Nickname).CopyTo(registerInfo.Nickname.AsSpan());
 
             return registerInfo;
         }
@@ -163,6 +166,15 @@ namespace Ryujinx.HLE.HOS.Services.Nfc.Nfp
             }
         }
 
+        public static void SetNickname(byte[] tagUuid, string nickname)
+        {
+            VirtualAmiiboFile virtualAmiiboFile = LoadAmiiboFile(tagUuid);
+
+            virtualAmiiboFile.Nickname = nickname;
+
+            SaveAmiiboFile(virtualAmiiboFile);
+        }
+
         private static VirtualAmiiboFile LoadAmiiboFile(string amiiboId)
         {
             Directory.CreateDirectory(Path.Join(AppDataManager.BaseDirPath, "system", "amiibo"));
@@ -174,12 +186,20 @@ namespace Ryujinx.HLE.HOS.Services.Nfc.Nfp
             if (File.Exists(filePath))
             {
                 virtualAmiiboFile = JsonHelper.DeserializeFromFile(filePath, _serializerContext.VirtualAmiiboFile);
+
+                if (virtualAmiiboFile.Nickname == null)
+                {
+                    virtualAmiiboFile.Nickname = "Ryujinx";
+
+                    SaveAmiiboFile(virtualAmiiboFile);
+                }
             }
             else
             {
                 virtualAmiiboFile = new VirtualAmiiboFile()
                 {
                     FileVersion = 0,
+                    Nickname = "Ryujinx",
                     TagUuid = Array.Empty<byte>(),
                     AmiiboId = amiiboId,
                     FirstWriteDate = DateTime.Now,
@@ -192,6 +212,28 @@ namespace Ryujinx.HLE.HOS.Services.Nfc.Nfp
             }
 
             return virtualAmiiboFile;
+        }
+
+        private static VirtualAmiiboFile LoadAmiiboFile(byte[] tagUuid)
+        {
+            VirtualAmiiboFile virtualAmiiboFile;
+
+            string[] paths = Directory.GetFiles(Path.Join(AppDataManager.BaseDirPath, "system", "amiibo"), "*.json");
+            foreach (string path in paths)
+            {
+                if (path.EndsWith("Amiibo.json"))
+                {
+                    continue;
+                }
+
+                virtualAmiiboFile = JsonHelper.DeserializeFromFile(path, _serializerContext.VirtualAmiiboFile);
+                if (virtualAmiiboFile.TagUuid.SequenceEqual(tagUuid))
+                {
+                    return virtualAmiiboFile;
+                }
+            }
+
+            throw new FileNotFoundException();
         }
 
         private static void SaveAmiiboFile(VirtualAmiiboFile virtualAmiiboFile)

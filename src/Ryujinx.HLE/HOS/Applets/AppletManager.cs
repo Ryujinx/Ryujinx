@@ -18,6 +18,7 @@ namespace Ryujinx.HLE.HOS.Applets
                 { AppletId.PlayerSelect,     typeof(PlayerSelectApplet)     },
                 { AppletId.Controller,       typeof(ControllerApplet)       },
                 { AppletId.SoftwareKeyboard, typeof(SoftwareKeyboardApplet) },
+                { AppletId.Cabinet,          typeof(CabinetApplet)          },
                 { AppletId.LibAppletWeb,     typeof(BrowserApplet)          },
                 { AppletId.LibAppletShop,    typeof(BrowserApplet)          },
                 { AppletId.LibAppletOff,     typeof(BrowserApplet)          },
