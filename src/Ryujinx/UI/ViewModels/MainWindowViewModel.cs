@@ -58,6 +58,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private string _searchText;
         private Timer _searchTimer;
         private string _dockedStatusText;
+        private string _vSyncModeText;
         private string _fifoStatusText;
         private string _gameStatusText;
         private string _volumeStatusText;
@@ -73,7 +74,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         private bool _showStatusSeparator;
         private Brush _progressBarForegroundColor;
         private Brush _progressBarBackgroundColor;
-        private Brush _vsyncColor;
+        private Brush _vSyncModeColor;
         private byte[] _selectedIcon;
         private bool _isAppletMenuActive;
         private int _statusBarProgressMaximum;
@@ -101,6 +102,8 @@ namespace Ryujinx.Ava.UI.ViewModels
         private WindowState _windowState;
         private double _windowWidth;
         private double _windowHeight;
+        private int _customVSyncInterval;
+        private int _customVSyncIntervalPercentageProxy;
 
         private bool _isActive;
         private bool _isSubMenuOpen;
@@ -127,6 +130,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
                 Volume = ConfigurationState.Instance.System.AudioVolume;
             }
+            CustomVSyncInterval = ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value;
         }
 
         public void Initialize(
@@ -414,13 +418,83 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
         }
 
-        public Brush VsyncColor
+        public Brush VSyncModeColor
         {
-            get => _vsyncColor;
+            get => _vSyncModeColor;
             set
             {
-                _vsyncColor = value;
+                _vSyncModeColor = value;
 
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ShowCustomVSyncIntervalPicker
+        {
+            get
+            {
+                if (_isGameRunning)
+                {
+                    return AppHost.Device.VSyncMode ==
+                           VSyncMode.Custom;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                OnPropertyChanged();
+            }
+        }
+
+        public int CustomVSyncIntervalPercentageProxy
+        {
+            get => _customVSyncIntervalPercentageProxy;
+            set
+            {
+                int newInterval = (int)((value / 100f) * 60);
+                _customVSyncInterval = newInterval;
+                _customVSyncIntervalPercentageProxy = value;
+                if (_isGameRunning)
+                {
+                    AppHost.Device.CustomVSyncInterval = newInterval;
+                    AppHost.Device.UpdateVSyncInterval();
+                }
+                OnPropertyChanged((nameof(CustomVSyncInterval)));
+                OnPropertyChanged((nameof(CustomVSyncIntervalPercentageText)));
+            }
+        }
+
+        public string CustomVSyncIntervalPercentageText
+        {
+            get
+            {
+                string text = CustomVSyncIntervalPercentageProxy.ToString() + "%";
+                return text;
+            }
+            set
+            {
+
+            }
+        }
+
+        public int CustomVSyncInterval
+        {
+            get => _customVSyncInterval;
+            set
+            {
+                _customVSyncInterval = value;
+                int newPercent = (int)((value / 60f) * 100);
+                _customVSyncIntervalPercentageProxy = newPercent;
+                if (_isGameRunning)
+                {
+                    AppHost.Device.CustomVSyncInterval = value;
+                    AppHost.Device.UpdateVSyncInterval();
+                }
+                OnPropertyChanged(nameof(CustomVSyncIntervalPercentageProxy));
+                OnPropertyChanged(nameof(CustomVSyncIntervalPercentageText));
                 OnPropertyChanged();
             }
         }
@@ -508,6 +582,17 @@ namespace Ryujinx.Ava.UI.ViewModels
             set
             {
                 _backendText = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        public string VSyncModeText
+        {
+            get => _vSyncModeText;
+            set
+            {
+                _vSyncModeText = value;
 
                 OnPropertyChanged();
             }
@@ -1227,17 +1312,18 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    Application.Current.Styles.TryGetResource(args.VSyncEnabled
-                        ? "VsyncEnabled"
-                        : "VsyncDisabled",
-                        Application.Current.ActualThemeVariant,
+                    Application.Current.Styles.TryGetResource(args.VSyncMode,
+                        Avalonia.Application.Current.ActualThemeVariant,
                         out object color);
 
                     if (color is not null)
                     {
-                        VsyncColor = new SolidColorBrush((Color)color);
+                        VSyncModeColor = new SolidColorBrush((Color)color);
                     }
 
+                    VSyncModeText = args.VSyncMode == "Custom" ? "Custom" : "VSync";
+                    ShowCustomVSyncIntervalPicker =
+                        args.VSyncMode == VSyncMode.Custom.ToString();
                     DockedStatusText = args.DockedMode;
                     AspectRatioStatusText = args.AspectRatio;
                     GameStatusText = args.GameStatus;
@@ -1392,6 +1478,27 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 ConfigurationState.Instance.System.EnableDockedMode.Value = !ConfigurationState.Instance.System.EnableDockedMode.Value;
             }
+        }
+
+        public void ToggleVSyncMode()
+        {
+            AppHost.VSyncModeToggle();
+            OnPropertyChanged(nameof(ShowCustomVSyncIntervalPicker));
+        }
+
+        public void VSyncModeSettingChanged()
+        {
+            if (_isGameRunning)
+            {
+                AppHost.Device.CustomVSyncInterval = ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value;
+                AppHost.Device.UpdateVSyncInterval();
+            }
+
+            CustomVSyncInterval = ConfigurationState.Instance.Graphics.CustomVSyncInterval.Value;
+            OnPropertyChanged(nameof(ShowCustomVSyncIntervalPicker));
+            OnPropertyChanged(nameof(CustomVSyncIntervalPercentageProxy));
+            OnPropertyChanged(nameof(CustomVSyncIntervalPercentageText));
+            OnPropertyChanged(nameof(CustomVSyncInterval));
         }
 
         public async Task ExitCurrentState()

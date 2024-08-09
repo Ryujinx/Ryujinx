@@ -9,6 +9,7 @@ using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.HLE.UI;
 using System;
+using VSyncMode = Ryujinx.Common.Configuration.VSyncMode;
 
 namespace Ryujinx.HLE
 {
@@ -84,9 +85,14 @@ namespace Ryujinx.HLE
         internal readonly RegionCode Region;
 
         /// <summary>
-        /// Control the initial state of the vertical sync in the SurfaceFlinger service.
+        /// Control the initial state of the present interval in the SurfaceFlinger service (previously Vsync).
         /// </summary>
-        internal readonly bool EnableVsync;
+        internal readonly VSyncMode VSyncMode;
+
+        /// <summary>
+        /// Control the custom VSync interval, if enabled and active.
+        /// </summary>
+        internal readonly int CustomVSyncInterval;
 
         /// <summary>
         /// Control the initial state of the docked mode.
@@ -180,7 +186,7 @@ namespace Ryujinx.HLE
                                 IHostUIHandler hostUIHandler,
                                 SystemLanguage systemLanguage,
                                 RegionCode region,
-                                bool enableVsync,
+                                VSyncMode vSyncMode,
                                 bool enableDockedMode,
                                 bool enablePtc,
                                 bool enableInternetAccess,
@@ -194,7 +200,8 @@ namespace Ryujinx.HLE
                                 float audioVolume,
                                 bool useHypervisor,
                                 string multiplayerLanInterfaceId,
-                                MultiplayerMode multiplayerMode)
+                                MultiplayerMode multiplayerMode,
+                                int customVSyncInterval)
         {
             VirtualFileSystem = virtualFileSystem;
             LibHacHorizonManager = libHacHorizonManager;
@@ -207,7 +214,8 @@ namespace Ryujinx.HLE
             HostUIHandler = hostUIHandler;
             SystemLanguage = systemLanguage;
             Region = region;
-            EnableVsync = enableVsync;
+            VSyncMode = vSyncMode;
+            CustomVSyncInterval = customVSyncInterval;
             EnableDockedMode = enableDockedMode;
             EnablePtc = enablePtc;
             EnableInternetAccess = enableInternetAccess;

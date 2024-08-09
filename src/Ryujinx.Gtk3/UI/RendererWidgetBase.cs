@@ -26,6 +26,7 @@ using Image = SixLabors.ImageSharp.Image;
 using Key = Ryujinx.Input.Key;
 using ScalingFilter = Ryujinx.Graphics.GAL.ScalingFilter;
 using Switch = Ryujinx.HLE.Switch;
+using VSyncMode = Ryujinx.Graphics.GAL.VSyncMode;
 
 namespace Ryujinx.UI
 {
@@ -455,7 +456,7 @@ namespace Ryujinx.UI
                 Device.Gpu.SetGpuThread();
                 Device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
 
-                Renderer.Window.ChangeVSyncMode(Device.EnableDeviceVsync);
+                Renderer.Window.ChangeVSyncMode(Device.VSyncMode == (Ryujinx.Common.Configuration.VSyncMode)VSyncMode.Switch ? VSyncMode.Switch : VSyncMode.Unbounded);
 
                 (Toplevel as MainWindow)?.ActivatePauseMenu();
 
@@ -492,7 +493,7 @@ namespace Ryujinx.UI
                         }
 
                         StatusUpdatedEvent?.Invoke(this, new StatusUpdatedEventArgs(
-                            Device.EnableDeviceVsync,
+                            Device.VSyncMode == Ryujinx.Common.Configuration.VSyncMode.Switch ? VSyncMode.Switch.ToString() : VSyncMode.Unbounded.ToString(),
                             Device.GetVolume(),
                             _gpuBackendName,
                             dockedMode,
@@ -653,7 +654,7 @@ namespace Ryujinx.UI
                 if (currentHotkeyState.HasFlag(KeyboardHotkeyState.ToggleVSync) &&
                     !_prevHotkeyState.HasFlag(KeyboardHotkeyState.ToggleVSync))
                 {
-                    Device.EnableDeviceVsync = !Device.EnableDeviceVsync;
+                    Device.VSyncMode = Device.VSyncMode == Ryujinx.Common.Configuration.VSyncMode.Switch ? Ryujinx.Common.Configuration.VSyncMode.Unbounded : Ryujinx.Common.Configuration.VSyncMode.Switch;
                 }
 
                 if ((currentHotkeyState.HasFlag(KeyboardHotkeyState.Screenshot) &&
@@ -757,7 +758,7 @@ namespace Ryujinx.UI
         {
             KeyboardHotkeyState state = KeyboardHotkeyState.None;
 
-            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ToggleVsync))
+            if (_keyboardInterface.IsPressed((Key)ConfigurationState.Instance.Hid.Hotkeys.Value.ToggleVSyncMode))
             {
                 state |= KeyboardHotkeyState.ToggleVSync;
             }

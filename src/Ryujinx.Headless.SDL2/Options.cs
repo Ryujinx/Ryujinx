@@ -114,8 +114,11 @@ namespace Ryujinx.Headless.SDL2
         [Option("fs-global-access-log-mode", Required = false, Default = 0, HelpText = "Enables FS access log output to the console.")]
         public int FsGlobalAccessLogMode { get; set; }
 
-        [Option("disable-vsync", Required = false, HelpText = "Disables Vertical Sync.")]
-        public bool DisableVSync { get; set; }
+        [Option("vsync-mode", Required = false, Default = VSyncMode.Switch, HelpText = "Sets the emulated VSync mode (Switch, Unbounded, or Custom).")]
+        public VSyncMode VSyncMode { get; set; }
+
+        [Option("custom-refresh-rate", Required = false, Default = 90, HelpText = "Sets the custom refresh rate target value (integer).")]
+        public int CustomVSyncInterval { get; set; }
 
         [Option("disable-shader-cache", Required = false, HelpText = "Disables Shader cache.")]
         public bool DisableShaderCache { get; set; }

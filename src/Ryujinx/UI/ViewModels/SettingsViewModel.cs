@@ -49,6 +49,10 @@ namespace Ryujinx.Ava.UI.ViewModels
         private int _graphicsBackendIndex;
         private int _scalingFilter;
         private int _scalingFilterLevel;
+        private int _customVSyncInterval;
+        private bool _enableCustomVSyncInterval;
+        private int _customVSyncIntervalPercentageProxy;
+        private VSyncMode _vSyncMode;
 
         public event Action CloseWindow;
         public event Action SaveSettingsEvent;
@@ -136,7 +140,74 @@ namespace Ryujinx.Ava.UI.ViewModels
         public bool EnableDockedMode { get; set; }
         public bool EnableKeyboard { get; set; }
         public bool EnableMouse { get; set; }
-        public bool EnableVsync { get; set; }
+        public VSyncMode VSyncMode
+        {
+            get => _vSyncMode;
+            set
+            {
+                if (value == VSyncMode.Custom ||
+                    value == VSyncMode.Switch ||
+                    value == VSyncMode.Unbounded)
+                {
+                    _vSyncMode = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int CustomVSyncIntervalPercentageProxy
+        {
+            get => _customVSyncIntervalPercentageProxy;
+            set
+            {
+                int newInterval = (int)((value / 100f) * 60);
+                _customVSyncInterval = newInterval;
+                _customVSyncIntervalPercentageProxy = value;
+                OnPropertyChanged((nameof(CustomVSyncInterval)));
+                OnPropertyChanged((nameof(CustomVSyncIntervalPercentageText)));
+            }
+        }
+
+        public string CustomVSyncIntervalPercentageText
+        {
+            get
+            {
+                string text = CustomVSyncIntervalPercentageProxy.ToString() + "%";
+                return text;
+            }
+        }
+
+        public bool EnableCustomVSyncInterval
+        {
+            get => _enableCustomVSyncInterval;
+            set
+            {
+                _enableCustomVSyncInterval = value;
+                if (_vSyncMode == VSyncMode.Custom && !value)
+                {
+                    VSyncMode = VSyncMode.Switch;
+                }
+                else if (value)
+                {
+                    VSyncMode = VSyncMode.Custom;
+                }
+                OnPropertyChanged();
+            }
+        }
+
+        public int CustomVSyncInterval
+        {
+            get => _customVSyncInterval;
+            set
+            {
+                _customVSyncInterval = value;
+                int newPercent = (int)((value / 60f) * 100);
+                _customVSyncIntervalPercentageProxy = newPercent;
+                OnPropertyChanged(nameof(CustomVSyncIntervalPercentageProxy));
+                OnPropertyChanged(nameof(CustomVSyncIntervalPercentageText));
+                OnPropertyChanged();
+            }
+        }
         public bool EnablePptc { get; set; }
         public bool EnableInternetAccess { get; set; }
         public bool EnableFsIntegrityChecks { get; set; }
@@ -424,7 +495,9 @@ namespace Ryujinx.Ava.UI.ViewModels
             CurrentDate = currentDateTime.Date;
             CurrentTime = currentDateTime.TimeOfDay;
 
-            EnableVsync = config.Graphics.EnableVsync;
+            EnableCustomVSyncInterval = config.Graphics.EnableCustomVSyncInterval.Value;
+            CustomVSyncInterval = config.Graphics.CustomVSyncInterval;
+            VSyncMode = config.Graphics.VSyncMode;
             EnableFsIntegrityChecks = config.System.EnableFsIntegrityChecks;
             ExpandDramSize = config.System.ExpandRam;
             IgnoreMissingServices = config.System.IgnoreMissingServices;
@@ -436,7 +509,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             // Graphics
             GraphicsBackendIndex = (int)config.Graphics.GraphicsBackend.Value;
-            // Physical devices are queried asynchronously hence the prefered index config value is loaded in LoadAvailableGpus().
+            // Physical devices are queried asynchronously hence the preferred index config value is loaded in LoadAvailableGpus().
             EnableShaderCache = config.Graphics.EnableShaderCache;
             EnableTextureRecompression = config.Graphics.EnableTextureRecompression;
             EnableMacroHLE = config.Graphics.EnableMacroHLE;
@@ -518,7 +591,9 @@ namespace Ryujinx.Ava.UI.ViewModels
             }
 
             config.System.SystemTimeOffset.Value = Convert.ToInt64((CurrentDate.ToUnixTimeSeconds() + CurrentTime.TotalSeconds) - DateTimeOffset.Now.ToUnixTimeSeconds());
-            config.Graphics.EnableVsync.Value = EnableVsync;
+            config.Graphics.VSyncMode.Value = VSyncMode;
+            config.Graphics.EnableCustomVSyncInterval.Value = EnableCustomVSyncInterval;
+            config.Graphics.CustomVSyncInterval.Value = CustomVSyncInterval;
             config.System.EnableFsIntegrityChecks.Value = EnableFsIntegrityChecks;
             config.System.ExpandRam.Value = ExpandDramSize;
             config.System.IgnoreMissingServices.Value = IgnoreMissingServices;
@@ -584,6 +659,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             config.ToFileFormat().SaveConfig(Program.ConfigurationPath);
 
             MainWindow.UpdateGraphicsConfig();
+            MainWindow.MainWindowViewModel.VSyncModeSettingChanged();
 
             SaveSettingsEvent?.Invoke();
 

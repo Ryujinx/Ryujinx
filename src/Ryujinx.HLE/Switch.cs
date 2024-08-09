@@ -27,7 +27,11 @@ namespace Ryujinx.HLE
         public TamperMachine TamperMachine { get; }
         public IHostUIHandler UIHandler { get; }
 
-        public bool EnableDeviceVsync { get; set; } = true;
+        public VSyncMode VSyncMode { get; set; } = VSyncMode.Switch;
+        public bool CustomVSyncIntervalEnabled { get; set; } = false;
+        public int CustomVSyncInterval { get; set; }
+
+        public long TargetVSyncInterval { get; set; } = 60;
 
         public bool IsFrameAvailable => Gpu.Window.IsFrameAvailable;
 
@@ -59,12 +63,14 @@ namespace Ryujinx.HLE
             System.State.SetLanguage(Configuration.SystemLanguage);
             System.State.SetRegion(Configuration.Region);
 
-            EnableDeviceVsync                       = Configuration.EnableVsync;
+            VSyncMode                               = Configuration.VSyncMode;
+            CustomVSyncInterval                     = Configuration.CustomVSyncInterval;
             System.State.DockedMode                 = Configuration.EnableDockedMode;
             System.PerformanceState.PerformanceMode = System.State.DockedMode ? PerformanceMode.Boost : PerformanceMode.Default;
             System.EnablePtc                        = Configuration.EnablePtc;
             System.FsIntegrityCheckLevel            = Configuration.FsIntegrityCheckLevel;
             System.GlobalAccessLogMode              = Configuration.FsGlobalAccessLogMode;
+            UpdateVSyncInterval();
 #pragma warning restore IDE0055
         }
 
@@ -113,6 +119,34 @@ namespace Ryujinx.HLE
         public void PresentFrame(Action swapBuffersCallback)
         {
             Gpu.Window.Present(swapBuffersCallback);
+        }
+
+        public void IncrementCustomVSyncInterval()
+        {
+            CustomVSyncInterval += 1;
+            UpdateVSyncInterval();
+        }
+
+        public void DecrementCustomVSyncInterval()
+        {
+            CustomVSyncInterval -= 1;
+            UpdateVSyncInterval();
+        }
+
+        public void UpdateVSyncInterval()
+        {
+            switch (VSyncMode)
+            {
+                case VSyncMode.Custom:
+                    TargetVSyncInterval = CustomVSyncInterval;
+                    break;
+                case VSyncMode.Switch:
+                    TargetVSyncInterval = 60;
+                    break;
+                case VSyncMode.Unbounded:
+                    TargetVSyncInterval = 1;
+                    break;
+            }
         }
 
         public void SetVolume(float volume)

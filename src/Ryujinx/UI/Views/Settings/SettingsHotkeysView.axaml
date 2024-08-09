@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Ryujinx.Ava.UI.Views.Settings.SettingsHotkeysView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -50,9 +50,9 @@
                     Classes="h1"
                     Text="{locale:Locale SettingsTabHotkeysHotkeys}" />
                 <StackPanel>
-                    <TextBlock Text="{locale:Locale SettingsTabHotkeysToggleVsyncHotkey}" />
-                    <ToggleButton Name="ToggleVsync">
-                        <TextBlock Text="{Binding KeyboardHotkey.ToggleVsync, Converter={StaticResource Key}}" />
+                    <TextBlock Text="{locale:Locale SettingsTabHotkeysToggleVSyncModeHotkey}" />
+                    <ToggleButton Name="ToggleVSyncMode">
+                        <TextBlock Text="{Binding KeyboardHotkey.ToggleVSyncMode, Converter={StaticResource Key}}" />
                     </ToggleButton>
                 </StackPanel>
                 <StackPanel>
@@ -101,6 +101,18 @@
                     <TextBlock Text="{locale:Locale SettingsTabHotkeysVolumeDownHotkey}" />
                     <ToggleButton Name="VolumeDown">
                         <TextBlock Text="{Binding KeyboardHotkey.VolumeDown, Converter={StaticResource Key}}" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <TextBlock Text="{locale:Locale SettingsTabHotkeysIncrementCustomVSyncIntervalHotkey}" />
+                    <ToggleButton Name="CustomVSyncIntervalIncrement">
+                        <TextBlock Text="{Binding KeyboardHotkey.CustomVSyncIntervalIncrement, Converter={StaticResource Key}}" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Margin="10,0,0,0" Orientation="Horizontal">
+                    <TextBlock Text="{locale:Locale SettingsTabHotkeysDecrementCustomVSyncIntervalHotkey}" />
+                    <ToggleButton Name="CustomVSyncIntervalDecrement">
+                        <TextBlock Text="{Binding KeyboardHotkey.CustomVSyncIntervalDecrement, Converter={StaticResource Key}}" />
                     </ToggleButton>
                 </StackPanel>
             </StackPanel>
