@@ -193,6 +193,8 @@ namespace ARMeilleure.Instructions
 
             Operand hostAddress;
 
+            var table = context.FunctionTable;
+
             // If address is mapped onto the function table, we can skip the table walk. Otherwise we fallback
             // onto the dispatch stub.
             if (guestAddress.Kind == OperandKind.Constant && context.FunctionTable.IsValid(guestAddress.Value))
@@ -202,6 +204,36 @@ namespace ARMeilleure.Instructions
                     Const(ref context.FunctionTable.GetValue(guestAddress.Value), new Symbol(SymbolType.FunctionTable, guestAddress.Value));
 
                 hostAddress = context.Load(OperandType.I64, hostAddressAddr);
+            }
+            else if (table.Sparse && table.Levels.Length == 2)
+            {
+                // Inline table lookup. Only enabled when the sparse function table is enabled with 2 levels.
+                // Deliberately attempts to avoid branches.
+
+                var level0 = table.Levels[0];
+                int clearBits0 = 64 - (level0.Index + level0.Length);
+
+                Operand index = context.ShiftLeft(
+                    context.ShiftRightUI(context.ShiftLeft(guestAddress, Const(clearBits0)), Const(clearBits0 + level0.Index)),
+                    Const(3)
+                    );
+
+                Operand tableBase = !context.HasPtc ?
+                    Const(table.Base) :
+                    Const(table.Base, Ptc.FunctionTableSymbol);
+
+                Operand page = context.Load(OperandType.I64, context.Add(tableBase, index));
+
+                // Second level
+                var level1 = table.Levels[1];
+                int clearBits1 = 64 - (level1.Index + level1.Length);
+
+                Operand index2 = context.ShiftLeft(
+                    context.ShiftRightUI(context.ShiftLeft(guestAddress, Const(clearBits1)), Const(clearBits1 + level1.Index)),
+                    Const(3)
+                    );
+
+                hostAddress = context.Load(OperandType.I64, context.Add(page, index2));
             }
             else
             {

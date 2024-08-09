@@ -1,3 +1,4 @@
+using ARMeilleure.Common;
 using ARMeilleure.Translation;
 using NUnit.Framework;
 using Ryujinx.Cpu.Jit;
@@ -17,7 +18,10 @@ namespace Ryujinx.Tests.Cpu
         private static void EnsureTranslator()
         {
             // Create a translator, as one is needed to register the signal handler or emit methods.
-            _translator ??= new Translator(new JitMemoryAllocator(), new MockMemoryManager(), true);
+            _translator ??= new Translator(
+                new JitMemoryAllocator(),
+                new MockMemoryManager(),
+                AddressTable<ulong>.CreateForArm(true, ARMeilleure.Memory.MemoryManagerType.SoftwarePageTable));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]

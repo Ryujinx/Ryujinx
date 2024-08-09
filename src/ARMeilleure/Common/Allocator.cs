@@ -2,7 +2,7 @@ using System;
 
 namespace ARMeilleure.Common
 {
-    unsafe abstract class Allocator : IDisposable
+    public unsafe abstract class Allocator : IDisposable
     {
         public T* Allocate<T>(ulong count = 1) where T : unmanaged
         {

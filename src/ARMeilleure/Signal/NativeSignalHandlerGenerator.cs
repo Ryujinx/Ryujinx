@@ -8,7 +8,7 @@ namespace ARMeilleure.Signal
 {
     public static class NativeSignalHandlerGenerator
     {
-        public const int MaxTrackedRanges = 8;
+        public const int MaxTrackedRanges = 16;
 
         private const int StructAddressOffset = 0;
         private const int StructWriteOffset = 4;

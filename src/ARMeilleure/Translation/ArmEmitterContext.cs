@@ -46,7 +46,7 @@ namespace ARMeilleure.Translation
         public IMemoryManager Memory { get; }
 
         public EntryTable<uint> CountTable { get; }
-        public AddressTable<ulong> FunctionTable { get; }
+        public IAddressTable<ulong> FunctionTable { get; }
         public TranslatorStubs Stubs { get; }
 
         public ulong EntryAddress { get; }
@@ -62,7 +62,7 @@ namespace ARMeilleure.Translation
         public ArmEmitterContext(
             IMemoryManager memory,
             EntryTable<uint> countTable,
-            AddressTable<ulong> funcTable,
+            IAddressTable<ulong> funcTable,
             TranslatorStubs stubs,
             ulong entryAddress,
             bool highCq,

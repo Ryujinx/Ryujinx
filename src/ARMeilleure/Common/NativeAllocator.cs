@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ARMeilleure.Common
 {
-    unsafe sealed class NativeAllocator : Allocator
+    public unsafe sealed class NativeAllocator : Allocator
     {
         public static NativeAllocator Instance { get; } = new();
 
